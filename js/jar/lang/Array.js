@@ -188,7 +188,7 @@ JAR.register({
 						else {
 							var value = array[0];
 							array = new ArrayCopy();
-							value && array.push(value);
+							lang.isDefined(value) && !lang.isNull(value) && array.push(value);
 						}
 		            }
 	            }
