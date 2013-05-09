@@ -32,40 +32,40 @@ Some examples for explizit dependencies:
  * String:
 
             JAR.register({
-                MID: "some.Module",
-                deps: "another.Module"
-            }, function(anotherModule) { // has one dependency in another bundle
-                var some = this; // implizit
+                MID: "someBundle.Module",
+                deps: "anotherBundle.Module"
+            }, function(anotherBundleModule) { // has one dependency in another bundle
+                var someBundle = this; // implizit
                 ...
             });
 
             JAR.register({
-                MID: "some.Module",
-                deps: "another.*"
-            }, function(another) { // has a bundle as dependency
+                MID: "someBundle.Module",
+                deps: "anotherBundle.*"
+            }, function(anotherBundle) { // has a bundle as dependency
                 ...
             });
 
             JAR.register({
-                MID: "some.Module",
+                MID: "someBundle.Module",
                 deps: ".Module2"
             }, function(Module2) { // has one dependency in the same bundle
-                var some = this;
-                some.Module2 === Module2 // true
+                var someBundle = this;
+                someBundle.Module2 === Module2 // true
                 ...
             });
 
  * Array:
 
             JAR.register({
-                MID: "some.Module",
-                deps: ["another.Module", "another.Module2"]
-            }, function(anotherModule, anotherModule2) { // has more dependencies in another bundle
+                MID: "someBundle.Module",
+                deps: ["anotherBundle.Module", "anotherBundle.Module2"]
+            }, function(anotherBundleModule, anotherBundleModule2) { // has more dependencies in another bundle
                 ...
             });
 
             JAR.register({
-                MID: "some.Module",
+                MID: "someBundle.Module",
                 deps: [".Module2", ".Module3"]
             }, function(Module2, Module3) { // has more dependencies in the same bundle
                 ...
@@ -74,9 +74,9 @@ Some examples for explizit dependencies:
  * Object:
 
             JAR.register({
-                MID: "some.Module",
-                deps: {another: [".", "Module", "Module2"]}
-            }, function(another, anotherModule, anotherModule2) { // has more dependencies in another bundle
+                MID: "someBundle.Module",
+                deps: {anotherBundle: [".", "Module", "Module2"]}
+            }, function(anotherBundle, anotherBundleModule, anotherBundleModule2) { // has more dependencies in another bundle
                 ...
             });
 
@@ -126,7 +126,7 @@ Examples
         var RW = Class("ReadWrite", {
             $public: { // doesn't need private access
                 constructor: function(value) {
-                    this.$super(value); // calls the constructor of the SuperClass - special case of this.superCall(methodName, arguments)
+                    this.$super(value); // calls the constructor of the SuperClass - this.$super is only available if the method is overwritten
                 }
             },
 
@@ -143,14 +143,16 @@ Examples
         ro._value // undefined
 
         var rw = new RW("notDefault");
-        ro.getValue() // "notDefault"
-        ro.setValue("custom")
-        ro.getValue() // "custom"
-        ro._value // undefined
+        rw.getValue() // "notDefault"
+        rw.setValue("custom")
+        rw.getValue() // "custom"
+        rw._value // undefined
 
-		ro.constructor === RO // false - important!
+        ro.constructor === RO // false - important!
         ro.Class === RO // true
+        ro.getHash() // unique hash like "Object #<ReadOnly#...>"
         RO.getClassName() // "ReadOnly"
+        RO.getHash() // unique hash like "Class #<ReadOnly#...>"
         RO.getSubClasses()[0] === RW // true
         RW.getSuperClass() === RO // true
         RO.getInstances()[0] === ro // true
