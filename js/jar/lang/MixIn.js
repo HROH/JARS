@@ -12,6 +12,8 @@ JAR.register({
 			
 			_allowedClasses: null,
 			
+			_destructor: null,
+			
 			_isReceiverAllowed: function(receiver, allowedClass) {
 				var isReceiverAllowed = true;
 				if(Class.isClass(allowedClass)) {
@@ -28,10 +30,11 @@ JAR.register({
 		},
 		
 		$privileged: {
-			constructor: function(mixInName, toMix, allowedClasses) {
+			constructor: function(mixInName, toMix, allowedClasses, destructor) {
 				this._name = mixInName;
 		        this._toMix = toMix;
 		        this._allowedClasses = allowedClasses;
+		        this._destructor = destructor;
 		    },
 			
 			mixInto: function(receiver) {
@@ -51,7 +54,14 @@ JAR.register({
 						receiverAllowed = this._isReceiverAllowed(receiver, allowedClasses);
 					}
 					if(receiverAllowed) {
-						Class.isClass(receiver) ? receiver.prototype.extend(toMix) : receiver.extend(toMix);
+						if(Class.isClass(receiver)) {
+							receiver.prototype.extend(toMix);
+							receiver.addDestructor(this._destructor);
+						}
+						else {
+							receiver.extend(toMix);
+							receiver.Class.addDestructor(this._destructor, receiver);
+						}
 					}
 					else {
 						lang.debug("MixIn \"#<" + name + ">\": The given receiver " + receiver.getHash() + " is not part of the allowed Classes!", "warn");

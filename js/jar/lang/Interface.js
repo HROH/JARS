@@ -35,28 +35,35 @@ JAR.register({
 		
 		$public: {
 			isImplementedBy: function(InstanceOrClass) {
-				var methods = this.getMethods(), notImplemented = [],
-					checkPoint = Class.isClass(InstanceOrClass) ? InstanceOrClass.prototype : Class.isInstance(InstanceOrClass) ? InstanceOrClass : null;
+				var methods = this.getMethods(), notImplemented = [], isImplemented = false,
+					checkPoint = (Class.isClass(InstanceOrClass) && !(InstanceOrClass instanceof Interface)) ?
+						InstanceOrClass.prototype :
+						Class.isInstance(InstanceOrClass) ?
+							InstanceOrClass :
+							null;
 
 				if(checkPoint) {
 			        methods.each(function(methodName, args) {
-						if(!(lang.isFunction(checkPoint[methodName]) && (!args || args === checkPoint[methodName].length))) {
+						if(!(lang.isFunction(checkPoint[methodName]) && (!lang.isNumber(args) || args === checkPoint[methodName].length))) {
 							notImplemented.push(methodName + " (arguments: " + args + ")");
 						}
 			        });
 	        
 			        if(notImplemented.length > 0) {
-			            lang.debug("The " + InstanceOrClass.getHash() + "\" must implement the methods: [\"" + notImplemented.join(", ") + "\"] from Interface \"" + this.getName() + "\"!", "error");
+			            lang.debug("The " + InstanceOrClass.getHash() + "\" must implement the methods: [\"" + notImplemented.join(", ") + "\"] from Interface: \"" + this.getName() + "\"!", "error");
 			            checkPoint.each(function(prop) {
 							checkPoint[prop] = undefined;
 						});
 			        }
+			        else {
+						isImplemented = true;
+			        }
 				}
 				else {
-					lang.debug("No Instance or Class given to check by Interface \"" + this.getName() + "\"!", "warn");
+					lang.debug("No Instance or Class given to check by Interface: \"" + this.getName() + "\"!", "warn");
 				}
 			        
-		        return notImplemented.length === 0 ? InstanceOrClass : false;
+		        return isImplemented ? InstanceOrClass : false;
 			}
 		}
 	});
