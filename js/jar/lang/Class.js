@@ -3,76 +3,130 @@ JAR.register({
 	deps: [".Object", ".Array", ".Function"],
 	bundle: ["Abstract"]
 }, function(Obj, Arr, Fn) {
-	var lang = this, generateGuid, Constructor = lang.copyNative("Function"), ConstructorPrivates, Class, Classes = {}, proxy, init;
+	var lang = this, Constructor = lang.copyNative("Function"), ClassPrivateMethods, ClassFactory, Classes = {}, proxy;
 	
-    generateGuid = (function() {
-		var S4 = function() {
-            return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
-        };
-        
-		return function() {
-			return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
-		};
-    })();
+	/***Start Hash-generation***/
+	function S4() {
+        return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
+    }
+    
+    function generateHash() {
+		return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
+	}
+    /***End Hash-genearation***/
 	
 	proxy = function(InstanceOrClass, method, args) {
-		var result, hashValue = InstanceOrClass.getHash(), privates, protoPrivates, inPrivileged = false;
+		var result, ClassHidden, tmpPrivateProps, inPrivileged = false;
 		
-		if(hashValue in Classes) {
-			privates = Classes[hashValue]._;
-			protoPrivates = Classes[hashValue].__;
-			
+		if(ClassFactory.isClass(InstanceOrClass)) {
+			tmpPrivateProps = Classes[InstanceOrClass.getHash()];
 		}
 		else {
-			privates = Classes[InstanceOrClass.Class.getHash()].Instances[hashValue]._;
+			ClassHidden = Classes[InstanceOrClass.Class.getHash()];
+			tmpPrivateProps = ClassHidden._Instances[InstanceOrClass.getHash()]._private.extend(ClassHidden._prototype);
 		}
-		
-		if(privates) {
-			InstanceOrClass.extend(privates);
-			if(privates.inPrivileged) {
-				inPrivileged = true;
-				delete InstanceOrClass.inPrivileged;
-			}
-			else {
-				privates.inPrivileged = true;
-			}
-			if(protoPrivates) {
-				InstanceOrClass.prototype.extend(protoPrivates);
-			}
+
+		InstanceOrClass.extend(tmpPrivateProps);
+		if(tmpPrivateProps.inPrivileged) {
+			inPrivileged = true;
+			delete InstanceOrClass.inPrivileged;
+		}
+		else {
+			tmpPrivateProps.inPrivileged = true;
 		}
 		
 		result = method.apply(InstanceOrClass, args || []);
 		
-		if(privates && !inPrivileged) {
-			delete privates.inPrivileged;
-			privates.each(function(prop, value) {
+		if(!inPrivileged) {
+			delete tmpPrivateProps.inPrivileged;
+			tmpPrivateProps.each(function(prop, value) {
 				if(InstanceOrClass[prop] !== value) {
-					privates[prop] = InstanceOrClass[prop];
+					tmpPrivateProps[prop] = InstanceOrClass[prop];
 				}
 				delete InstanceOrClass[prop];
 			});
-			if(protoPrivates) {
-				protoPrivates.each(function(prop, value) {
-					if(InstanceOrClass.prototype[prop] === value) {
-						delete InstanceOrClass.prototype[prop];
-					}
-				});
-			}
 		}
 		
 		return result;
 	};
 	
-	ConstructorPrivates = {
+	ClassPrivateMethods = Obj.fromNative({
+		initInstance: function(Instance, args) {
+			var Class = this, classHash = Class.getHash(),
+				Instances = Class._Instances, directCall = false;
+			
+			// Class._isTransmitting is true when a SubClass is inheriting over SubClass.extendz(SuperClass)
+			// In this case we don't need the constructor to be executed neither do we need a new Instance to be saved
+			if(Class._isTransmitting) {
+				return Instance;
+			}
+			// If Class is an abstract Class return an empty Object
+			// Returning undefined won't work because of the function behaviour in combinatino with 'new'
+	        else if(Class._isAbstract) {
+	            lang.debug("Abstract " + classHash + ": You can't create a new instance of an abstract Class.", "warn");
+	            return {};
+	        }
+	        // If a Singleton exists return it and skip the rest
+	        else if(Class._singleton) {
+	            lang.debug("Singleton " + classHash + ": You can't create a new instance of this Class.", "warn");
+	            return Class._singleton;
+	        }
+			else if(ClassFactory.isInstance(Instance)) {
+				// If we have a new Instance that is not stored in the Instances yet
+				// create a unique hash for it and store a reference under this hash for later use
+				// This hash is also used to store the private properties/methods
+				//
+				// Note: If an Instance isn't used anymore this reference has to be deleted over the destructor of the Instance
+				// Otherwise this could lead to memory leaks if there are too many Instances
+				if(Instance instanceof Class && !(lang.isFunction(Instance.getHash) && Instances[Instance.getHash()] === Instance)) {
+					var objectHashPrefix, objectHash;
+
+		            objectHashPrefix = "object #<" + Class.getClassName() + "#";
+		            
+					do {
+						objectHash = objectHashPrefix + generateHash() + ">";
+					}
+					while(objectHash in Instances);
+					
+					// !!!IMPORTANT: never delete or overwrite this method!!!
+		            Instance.getHash = function() {
+						return objectHash;
+		            };
+		            
+		            Instances[objectHash] = {Instance: Instance, _private: Obj(), _destructors: Arr()};
+	            }
+	            else {
+					return Instance;
+	            }
+	        }
+	        else {
+				// We came here because Class.initInstance was called directly
+				// [ Class.initInstance(arg1, arg2, ...) <--> new Class(arg1, arg2, ...) ]
+				// So we have to create a new Instance and return it
+				directCall = true;
+				args = arguments;
+				// prevent the constructor from being executed twice
+				Class._skipConstructor = true;
+				Instance = new Class();
+				Class._skipConstructor = false;
+	        }
+            Class._skipConstructor || Instance.constructor.apply(Instance, args);
+            
+			return directCall ? Instance : undefined;
+	    },
+		
+		getClassName: function() {
+			return this._className;
+		},
+		
 		isSingleton: function() {
 			return !!this._singleton;
 		},
 		
 		singleton: function() {
-            var singleton = this._singleton, Class = this;
-            this._singleton = singleton || new Class();
-            singleton || this._singleton.constructor.apply(this._singleton, arguments);
-            return this._singleton;
+            var Class = this;
+            Class._singleton = Class._singleton || Class.initInstance.apply(Class, arguments);
+            return Class._singleton;
         },
 		
 		toAbstract: function() {
@@ -88,139 +142,33 @@ JAR.register({
 			return this._superClass;
 		},
 		
-		getClassName: function() {
-			return this._className;
-		},
-		
 		getSubClasses: function() {
 			var SubClasses = Arr();
 			
 			this._subClasses.each(function(hash, SubClass) {
-				SubClasses.push(SubClass.self);
+				SubClasses.push(SubClass.Class);
 			});
 			
 			return SubClasses;
-		}
-	};
-	
-	Constructor.prototype.extend({
-		initInstance: function(Instance, args) {
-			var TheClass = this, classHash = TheClass.getHash(), ClassHidden = Classes[classHash],
-				Instances = ClassHidden.Instances, autoNew = false;
-			
-				
-	        if(TheClass.isAbstract()) {
-	            lang.debug("Abstract " + classHash + ": You can't create a new instance of an abstract Class.", "warn");
-	            return {};
-	        }
-	        else if(TheClass.isSingleton()) {
-	            lang.debug("Singleton " + classHash + ": You can't create a new instance of this Class.", "warn");
-	            lang.debug("There already exist a singleton.", "warn");
-	            return TheClass.singleton();
-	        }
-			else if(Class.isInstance(Instance) && !(lang.isFunction(Instance.getHash) && Instance.getHash() in Instances)) {
-				var InstanceHidden, ObjectName, objectHash;
-
-	            ObjectName = "Object #<" + TheClass.getClassName() + "#";
-	            
-				do {
-					objectHash = ObjectName + generateGuid() + ">";
-				}
-				while(objectHash in Instances);
-				
-	            Instance.getHash = function() {
-					return objectHash;
-	            };
-	            
-	            InstanceHidden = Instances[objectHash] = {self: Instance};
-	            
-	            if(ClassHidden.__) {
-					InstanceHidden._ = ClassHidden.__.copy();
-				}
-				
-				TheClass = TheClass.getSuperClass();
-				if(TheClass) {
-					InstanceHidden._ = InstanceHidden._ || Obj();
-					while(TheClass) {
-						InstanceHidden._.extend(Classes[TheClass.getHash()].__);
-						TheClass = TheClass.getSuperClass();
-					}
-	            }
-	        }
-	        else {
-				autoNew = true;
-				args = Instance;
-				Instance = new TheClass();
-	        }
-            Instance.constructor.apply(Instance, args);
-            
-			return autoNew ? Instance : undefined;
-	    },
-	    
-		singleton: function() {
-			return proxy(this, ConstructorPrivates.singleton, arguments);
-        },
-		
-		isSingleton: function() {
-			return proxy(this, ConstructorPrivates.isSingleton);
 		},
-		
-		toAbstract: function() {
-			return proxy(this, ConstructorPrivates.toAbstract);
-		},
-		
-		isAbstract: function() {
-			return proxy(this, ConstructorPrivates.isAbstract);
-		},
-		
-		getSuperClass: function() {
-			return proxy(this, ConstructorPrivates.getSuperClass);
-		},
-		
-		hasSuperClass: function() {
-			return !!this.getSuperClass();
-		},
-		
-		getSubClasses: function() {
-			return proxy(this, ConstructorPrivates.getSubClasses);
-		},
-		
-		hasSubClasses: function() {
-			return this.getSubClasses().length > 0;
-		},
-		
-		getInstances: function() {
-			var Instances = [];
-			
-			Classes[this.getHash()].Instances.each(function(hash, Instance) {
-				Instances.push(Instance.self);
-			});
-			
-			this.getSubClasses().each(function(SubClass) {
-				Instances = Instances.concat(SubClass.getInstances());
-			});
-			
-			return Arr.fromNative(Instances);
-		},
-		
-		getClassName: function() {
-			return proxy(this, ConstructorPrivates.getClassName);
-		},
-		
 		/**
 		 * Method to mimick classical inheritance in JS
 		 * It uses prototypal inheritance inside but makes developing easier
-		 * To call the parent-constructor use this.$super(arg1, arg2, ...)
-		 * To call any other parent-method use this.superCall(methodName, arguments)
+		 * To call a parent-method use this.$super(arg1, arg2, ...)
 		 *
-		 * Note: The SuperClass has to be created with jar.lang.Class() 
-		 * or at least use jar.lang.Object for the creation of the prototype
+		 * Note: The SuperClass has to be created with jar.lang.Class()
 		 * 
 		 * Example:
 		 * 
 		 *		var MySubClass = jar.lang.Class("MySubClass", {
+		 *			constructor: function() {
+	     *				//constructor-code goes here...
+		 *				this.$super(arg1, arg2) // Call the constructor of the SuperClass
+		 *			},
+		 *
 		 *			myMethod: function(param) {
 		 *				// do something...
+		 *				this.$super(param) // Call the myMethod-method of the SuperClass
 		 *			}
 		 *		}).extendz(MyClass);
 		 * 
@@ -230,87 +178,187 @@ JAR.register({
 		 * @return Object
 		 */		
 		extendz: function(SuperClass) {
-			if(Class.isClass(SuperClass)) {
-				var superProto = SuperClass.prototype,
-	                superIsExecuting = {}, classHash = this.getHash(),
-	                Proto = function() {};
-               
-				Classes[classHash]._._superClass = SuperClass;
-				Classes[SuperClass.getHash()]._._subClasses[classHash] = Classes[classHash];
-                // We assign the prototype of the SuperClass to another Constructor
-                // This is to prevent code in the real Constructor to be executed
-                Proto.prototype = superProto;
-                // Create a new superinstance of the SuperClass, merge it with the current prototype
-                // and finally merge it with the superCall-methods to overwrite in the correct order
-                this.prototype = new Proto().merge(this.prototype).merge({
-					/**
-					 * Method to call a super-method of the SuperClass in the context of the current instance
-					 * The context is optional and will be automatically set to the right context
-					 * It handles the delegation of the superCall up the prototype-chain
-					 * and steps over the methods that are currently executing or equal to the current method
-					 * 
-					 * 
-					 * @param String methodName
-					 * @param Array args
-					 * @param Object context
-					 * 
-					 * @return the result of the superCall
-					 */
-                    superCall: function(methodName, args, context) {
-                        var result, objectHash, superMethods;
-                        
-                        args = Arr.fromArgs(args) || [];
-                        // Set the context for the execution
-                        context = context || this;
-                        objectHash = context.getHash();
-                        superMethods = superIsExecuting[objectHash] = superIsExecuting[objectHash] || {};
-
-						/**
-						 * If the super-method is already executing
-						 * or the current method and the method of the SuperClass.prototype are the same
-						 * call the superCall of the SuperClass.prototype with the right context
-						 * 
-						 * The first case happens because of the nature of 'this', which will be refering to context
-						 * So if there is a superCall in a method and a superCall in the super-method
-						 * they are practically the same thus resulting in an infinte loop
-						 * 
-						 * The second case happens when the method of the current instance is inherited from the SuperClass
-						 * In this case the method would be executed twice
-						 * 
-						 * Those cases are handled by stepping over the affected methods
-						 * 
-						 */
-						if(lang.isFunction(context[methodName])) {
-							result = proxy(SuperClass, function() {
-								var superProto = this.prototype, result;
-								// If the super-method exists call it
-								if(superMethods[methodName] !== true && lang.isFunction(superProto[methodName]) && context[methodName] !== superProto[methodName]) {
-									// Tell the instance that the method of the current prototype-level is executing
-		                            superMethods[methodName] = true;
-						            result = superProto[methodName].apply(context, args);
-									// Tell the instance that the method of the current prototype-level has finished executing
-						            delete superMethods[methodName];
-						        }
-						        else if(lang.isFunction(superProto.superCall)) {
-									result = superProto.superCall(methodName, args, context);
-						        }
-						        return result;
-							});
-                        }
-                        delete superIsExecuting[objectHash];
-                        // Return any result that was returned by by the super-method
-                        return result;
-                    },
-					/**
-					 * Shortcut to this.superCall("constructor", arguments)
-					 */
-                    $super: function() {
-                        return this.superCall("constructor", arguments);
-                    }
+			var Class = this, classHash = Class.getHash();
+			
+			
+			if(Class._superClass) {
+				lang.debug(classHash + " already has the SuperClass: " + this.getSuperClass().getHash() + "!", "error");
+			}
+			else if(!ClassFactory.isClass(SuperClass)) {
+				lang.debug("There is no SuperClass given for " + classHash + "!", "warn");
+			}
+			else {
+				var SuperClassHidden = Classes[SuperClass.getHash()];
+	                
+				// add SuperClass reference
+				Class._superClass = SuperClass;
+				// extend own private prototype with that of the SuperClass
+				Class._prototype.extend(SuperClassHidden._prototype);
+				// add SubClass reference in the SuperClass
+				SuperClassHidden._subClasses[classHash] = Classes[classHash];
+				
+				// Prevent the default constructor and objectHash-generation to be executed
+                SuperClassHidden._isTransmitting = true;
+                // Create a new Instance of the SuperClass and merge it with the current prototype
+                // to overwrite in the correct order
+                this.prototype = new SuperClass().merge(this.prototype);
+                // end transmission
+                SuperClassHidden._isTransmitting = false;
+                
+                // Check if methods in the public and the private prototype were overwritten
+                // and do it properly so that this.$super() works in Instances
+                Arr(this.prototype, this._prototype).each(function(protoToOverwrite) {
+					protoToOverwrite.each(function(prop, value) {
+						lang.isFunction(value) && Class.overwriteMethod(prop, value);
+	                });
                 });
             }
             return this;
-        }
+        },
+		
+		overwriteMethod: function(methodName, method) {
+	        var ClassHiddenProto = this._prototype, protoToOverwrite,
+				SuperClass = this._superClass, SuperClassHiddenProto, superProtoToCheckAgainst;
+	        
+	        // Never overwrite Class-, getHash- and destructor-methods
+	        if(SuperClass && lang.isFunction(method) && !(methodName === "Class" || methodName === "getHash" || methodName === "destructor")) {
+				SuperClassHiddenProto = Classes[SuperClass.getHash()]._prototype;
+				if(methodName in SuperClass.prototype) {
+					protoToOverwrite = this.prototype;
+					superProtoToCheckAgainst = SuperClass.prototype;
+				}
+				else if(methodName in SuperClassHiddenProto) {
+					protoToOverwrite = ClassHiddenProto;
+					superProtoToCheckAgainst = SuperClassHiddenProto;
+				}
+				// check if the method is overwriting a method in the SuperClass.prototype and is not already overwritten in the current Class.prototype
+				if(superProtoToCheckAgainst && (!protoToOverwrite.hasOwn(methodName, method) || protoToOverwrite[methodName] === method) &&
+					lang.isFunction(superProtoToCheckAgainst[methodName]) && superProtoToCheckAgainst[methodName] !== method
+				) {
+					protoToOverwrite[methodName] = function() {
+						var result, currentSuper;
+						
+						// if this.$super is already set store it for later
+						if(this.$super) {
+							currentSuper = this.$super;
+						}
+						
+						// create a new temporary this.$super that uses the method of the SuperClass.prototype
+						this.$super = function() {
+							return superProtoToCheckAgainst[methodName].apply(this, arguments);
+						};
+						
+						result = method.apply(this, arguments);
+						
+						// restore or delete this.$super
+						if(currentSuper) {
+							this.$super = currentSuper;
+						}
+						else {
+							delete this.$super;
+						}
+						
+						return result;
+					};
+				}
+			}
+		},
+		
+		getInstances: function() {
+			var Instances = [];
+			
+			this._Instances.each(function(hash, Instance) {
+				Instances.push(Instance.Instance);
+			});
+			
+			this._subClasses.each(function(SubClass) {
+				Instances = Instances.concat(SubClass.getInstances());
+			});
+			
+			return Arr.fromNative(Instances);
+		},
+		
+		addDestructor: function(destructor, Instance) {
+			var Class = this, destructors;
+			
+			if(lang.isFunction(destructor)) {
+				if(Instance instanceof Class) {
+					destructors = Class._Instances[Instance.getHash()]._destructors;
+				}
+				else {
+					destructors = Class._destructors;
+				}
+				destructors.push(destructor);
+			}
+			
+			return Class;
+		},
+		
+		destruct: function(Instance) {
+			var Class = this, destructors, hash, Instances = this._Instances;
+			
+			if(Instance instanceof Class) {
+				hash = Instance.getHash();
+				
+				if(hash in Instances) {
+					destructors = this._destructors;
+					
+					while(Class.hasSuperClass()) {
+						Class = Class.getSuperClass();
+						destructors.mergeUnique(Classes[Class.getHash()]._destructors);
+					}
+					
+					destructors.mergeUnique(Instances[hash]._destructors);
+					
+					while(destructors.length > 0) {
+						destructors.shift().call(Instance);
+					}
+					
+					delete Instances[hash];
+				}
+				else {
+					Instance.Class.destruct(Instance);
+				}
+				
+				return this;
+			}
+			/*
+			else {
+				hash = this.getHash();
+				this.getInstances().each(function(Instance) {
+					Instance.Class.destruct(Instance);
+				});
+				
+				if(this._subClasses) {
+					this.getSubClasses().each(function(SubClass) {
+						SubClass.destruct();
+					});
+				}
+				if(this._superClass) {
+					delete Classes[this._superClass.getHash()]._subClasses[hash];
+				}
+				delete Classes[hash];
+				
+				return undefined;
+			}
+			*/
+		}
+	});
+	
+	ClassPrivateMethods.each(function(methodName, method) {
+		Constructor.prototype[methodName] = function() {
+			return proxy(this, method, arguments);
+		};
+	});
+	
+	Constructor.prototype.extend({
+		hasSuperClass: function() {
+			return !!this.getSuperClass();
+		},
+		
+		hasSubClasses: function() {
+			return this.getSubClasses().length > 0;
+		}
 	});
 	
     /**
@@ -322,7 +370,6 @@ JAR.register({
      * var MyClass = jar.lang.Class("MyClass", {
      *		constructor: function() {
      *			//constructor-code goes here...
-     *			this.$super(arg1, arg2) // Call the constructor of the SuperClass
      *		},
 	 *		
 	 *		myMethod: function(param) {
@@ -340,59 +387,62 @@ JAR.register({
      * 
      * @return Class
      */	
-	Class = function(name, proto) {
-		var _Class, classHash, _public, privileged = {}, _private, constructor;
+	ClassFactory = function(name, proto) {
+		var Class, classHash, ClassHidden;
 		
-		_Class = new Constructor("return this.Class && this instanceof this.Class && this.Class.initInstance(this, arguments);");
+		Class = new Constructor("return this.Class && this instanceof this.Class && this.Class.initInstance(this, arguments);");
 		
 		do {
-			classHash = "Class #<" + name + "#" + generateGuid() + ">";
+			classHash = "Class #<" + name + "#" + generateHash() + ">";
 		}
 		while(classHash in Classes);
         
-		// Store a reference of the Class
-        Classes[classHash] = {
-			self: _Class,
-		
-			_: Obj.fromNative({
-				_isAbstract: false,
-				
-				_singleton: undefined,
-				
-				_className: name,
-				
-				_subClasses: Obj()
-			}),
+		// Store a reference of the Class and define some private properties
+        ClassHidden = Classes[classHash] = Obj.fromNative({
+			Class: Class,
 			
-			Instances: Obj()
-		};
+			_isAbstract: false,
+			
+			_singleton: null,
+			
+			_className: name,
+			
+			_skipConstructor: false,
+			
+			_isTransmitting: false,
+			
+			_superClass: null,
+			
+			_subClasses: Obj(),
+			
+			_prototype: Obj(),
+		
+			_Instances: Obj(),
+			
+			_destructors: Arr()
+		});
 		
 		/**
 		 * Experimental create Classes with public, private and privileged methods/properties
-		 * private methods/properties in a SuperClass can be accessed in a SubClass
+		 * Private methods/properties in a SuperClass can be accessed in a SubClass
 		 * 
 		 */
 			
 		if("$privileged" in proto || "$private" in proto || "$public" in proto) {
 			
-			_public = Obj.fromNative(proto.$public);
-			
-			_private = Obj.fromNative(proto.$private);
-			
-			Obj.fromNative(proto.$privileged).each(function(prop, value) {
+			ClassHidden._prototype.extend(proto.$private);
+		
+			proto = Obj.fromNative(proto.$public).extend(Obj.fromNative(proto.$privileged).map(function(prop, value) {
 				if(lang.isFunction(value)) {
-					privileged[prop] = function() {
+					return function() {
 						return proxy(this, value, arguments);
 					};
 				}
-			});
-		
-			proto = _public.extend(privileged);
-			
-			Classes[classHash].__ = _private;
+				return value;
+			}));
 		}
 		 
-        _Class.merge({
+        Class.merge({
 			getHash: function() {
 				return classHash;
 	        },
@@ -400,18 +450,21 @@ JAR.register({
 			// Extend the prototype with some methods defined in Obj (see module jar.lang.Object),
 			// and a reference to the Class
 			prototype: Obj.fromNative(proto).extend({
-	            Class: _Class,
-	            
-	            destructor: function() {
-					delete Classes[classHash].Instances[this.getHash()];
-	            }
+	            Class: Class
 	        })
         });
         
-		return _Class;
+		return Class;
 	};
-	
-	Class.addStatic = function(prop, value) {
+	/**
+	 * This method is used to add methods like 'implementz' or 'mixin'
+	 * to all Classes, when the module is loaded
+	 * Added methods are automatically available to 'all' Classes
+	 *
+	 * @param String|Object prop
+	 * @param Function|undefined value
+	 */
+	ClassFactory.addStatic = function(prop, value) {
 		var props = {};
 		
 		if(lang.isObject(prop)) {
@@ -423,13 +476,11 @@ JAR.register({
 		Constructor.prototype.extend(props);
 	};
 	
-	Class.getClass = function(hashValue) {
-		return Classes[hashValue] && Classes[hashValue].self;
+	ClassFactory.getClass = function(hashValue) {
+		return Classes[hashValue] && Classes[hashValue].Class;
 	};
 	
-	Class.getInstances = function(ClassOrHash) {
-		var Instances = [];
-		
+	ClassFactory.getInstances = function(ClassOrHash) {
 		if(!this.isClass(ClassOrHash)) {
 			ClassOrHash = this.getClass(ClassOrHash);
 		}
@@ -437,13 +488,13 @@ JAR.register({
 		return ClassOrHash ? ClassOrHash.getInstances() : undefined;
 	};
 	
-	Class.isClass = function(ClassToCheck) {
-		return ClassToCheck instanceof Constructor;
+	ClassFactory.isClass = function(Class) {
+		return Class instanceof Constructor;
 	};
 	
-	Class.isInstance = function(Instance) {
+	ClassFactory.isInstance = function(Instance) {
 		return Instance && Instance.Class && Instance instanceof Instance.Class && this.isClass(Instance.Class);
 	};
 	
-    return Class;
+    return ClassFactory;
 });
