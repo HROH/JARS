@@ -23,7 +23,7 @@ Because there are some cases that are not covered by such loaders:
 The ModuleLoader automatically creates a module hierarchy tree so that a module like *jar.lang* can be later accessed as <code>jar.lang</code> in javascript.
 
 * Bundles:  
-It is possible to define and import bundles like *jar.lang.\** . This will import the module *jar.lang* and all its submodules. A bundle is defined in the module's properties.
+It is possible to define and import bundles like *jar.lang.** . This will import the module *jar.lang* and all its submodules. A bundle is defined in the module's properties.
 
 * Automatic dependency-detection and complex dependency-definition:  
 There are two kinds of dependencies - implizit dependencies like *jar* for *jar.lang* and explizit dependencies. Explizit dependencies are declared in the module itself. To see how it works, just look into the existing modules.  
