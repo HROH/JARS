@@ -9,7 +9,7 @@ Usage
 ---------
 To use JAR, you only have to write the following line in the head of your HTML-document.
 ```html
-    <script type="text/javascript" src="path/to/jar.js"></script>
+<script type="text/javascript" src="path/to/jar.js"></script>
 ```
 That's it! You are done!  
 You can now play with JAR in an inline-script or a custom js-file.
@@ -91,7 +91,7 @@ JAR.configure(options);
 ```
 where <code>options</code> includes one of the following options:
 
-* basePath (the path to where the jar folder lies - default: *js*)
+* basePath (the path to where the jar folder is located - default: *js*)
 * bundle (an Array of modules to import  with <code>JAR.$import("*");</code> - default: [])
 * cache ( *false* prevents caching of the files - default: *true*)
 * debug (turn debugging on or off - default: *false*)
