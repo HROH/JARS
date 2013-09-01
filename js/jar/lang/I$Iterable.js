@@ -1,11 +1,11 @@
 // Example for an Interface
 JAR.register({
-	MID: "jar.lang.Iterable",
+	MID: "jar.lang.I$Iterable",
 	deps: ".Interface"
 }, function(Iface) {
-	var Iterable = new Iface("Iterable", {
+	var I$Iterable = new Iface("Iterable", {
 		iterator: 0
 	});
 
-	return Iterable;
+	return I$Iterable;
 });

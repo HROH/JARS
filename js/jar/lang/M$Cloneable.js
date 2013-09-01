@@ -1,9 +1,9 @@
 JAR.register({
-	MID: "jar.lang.Cloneable",
+	MID: "jar.lang.M$Cloneable",
 	deps: ".MixIn"
 }, function(MixIn) {
-	// TODO only mixin in Classes or Instances created with jar.lang.Class
-	var Cloneable = new MixIn("Cloneable", {
+	// TODO only mix in Classes or Instances created with jar.lang.Class
+	var M$Cloneable = new MixIn("Cloneable", {
 		clone: function() {
 			var clone = new this.Class();
 			if(clone === this) {
@@ -14,5 +14,5 @@ JAR.register({
         }
 	});
 	
-	return Cloneable;
+	return M$Cloneable;
 });
