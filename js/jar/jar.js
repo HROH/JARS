@@ -1,1111 +1,2064 @@
-// JAVA Alike Renderer
+(function globalSetup(global, undef) {
+    'use strict';
 
-(function(win, undefined) {
-    "use strict";
-    
-    var doc = win.document,
-        docElem = doc.documentElement,
-        toString = Object.prototype.toString,
-        slice = Array.prototype.slice;
-    
-    var JAR = (function() {
-        var locked, parsed, global,
-            mainQueue = [];
+    var globalModule = '*',
+        separator = '", "',
+        slash = '/',
+        object = {},
+        toString = object.toString,
+        hasOwn = object.hasOwnProperty,
+        Root = {},
+        ConfigTransforms = {},
+        previousJAR = global.JAR,
+        System, SourceManager, Config, Loader, JAR, jar, lxRegister, lxNormalize, lxGetModuleHook, lxListenFor, sxIsObject, sxIsFunction, sxIsArray, sxIsString, sxIsSet;
+
+    function noop() {}
+
+    function hasOwnProp(obj, prop) {
+        return hasOwn.call(obj, prop);
+    }
+
+    Config = {
+        modules: {},
+        cache: true,
+        debug: false,
+        debugMode: 'console',
+        environment: '',
+        environments: {},
+        globalAccess: false,
+        parseOnLoad: false,
+        supressErrors: false,
+        timeout: 5
+    };
+
+    System = (function systemSetup() {
+        var Debuggers = {},
+            types = ['Null', 'Undefined', 'String', 'Number', 'Boolean', 'Array', 'Arguments', 'Object', 'Function', 'Date', 'RegExp'],
+            idx = 0,
+            nothing = null,
+            typesLen = types.length,
+            typeLookup = {},
+            rTemplateKey = /\{\{(.*?)\}\}/g,
+            System, isArgs;
+
         /**
          *
-         * @param Function fn
+         * @param {*} data
+         * @param {String} type
          */
-        function end(fn) {
-            fn.apply(null, ROOT);
-            locked = false;
+        function out(data, type, logContext) {
+            var Debugger = (Debuggers[Config.debugMode] || Debuggers.console),
+                output = Debugger[type] || Debugger.log;
+
+            if (Config.debug && sxIsFunction(output)) {
+                output(data, logContext);
+            }
         }
-        
-        var JAR = function() {
-            locked = false;
-            parsed = false;
-        };
-        
-        JAR.fn = JAR.prototype = {
-            constructor: JAR,
-            /**
-             * 
-             * @param Function startFn
-             * @param Function endFn
-             * 
-             */
-            main: function(startFn, endFn) {
-                var JAR = this;
-                if(!locked) {
-                    ModuleLoader.ready(function() {
-                        locked = true;
-                        if(Config.supressErrors) {
-                            try {
-                                log("start executing main...", "log");
-                                startFn.call(ROOT);
-                            }
-                            catch(e) {
-                                log((e.stack || e.message || "Error:\nError in JavaScript-code!") + "\nexiting...", "error");
-                            }
-                            finally {
-                                end(endFn || function() {
-                                    log("...done executing main", "log");
-                                });
-                            }
-                        }
-                        else {
-                            startFn.call(ROOT);
-                            locked = false;
-                        }
-                        if(mainQueue.length > 0) {
-                            JAR.main.apply(JAR, mainQueue.shift());
-                        }
-                    });
+
+        /**
+         *
+         * @param {*} value
+         *
+         * @return {Boolean}
+         */
+        function isSet(value) {
+            return value != nothing;
+        }
+
+        /**
+         *
+         * @param {*} value
+         *
+         * @return {String}
+         */
+        function getType(value) {
+            var type;
+
+            if (isSet(value)) {
+                if (value.nodeType === 1 || value.nodeType === 9) {
+                    type = 'element';
                 }
                 else {
-                    mainQueue.push([startFn, endFn]);
-                }
-            },
-            /**
-             * 
-             * @param String moduleName
-             * @param String basePath
-             * 
-             */
-            $import: function(moduleName, basePath) {
-                if(/^\*$/.test(moduleName)) {
-                    var bundle = Config.bundle;
-                    for(var i = 0, l = bundle.length; i < l; i++) {
-                        ModuleLoader.$import(bundle[i], basePath);
+                    type = typeLookup[toString.call(value)];
+
+                    if (type === 'number') {
+                        if (isNaN(value)) {
+                            type = 'nan';
+                        }
+                        else if (!isFinite(value)) {
+                            type = 'infinity';
+                        }
                     }
                 }
-                else {
-                    ModuleLoader.$import(moduleName, basePath);
-                }
-            },
-            /**
-             * 
-             * @param Object props
-             * @param Function fn
-             * 
-             */
-            register: function(props, fn) {
-                ModuleLoader.register(props, fn);
-            },
-            /**
-             * 
-             * @param Object config
-             * 
-             */
-            configure: function(config) {
-                for(var option in config) {
-                    Config[option] = config[option];
-                }
-                if(!parsed && Config.parseOnLoad === true) {
-                    parsed = true;
-                    this.$import("jar.html.Parser");
-                    this.main(function() {
-                        log("start autoparsing document...", "log");
-                        this.jar.html.Parser.parseDocument();
-                        log("...end autoparsing document", "log");
-                    });
-                    locked = true;
-                }
-				if(!global && Config.globalAccess === true) {
-					for(var module in ROOT) {
-						win[module] = ROOT[module];
-					}
-					ROOT = win;
-					global = true;
-				}
-            },
-            /**
-             * 
-             * @param String name
-             * @param Function func
-             * 
-             */
-            func: function(name, func) {
-                Functions.add(name, func);
-            },
-            
-            version: "0.1.0"
-        };
-        
-        return new JAR();
-    })(),
-	
-    ROOT = {},
-    
-    Config = {
-        basePath:		"js",
-        bundle:			[],
-        cache:			true,
-        debug:			false,
-        debugMode:		"console",
-		globalAccess:	false,
-        parseOnLoad:	false,
-        supressErrors:	false,
-        waitForTimeout:	10
-    },
-    
-    SYSTEM = (function() {
-		function roleTestSetup(roleDef, type) {
-            return function(value) {
-                return typeof value === type.toLowerCase() || (value && toString.call(value) === roleDef);
-            };
-        }
-    
-        var roles = ["Undefined", "String", "Number", "Boolean", "Array", "Arguments", "Object", "Function"],
-            roleTests = {}, roleDef, objPartOne = "[object ", objPartTwo = "]",
-            i = 0, l = roles.length, isArgs, isNumber;
-
-        for(; i < l; i++) {
-            roleDef = [objPartOne, roles[i], objPartTwo].join("");
-            roleTests["is" + roles[i]] = roleTestSetup(roleDef, roles[i]);
-        }
-        
-        isArgs = roleTests.isArguments;
-        isNumber = roleTests.isNumber;
-        
-        roleTests.isNumber = function(value) {
-			return isNumber(value) && !isNaN(value) && value !== Infinity && value !== -Infinity;
-        };
-        
-        roleTests.isArguments = function(value) {
-            return isArgs(value) || (roleTests.isNumber(value.length) && !roleTests.isFunction(value));
-        };
-        
-        roleTests.isDefined = function(value) {
-			return !roleTests.isUndefined(value);
-        };
-        
-        roleTests.isNull = function(value) {
-			return value === null;
-        };
-        
-        roleTests.isDate = function(value) {
-			return value instanceof Date;
-        };
-        
-        roleTests.isRegExp = function(value) {
-			return value instanceof RegExp;
-        };
-
-        return roleTests;
-    })(),
-
-    log = (function() {
-        var even = false,
-            debugWindow,
-			debugWindowWidth = 640,
-            debugWindowHeight = 480,
-            noop = function() {},
-            pseudoConsole = {
-                log:	noop,
-
-                debug:	noop,
-
-                warn:	noop,
-
-                error:	noop
-            },
-            modes = {
-                console: (function() {
-                    return win.console || pseudoConsole;
-                })(),
-                // TODO rewrite
-                html: {
-                    log: function(obj, depth) {
-                        depth = depth || 0;
-                        var prop;
-                        
-						even = !even;
-                        if(depth === 0) {
-							write('<div style="background-color:' + (even ? '#414141' : '') + '">');
-                        }
-                        if(SYSTEM.isString(obj)) {
-							/* TODO replace */
-                            obj = obj.replace(/(\".*?\")/gi, '<b style="color: lightblue;">$1</b>')
-                                .replace(/(function\s*\(.*\))/g, '<i style="color: orange;">$1</i>')
-                                .replace(/(\s+-{0,1}\d+)/g, '<i style="color: lime;">$1</i>')
-                                .replace(/\[(.*?)\]/g, '<i style="color: yellow;">[</i>$1<i style="color: yellow;">]</i>')
-                                .replace(/\S{0,1}([\-\+=\|!&]{1,3})\s+/g, ' <span style="font-weight: bolder; color: darkred;">$1</span> ')
-                                .replace(/(true|false)/g, ' <span style="font-weight: bolder; color: darkgreen;">$1</span> ');
-                            write('<code>' + obj + '<br></code>');
-                        }
-                        else if(SYSTEM.isNumber(obj)) {
-                            write('<code style="color: violett;">' + obj + '<br></code>');
-                        }
-                        else if(SYSTEM.isArray(obj)) {
-                            write('<code>Array:<br>');
-                            for(prop = 0; prop < obj.length; prop++) {
-                                write('\t' + prop + ' => ');
-                                this.log(obj[prop], depth + 1);
-                            }
-                            write('</code>');
-                        }
-                        else if(SYSTEM.isObject(obj) && depth <= 1) {
-                            write("<code>Object:<br>");
-                            for(prop in obj) {
-                                write(prop + " => ");
-                                this.log(obj[prop], depth + 1);
-                            }
-                            write('</code>');
-                        }
-                        else if(SYSTEM.isFunction(obj)) {
-                            this.log(Function.toString.call(obj) + "<br>", depth + 1);
-                        }
-                        else if(SYSTEM.isBoolean(obj)) {
-                            write(obj + "<br>");
-                        }
-                        else {
-                            write(obj + "<br>");
-                        }
-                        if(depth === 0) {
-							write('</div>');
-						}
-                    },
-                    //TODO write proper debug, warn, error
-					warn: function(obj) {
-						write('<div style="background-color: #ff730f">');
-						this.log(obj, 1);
-						write('</div>');
-					},
-					
-					error: function(obj) {
-						write('<div style="background-color: #ff370f">');
-						this.log(obj, 1);
-						write('</div>');
-					},
-					
-					debug: function(obj) {
-						write('<div style="background-color: #0f73ff">');
-						this.log(obj, 1);
-						write('</div>');
-					}
-                }
-            };
-            
-        function write(string) {
-            // The debugWindow is a seperate window so we can freely make use of document.write
-            if(debugWindow && !debugWindow.closed) {
-                debugWindow.document.write(string);
-                debugWindow.document.body.scrollIntoView(false);
             }
             else {
-                debugWindow = win.open("Debug", "_blank", "top=" + (win.screen.height - debugWindowHeight)/2 + ",left=" + (win.screen.width - debugWindowWidth)/2 + ",width=" + debugWindowWidth + ",height=" + debugWindowHeight + ",scrollbars=yes");
-                debugWindow.document.write("<h2>Debug Information <a style='font-size:10pt; color: white;' href='javascript:window.close()'>close</a></h2>");
-                // The debugWindow needs focus to style the body
-                debugWindow.focus();
-                debugWindow.document.body.style.backgroundColor = "#000000";
-                debugWindow.document.body.style.color = "#ffffff";
-                write(string);
-            }            
-        }
-            
-       return function(obj, type) {
-            if(!!Config.debug && !!Config.debugMode) {
-                modes[Config.debugMode][type || "log"](obj);
+                type = String(value);
             }
-        };
-    })(),
-    
-    Functions = (function() {
-        var funcs,
-        
-        Functions = function() {
-            funcs = {};
-        };
-        
-        Functions.prototype = {
-            add: function(name, func) {
-                funcs[name] = func;
-            },
-            
-            exec: function(name) {
-                return funcs[name].apply(ROOT, arguments[1]);
+
+            return type || typeof value;
+        }
+        /**
+         *
+         * @param {String} typeDef
+         *
+         * @return {function(*):boolean}
+         */
+        function typeTestSetup(typeDef) {
+            typeLookup['[object ' + typeDef + ']'] = typeDef = typeDef.toLowerCase();
+
+            return function typeTest(value) {
+                return getType(value) === typeDef;
+            };
+        }
+
+        function replacer(match, key) {
+            return replacer.values[key] || 'UNKNOWN';
+        }
+
+        /**
+         *
+         * @param {String} mode
+         * @param {Function} debuggerSetup
+         */
+        function addDebugger(mode, debuggerSetup) {
+            if (!hasOwnProp(Debuggers, mode) && sxIsFunction(debuggerSetup)) {
+                Debuggers[mode] = debuggerSetup();
             }
-        };
-        
-        return new Functions();
-    })(),
-    /**
-     * The ModuleLoader is responsible for loading/executing the different modules in the right order
-     */
-    ModuleLoader = (function() {
-		var messages, messageHooks, logTypes, sourceManager;
-		/**
-		 * Some messages to display the current state of the modules
-		 */
-        messages = {
-            request: "module \"{name}\" requested",
-            requestBundle: "bundle \"{name}.*\" requested",
-            requestDependencies: "dependencies [\"{dependencies}\"] for module \"{name}\" requested",
-            foundSimpleDependency: "found simple dependency \"{dependency}\" for module \"{name}\"",
-            foundDependencies: "found complex dependencies [\"{dependencies}\"] for module \"{name}\"",
-            foundBundle: "found bundlemodules [\"{name}.{bundle}\"] for module \"{name}\"",
-            loading: "attempted to load module \"{name}\" but is already loading",
-            loaded: "attempted to load module \"{name}\" but is already loaded",
-            loadedManual: "attempted to load module \"{name}\" but was already loaded manual",
-            startLoad: "started loading module: \"{name}\"",
-            endLoad: "finished loading module: \"{name}\"",
-            loadManual: "module \"{name}\" was loaded manual",
-            bundleNotDefined: "attempted to load bundle: \"{name}.*\" but bundle is not defined in module \"{name}\"",
-            bundleLoading: "attempted to load bundle: \"{name}.*\" but is already loading",
-            bundleLoaded: "attempted to load bundle: \"{name}.*\" but is already loaded",
-            startLoadBundle: "started loading bundle: \"{name}.*\"",
-            endLoadBundle: "finished loading bundle \"{name}.*\"",
-            timeout: "timeout: aborted loading module \"{name}\" after {seconds} second(s) - module may not be available on path: \"{path}.js\"",
-            subscribing: "\"{name}\" subscribed to \"{moduleorbundle}\"",
-            publishing: "\"{moduleorbundle}\" published to \"{name}\""
-        };
-        
-        messageHooks = {
-			foundSimpleDependency: function(message, content) {
-				return message.replace(/\{dependency\}/gi, content);
-			},
-			
-			foundBundle: function(message, content) {
-				return message.replace(/\{bundle\}/gi, content.join("\", \"{name}."));
-            },
-            
-            timeout: function(message, content) {
-				return message.replace(/\{seconds\}/gi, Config.waitForTimeout).replace(/\{path\}/gi, content);
-            },
-            
-            foundDependencies: function(message, content) {
-	            return message.replace(/\{dependencies\}/gi, content.join("\", \""));
-	        },
-	        
-	        subscribing: function(message, content) {
-				return message.replace(/\{moduleorbundle\}/gi, content);
-			}
-        };
-        
-        messageHooks.requestDependencies = messageHooks.foundDependencies;
-        
-        messageHooks.publishing = messageHooks.subscribing;
-        
-        logTypes = {
-			timeout: "error",
+        }
 
-			loading: "warn"
+        System = {
+            getType: getType,
+
+            isNaN: isNaN,
+
+            isFinite: isFinite,
+
+            out: out,
+
+            getCustomLogger: function(logContext, templates) {
+                templates = templates || {};
+
+                return function(data, type, values) {
+                    data = templates[data] || data;
+
+                    if (sxIsObject(values) && sxIsString(data)) {
+                        replacer.values = values;
+
+                        data = data.replace(rTemplateKey, replacer);
+
+                        replacer.values = nothing;
+                    }
+
+                    out(data, type, logContext);
+                };
+            },
+
+            addDebugger: addDebugger,
+
+            isSet: isSet
         };
-        
-        logTypes.loaded = logTypes.loadedManual = logTypes.bundleNotDefined = logTypes.bundleLoading = logTypes.bundleLoaded = logTypes.loading;
-        
+
+        for (; idx < typesLen; idx++) {
+            System['is' + types[idx]] = typeTestSetup(types[idx]);
+        }
+
+        isArgs = System.isArguments;
+
         /**
-         * A simple sourceManager that handles adding and removing scripts and stylesheets to and from the head
+         *
+         * @param {*} value
+         *
+         * @return {Boolean}
          */
-        sourceManager = {
-			/**
-			 * A reference to the head of the document
-			 */
-            head: doc.getElementsByTagName("head")[0],
-            
-            scripts: {},
-            
-            styleSheets: {},
-            /**
-             * Method that creates a timestamp to prevent caching
-             * Configurable through JAR.configure()
-             * This may disable debugging in the console
-             */
-            getTimeStamp: function() {
-                return Config.cache ? "" : ("?_=" + new Date().getTime());
-            },
-            /**
-             * Adds the script to the end of the head
-             * 
-             * @param String path
-             * 
-             */
-            addScript: function(path) {
-                var script = doc.createElement("script");
-                    
-                script.type = "text/javascript";
-                script.src = path + ".js" + this.getTimeStamp();
-                this.head.appendChild(script);
-                this.scripts[path] = script;
-            },
-            /**
-             * Removes the specified script from the head
-             * 
-             * @param String path
-             * 
-             */
-            removeScript: function(path) {
-                this.head.removeChild(this.scripts[path]);
-                delete this.scripts[path];
-            },
-            /**
-             * Creates a styleSheet according to the browser version
-             */
-            createStyleSheet: (function() {
-				return (doc.createStyleSheet ? function(path) {
-					return  doc.createStyleSheet(path).owningElement;
-				} : function() {
-					return doc.createElement("link");
-				});
-            })(),
-            /**
-             * Adds the styleSheet to the beginning of the head
-             * 
-             * @param String path
-             * 
-             */
-            addStyleSheet: function(path) {
-                var stylePath = path + ".css" + this.getTimeStamp(), styleSheet = this.createStyleSheet();
-                    
-                this.head.insertBefore(styleSheet, this.head.firstChild);
-                styleSheet.setAttribute("type", "text/css");
-                styleSheet.setAttribute("rel", "stylesheet");
-                styleSheet.setAttribute("href", stylePath);
-                this.styleSheets[path] = styleSheet;
-            },
-            /**
-             * Removes the specified styleSheet from the head
-             * 
-             * @param String path
-             * 
-             */
-            removeStyleSheet: function(path) {
-                this.head.removeChild(this.styleSheets[path]);
-                delete this.styleSheets[path];
+        System.isArguments = function(value) {
+            var isArguments = false,
+                length;
+
+            if (value) {
+                length = value.length;
+                isArguments = isArgs(value) || (System.isNumber(length) && length === 0 || (length > 0 && ((length - 1) in value)));
             }
+
+            return isArguments;
         };
-		/**
-		 * A function to extract the modulename of a bundlerequest or the simple dependency of a module
-		 * 
-		 * @param String moduleName
-		 * 
-		 */
-        function extractModuleName(moduleName) {
-            var tmp = moduleName.split(".");
-            tmp.pop();
-            return tmp.join(".");
-        }
-        
         /**
-         * Checks whether the moduleName is ending with '.*', which marks a bundlerequest
-		 * 
-		 * @param String moduleName
+         *
+         * @param {*} value
+         *
+         * @return {Boolean}
          */
-        function isBundleRequest(moduleName) {
-            return (/\.\*$/).test(moduleName);
-        }
-        
+        System.isArrayLike = function(value) {
+            return sxIsArray(value) || System.isArguments(value);
+        };
         /**
-         * The Module keeps track of the state of the required script
-		 * It listens for Modules or the bundle that it is depending on,
-		 * executes the content of the script when all required Modules are loaded
-		 * and notifies depending Modules of its execution
-		 * 
-		 * Every script of a Module is only loaded and executed once
-		 * It is also possible to load Modules manual (putting the script tag in the head)
-		 * If JAR was defined before it will handle dependency-loading itself
-		 * In this case there exists the possiblity that a script is loaded twice
-		 * 
-		 * @param String moduleName
-		 * @param String basePath
+         *
+         * @param {*} value
+         *
+         * @return {Boolean}
          */
-        function Module(moduleName, basePath) {
-            this._basePath = basePath;
-            
-            this.state = Module.WAITING;
-            this.bundleState = Module.NO_BUNDLE;
-            
-            this._dependencies = {};
-            this.dependenciesNeeded = 0;
+        System.isDefined = function(value) {
+            return !System.isUndefined(value);
+        };
+        /**
+         *
+         * @param {*} Instance
+         * @param {*} Class
+         *
+         * @return {Boolean}
+         */
+        System.isA = function(Instance, Class) {
+            var isA = false,
+                idx = 0,
+                classLen = Class.length;
 
-            this._bundle = {};
-            this.bundleModulesNeeded = 0;
-            
-            this._setup(moduleName);
-        }
-        // Module states
-        Module.WAITING = 1;
-        Module.LOADING = 2;
-        Module.LOADED = 4;
-        Module.LOADED_MANUAL = 8;
-        // Bundle states
-        Module.NO_BUNDLE = 0;
-        Module.BUNDLE_ADDED = 1;
-        Module.BUNDLE_REQUIRED = 2;
-        Module.BUNDLE_LOADING = 4;
-        Module.BUNDLE_LOADED = 8;
-        
-        Module.prototype = {
-            constructor: Module,
-            
-            _hook: ROOT,
-            
-            path: "",
-			/**
-			 * Method to inspect how the Modules interact with each other
-			 * When the state of the Module changes and debugging is turned on it will be logged
-			 * 
-			 * @param String msgType
-			 * @param content 
-			 */
-            showMessage: function(msgType, content) {
-                var message = messages[msgType], messageHook = messageHooks[msgType], logType = logTypes[msgType] || "log";
-                
-				messageHook && (message = messageHook(message, content));
+            if (sxIsArray(Class)) {
+                for (; idx < classLen; idx++) {
+                    isA = System.isA(Instance, Class[idx]);
 
-                message = message.replace(/\{name\}/gi, this.name);
-                log(message, logType);
-            },
-            /**
-             * Set up the Module:
-             * If it is a bundlerequest the modulename has to be extracted
-             *    mysimpledependeny.mymodule.* -> mysimpledependency.mymodule
-             * 
-             * Get the hookname of the Module to hook it in the module-tree later
-             *    -> mymodule
-             * 
-             * Search for a simple dependency and listen for it
-             *    -> mysimpledependency
-             * 
-             * Create the path to the Module that is used for loading
-             *    -> mysimpledependency/mymodule
-             * 
-             * The rest of the path is created before loading with Module.getFullPath()
-             */
-            _setup: function(moduleName) {
-                var parts;
-                
-                if(isBundleRequest(moduleName)) {
-					this.bundleState = Module.BUNDLE_REQUIRED;
-                    moduleName = extractModuleName(moduleName);
-                }
-                this.name = moduleName;
-                    
-                parts = this.name.split(".");
-                
-                this._hookName = parts.pop();
-                if(parts.length > 0) {
-                    var simpleDependencyName = parts.join(".");
-                    this.showMessage("foundSimpleDependency", simpleDependencyName);
-                    this._simpleDependency = this.addDependency(simpleDependencyName);
-                    this.path += this._simpleDependency.path;
-                }
-                this.path += "/" + this._hookName;
-            },
-            
-            setBasePath: function(basePath) {
-                this._basePath = basePath;
-            },
-            /**
-             * Construct the full path except the file-extension of the basePath and path properties
-             *    -> js/mysimpledependency/mymodule/mymodule(.js/.css)
-             * 
-             * If the first letter of the hookname is uppercase, which is the case for Classes, Interfaces, Mixins, etc.
-             * It searches for the Module in the directory of the simple dependency
-             *    mysimpledependeny.mymodule.MyClass -> js/mysimpledependeny/mymodule/MyClass(.js/.css)
-             */
-            getFullPath: function() {
-                return (this._basePath || Config.basePath) + this.path + (this._hookName === this._hookName.toLowerCase() ? "/" + this._hookName : "");
-            },
-            
-            isWaiting: function() {
-				return this.state & Module.WAITING;
-            },
-            
-            isLoading: function() {
-				return this.state & Module.LOADING;
-            },
-            
-            isLoaded: function() {
-				return this.state & Module.LOADED;
-            },
-            
-            isLoadedManual: function() {
-				return this.state & Module.LOADED_MANUAL;
-            },
-            
-            setLoadedManual: function() {
-                this.showMessage("loadManual");
-                this.state = Module.LOADED_MANUAL;
-            },
-            
-            setBundleRequired: function(bundleRequired) {
-				this.bundleState |= (bundleRequired ? Module.BUNDLE_REQUIRED : Module.NO_BUNDLE);
-            },
-                    
-            isBundleDefinedAndRequired: function() {
-                return this.isBundleAdded() && this.isBundleRequired();
-            },
-            
-            isBundleAdded: function() {
-				return this.bundleState & Module.BUNDLE_ADDED;
-            },
-            
-            isBundleRequired: function() {
-				return this.bundleState & Module.BUNDLE_REQUIRED;
-            },
-            
-            isBundleLoading: function() {
-				return this.bundleState & Module.BUNDLE_LOADING;
-            },
-            
-            isBundleLoaded: function() {
-				return this.bundleState & Module.BUNDLE_LOADED;
-            },
-            
-            listenFor: function(moduleName, module) {
-                var $this = this, iBR = isBundleRequest(moduleName), isDependency = (moduleName in this._dependencies);
-
-                if(!module.isLoaded() || (iBR && !module.isBundleLoaded())) {
-                    isDependency ? this.dependenciesNeeded++ : this.bundleModulesNeeded++;
-                    this.showMessage("subscribing", moduleName);
-                    ModuleLoader.listenFor(moduleName, function() {
-                        $this.showMessage("publishing", moduleName);
-                        isDependency ? $this.dependenciesNeeded-- : $this.bundleModulesNeeded--;
-                        $this.readyCheck();
-                    });
-                }
-            },
-            
-            addDependency: function(dependencyName) {
-                var dependency = ModuleLoader.getModule(dependencyName, this._basePath);
-                this._dependencies[dependencyName] = dependency;
-                this.listenFor(dependencyName, dependency);
-                ModuleLoader.$import(dependencyName, this._basePath);
-                return dependency;
-            },
-            
-            addDependencies: function(dependencies) {
-				var dependency, dependencyName;
-                dependencies = this.flattenDependencies(dependencies);
-                this.showMessage("foundDependencies", dependencies);
-                for(var i = 0, len =  dependencies.length; i < len; i++) {
-                    dependencyName = dependencies[i];
-                    dependency = this.addDependency(dependencyName);
-                }
-            },
-            
-            flattenDependencies: function(dependencies, referenceDependency) {
-				var flattenedDependencies = [];
-				
-				if(SYSTEM.isArray(dependencies)) {
-					for(var i = 0, l = dependencies.length; i < l; i++) {
-						flattenedDependencies = flattenedDependencies.concat(this.flattenDependencies(dependencies[i], referenceDependency));
-					}
-				}
-				else if(SYSTEM.isObject(dependencies)) {
-					for(var tmpReferenceDependency in dependencies) {
-						flattenedDependencies = flattenedDependencies.concat(this.flattenDependencies(dependencies[tmpReferenceDependency], tmpReferenceDependency));
-					}
-					flattenedDependencies = this.flattenDependencies(flattenedDependencies, referenceDependency);
-				}
-				else if(SYSTEM.isString(dependencies)) {
-					if(referenceDependency) {
-						if(referenceDependency === ".") {
-							referenceDependency = "";
-						}
-						if(dependencies === ".") {
-							dependencies = referenceDependency;
-						}
-						else {
-							dependencies = referenceDependency + "." + dependencies;
-						}
-					}
-					else if(/^\..+/.test(dependencies)) {
-						dependencies = this._simpleDependency.name + dependencies;
-					}
-					flattenedDependencies.push(dependencies);
-				}
-				return flattenedDependencies;
-	        },
-
-            addBundle: function(bundle) {
-                this.showMessage("foundBundle", bundle);
-                var len = bundle.length;
-                if(!!len) {
-                    for(var i = 0; i < len; i++) {
-                        var moduleName = this.name + "." + bundle[i];
-                        var module = ModuleLoader.getModule((isBundleRequest(moduleName) ? extractModuleName(moduleName) : moduleName) , this._basePath);
-                        this.listenFor(moduleName, module);
-                        this._bundle[moduleName] = module;
-                    }
-                    this.bundleState |= Module.BUNDLE_ADDED;
-                    if(this.isBundleDefinedAndRequired()) {
-                        this.importBundle();
+                    if (isA) {
+                        break;
                     }
                 }
-            },
-            
-            importBundle: function() {
-                this.bundleState |= Module.BUNDLE_LOADING;
-                for(var moduleName in this._bundle) {
-					ModuleLoader.$import(moduleName);
-                }
-            },
-                    
-            $import: function() {
-                var $this = this, path = this.getFullPath();
-                if(!(this.state & Module.LOADING)) {    
-	                this.state = Module.LOADING;
-	                
-	                this._timer = win.setTimeout(function() {
-	                    $this.abort(path);
-	                }, Config.waitForTimeout * 1000);
+            }
+            else {
+                isA = Instance instanceof Class;
+            }
 
-	                sourceManager.addScript(path);
-                }
-            },
-                    
-            loadStyleSheet: function() {
-                sourceManager.addStyleSheet(this.getFullPath());
-            },
-            
-            abort: function(path, silent) {
-                if(!silent) {
-                    this.showMessage("timeout", path);
-                }
-                sourceManager.removeScript(path);
-                //sourceManager.removeStyleSheet(path);
-                win.clearTimeout(this._timer);
-            },
-            
-            notify: function(props, fn) {
-                win.clearTimeout(this._timer);
-                if(!!props.deps) {
-                    this.addDependencies(props.deps);
-                }
-                if(!!props.bundle) {
-                    this.addBundle(props.bundle);
-                }
-                if(!!props.styles) {
-                    this.loadStyleSheet();
-                }
-                
-                this.onReady = fn;
-                
-                if(!!props.domReady) {
-                    var $this = this;
-                    this.dependenciesNeeded++;
-                    DOMWatcher.onDomReady(function() {
-                        $this.dependenciesNeeded--;
-                        $this.readyCheck();
-                    });
-                }
-                else {
-                    this.readyCheck();
-                }
-            },
-            
-            readyCheck: function() {
-                if(!this.isLoaded() && this.dependenciesNeeded === 0 && this.onReady) {
-                    this.hook(this.onReady);
-					this.state = Module.LOADED;
-                    this.showMessage("endLoad");
-                    ModuleLoader.notify(this.name);
-                }
-                if(this.isLoaded() && !this.isBundleLoaded() && (this.isBundleAdded() || this.isBundleRequired()) && this.bundleModulesNeeded === 0) {
-                    this.bundleState |= Module.BUNDLE_LOADED;
-                    if(this.isBundleDefinedAndRequired()) {
-						this.showMessage("endLoadBundle");
-					}
-					else if(this.isBundleRequired()) {
-						this.showMessage("bundleNotDefined");
-					}
-                    ModuleLoader.notify(this.name + ".*");
-                }
-            },
-                    
-            hook: function(fn) {
-                    var hook,
-                        depHooks = [],
-                        hookIndex;
-						
-                    if(!!this._simpleDependency) {
-                        hook = this._simpleDependency.getHook();
-                    }
-                    else {
-                        hook = ROOT;
-                    }
-					hookIndex = this._hookName;
-                    for(var dependencyName in this._dependencies) {
-						var dependency = this._dependencies[dependencyName];
-						if(dependency !== this._simpleDependency) {
-							depHooks.push(dependency.getHook());
+            return isA;
+        };
+
+        sxIsObject = System.isObject;
+        sxIsFunction = System.isFunction;
+        sxIsArray = System.isArray;
+        sxIsString = System.isString;
+        sxIsSet = isSet;
+
+        addDebugger('console', function consoleDebuggerSetup() {
+            var console = global.console,
+                canUseGroups = console.group && console.groupEnd,
+                pseudoConsole = {},
+                methods = ['log', 'debug', 'warn', 'error'],
+                methodsLen = methods.length,
+                idx = 0,
+                method,
+                lastLogContext;
+
+            for (; idx < methodsLen; idx++) {
+                method = methods[idx];
+                pseudoConsole[method] = console ? forwardConsole(console[method] ? method : methods[0]) : noop;
+            }
+
+            function forwardConsole(method) {
+                return function logger(data, logContext) {
+                    if (canUseGroups && Config.debugGroup) {
+                        if (lastLogContext !== logContext) {
+                            if (lastLogContext) {
+                                global.console.groupEnd(lastLogContext);
+                            }
+
+                            if (logContext) {
+                                global.console.group(logContext);
+                            }
+
+                            lastLogContext = logContext;
                         }
                     }
-                    hook[hookIndex] = fn.apply(hook, depHooks);
-                    this._hook = hook[hookIndex];
-            },
-
-            getHook: function() {
-                return this._hook;
-            },
-
-            getHookName: function() {
-                return this._hookName;
-            }
-        };
-        
-        var loaderReady,
-            modulesToWaitFor,
-			bundlesToWaitFor,
-            modules,
-            moduleListeners;
-        
-        function Loader() {
-            loaderReady = [];
-            modulesToWaitFor = 0;
-            bundlesToWaitFor = 0;
-            modules = {};
-            moduleListeners = {};
-        }
-        
-        Loader.prototype = {
-            constructor: Loader,
-            
-            getModule: function(moduleName, basePath) {
-                var iBR = isBundleRequest(moduleName);
-                if(iBR) {
-                    moduleName = extractModuleName(moduleName);
-                }
-                if(!(moduleName in modules)) {
-                    modules[moduleName] = new Module(moduleName + (iBR ? ".*" : ""), basePath);
-                }
-                else {
-                    if(basePath) {
-                        modules[moduleName].setBasePath(basePath);
-                    }
-                }
-                return modules[moduleName];
-            },
-            
-            register: function(props, fn) {
-                var module = this.getModule(props.MID);
-                if(module.isWaiting()) {
-                    module.setLoadedManual();
-                }
-                if(!(module.isLoaded())) {
-                    module.notify(props, fn);
-                }
-            },
-            
-            $import: function(moduleName, basePath) {
-				var $this = this ,module = this.getModule(moduleName, basePath),
-					iBR = isBundleRequest(moduleName);
-				
-                module.setBundleRequired(iBR);
-                
-                module.showMessage("request");
-                if(module.isWaiting()) {
-					module.showMessage("startLoad");
-                    modulesToWaitFor++;
-                    this.listenFor(moduleName, function() {
-						modulesToWaitFor--;
-						$this.ready();
-                    });
-					module.$import();
-                }
-                else if(module.isLoaded()) {
-                    module.showMessage("loaded");
-                }
-                else if(module.isLoadedManual()) {
-                    module.showMessage("loadedManual");
-                }
-                else if(module.isLoading()) {
-                    module.showMessage("loading");
-                }
-                if(iBR) {
-					module.showMessage("requestBundle");
-	                if(module.isBundleLoaded()) {
-	                    module.showMessage("bundleLoaded");
-	                }
-	                else if(module.isBundleLoading()) {
-	                    module.showMessage("bundleLoading");
-	                }
-	                else {
-						module.showMessage("startLoadBundle");
-						bundlesToWaitFor++;
-	                    this.listenFor(moduleName, function() {
-							bundlesToWaitFor--;
-							$this.ready();
-	                    });
-						module.importBundle();
-	                }
-                }
-            },
-            
-            ready: function(fn) {
-                if(fn) {
-                    loaderReady.push(fn);
-                }
-                if(modulesToWaitFor === 0 && bundlesToWaitFor === 0) {
-                    if(loaderReady.length > 0) {
-                        loaderReady.shift()();
-						this.ready();
-                    }
-                }
-            },
-            
-            listenFor: function(moduleName, callback) {
-				var listeners = moduleListeners[moduleName] = moduleListeners[moduleName] || [];
-
-				listeners.push(callback);
-            },
-            
-            notify: function(moduleName) {
-				var listeners = moduleListeners[moduleName];
-
-				while(listeners && listeners.length > 0) {
-					listeners.shift()();
-				}
-            }
-        };
-        
-        return new Loader();
-    })(),
-
-    DOMWatcher = (function() {
-        var DOMWatcher = function() {
-            var CP = "complete",
-                RS = "readyState",
-                ATE = "attachEvent",
-                AEL = "addEventListener",
-                DCL = "DOMContentLoaded",
-                ORSC = "onreadystatechange",
-                w3c = AEL in doc,
-                top = false,
-                $this = this;
-
-            function DOMContentLoadedHandler() {
-                if ( w3c ) {
-                    doc.removeEventListener( DCL, DOMContentLoadedHandler, false );
-                    $this._setDomReady();
-                } else if ( doc[RS] === CP ) {
-                    doc.detachEvent( ORSC, DOMContentLoadedHandler );
-                    $this._setDomReady();
-                }
-            }
-            
-            if ( doc[RS] === CP ) {
-                this._defer(function() { $this._setDomReady();} );
-            } else if ( w3c ) {
-                doc[AEL]( DCL, DOMContentLoadedHandler, false );
-                
-                win[AEL]( "load", function() {$this._setDomReady();}, false );
-                
-            } else {
-                doc[ATE]( ORSC, DOMContentLoadedHandler );
-                
-                win[ATE]( "onload", function() {$this._setDomReady();} );
-
-                try {
-                    top = win.frameElement === null && docElem;
-                } catch(e) {}
-
-                if ( top && top.doScroll ) {
-                    (function() {
-                        var doScrollCheck = function() {
-                            if ( !$this._isReady ) {
-                                try {
-                                    top.doScroll("left");
-                                } catch(e) {
-                                    return $this._defer( doScrollCheck, 50 );
-                                }
-                                
-                                $this._setDomReady();
-                            }
-                        };
-                    })();
-                }
-            }
-        };
-        
-        DOMWatcher.prototype = {
-            constructor: DOMWatcher,
-            
-            _isReady: false,
-            
-            _domFired: false,
-            
-            _setDomReady: function() {
-				var $this = this;
-                if(!this._isReady) {
-                    if ( !doc.body ) {
-                        return this._defer(function() { $this._setDomReady();} );
+                    else {
+                        logContext && (data = logContext + ': ' + data);
                     }
 
-                    this._isReady = true;
-
-                    if(!this._domFired) {
-                        this._domFired = true;
-                        ModuleLoader.notify("domReady");
-                    }
-                }
-                return true;
-            },
-            
-            onDomReady: function(readyFn) {
-                if(this._isReady) {
-                    this._defer(readyFn);
-                }
-                else {
-                    ModuleLoader.listenFor("domReady", readyFn);
-                }
-            },
-            
-            _defer: function( fn, wait ) {
-                win.setTimeout( fn, +wait >= 0 ? wait : 1 );
+                    return global.console[method](data);
+                };
             }
-        };
-        
-        return new DOMWatcher();
+
+            return pseudoConsole;
+        });
+
+        return System;
     })();
-    
-    JAR.register({
-		MID: "SYSTEM"
-    }, function() {
-	    SYSTEM.debug = log;
-	    return SYSTEM;
-    });
-	
-    JAR.register({
-        MID: "jar",
-        bundle: ["lang.*", "html.*", "util.*"]
-    }, function() {
-        var jar = {
-            func: JAR.func,
 
-            exec: function(name) {
-                return Functions.exec(name, slice.call(arguments, 1));
+    SourceManager = (function sourceManagerSetup() {
+        var doc = global.document,
+            head = doc.getElementsByTagName('head')[0],
+            scripts = {},
+            styleSheets = {},
+            createStyleSheet;
+
+        /**
+         *
+         * @return {String}
+         */
+        function getTimeStamp() {
+            return Config.cache ? '' : ('?_=' + new Date().getTime());
+        }
+
+        function getScripts() {
+            return doc.getElementsByTagName('script');
+        }
+
+        /**
+         *
+         * @param {String} moduleName
+         * @param {String} path
+         */
+        function addScript(moduleName, path) {
+            var script = doc.createElement('script');
+
+            script.id = 'js:' + moduleName;
+            script.type = 'text/javascript';
+            script.src = path + getTimeStamp();
+            script.async = true;
+
+            head.appendChild(script);
+            scripts[moduleName] = script;
+        }
+
+        /**
+         *
+         * @param {String} moduleName
+         */
+        function removeScript(moduleName) {
+            var script = scripts[moduleName],
+                path = script.src;
+
+            head.removeChild(script);
+
+            delete scripts[moduleName];
+
+            return path;
+        }
+
+        /**
+         *
+         * @param {String} path
+         *
+         * @return {Object}
+         */
+        createStyleSheet = (doc.createStyleSheet ? function(path) {
+            return doc.createStyleSheet(path).owningElement;
+        } : function() {
+            return doc.createElement('link');
+        });
+
+        /**
+         *
+         * @param {String} moduleName
+         * @param {String} path
+         */
+        function addStyleSheet(moduleName, path) {
+            var styleSheet;
+
+            path = path + getTimeStamp();
+            styleSheet = createStyleSheet(path);
+
+            head.insertBefore(styleSheet, head.firstChild);
+
+            styleSheet.id = 'css:' + moduleName;
+            styleSheet.setAttribute('type', 'text/css');
+            styleSheet.setAttribute('rel', 'stylesheet');
+            styleSheet.setAttribute('href', path);
+            styleSheets[moduleName] = styleSheet;
+        }
+
+        /**
+         *
+         * @param {String} moduleName
+         */
+        function removeStyleSheet(moduleName) {
+            var styleSheet = styleSheets[moduleName],
+                path = styleSheet.href;
+
+            head.removeChild(styleSheet);
+            delete styleSheets[moduleName];
+
+            return path;
+        }
+
+        return {
+            getScripts: getScripts,
+
+            addScript: addScript,
+
+            removeScript: removeScript,
+
+            addStyleSheet: addStyleSheet,
+
+            removeStyleSheet: removeStyleSheet
+        };
+    })();
+
+    Loader = (function loaderSetup() {
+        var loaderModules = {},
+            moduleQueues = {},
+            rBundleRequest = /\.\*$/,
+            rPlugin = /!/,
+            rLeadingDot = /^\./,
+            /**
+             *
+             */
+            MSG_BUNDLE_ALREADY_LOADED = 0,
+            /**
+             * @const
+             * @type {number}
+             */
+            MSG_BUNDLE_ALREADY_LOADING = 1,
+            /**
+             * @const
+             * @type {number}
+             */
+            MSG_BUNDLE_FOUND = 2,
+            /**
+             * @const
+             * @type {number}
+             */
+            MSG_BUNDLE_LOADED = 3,
+            /**
+             * @const
+             * @type {number}
+             */
+            MSG_BUNDLE_LOADING = 4,
+            /**
+             * @const
+             * @type {number}
+             */
+            MSG_BUNDLE_NOT_DEFINED = 5,
+            /**
+             * @const
+             * @type {number}
+             */
+            MSG_BUNDLE_REQUESTED = 6,
+            /**
+             * @const
+             * @type {number}
+             */
+            MSG_DEPENDENCIES_FOUND = 7,
+            /**
+             * @const
+             * @type {number}
+             */
+            MSG_DEPENDENCY_FOUND = 8,
+            /**
+             * @const
+             * @type {number}
+             */
+            MSG_MODULE_ALREADY_LOADED = 9,
+            /**
+             * @const
+             * @type {number}
+             */
+            MSG_MODULE_ALREADY_LOADED_MANUAL = 10,
+            /**
+             * @const
+             * @type {number}
+             */
+            MSG_MODULE_ALREADY_LOADING = 11,
+            /**
+             * @const
+             * @type {number}
+             */
+            MSG_MODULE_ALREADY_REGISTERED = 12,
+            /**
+             * @const
+             * @type {number}
+             */
+            MSG_MODULE_LOADED = 13,
+            /**
+             * @const
+             * @type {number}
+             */
+            MSG_MODULE_LOADED_MANUAL = 14,
+            /**
+             * @const
+             * @type {number}
+             */
+            MSG_MODULE_LOADING = 15,
+            /**
+             * @const
+             * @type {number}
+             */
+            MSG_MODULE_NAME_INVALID = 16,
+            /**
+             * @const
+             * @type {number}
+             */
+            MSG_MODULE_RECOVERING = 17,
+            /**
+             * @const
+             * @type {number}
+             */
+            MSG_MODULE_REGISTERING = 18,
+            /**
+             * @const
+             * @type {number}
+             */
+            MSG_MODULE_REQUESTED = 19,
+            /**
+             * @const
+             * @type {number}
+             */
+            MSG_MODULE_SUBSCRIBED = 20,
+            /**
+             * @const
+             * @type {number}
+             */
+            MSG_MODULE_PUBLISHED = 21,
+            /**
+             * @const
+             * @type {number}
+             */
+            MSG_TIMEOUT = 22,
+            /**
+             * @const
+             * @type {number}
+             */
+            MSG_PLUGIN_NOT_FOUND = 23,
+            // Module states
+            /**
+             * @const
+             * @type {number}
+             */
+            MODULE_WAITING = 1,
+            /**
+             * @const
+             * @type {number}
+             */
+            MODULE_LOADING = 2,
+            /**
+             * @const
+             * @type {number}
+             */
+            MODULE_LOADED = 3,
+            /**
+             * @const
+             * @type {number}
+             */
+            MODULE_REGISTERED = 4,
+            /**
+             * @const
+             * @type {number}
+             */
+            MODULE_LOADED_MANUAL = 5,
+
+            // Bundle states
+            /**
+             * @const
+             * @type {number}
+             */
+            MODULE_BUNDLE_WAITING = 0,
+            /**
+             * @const
+             * @type {number}
+             */
+            MODULE_BUNDLE_LOADING = 1,
+            /**
+             * @const
+             * @type {number}
+             */
+            MODULE_BUNDLE_LOADED = 2,
+            Loader, Module, sortedModulesList, alreadySortedModules, currentModuleName, messageStates, loaderNormalize, loaderLogMessage, loaderImport;
+
+        /**
+         *
+         * @param {String} messageType
+         * @param {String} moduleName
+         * @param {Object} values
+         */
+        loaderLogMessage = (function loaderLogMessageSetup() {
+            var messageTemplates = [],
+                module = 'module',
+                bundle = 'bundle',
+                requested = '{{what}} requested',
+                startLoad = 'started loading {{what}}',
+                endLoad = 'finished loading {{what}}',
+                attemptedTo = 'attempted to ',
+                attemptLoad = attemptedTo + 'load {{what}} but {{why}}',
+                already = 'is already ',
+                alreadyLoading = already + 'loading',
+                alreadyLoaded = already + 'loaded',
+                attemptLoadModule = replaceModule(attemptLoad),
+                attemptLoadBundle = replaceBundle(attemptLoad),
+                loaderLogger;
+
+            function replaceWhat(message, what) {
+                return message.replace('{{what}}', what + ' "{{mod}}"');
+            }
+
+            function replaceModule(message) {
+                return replaceWhat(message, module);
+            }
+
+            function replaceBundle(message) {
+                return replaceWhat(message, bundle);
+            }
+
+            function replaceWhy(message, why) {
+                return message.replace('{{why}}', why);
+            }
+
+            function replaceAlreadyLoaded(message) {
+                return replaceWhy(message, alreadyLoaded);
+            }
+
+            function replaceAlreadyLoading(message) {
+                return replaceWhy(message, alreadyLoading);
+            }
+
+            messageTemplates[MSG_BUNDLE_ALREADY_LOADED] = replaceAlreadyLoaded(attemptLoadBundle);
+            messageTemplates[MSG_BUNDLE_ALREADY_LOADING] = replaceAlreadyLoading(attemptLoadBundle);
+            messageTemplates[MSG_BUNDLE_FOUND] = replaceBundle('found bundlemodules "{{bundle}}" for {{what}}');
+            messageTemplates[MSG_BUNDLE_LOADED] = replaceBundle(endLoad);
+            messageTemplates[MSG_BUNDLE_LOADING] = replaceBundle(startLoad);
+            messageTemplates[MSG_BUNDLE_NOT_DEFINED] = replaceWhy(attemptLoadBundle, 'bundle is not defined');
+            messageTemplates[MSG_BUNDLE_REQUESTED] = replaceBundle(requested);
+
+            messageTemplates[MSG_DEPENDENCIES_FOUND] = replaceModule('found explizit dependencies "{{deps}}" for {{what}}');
+            messageTemplates[MSG_DEPENDENCY_FOUND] = replaceModule('found implizit dependency "{{dep}}" for {{what}}');
+
+            messageTemplates[MSG_MODULE_ALREADY_LOADED] = replaceAlreadyLoaded(attemptLoadModule);
+            messageTemplates[MSG_MODULE_ALREADY_LOADED_MANUAL] = replaceAlreadyLoaded(attemptLoadModule) + ' manual';
+            messageTemplates[MSG_MODULE_ALREADY_LOADING] = replaceAlreadyLoading(attemptLoadModule);
+            messageTemplates[MSG_MODULE_ALREADY_REGISTERED] = replaceWhy(replaceModule(attemptedTo + 'register {{what}} but {{why}}'), already + 'registered');
+
+            messageTemplates[MSG_MODULE_LOADED] = replaceModule(endLoad);
+            messageTemplates[MSG_MODULE_LOADED_MANUAL] = replaceModule('{{what}} was loaded manual');
+            messageTemplates[MSG_MODULE_LOADING] = replaceModule(startLoad);
+
+            messageTemplates[MSG_MODULE_NAME_INVALID] = '"{{mod}}" is no valid modulename';
+            messageTemplates[MSG_MODULE_PUBLISHED] = '"{{pub}}" published to "{{mod}}"';
+            messageTemplates[MSG_MODULE_RECOVERING] = replaceModule('{{what}} tries to recover...');
+            messageTemplates[MSG_MODULE_REGISTERING] = replaceModule('registering {{what}}...');
+            messageTemplates[MSG_MODULE_REQUESTED] = replaceModule(requested);
+            messageTemplates[MSG_MODULE_SUBSCRIBED] = replaceModule('{{what}} subscribed to "{{subs}}"');
+
+            messageTemplates[MSG_PLUGIN_NOT_FOUND] = replaceModule('could not call method "plugIn" on {{what}} with data "{{data}}"');
+            messageTemplates[MSG_TIMEOUT] = replaceModule('aborted loading {{what}} after {{sec}} second(s) - module may not be available on path "{{path}}"');
+
+            loaderLogger = System.getCustomLogger('Loader', messageTemplates);
+
+            function loaderLogMessage(messageType, moduleName, values) {
+                var logType = messageStates[messageType] || 'log';
+
+                values = values || {};
+                values.mod = moduleName;
+
+                loaderLogger(messageType, logType, values);
+            }
+
+            return loaderLogMessage;
+        })();
+
+        messageStates = (function messageStateSetup() {
+            var messageStates = {};
+
+            function setStateForMessages(messages, state) {
+                var idx = 0,
+                    messagesLen = messages.length;
+
+                for (; idx < messagesLen; idx++) {
+                    messageStates[messages[idx]] = state;
+                }
+            }
+
+            setStateForMessages([
+            MSG_MODULE_NAME_INVALID,
+            MSG_PLUGIN_NOT_FOUND,
+            MSG_TIMEOUT], 'error');
+
+            setStateForMessages([
+            MSG_BUNDLE_ALREADY_LOADED,
+            MSG_BUNDLE_ALREADY_LOADING,
+            MSG_BUNDLE_NOT_DEFINED,
+            MSG_MODULE_ALREADY_LOADED,
+            MSG_MODULE_ALREADY_LOADING,
+            MSG_MODULE_ALREADY_LOADED_MANUAL,
+            MSG_MODULE_ALREADY_REGISTERED], 'warn');
+
+            return messageStates;
+        })();
+
+        Module = (function moduleSetup() {
+            /**
+             *
+             * @constructor
+             * @param {String} moduleName
+             */
+            function Module(moduleName) {
+                var module = this,
+                    implizitDependency = loaderExtractModuleName(moduleName),
+                    dirParts, fileName, pathParts, firstLetter;
+
+                module.name = moduleName;
+                pathParts = moduleName.split('.');
+                module.fileName = fileName = pathParts.pop();
+
+                if (implizitDependency) {
+                    module.dep = implizitDependency;
+                }
+
+                dirParts = pathParts;
+
+                firstLetter = fileName.charAt(0);
+
+                if (firstLetter === firstLetter.toLowerCase()) {
+                    dirParts.push(fileName);
+                }
+
+                module.dirPath = dirParts.join(slash) + slash;
+
+                module.state = MODULE_WAITING;
+                module.bundleState = MODULE_BUNDLE_WAITING;
+
+                module.pluginData = {};
+            }
+
+            Module.prototype = {
+                depsCounter: 0,
+
+                bundleCounter: 0,
+
+                setWaiting: function() {
+                    this.state = MODULE_WAITING;
+                },
+
+                isState: function(state) {
+                    return this.state === state;
+                },
+
+                setState: function(state) {
+                    this.state = state;
+                },
+
+                isRegistered: function() {
+                    return this.state === MODULE_REGISTERED || this.isState(MODULE_LOADED) || this.isState(MODULE_LOADED_MANUAL);
+                },
+
+                isBundleState: function(bundleState) {
+                    return this.bundleState === bundleState;
+                },
+
+                setBundleState: function(bundleState) {
+                    this.bundleState = bundleState;
+                },
+
+                unsetBundleLoading: function() {
+                    var module = this;
+
+                    if (module.isBundleState(MODULE_BUNDLE_LOADING)) {
+                        module.bundleState = MODULE_BUNDLE_WAITING;
+
+                        module.dep && loaderGetModule(module.dep).unsetBundleLoading();
+                    }
+                },
+
+                setBundleLoaded: function() {
+                    var module = this,
+                        bundleName = module.name + '.*',
+                        messageID = module.bundle.length ? MSG_BUNDLE_LOADED : MSG_BUNDLE_NOT_DEFINED;
+
+                    module.bundleState = MODULE_BUNDLE_LOADED;
+
+                    loaderLogMessage(messageID, bundleName);
+
+                    loaderNotify(bundleName);
+                },
+
+                getFullPath: function(fileType) {
+                    var module = this,
+                        moduleName = module.name,
+                        keyDirPath = 'dirPath',
+                        keyFileName = 'fileName',
+                        dirPath = loaderGetModuleConfig(moduleName, keyDirPath) || module[keyDirPath],
+                        fileName = loaderGetModuleConfig(moduleName, keyFileName) || module[keyFileName],
+                        fullPath;
+
+                    fullPath = loaderGetModuleConfig(moduleName, 'baseUrl') + dirPath + fileName;
+
+                    if (fileType == 'js') {
+                        fullPath += loaderGetModuleConfig(moduleName, 'versionSuffix') + loaderGetModuleConfig(moduleName, 'minified');
+                    }
+
+                    fullPath += '.' + fileType;
+
+                    return fullPath;
+                },
+
+                depsReady: function() {
+                    var module = this,
+                        moduleName = module.name;
+
+                    if (module.isRegistered() && !module.isState(MODULE_LOADED)) {
+                        module.hookUp();
+
+                        module.setState(MODULE_LOADED);
+                        loaderLogMessage(MSG_MODULE_LOADED, moduleName);
+                        loaderNotify(moduleName);
+                    }
+                },
+
+                bundleReady: function() {
+                    var module = this,
+                        bundleName = module.name + '.*',
+                        messageID = module.bundle.length ? MSG_BUNDLE_LOADED : MSG_BUNDLE_NOT_DEFINED;
+
+                    if (!module.isBundleState(MODULE_BUNDLE_LOADED)) {
+                        module.setBundleState(MODULE_BUNDLE_LOADED);
+
+                        module.bundleState = MODULE_BUNDLE_LOADED;
+
+                        loaderLogMessage(messageID, bundleName);
+
+                        loaderNotify(bundleName);
+                    }
+                },
+
+                listenFor: function(moduleNames, asBundle) {
+                    var module = this,
+                        moduleName = module.name,
+                        moduleCount = moduleNames.length,
+                        moduleDepsBundlePrefix = asBundle ? 'bundle' : 'deps',
+                        moduleCounter = moduleDepsBundlePrefix + 'Counter',
+                        moduleReady = moduleDepsBundlePrefix + 'Ready';
+
+                    module[moduleCounter] += moduleCount;
+
+                    if (!module[moduleCounter]) {
+                        module[moduleReady]();
+                    }
+                    else if (moduleCount) {
+                        loaderLogMessage(MSG_MODULE_SUBSCRIBED, moduleName, {
+                            subs: moduleNames.join(separator)
+                        });
+
+                        loaderListenFor(moduleNames, function onModuleLoaded(publishingModuleName, pluginData) {
+                            loaderLogMessage(MSG_MODULE_PUBLISHED, moduleName, {
+                                pub: publishingModuleName
+                            });
+
+                            if (sxIsSet(pluginData)) {
+                                module.pluginData[publishingModuleName] = pluginData;
+                            }
+
+                            --module[moduleCounter] || module[moduleReady]();
+                        }, function onModuleAborted() {
+                            asBundle ? module.unsetBundleLoading() : loaderAbort(moduleName);
+                        });
+                    }
+                },
+
+                hookUp: function() {
+                    var module = this,
+                        factory = module.factory,
+                        depHooks = [],
+                        idx = 0,
+                        implizitDependency = module.dep,
+                        dependencies = module.deps,
+                        depLen = dependencies ? dependencies.length : 0,
+                        hook = implizitDependency ? loaderGetModuleHook(implizitDependency) : Root,
+                        dependencyName, pluginData;
+
+                    for (; idx < depLen; idx++) {
+                        dependencyName = dependencies[idx];
+                        pluginData = module.pluginData[dependencyName];
+                        depHooks.push(pluginData ? pluginData : loaderGetModuleHook(dependencyName));
+                    }
+
+                    loaderSetCurrentModuleName(module.name);
+
+                    module.hook = hook[module.fileName] = sxIsFunction(factory) ? factory.apply(hook, depHooks) : factory || {};
+
+                    loaderSetCurrentModuleName();
+                }
+            };
+
+            return Module;
+        })();
+
+        /**
+         *
+         * @param {String} moduleName
+         *
+         * @return {String}
+         */
+        function loaderExtractModuleName(moduleName) {
+            return moduleName.substr(0, moduleName.lastIndexOf('.'));
+        }
+
+        /**
+         *
+         * @param {String} moduleName
+         *
+         * @return {String}
+         */
+        function loaderExtractPluginModuleName(moduleName) {
+            return moduleName.split(rPlugin)[0];
+        }
+
+        /**
+         *
+         * @param {String} moduleName
+         *
+         * @return {Boolean}
+         */
+        function loaderIsBundleRequest(moduleName) {
+            return rBundleRequest.test(moduleName);
+        }
+
+        /**
+         *
+         * @param {String} moduleName
+         *
+         * @return {Boolean}
+         */
+        function loaderIsPluginRequest(moduleName) {
+            return rPlugin.test(moduleName);
+        }
+
+        /**
+         *
+         * @param {String} moduleName
+         *
+         * @return {Module}
+         */
+        function loaderGetModule(moduleName) {
+            var extractedName = loaderIsBundleRequest(moduleName) ? loaderExtractModuleName(moduleName) : loaderIsPluginRequest(moduleName) ? loaderExtractPluginModuleName(moduleName) : moduleName,
+                module = loaderModules[extractedName] = (loaderModules[extractedName] || new Module(extractedName));
+
+            return module;
+        }
+
+        /**
+         *
+         * @param {String} moduleName
+         *
+         * @return {*}
+         */
+        function loaderGetModuleHook(moduleName) {
+            return loaderGetModule(moduleName).hook;
+        }
+
+        /**
+         *
+         * @param {String} moduleName
+         */
+        loaderImport = (function loaderImportSetup() {
+            function loaderImport(moduleName) {
+                var $import = loaderIsBundleRequest(moduleName) ? loaderImportBundle : loaderImportModule;
+
+                $import(moduleName);
+            }
+
+            function loaderImportModule(moduleName) {
+                var module = loaderGetModule(moduleName),
+                    messageID;
+
+                loaderLogMessage(MSG_MODULE_REQUESTED, moduleName);
+
+                if (module.isState(MODULE_WAITING)) {
+                    loaderImportImplizitDependency(moduleName);
+
+                    loaderLogMessage(MSG_MODULE_LOADING, moduleName);
+
+                    module.setState(MODULE_LOADING);
+
+                    module.timeoutID = global.setTimeout(function abortModule() {
+                        loaderAbort(moduleName);
+                    }, (Config.timeout) * 1000);
+
+                    SourceManager.addScript(moduleName, module.getFullPath('js'));
+                }
+                else {
+                    messageID = module.isState(MODULE_LOADED) ? MSG_MODULE_ALREADY_LOADED : module.isState(MODULE_LOADED_MANUAL) ? MSG_MODULE_ALREADY_LOADED_MANUAL : MSG_MODULE_ALREADY_LOADING;
+
+                    loaderLogMessage(messageID, moduleName);
+                }
+            }
+
+            function loaderImportBundle(bundleName) {
+                var module = loaderGetModule(bundleName),
+                    messageID;
+
+                loaderLogMessage(MSG_BUNDLE_REQUESTED, bundleName);
+
+                if (module.isBundleState(MODULE_BUNDLE_LOADED)) {
+                    messageID = MSG_BUNDLE_ALREADY_LOADED;
+                }
+                else if (module.isBundleState(MODULE_BUNDLE_LOADING)) {
+                    messageID = MSG_BUNDLE_ALREADY_LOADING;
+                }
+                else {
+                    loaderListenFor([module.name], loaderImportBundleForModule);
+
+                    messageID = MSG_BUNDLE_LOADING;
+                }
+
+                loaderLogMessage(messageID, bundleName);
+            }
+
+            function loaderImportBundleForModule(moduleName) {
+                var module = loaderGetModule(moduleName);
+
+                if (!(module.isBundleState(MODULE_BUNDLE_LOADING) || module.isBundleState(MODULE_BUNDLE_LOADED))) {
+                    module.setBundleState(MODULE_BUNDLE_LOADING);
+
+                    module.listenFor(module.bundle, true);
+                }
+            }
+
+            return loaderImport;
+        })();
+
+        function loaderImportImplizitDependency(moduleName) {
+            var module = loaderGetModule(moduleName),
+                implizitDependency = module.dep;
+
+            if (implizitDependency) {
+                loaderLogMessage(MSG_DEPENDENCY_FOUND, moduleName, {
+                    dep: implizitDependency
+                });
+
+                module.listenFor([implizitDependency]);
+            }
+        }
+
+        /**
+         * 
+         * @param {Array} moduleNames
+         * @param {function(string)} callback
+         * @param {function(string)} errback
+         */
+        function loaderListenFor(moduleNames, callback, errback) {
+            var idx = 0,
+                pluginArgs = {},
+                moduleCount = moduleNames.length,
+                pluginParts,
+                moduleName, module, queue, onModuleLoaded;
+
+            function onPluginModuleLoaded(pluginName) {
+                var data = pluginArgs[pluginName],
+                    pluginModule = loaderGetModuleHook(pluginName);
+
+                delete pluginArgs[pluginName];
+
+                if (sxIsFunction(pluginModule.plugIn)) {
+                    pluginModule.plugIn({
+                        onSuccess: function(pluginData) {
+                            callback(pluginName + '!' + data, pluginData);
+                        },
+
+                        onError: errback,
+
+                        data: data
+                    });
+                }
+                else {
+                    loaderLogMessage(MSG_PLUGIN_NOT_FOUND, pluginName, {
+                        data: data
+                    });
+
+                    errback(pluginName);
+                }
+            }
+
+            for (; idx < moduleCount; idx++) {
+                moduleName = moduleNames[idx];
+
+                if (loaderIsPluginRequest(moduleName)) {
+                    pluginParts = moduleName.split(rPlugin);
+                    moduleName = pluginParts.shift();
+                    pluginArgs[moduleName] = pluginParts.join('!');
+                    onModuleLoaded = onPluginModuleLoaded;
+                }
+                else {
+                    onModuleLoaded = callback;
+                }
+
+                queue = moduleQueues[moduleName] = moduleQueues[moduleName] || [];
+
+                loaderImport(moduleName);
+
+                module = loaderGetModule(moduleName);
+
+                if (!module.isState(MODULE_LOADED) || (loaderIsBundleRequest(moduleName) && !module.isBundleState(MODULE_BUNDLE_LOADED))) {
+                    queue.push([onModuleLoaded, errback]);
+                }
+                else {
+                    onModuleLoaded(moduleName);
+                }
+            }
+        }
+
+        /**
+         * 
+         * @param {Object<string, *>} properties
+         * @param {function()} factory
+         */
+        function loaderRegister(properties, factory) {
+            var moduleName = properties.MID,
+                autoRegisterLevel = properties.autoRegLvl,
+                module = loaderGetModule(moduleName),
+                implizitDependency = module.dep,
+                bundle, dependencies;
+
+            if (!module.isRegistered()) {
+                loaderLogMessage(MSG_MODULE_REGISTERING, moduleName);
+
+                module.factory = factory;
+
+                if (autoRegisterLevel > 0 && implizitDependency) {
+                    loaderAbort(implizitDependency, true);
+
+                    loaderRegister({
+                        MID: implizitDependency,
+                        autoRegLvl: --autoRegisterLevel
+                    });
+                }
+
+                if (module.isState(MODULE_LOADING)) {
+                    global.clearTimeout(module.timeoutID);
+                    module.setState(MODULE_REGISTERED);
+                }
+                else {
+                    loaderLogMessage(MSG_MODULE_LOADED_MANUAL, moduleName);
+
+                    module.setState(MODULE_LOADED_MANUAL);
+
+                    implizitDependency && loaderImportImplizitDependency(moduleName);
+                }
+
+                if (properties.styles) {
+                    SourceManager.addStyleSheet(moduleName, module.getFullPath('css'));
+                }
+
+                bundle = loaderNormalize(properties.bundle, moduleName, true);
+
+                dependencies = loaderNormalize(properties.deps, moduleName);
+
+                module.deps = dependencies;
+                module.bundle = bundle;
+
+                if (dependencies.length) {
+                    loaderLogMessage(MSG_DEPENDENCIES_FOUND, moduleName, {
+                        deps: dependencies.join(separator)
+                    });
+                }
+
+                module.listenFor(dependencies);
+
+                if (bundle.length) {
+                    loaderLogMessage(MSG_BUNDLE_FOUND, moduleName, {
+                        bundle: bundle.join(separator)
+                    });
+                }
+            }
+            else {
+                loaderLogMessage(MSG_MODULE_ALREADY_REGISTERED, moduleName);
+            }
+        }
+
+        /**
+         * 
+         * @param {String} moduleName
+         */
+        function loaderNotify(moduleName) {
+            var queue = moduleQueues[moduleName];
+
+            loaderPushModule(moduleName);
+
+            if (queue) {
+                while (queue.length) {
+                    queue.shift()[0](moduleName);
+                }
+            }
+        }
+
+        /**
+         *
+         * @param {String} moduleName
+         * @param {Boolean} silent
+         */
+        function loaderAbort(moduleName, silent) {
+            var module = loaderGetModule(moduleName),
+                queue = (moduleQueues[moduleName] || []).concat(moduleQueues[moduleName + '.*'] || []),
+                errback, path;
+
+            if (module.isState(MODULE_LOADING)) {
+                path = SourceManager.removeScript(moduleName);
+
+                if (!silent) {
+                    loaderLogMessage(MSG_TIMEOUT, moduleName, {
+                        path: path,
+                        sec: Config.timeout
+                    });
+
+                    module.setWaiting();
+
+                    if (!loaderFindRecover(moduleName)) {
+                        while (queue.length) {
+                            errback = queue.shift()[1];
+
+                            if (sxIsFunction(errback)) {
+                                errback(moduleName);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        /**
+         *
+         * @param {String} moduleName
+         * 
+         * @return {Boolean}
+         */
+        function loaderFindRecover(moduleName) {
+            var module = loaderGetModule(moduleName),
+                foundRecover,
+                recoverModuleName,
+                recoverModuleDependency;
+
+            foundRecover = loaderGetModuleConfig(moduleName, 'recover', module.nextRecover);
+
+            if (foundRecover) {
+                recoverModuleName = foundRecover.restrict;
+
+                // This is a recover on a higher level
+                if (recoverModuleName !== moduleName) {
+                    // extract the next recovermodule
+                    recoverModuleDependency = loaderGetModule(recoverModuleName).dep;
+                    module.nextRecover = recoverModuleDependency ? recoverModuleDependency + '.*' : undef;
+
+                    // Only recover this module
+                    foundRecover.restrict = moduleName;
+                }
+
+                JAR.configure('modules', foundRecover);
+
+                // Restore module recover assoziation
+                foundRecover.restrict = recoverModuleName;
+
+                loaderLogMessage(MSG_MODULE_RECOVERING, moduleName);
+
+                loaderImport(moduleName);
+            }
+            else {
+                delete module.nextRecover;
+            }
+
+            return !!foundRecover;
+        }
+
+        /**
+         *
+         * @param {(String|Array|Object)} modules
+         * @param {String} ref
+         * @param {Boolean} isRootRef
+         *
+         * @return {Array}
+         */
+        loaderNormalize = (function loaderNormalizeSetup() {
+            function normalizeArray(modules, ref, isRootRef) {
+                var normalizedModules = [],
+                    idx = 0,
+                    moduleCount = modules.length;
+
+                for (; idx < moduleCount; idx++) {
+                    normalizedModules = normalizedModules.concat(normalize(modules[idx], ref, isRootRef));
+                }
+
+                return normalizedModules;
+            }
+
+            function normalizeObject(modules, ref, isRootRef) {
+                var normalizedModules = [],
+                    tmpRef;
+
+                for (tmpRef in modules) {
+                    if (hasOwnProp(modules, tmpRef)) {
+                        normalizedModules = normalizedModules.concat(normalize(modules[tmpRef], tmpRef, true));
+                    }
+                }
+
+                return normalizeArray(normalizedModules, ref, isRootRef);
+            }
+
+            /**
+             *
+             * @param {String} moduleName
+             * @param {String} ref
+             * @param {Boolean} isRootRef
+             *
+             * @return {Array}
+             */
+            function normalizeString(moduleName, ref, isRootRef) {
+                var dot = '.',
+                    normalizedModules = [];
+
+                if (moduleName) {
+                    if (ref && isRootRef) {
+                        if (moduleName === dot) {
+                            moduleName = dot = '';
+                        }
+                        else if (!ref.replace(/\./g, '')) {
+                            dot = '';
+                        }
+
+                        moduleName = ref + dot + moduleName;
+                    }
+                    else {
+                        while (ref && rLeadingDot.test(moduleName)) {
+                            moduleName = moduleName.replace(rLeadingDot, '');
+                            ref = loaderExtractModuleName(ref) || undef;
+                            isRootRef = !! ref;
+                        }
+
+                        isRootRef && (moduleName = normalizeString(moduleName || dot, ref, isRootRef)[0]);
+                    }
+
+                    if (rLeadingDot.test(moduleName) && !isRootRef) {
+                        loaderLogMessage(MSG_MODULE_NAME_INVALID, moduleName);
+                    }
+                    else {
+                        normalizedModules = [moduleName];
+                    }
+                }
+
+                return normalizedModules;
+            }
+
+            function normalize(modules, ref, isRootRef) {
+                var normalizer;
+
+                if (sxIsObject(modules)) {
+                    normalizer = normalizeObject;
+                }
+                else if (sxIsArray(modules)) {
+                    normalizer = normalizeArray;
+                }
+                else if (sxIsString(modules)) {
+                    normalizer = normalizeString;
+                }
+
+                return normalizer ? normalizer(modules, ref, isRootRef) : [];
+            }
+
+            return normalize;
+        })();
+
+        /**
+         *
+         * @param {String} moduleName
+         * @param {String} info
+         *
+         * @return {String}
+         */
+        function loaderGetModuleConfig(moduleName, option, skipUntil) {
+            var moduleConfigs = Config.modules,
+                nextLevel = moduleName,
+                skip = false,
+                result;
+
+            do {
+                if (!skip && moduleConfigs[moduleName]) {
+                    result = moduleConfigs[moduleName][option];
+                }
+
+                if (nextLevel) {
+                    moduleName = nextLevel + '.*';
+                    nextLevel = loaderExtractModuleName(nextLevel);
+                }
+                else {
+                    moduleName = moduleName !== globalModule ? globalModule : undef;
+                }
+
+                if (skipUntil) {
+                    skip = skipUntil !== moduleName;
+                    skip || (skipUntil = undef);
+                }
+
+            } while (!sxIsSet(result) && moduleName);
+
+            return result || '';
+        }
+
+        /**
+         *
+         * @return {String}
+         */
+        function loaderGetCurrentModuleName() {
+            return currentModuleName || globalModule;
+        }
+
+        /**
+         *
+         * @param {String} moduleName
+         */
+        function loaderSetCurrentModuleName(moduleName) {
+            currentModuleName = moduleName || undef;
+        }
+
+        /**
+         * Computes an array of all the loaded modules
+         * in the order they are dependending on each other
+         * This method can be used to create a custom build
+         * preferable with grunt and phantomjs
+         *
+         * it is possible to recompute the list
+         * this is only for aesthetics
+         * even without recomputation the list will still be valid
+         *
+         * @param {Boolean} forceRecompute
+         *
+         * @return {Array}
+         */
+        function loaderGetModulesList(forceRecompute) {
+            var moduleName;
+
+            if (forceRecompute) {
+                loaderResetModulesList();
+
+                for (moduleName in loaderModules) {
+                    hasOwnProp(loaderModules, moduleName) && loaderPushModule(moduleName);
+                }
+            }
+
+            return sortedModulesList;
+        }
+
+        function loaderResetModulesList() {
+            sortedModulesList = [];
+            alreadySortedModules = {
+                jar: true,
+                System: true
+            };
+        }
+
+        /**
+         *
+         * @param {Array} modules
+         */
+        function loaderPushModules(modules) {
+            var idx = 0,
+                moduleCount;
+
+            moduleCount = modules ? modules.length : 0;
+
+            for (; idx < moduleCount; idx++) {
+                loaderPushModule(modules[idx]);
+            }
+        }
+
+        /**
+         *
+         * @param {String} moduleName
+         */
+        function loaderPushModule(moduleName) {
+            var isBundleRequested = loaderIsBundleRequest(moduleName),
+                module = loaderGetModule(moduleName),
+                implizitDependency = module.dep,
+                dependencies = (module.deps || []).slice();
+
+            moduleName = module.name;
+            implizitDependency && dependencies.unshift(implizitDependency);
+
+            if (module.isState(MODULE_LOADED)) {
+                if (!hasOwnProp(alreadySortedModules, moduleName)) {
+                    loaderPushModules(dependencies);
+
+                    sortedModulesList.push(module.getFullPath('js'));
+                    alreadySortedModules[moduleName] = true;
+                }
+
+                if (isBundleRequested) {
+                    loaderPushModules(module.bundle);
+                }
+            }
+        }
+
+        loaderResetModulesList();
+
+        lxRegister = loaderRegister;
+        lxNormalize = loaderNormalize;
+        lxGetModuleHook = loaderGetModuleHook;
+        lxListenFor = loaderListenFor;
+
+        Loader = {
+            getCurrentModuleName: loaderGetCurrentModuleName,
+
+            getModulesList: loaderGetModulesList
+        };
+
+        return Loader;
+    })();
+
+    jar = {
+        /**
+         *
+         * @param {(Object|Array|String)} moduleNames
+         * @param {function()} callback
+         *
+         * @return {*}
+         */
+        use: function(moduleNames, callback) {
+            var idx = 0,
+                hooks = [],
+                moduleCount;
+
+            moduleNames = lxNormalize(moduleNames);
+            moduleCount = moduleNames.length;
+
+            for (; idx < moduleCount; idx++) {
+                hooks.push(lxGetModuleHook(moduleNames[idx]));
+            }
+
+            return sxIsFunction(callback) ? callback.apply(null, hooks) : hooks;
+        },
+        /**
+         *
+         * @param {(Object|Array|String)} moduleNames
+         * @param {function()} callback
+         * @param {function(string)} errback
+         * @param {function(string)} progressback
+         */
+        lazyImport: function(moduleNames, callback, errback, progressback) {
+            var hooks = [],
+                hook, counter, moduleCount;
+
+            moduleNames = lxNormalize(moduleNames);
+            counter = moduleCount = moduleNames.length;
+
+            sxIsFunction(progressback) || (progressback = undef);
+
+            lxListenFor(moduleNames, function publishLazy(moduleName, pluginData) {
+                hook = sxIsSet(pluginData) ? pluginData : lxGetModuleHook(moduleName);
+                hooks.push(hook);
+
+                counter--;
+
+                progressback && progressback(hook, 1 - counter / moduleCount);
+
+                counter || callback.apply(null, hooks);
+            }, errback);
+        },
+        /**
+         *
+         * @param {String} option
+         *
+         * @return {*}
+         */
+        getConfig: function(option) {
+            var transforms = ConfigTransforms[option],
+                value = Config[option],
+                getConfig;
+
+            if (transforms) {
+                getConfig = transforms.get;
+            }
+
+            return sxIsFunction(getConfig) ? getConfig(value, transforms.logger) : value;
+        },
+
+        getModuleName: Loader.getCurrentModuleName
+    };
+
+    lxRegister({
+        MID: 'System',
+        bundle: ['HtmlDebugger']
+    }, System);
+
+    lxRegister({
+        MID: 'jar',
+        bundle: ['async.*', 'feature.*', 'html.*', 'lang.*', 'util.*']
+    }, jar);
+
+    JAR = (function jarSetup() {
+        var jarLogger = System.getCustomLogger('JAR'),
+            importStatus = 'idle',
+            globalQueue = [],
+            globalCounter = 0,
+            baseUrl = './',
+            scripts = SourceManager.getScripts(),
+            idx = scripts.length - 1,
+            JAR, isAborted, lastAbortedModule, mainScript;
+
+        /**
+         *
+         *
+         */
+        function onImport() {
+            globalCounter--;
+
+            if (!globalCounter) {
+                while (globalQueue.length) {
+                    globalQueue.shift()[0]();
+                }
+            }
+        }
+
+        /**
+         *
+         * @param {String} abortedModuleName
+         */
+        function onAbort(abortedModuleName) {
+            isAborted = true;
+            lastAbortedModule = abortedModuleName;
+
+            globalCounter = 0;
+
+            while (globalQueue.length) {
+                globalQueue.shift()[1](abortedModuleName);
+            }
+        }
+
+        function globalErrback(abortedModuleName) {
+            jarLogger('import of "' + abortedModuleName + '" failed!');
+            importStatus = 'idle';
+        }
+
+        /**
+         *
+         * @param {(Object|String)} config
+         * @param {*} value
+         */
+        function jarConfigure(config, value) {
+            var option, transforms, setConfig, logger;
+
+            if (sxIsString(config)) {
+                transforms = ConfigTransforms[config];
+
+                if (transforms) {
+                    setConfig = transforms.set;
+                    logger = transforms.logger;
+                }
+
+                Config[config] = sxIsFunction(setConfig) ? setConfig(value, Config[config], logger) : value;
+            }
+            else if (sxIsObject(config)) {
+                for (option in config) {
+                    hasOwnProp(config, option) && jarConfigure(option, config[option]);
+                }
+            }
+        }
+
+        /**
+         * 
+         *
+         *
+         * @param {function(this:Root)} main
+         * @param {function(string)} errback
+         */
+        function jarMain(main, errback) {
+            errback = sxIsFunction(errback) ? errback : globalErrback;
+
+            function callback() {
+                if (Config.supressErrors) {
+                    try {
+                        jarLogger('start executing main...');
+                        main.call(Root);
+                    }
+                    catch (e) {
+                        jarLogger((e.stack || e.message || '\n\tError in JavaScript-code: ' + e) + '\nexiting...', 'error');
+                    }
+                    finally {
+                        jarLogger('...done executing main');
+                    }
+                }
+                else {
+                    main.call(Root);
+                }
+            }
+
+            if (isAborted) {
+                errback(lastAbortedModule);
+            }
+            else if (!globalCounter) {
+                callback();
+            }
+            else {
+                globalQueue.push([callback, errback]);
+            }
+        }
+
+        /**
+         *
+         * @param {(String|Object|Array)} moduleData
+         */
+        function jarImport(moduleData) {
+            var moduleNames;
+
+            if (isAborted) {
+                isAborted = false;
+                lastAbortedModule = undef;
+            }
+
+            if (moduleData === globalModule) {
+                moduleNames = Config.modules[globalModule].bundle || [];
+            }
+            else {
+                moduleNames = lxNormalize(moduleData);
+            }
+
+            if (importStatus === 'idle') {
+                importStatus = 'started';
+                jarLogger('started import "' + moduleNames.join(separator) + '"...');
+            }
+            else {
+                jarLogger('added import "' + moduleNames.join(separator) + '" to queue...');
+            }
+
+            globalCounter += moduleNames.length;
+
+            lxListenFor(moduleNames, onImport, onAbort);
+
+            if (importStatus === 'started') {
+                importStatus = 'importing';
+
+                jarMain(function mainStart() {
+                    jarLogger('...done importing.');
+                    jarLogger('waiting for new import...');
+                    importStatus = 'idle';
+                });
+            }
+        }
+
+        /**
+         *
+         * @param {(Object|String)} config
+         * @param {(Object|Function)} transforms
+         */
+        function jarAddConfigTransforms(config, transforms) {
+            var option;
+
+            if (sxIsString(config) && !hasOwnProp(ConfigTransforms, config)) {
+                if (sxIsFunction(transforms)) {
+                    transforms = {
+                        set: transforms
+                    };
+                }
+
+                if (sxIsObject(transforms)) {
+                    ConfigTransforms[config] = transforms;
+
+                    transforms.logger = System.getCustomLogger('Config#' + config);
+
+                    jarConfigure(Config[config]);
+                }
+            }
+            else if (sxIsObject(config)) {
+                for (option in config) {
+                    hasOwnProp(config, option) && jarAddConfigTransforms(option, config[option]);
+                }
+            }
+        }
+
+        JAR = {
+            main: jarMain,
+
+            $import: jarImport,
+
+            register: lxRegister,
+
+            configure: jarConfigure,
+
+            addConfigTransforms: jarAddConfigTransforms,
+
+            getModulesList: Loader.getModulesList,
+
+            noConflict: function() {
+                global.JAR = previousJAR;
+
+                return JAR;
+            },
+            /**
+             *
+             * @type {String}
+             */
+            version: '0.2.0'
+        };
+
+        jarAddConfigTransforms({
+            /**
+             *
+             * @param {Number} timeout
+             *
+             * @return {Number}
+             */
+            timeout: function(timeout) {
+                timeout = Number(timeout);
+
+                return timeout > 0 ? timeout : 1;
+            },
+            /**
+             *
+             * @param {String} mainScript
+             * @param {String} oldMainScript
+             *
+             * @return {String}
+             */
+            main: function(mainScript, oldMainScript) {
+                return oldMainScript || SourceManager.addScript('jar', mainScript + '.js');
+            },
+            /**
+             *
+             * @param {Boolean} parse
+             * @param {Boolean} isParsed
+             * @param {function(string, string)} logger 
+             *
+             * @return {Boolean}
+             */
+            parseOnLoad: function(parse, isParsed, logger) {
+                if (!isParsed && parse === true) {
+                    globalCounter++;
+
+                    jar.lazyImport('jar.html.Parser', function(Parser) {
+                        logger('start autoparsing document...');
+                        Parser.parseDocument();
+                        logger('...end autoparsing document');
+                        onImport();
+                    }, globalErrback);
+                }
+
+                return isParsed || parse;
+            },
+            /**
+             *
+             * @param {Boolean} makeGlobal
+             * @param {Boolean} isGlobal
+             *
+             * @return {Boolean}
+             */
+            globalAccess: function(makeGlobal, isGlobal) {
+                if (!isGlobal && makeGlobal) {
+                    JAR.mods = Root;
+                }
+                else if (isGlobal && !makeGlobal) {
+                    delete JAR.mods;
+                }
+
+                return !!makeGlobal;
             },
 
-            use: function(modules, fn) {
-                var args = [];
-                for(var i = 0; i < modules.length; i++) {
-                    var module = ModuleLoader.getModule(modules[i]).getHook();
-                    args.push(module);
-                }
-                fn.apply(null, args);
-            },
+            modules: (function moduleConfigsTransformSetup() {
+                var str = 'String',
+                    rEndSlash = /\/$/,
+                    propertyDefinitions = {
+                        baseUrl: {
+                            check: str,
 
-            lazyImport: function(modules, fn, basePath) {
-                var $this = this;
-                for( var i = 0, l = modules.length; i < l; i++) {
-                    ModuleLoader.$import(modules[i], basePath);
+                            transform: addEndSlash
+                        },
+
+                        bundle: {
+                            check: 'Set',
+
+                            transform: function bundleTransform(props, moduleName) {
+                                return lxNormalize(props, moduleName, moduleName !== globalModule);
+                            }
+                        },
+
+                        config: {
+                            check: 'Object'
+                        },
+
+                        dirPath: {
+                            check: str,
+
+                            transform: addEndSlash
+                        },
+
+                        fileName: {
+                            check: str
+                        },
+
+                        minified: {
+                            check: 'Boolean',
+
+                            transform: function minTransform(prop) {
+                                return prop ? '.min' : '';
+                            }
+                        },
+
+                        recover: {
+                            check: 'Object',
+
+                            transform: function recoverTransform(props, moduleName) {
+                                var recover = {},
+                                    prop;
+
+                                for (prop in props) {
+                                    hasOwnProp(props, prop) && (recover[prop] = props[prop]);
+                                }
+
+                                recover.restrict = moduleName;
+
+                                return recover;
+                            }
+                        },
+
+                        versionSuffix: {
+                            check: str
+                        }
+                    };
+
+                function addEndSlash(prop) {
+                    return (!prop || rEndSlash.test(prop)) ? prop : prop + slash;
                 }
-                ModuleLoader.ready(function() {
-                    $this.use(modules, fn);
+
+                function setProperty(moduleConfig, moduleName, property, propertyValue) {
+                    var propertyDefinition = propertyDefinitions[property],
+                        propertyTransform = propertyDefinition.transform,
+                        propertyCheck = 'is' + propertyDefinition.check;
+
+                    if (System[propertyCheck](propertyValue)) {
+                        moduleConfig[property] = propertyTransform ? propertyTransform(propertyValue, moduleName) : propertyValue;
+                    }
+                    else if (System.isNull(propertyValue)) {
+                        delete moduleConfig[property];
+                    }
+                }
+
+                return {
+                    /**
+                     *
+                     * @param {(Object|Array)} moduleConfigs
+                     * @param {Object<string, object>} oldModuleConfigs
+                     *
+                     * @return {Object<string, object>}
+                     */
+                    set: function(moduleConfigs, oldModuleConfigs) {
+                        var idx = 0,
+                            property, moduleConfigsLen, oldModuleConfig, modules, moduleName, mi, moduleCount;
+
+                        if (sxIsArray(moduleConfigs)) {
+                            moduleConfigsLen = moduleConfigs.length;
+
+                            for (; idx < moduleConfigsLen; idx++) {
+                                jarConfigure('modules', moduleConfigs[idx]);
+                            }
+                        }
+                        else if (sxIsObject(moduleConfigs)) {
+                            modules = lxNormalize(moduleConfigs.restrict || globalModule);
+                            moduleCount = modules.length;
+
+                            for (mi = 0; mi < moduleCount; mi++) {
+                                moduleName = modules[mi];
+                                oldModuleConfig = oldModuleConfigs[moduleName] = oldModuleConfigs[moduleName] || {};
+
+                                for (property in propertyDefinitions) {
+                                    hasOwnProp(propertyDefinitions, property) && setProperty(oldModuleConfig, moduleName, property, moduleConfigs[property]);
+                                }
+                            }
+                        }
+
+                        return oldModuleConfigs;
+                    },
+                    /**
+                     *
+                     * @param {Object} moduleConfigs
+                     *
+                     * @return {function(string)}
+                     */
+                    get: function(moduleConfigs) {
+                        // TODO maby rethink
+                        var modules = {},
+                            moduleName;
+
+                        for (moduleName in moduleConfigs) {
+                            hasOwnProp(moduleConfigs, moduleName) && (modules[moduleName] = generatePropertiesGetter(moduleConfigs[moduleName]));
+                        }
+
+                        function generatePropertiesGetter(moduleConfig) {
+                            return function propertyGetter(ruleProperty) {
+                                return moduleConfig[ruleProperty];
+                            };
+                        }
+
+                        return modules;
+                    }
+                };
+            })(),
+            /**
+             *
+             * @param {Object} environments
+             * @param {Object} oldEnvironments
+             *
+             * @return {Object}
+             */
+            environments: function(environments, oldEnvironments) {
+                var environment;
+
+                for (environment in environments) {
+                    if (hasOwnProp(environments, environment)) {
+                        oldEnvironments[environment] = environments[environment];
+                    }
+                }
+
+                return oldEnvironments;
+            },
+            /**
+             *
+             * @param {String} environment
+             * @param {String} oldEnvironment
+             *
+             * @return {String}
+             */
+            environment: function(environment, oldEnvironment) {
+                var envCallback = Config.environments[environment];
+
+                if (environment !== oldEnvironment && sxIsFunction(envCallback)) {
+                    envCallback(jarConfigure);
+                }
+
+                return environment;
+            }
+        });
+
+        jarConfigure('environments', {
+            production: function() {
+                jarConfigure({
+                    debug: false,
+
+                    modules: {
+                        minified: true
+                    },
+
+                    globalAccess: false
                 });
             },
-			
-			getConfig: function(option) {
-				return Config[option];
-			}
-        };
 
-        return jar;
-    });
+            development: function() {
+                jarConfigure({
+                    debug: true,
 
-    win.JAR = JAR;
+                    modules: {
+                        minified: false
+                    },
 
-})(window);
+                    globalAccess: true
+                });
+            }
+        });
+
+        for (; idx > -1; idx--) {
+            mainScript = scripts[idx].getAttribute('data-main');
+
+            if (mainScript) {
+                baseUrl = mainScript.substring(0, mainScript.lastIndexOf(slash)) || baseUrl;
+
+                jarConfigure('main', mainScript);
+                break;
+            }
+        }
+
+        jarConfigure('modules', {
+            baseUrl: baseUrl
+        });
+
+        global.jarconfig && jarConfigure(global.jarconfig);
+
+        return JAR;
+    })();
+
+    global.JAR = JAR;
+
+})(this);
