@@ -1,96 +1,91 @@
 JAR.register({
-    MID: "jar.lang.MixIn",
-    deps: [".Class", ".Array", ".Function"]
-}, function(Class, Arr, Fn) {
-    var lang = this, MixIn;
-    
-    MixIn = Class("MixIn", {
-		$private: {
-			_name: "",
-			
-			_toMix: null,
-			
-			_allowedClasses: null,
-			
-			_destructor: null,
-			
-			_isReceiverAllowed: function(receiver, allowedClass) {
-				var isReceiverAllowed = true;
-				if(Class.isClass(allowedClass)) {
-					if(Class.isClass(receiver)) {
-						isReceiverAllowed = receiver === allowedClass || this._isReceiverAllowed(receiver.getSuperClass(), allowedClass);
-					}
-					else {
-						isReceiverAllowed = receiver instanceof allowedClass;
-					}
-				}
+    MID: 'jar.lang.MixIn',
+    deps: ['System', '.Class', '.Object', '.Array', '.Function']
+}, function(System, Class, Obj, Arr, Fn) {
+    var MixIn = Class('MixIn', {
+        $: {
+            construct: function(mixInName, toMix, allowedClasses, destructor) {
+                this._$name = mixInName;
+                this._$toMix = Obj.from(toMix);
+                this._$allowedClasses = Arr.filter(System.isArray(allowedClasses) ? allowedClasses : [allowedClasses], Class.isClass);
+                this._$destructor = destructor;
+                this._$logger = System.getCustomLogger('MixIn "#<' + mixInName + '>"');
+            },
 
-				return isReceiverAllowed;
-			}
-		},
-		
-		$privileged: {
-			constructor: function(mixInName, toMix, allowedClasses, destructor) {
-				this._name = mixInName;
-		        this._toMix = toMix;
-		        this._allowedClasses = allowedClasses;
-		        this._destructor = destructor;
-		    },
-			
-			mixInto: function(receiver) {
-				var name = this._name, receiverAllowed = false, toMix = this._toMix, allowedClasses = this._allowedClasses;
-				
-				if(Class.isClass(receiver) || Class.isInstance(receiver)) {
-					if(!allowedClasses) {
-						receiverAllowed = true;
-					}
-					else if(lang.isArray(allowedClasses)) {
-						var iRA = Fn(this._isReceiverAllowed).remap(this);
-						Arr.fromNative(allowedClasses).each(function(allowedClass) {
-							receiverAllowed = iRA(receiver, allowedClass);
-						});
-					}
-					else {
-						receiverAllowed = this._isReceiverAllowed(receiver, allowedClasses);
-					}
-					if(receiverAllowed) {
-						if(Class.isClass(receiver)) {
-							receiver.prototype.extend(toMix);
-							receiver.addDestructor(this._destructor);
-						}
-						else {
-							receiver.extend(toMix);
-							receiver.Class.addDestructor(this._destructor, receiver);
-						}
-					}
-					else {
-						lang.debug("MixIn \"#<" + name + ">\": The given receiver " + receiver.getHash() + " is not part of the allowed Classes!", "warn");
-					}
-				}
-				else {
-					lang.debug("MixIn \"#<" + name + ">\": There is no receiver given!", "warn");
-				}
-				
-				return receiver;
-			},
-			
-			getName: function() {
-				return this._name;
-			}
-		}
-    });
-    
-	/**
-	 * Define a mixin-method that mixes the MixIn into the Class
-	 * It is available for every Class created with jar.lang.Class()
-	 * as soon as this module is loaded
-	 */
-    Class.addStatic("mixin", function(mixIn) {
-		if(mixIn instanceof MixIn) {
-			mixIn.mixInto(this);
+            mixInto: function(receiver, mixInAnyObject) {
+                var logger = this._$logger,
+                    receiverAllowed = false,
+                    isReceiverAllowed = Fn(this._$isReceiverAllowed).remap(this, receiver),
+                    toMix = this._$toMix,
+                    allowedClasses = this._$allowedClasses,
+                    destructors = this._$destructor,
+                    objectToExtend;
+
+                if (receiver) {
+                    receiverAllowed = Arr.every(allowedClasses, isReceiverAllowed);
+
+                    if (receiverAllowed) {
+                        if (Class.isClass(receiver)) {
+                            objectToExtend = receiver.prototype;
+                            receiver.addDestructor(destructors);
+                        }
+                        else if (Class.isInstance(receiver)) {
+                            objectToExtend = receiver;
+                            receiver.Class.addDestructor(destructors, receiver);
+                        }
+                        else if (mixInAnyObject && System.isObject(receiver)) {
+                            objectToExtend = receiver;
+                        }
+
+                        objectToExtend && Obj.extend(objectToExtend, toMix);
+                    }
+                    else {
+                        logger('The given receiver "' + receiver + '" is not part of the allowed Classes!', 'warn');
+                    }
+                }
+                else {
+                    logger('There is no receiver given!', 'warn');
+                }
+
+                return receiver;
+            },
+
+            getName: function() {
+                return this._$name;
+            }
+        },
+
+        _$: {
+            name: '',
+
+            logger: null,
+
+            toMix: null,
+
+            allowedClasses: null,
+
+            destructor: null,
+
+            isReceiverAllowed: function(receiver, allowedClass) {
+                return receiver === allowedClass || allowedClass.isSuperClassOf(receiver) || System.isA(receiver, allowedClass);
+            }
         }
-        return this;
     });
-    
+
+    /**
+     * Define a mixin-method that mixes the MixIn into the Class
+     * It is available for every Class created with jar.lang.Class()
+     * as soon as this module is loaded
+     */
+    function mixin(mixIn) {
+        if (System.isA(mixIn, MixIn)) {
+            mixIn.mixInto(this);
+        }
+
+        return this;
+    }
+
+    Class.addStatic('mixin', mixin);
+
     return MixIn;
 });
