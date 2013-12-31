@@ -1,106 +1,128 @@
 JAR.register({
-	MID: "jar.lang.Function",
-	deps: [".Array", ".Object"]
-}, function(Arr, Obj) {
-    var lang = this, Fn;
-	
-	Fn = function(fn) {
-        if(lang.isFunction(fn)) {
-            var selectedContext,
-				execContext,
-                predefinedArgs = [],
-                placeHolderArgs = new Arr();
+    MID: 'jar.lang.Function',
+    deps: ['..', 'System', '.Array', '.Object']
+}, function(jar, System, Arr, Obj) {
+    var lang = this,
+        fnConverter = lang.sandbox('function(fn) { return function() { return fn.apply(this, arguments);} }', '__SYSTEM__'),
+        FunctionCopy = jar.getConfig('allowProtoOverwrite') ? Function : lang.sandbox('Function', '__SYSTEM__'),
+        fromArray = Arr.from,
+        FunctionCopyProto;
 
-            var FnHandler = function() {
-				var newArgs = Arr.fromArgs(arguments),
-					args = placeHolderArgs.map(function(arg) {
-	                    return newArgs.shift() || arg;
-	                });
-	            
-                execContext = selectedContext || this;
-                return fn.apply(execContext, predefinedArgs.concat(args, newArgs));
-            };
-			
-			/**
-			 * Set a new context for the Function fn
-			 * Additional arguments are stored in predefinedArgs and are used in the call to fn
-			 * 
-			 * @param Object newContext
-			 * 
-			 */
-            FnHandler.remap = function(newContext) {
-				selectedContext = newContext;
-                FnHandler.partial.apply(null, Arr.fromArgs(arguments).slice(1));
-                return FnHandler;
-            };
-            
-            FnHandler.unmap = function() {
-				selectedContext = null;
-				return FnHandler;
-            };
-			/**
-			 * Similar to FnHandler.remap
-			 * but it returns a new FnHandler instead of only overwriting the context
-			 */
-			FnHandler.bind = FnHandler.hitch = function() {
-				return Fn(fn).remap.apply(null, arguments);
-			};
-			/**
-			 * Store the arguments in predefinedArgs
-			 * They will be used in the call to fn
-			 */
-            FnHandler.partial = function() {
-                predefinedArgs = predefinedArgs.concat(Arr.fromArgs(arguments));
-                return FnHandler;
-            };
-			/**
-			 * Store the arguments in placeholderArgs
-			 * They will be used in the call to fn as default if no other arguments are available
-			 * 
-			 * Example:
-			 * 
-			 * function(a) {
-			 *	return a || value;
-			 * }
-			 * 
-			 * This would be equal to:
-			 * 
-			 * jar.lang.Function(function(a) {
-			 *	return a;
-			 * }).preset(value);
-			 * 
-			 * This may be only useful in a few cases
-			 */
-            FnHandler.preset = function() {
-                placeHolderArgs = Arr.fromArgs(arguments);
-                return FnHandler;
-            };
-            /**
-             * Repeat the given function n times
-             * The first parameter refers to the current execution time
-             *
-             * jar.lang.Function(function(time) {
-             *	jar.lang.debug(time + " time(s) executed");
-             * }).repeat(5);
-             * 
-             * outputs:
-             * 
-             * "1 time(s) executed"
-             * "2 time(s) executed"
-             * "3 time(s) executed"
-             * "4 time(s) executed"
-             * "5 time(s) executed"
-             */
-            FnHandler.repeat = function(times) {
-				for(var i = 1; i <= times; i++) {
-					FnHandler.apply(this, [i].concat(Arr.fromArgs(arguments).slice(1)));
-				}
-            };
+    FunctionCopyProto = {
+        bind: function(context) {
+            var fnToBind = this,
+                FnLink = function() {},
+                boundArgs = fromArray(arguments, 1),
+                boundFn = fromFunction(function() {
+                    return fnToBind.apply((System.isA(this, FnLink) && context) ? this : context, boundArgs.concat(fromArray(arguments)));
+                });
 
-            return FnHandler;
+            FnLink.prototype = fnToBind.prototype;
+            boundFn.prototype = new FnLink();
+            boundFn.args = fnToBind.length;
+
+            return boundFn;
+        },
+
+        partial: function() {
+            var partialFn = this,
+                partialArgs = fromArray(arguments);
+
+            return fromFunction(function() {
+                var newArgs = fromArray(arguments),
+                    args = partialArgs.map(applyPartialArg, newArgs);
+
+                return partialFn.apply(this, args.concat(newArgs));
+            });
+        },
+        /**
+         * Store the arguments in placeholderArgs
+         * They will be used in the call to func as default if no other arguments are available
+         * 
+         * Example:
+         * 
+         * function(a) {
+         *	return a || value;
+         * }
+         * 
+         * This would be equal to:
+         * 
+         * jar.lang.Function.from(function(a) {
+         *	return a;
+         * }).preset(value);
+         *
+         * 
+         *
+         *
+         */
+        preset: function() {
+            var placeholderFn = this,
+                placeholderArgs = fromArray(arguments);
+
+            return fromFunction(function() {
+                var newArgs = fromArray(arguments),
+                    args = placeholderArgs.map(applyPlaceholderArg, newArgs);
+
+                return placeholderFn.apply(this, args.concat(newArgs));
+            });
+        },
+        /**
+         * Repeat the given function n times
+         * The last parameter refers to the current execution time
+         *
+         * jar.lang.Function.from(function(time) {
+         *	System.out(time + ' time(s) executed');
+         * }).repeat(5);
+         * 
+         * outputs:
+         * 
+         * '1 time(s) executed'
+         * '2 time(s) executed'
+         * '3 time(s) executed'
+         * '4 time(s) executed'
+         * '5 time(s) executed'
+         */
+        repeat: function(times) {
+            var args = fromArray(arguments, 1),
+                results = Arr(),
+                idx = 0;
+
+            for (; idx < times;) {
+                results[idx] = this.apply(this, args.concat(++idx));
+            }
+
+            return results;
         }
-        return fn;
     };
+
+    FunctionCopy.prototype.extend(FunctionCopyProto);
+
+    FunctionCopy.fromNative = FunctionCopy.from = fromFunction;
+
+    Obj.each(FunctionCopyProto, function(method, methodName) {
+        lang.delegate(FunctionCopy.prototype, FunctionCopy, methodName, System.isFunction);
+    });
+
+    function applyPartialArg(partialArg) {
+        return System.isNull(partialArg) ? this.shift() : partialArg;
+    }
+
+    function applyPlaceholderArg(arg) {
+        var newArgs = this,
+            newArg;
+
+        if (newArgs.length) {
+            newArg = newArgs.shift();
+
+            System.isNull(newArg) || (arg = newArg);
+        }
+
+        return arg;
+    }
     
-    return Fn;
+    function fromFunction(fn) {
+        return (System.isA(fn, FunctionCopy) || !System.isFunction(fn)) ? fn : fnConverter(fn);
+    }
+
+    return FunctionCopy;
 });

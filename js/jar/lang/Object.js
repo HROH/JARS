@@ -1,101 +1,212 @@
 JAR.register({
-	MID: "jar.lang.Object"
-}, function() {
-	var lang = this,
-		pseudoObjectProto, ObjectCopy = lang.copyNative("Object"),
-		ObjectCopyProto = ObjectCopy.prototype;
+    MID: 'jar.lang.Object',
+    deps: ['..', 'System']
+}, function(jar, System) {
+    var lang = this,
+        ObjectCopy = jar.getConfig('allowProtoOverwrite') ? Object : lang.sandbox('Object', '__SYSTEM__'),
+        ObjectCopyProto = ObjectCopy.prototype,
+        mergeLevel = 0,
+        mergedObjects, pseudoObjectProto, methodName;
 
-	pseudoObjectProto = {
-		merge: function(mergeObj, deep, keepDefault, mergedObjects) {
-			var t = this;
-			if (!(mergeObj && lang.isObject(mergeObj))) {
-				return this;
-			}
-			mergedObjects = mergedObjects || [];
-			mergedObjects.push([mergeObj, this]);
-			ObjectCopyProto.each.call(mergeObj, function(prop, value) {
-				if (lang.isObject(value) && deep) {
-					var merged = false,
-						i = 0,
-						l = mergedObjects.length,
-						mergedObj;
+    pseudoObjectProto = {
+        merge: function(mergeObj, deep, keepDefault) {
+            var obj = this,
+                prop;
 
-					while (i < l && !merged) {
-						mergedObj = mergedObjects[i];
-						merged = mergedObj[0] === value && mergedObj[1];
-						i++;
-					}
+            mergeLevel++ || (mergedObjects = []);
+            mergedObjects.push([mergeObj, obj]);
 
-					if (!merged) {
-						merged = ObjectCopyProto.merge.call(lang.isObject(t[prop]) ? t[prop] : {}, value, deep, keepDefault, mergedObjects);
-						mergedObjects.push([value, merged]);
-					}
-					t[prop] = merged;
-				}
-				else {
-					if (!(keepDefault && ObjectCopyProto.hasOwn.call(t, prop, value))) {
-						t[prop] = value;
-					}
-				}
-			});
-			return this;
-		},
+            for (prop in mergeObj) {
+                mergeValue(obj, mergeObj, prop, deep, keepDefault);
+            }
 
-		each: function(callback) {
-			for (var prop in this) {
-				if (ObjectCopyProto.hasOwn.call(this, prop, this[prop])) {
-					callback(prop, this[prop]);
-				}
-			}
-		},
+            --mergeLevel || (mergedObjects = null);
 
-		map: function(callback) {
-			var mapObj = new ObjectCopy();
-			ObjectCopyProto.each.call(this, function(prop, value) {
-				mapObj[prop] = callback(prop, value);
-			});
-			return mapObj;
-		},
+            return this;
+        },
 
-		extend: function(extObj, deep) {
-			return ObjectCopyProto.merge.call(this, extObj, deep, true);
-		},
+        each: function(callback, objectScope) {
+            var obj = this,
+                prop;
 
-		copy: function(deep) {
-			var copy = new ObjectCopy();
-			ObjectCopyProto.each.call(this, function(prop, value) {
-				if (deep && lang.isObject(value)) {
-					value = ObjectCopyProto.copy.call(value, deep);
-				}
-				copy[prop] = value;
-			});
-			return copy;
-		},
+            for (prop in obj) {
+                if (callHasOwn(obj, [prop])) {
+                    callback.call(objectScope, obj[prop], prop, obj);
+                }
+            }
+        },
 
-		hasOwn: function(prop, value) {
-			return (ObjectCopyProto.hasOwnProperty.call(this, prop)) && (!(prop in pseudoObjectProto) || value !== pseudoObjectProto[prop]);
-		}
-	};
+        size: function() {
+            return callReduce(this, [countProperties, 0]);
+        },
 
-	ObjectCopy.fromNative = function(nativeObj) {
-		nativeObj = nativeObj || {};
-		var prop, newObj;
+        map: function(callback, objectScope) {
+            var obj = this,
+                mapObj = new ObjectCopy(),
+                prop;
 
-		if (nativeObj instanceof ObjectCopy) {
-			newObj = nativeObj;
-		}
-		else if (lang.isObject(nativeObj)) {
-			newObj = new ObjectCopy().merge(nativeObj);
-		}
-		return newObj;
-	};
-        
+            for (prop in obj) {
+                if (callHasOwn(obj, [prop])) {
+                    mapObj[prop] = callback.call(objectScope, obj[prop], prop, obj);
+                }
+            }
+
+            return mapObj;
+        },
+
+        extend: function(extObj, deep) {
+            return callMerge(this, [extObj, deep, true]);
+        },
+
+        copy: function(deep) {
+            var copy = new ObjectCopy();
+
+            copy.extend(this, deep);
+
+            return copy;
+        },
+
+        hasOwn: ObjectCopyProto.hasOwnProperty,
+
+        reduce: function(callback, initialValue) {
+            var object = this,
+                isValueSet = false,
+                prop,
+                ret;
+
+            if (arguments.length > 1) {
+                ret = initialValue;
+                isValueSet = true;
+            }
+
+            for (prop in object) {
+                if (callHasOwn(object, [prop])) {
+                    if (isValueSet) {
+                        ret = callback(ret, object[prop], prop, object);
+                    }
+                    else {
+                        ret = object[prop];
+                        isValueSet = true;
+                    }
+                }
+            }
+
+            return ret;
+        },
+
+        transpose: function() {
+            return callReduce(this, [transpose, new ObjectCopy()]);
+        },
+
+        keys: function() {
+            return callReduce(this, [pushKey, []]);
+        },
+
+        values: function() {
+            return callReduce(this, [pushValue, []]);
+        }
+    };
+
+    ObjectCopy.from = ObjectCopy.fromNative = fromObject;
+
     /**
      * Extend jar.lang.Object with some useful methods
      */
-	for (var prop in pseudoObjectProto) {
-		ObjectCopyProto[prop] = pseudoObjectProto[prop];
-	}
+    for (methodName in pseudoObjectProto) {
+        ObjectCopyProto[methodName] = pseudoObjectProto[methodName];
+        lang.delegate(pseudoObjectProto, ObjectCopy, methodName);
+    }
 
-	return ObjectCopy;
+    function fromObject(object, deep) {
+        return (System.isA(object, ObjectCopy) || !System.isObject(object)) ? object : new ObjectCopy().extend(object, deep);
+    }
+
+    function mergeValue(obj, mergeObj, prop, deep, keepDefault) {
+        var isOwn, oldValue, newValue, valueToMerge, isOldValueObject;
+
+        if (callHasOwn(mergeObj, [prop])) {
+            valueToMerge = mergeObj[prop];
+            isOwn = callHasOwn(obj, [prop]);
+            keepDefault = isOwn ? keepDefault : false;
+            oldValue = isOwn ? obj[prop] : null;
+
+            isOldValueObject = System.isObject(oldValue);
+
+            if (deep && (isOldValueObject || !keepDefault) && System.isObject(valueToMerge)) {
+                newValue = mergeDeepValue(isOldValueObject ? oldValue : {}, valueToMerge, keepDefault);
+            }
+            else {
+                newValue = keepDefault ? oldValue : valueToMerge;
+            }
+
+            obj[prop] = newValue;
+        }
+    }
+
+    function mergeDeepValue(oldValue, valueToMerge, keepDefault) {
+        return getAlreadyMergedValue(valueToMerge) || callMerge(oldValue, [valueToMerge, true, keepDefault]);
+    }
+
+    function getAlreadyMergedValue(valueToMerge) {
+        var idx = 0,
+            mergedLen = mergedObjects.length,
+            mergedValue, mergedObjectData;
+
+        while (idx < mergedLen && !mergedValue) {
+            mergedObjectData = mergedObjects[idx++];
+            mergedValue = mergedObjectData[0] === valueToMerge && mergedObjectData[1];
+        }
+
+        return mergedValue;
+    }
+
+    function countProperties(size) {
+        return ++size;
+    }
+
+    function transpose(object, value, prop) {
+        object[value] = prop;
+
+        return object;
+    }
+
+    function pushKey(array, value, prop) {
+        array[array.length] = prop;
+
+        return array;
+    }
+
+    function pushValue(array, value) {
+        array[array.length] = value;
+
+        return array;
+    }
+
+    function callReduce(object, withData) {
+        return callMethodOn(object, 'reduce', withData);
+    }
+
+    function callHasOwn(object, withData) {
+        return callMethodOn(object, 'hasOwn', withData);
+    }
+    
+    function callMerge(object, withData) {
+        return callMethodOn(object, 'merge', withData);
+    }
+
+    function callMethodOn(object, methodName, args) {
+        var callingObject;
+
+        if (object[methodName] === pseudoObjectProto[methodName]) {
+            callingObject = object;
+        }
+        else {
+            args.unshift(object);
+            callingObject = ObjectCopy;
+        }
+
+        return callingObject[methodName].apply(callingObject, args);
+    }
+
+    return ObjectCopy;
 });

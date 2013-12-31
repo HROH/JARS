@@ -15,7 +15,7 @@ JAR.register({
             mixInto: function(receiver, mixInAnyObject) {
                 var logger = this._$logger,
                     receiverAllowed = false,
-                    isReceiverAllowed = Fn(this._$isReceiverAllowed).remap(this, receiver),
+                    isReceiverAllowed = this._$isReceiverAllowed.bind(this, receiver),
                     toMix = this._$toMix,
                     allowedClasses = this._$allowedClasses,
                     destructors = this._$destructor,
@@ -66,9 +66,9 @@ JAR.register({
 
             destructor: null,
 
-            isReceiverAllowed: function(receiver, allowedClass) {
+            isReceiverAllowed: Fn.from(function(receiver, allowedClass) {
                 return receiver === allowedClass || allowedClass.isSuperClassOf(receiver) || System.isA(receiver, allowedClass);
-            }
+            })
         }
     });
 
