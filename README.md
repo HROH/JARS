@@ -8,9 +8,9 @@ What is JAR? It is a self-contained JavaScript library that consists of its own 
 Usage
 ---------
 To use JAR, you only have to write the following line in the head of your HTML-document.
-
-    <script type="text/javascript" src="path/to/jar.js"></script>
-
+```html
+<script type="text/javascript" src="path/to/jar.js"></script>
+```
 That's it! You are done!  
 You can now play with JAR in an inline-script or a custom js-file.
 
@@ -30,69 +30,70 @@ There are two kinds of dependencies - implizit dependencies like *jar* for *jar.
 Some examples for explizit dependencies:
 
  * String:
+```js
+        JAR.register({
+            MID: "someBundle.Module",
+            deps: "anotherBundle.Module"
+        }, function(anotherBundleModule) { // has one dependency in another bundle
+            var someBundle = this; // implizit
+            ...
+        });
 
-            JAR.register({
-                MID: "someBundle.Module",
-                deps: "anotherBundle.Module"
-            }, function(anotherBundleModule) { // has one dependency in another bundle
-                var someBundle = this; // implizit
-                ...
-            });
+        JAR.register({
+            MID: "someBundle.Module",
+            deps: "anotherBundle.*"
+        }, function(anotherBundle) { // has a bundle as dependency
+            ...
+        });
 
-            JAR.register({
-                MID: "someBundle.Module",
-                deps: "anotherBundle.*"
-            }, function(anotherBundle) { // has a bundle as dependency
-                ...
-            });
-
-            JAR.register({
-                MID: "someBundle.Module",
-                deps: ".Module2"
-            }, function(Module2) { // has one dependency in the same bundle
-                var someBundle = this;
-                someBundle.Module2 === Module2 // true
-                ...
-            });
-
+        JAR.register({
+            MID: "someBundle.Module",
+            deps: ".Module2"
+        }, function(Module2) { // has one dependency in the same bundle
+            var someBundle = this;
+            someBundle.Module2 === Module2 // true
+            ...
+        });
+```
  * Array:
+```js
+        JAR.register({
+            MID: "someBundle.Module",
+            deps: ["anotherBundle.Module", "anotherBundle.Module2"]
+        }, function(anotherBundleModule, anotherBundleModule2) { // has more dependencies in another bundle
+            ...
+        });
 
-            JAR.register({
-                MID: "someBundle.Module",
-                deps: ["anotherBundle.Module", "anotherBundle.Module2"]
-            }, function(anotherBundleModule, anotherBundleModule2) { // has more dependencies in another bundle
-                ...
-            });
-
-            JAR.register({
-                MID: "someBundle.Module",
-                deps: [".Module2", ".Module3"]
-            }, function(Module2, Module3) { // has more dependencies in the same bundle
-                ...
-            });
-
+        JAR.register({
+            MID: "someBundle.Module",
+            deps: [".Module2", ".Module3"]
+        }, function(Module2, Module3) { // has more dependencies in the same bundle
+            ...
+        });
+```
  * Object:
+```js
+        JAR.register({
+            MID: "someBundle.Module",
+            deps: {anotherBundle: [".", "Module", "Module2"]}
+        }, function(anotherBundle, anotherBundleModule, anotherBundleModule2) { // has more dependencies in another bundle
+            ...
+        });
+```
 
-            JAR.register({
-                MID: "someBundle.Module",
-                deps: {anotherBundle: [".", "Module", "Module2"]}
-            }, function(anotherBundle, anotherBundleModule, anotherBundleModule2) { // has more dependencies in another bundle
-                ...
-            });
-
-The different dependency-declarations can be combined like in the last example (*Object*, *Array*)
+The different dependency-declarations can be combined like in the last example ( *Object*, *Array* )
 
 Configuration
 -------------------
 You can configure JAR through this line,  
-
-    JAR.configure(options);
-
+```js
+JAR.configure(options);
+```
 where <code>options</code> includes one of the following options:
 
-* basePath (the path to where the jar folder lies - default: *js*)
+* basePath (the path to where the jar folder is located - default: *js*)
 * bundle (an Array of modules to import  with <code>JAR.$import("*");</code> - default: [])
-* cache (*false* prevents caching of the files - default: *true*)
+* cache ( *false* prevents caching of the files - default: *true*)
 * debug (turn debugging on or off - default: *false*)
 * debugMode (stdout if debugging is turned on *console/html* - default: *console*)
 * globalAccess (root-modules can be used in the global namespace. This may be useful in developement - default: *false*)
@@ -102,68 +103,68 @@ You can also define custom configurations that can be read via <code>jar.getConf
 
 Examples
 --------------
+```js
+JAR.$import("jar.lang.Class"); // import the module
 
-    JAR.$import("jar.lang.Class"); // import the module
-    
-    JAR.main(function() { // waits for all the modules to be loaded
-        var Class = this.jar.lang.Class; // this !== window
-        var RO = Class("ReadOnly", { // create a Class
-            $privileged: { // privileged methods have access to private methods/properties
-                constructor: function(value) {
-                    value && (this._value = value);
-                },
-                
-                getValue: function() { // can get value
-                    return this._value;
-                }
+JAR.main(function() { // waits for all the modules to be loaded
+    var Class = this.jar.lang.Class; // this !== window
+    var RO = Class("ReadOnly", { // create a Class
+        $privileged: { // privileged methods have access to private methods/properties
+            constructor: function(value) {
+                value && (this._value = value);
             },
             
-            $private: { // not accessible from the outside
-                _value: "default"
+            getValue: function() { // can get value
+                return this._value;
             }
-        });
-
-        var RW = Class("ReadWrite", {
-            $public: { // doesn't need private access
-                constructor: function(value) {
-                    this.$super(value); // calls the constructor of the SuperClass - this.$super is only available if the method is overwritten
-                }
-            },
-
-            $privileged: {
-                setValue: function(value) { // can set value
-                    this._value = value;
-                }
-            }
-        }).extendz(RO); // inherit from RO
-
-        var ro = new RO();
-        ro.getValue() // "default"
-        ro.setValue("custom") // error
-        ro._value // undefined
-
-        var rw = new RW("notDefault");
-        rw.getValue() // "notDefault"
-        rw.setValue("custom")
-        rw.getValue() // "custom"
-        rw._value // undefined
-
-        ro.constructor === RO // false - important!
-        ro.Class === RO // true
-        ro.getHash() // unique hash like "Object #<ReadOnly#...>"
-        RO.getClassName() // "ReadOnly"
-        RO.getHash() // unique hash like "Class #<ReadOnly#...>"
-        RO.getSubClasses()[0] === RW // true
-        RW.getSuperClass() === RO // true
-        RO.getInstances()[0] === ro // true
-        RO.getInstances()[1] === rw // true - inheritance
-        RW.getInstances()[0] === rw // true
-        ro instanceof RO // true
-        ro instanceof RW // false
-        rw instanceof RO // true - inheritance
-        rw instanceof RW // true
+        },
+        
+        $private: { // not accessible from the outside
+            _value: "default"
+        }
     });
-    
+
+    var RW = Class("ReadWrite", {
+        $public: { // doesn't need private access
+            constructor: function(value) {
+                this.$super(value); // calls the constructor of the SuperClass - this.$super is only available if the method is overwritten
+            }
+        },
+
+        $privileged: {
+            setValue: function(value) { // can set value
+                this._value = value;
+            }
+        }
+    }).extendz(RO); // inherit from RO
+
+    var ro = new RO();
+    ro.getValue() // "default"
+    ro.setValue("custom") // error
+    ro._value // undefined
+
+    var rw = new RW("notDefault");
+    rw.getValue() // "notDefault"
+    rw.setValue("custom")
+    rw.getValue() // "custom"
+    rw._value // undefined
+
+    ro.constructor === RO // false - important!
+    ro.Class === RO // true
+    ro.getHash() // unique hash like "Object #<ReadOnly#...>"
+    RO.getClassName() // "ReadOnly"
+    RO.getHash() // unique hash like "Class #<ReadOnly#...>"
+    RO.getSubClasses()[0] === RW // true
+    RW.getSuperClass() === RO // true
+    RO.getInstances()[0] === ro // true
+    RO.getInstances()[1] === rw // true - inheritance
+    RW.getInstances()[0] === rw // true
+    ro instanceof RO // true
+    ro instanceof RW // false
+    rw instanceof RO // true - inheritance
+    rw instanceof RW // true
+});
+```
 Copyright and licensing
 ----------------------------------
 
