@@ -2,16 +2,21 @@ JAR.register({
     MID: 'jar.lang.Interface',
     deps: ['System', '.Class', '.Object', '.Array']
 }, function(System, Class, Obj, Arr) {
-    var Interface;
-    // TODO remove getMethods()
-    // maybe possible after rewriting jar.lang.Class to accept public (+), privileged ($), private (_) and protected (_$) and differentiating access between Classes
-    Interface = Class('Interface', {
+    'use strict';
+
+    var Interface = Class('Interface', {
         _$: {
             name: '',
 
             methods: null,
 
-            logger: null
+            logger: null,
+
+            addMethod: function(method) {
+                var methods = this._$methods;
+
+                methods.some(checkMethodExists, method) || methods.push(method);
+            }
         },
 
         $: {
@@ -21,22 +26,18 @@ JAR.register({
                 this._$logger = System.getCustomLogger('Interface "#<' + iFaceName + '>"');
             },
 
-            extendz: function(iface) {
-                var methods = this._$methods;
+            extendz: function(superInterface) {
+                var iface = this;
 
-                if (System.isA(iface, Interface)) {
-                    iface.getMethods().each(addSuperInterfaceMethod, methods);
+                if (System.isA(superInterface, Interface)) {
+                    iface.$proxy(superInterface, proxiedGetMethods).each(iface._$addMethod, iface);
                 }
 
-                return this;
+                return iface;
             },
 
             getName: function() {
                 return this._$name;
-            },
-
-            getMethods: function() {
-                return Arr.from(this._$methods);
             },
 
             isImplementedBy: function(object, checkAnyObject) {
@@ -47,7 +48,7 @@ JAR.register({
                     notImplementedMethods;
 
                 if (objectToCheck) {
-                    notImplementedMethods = methods.filter(isMethodImplemented, objectToCheck).map(transformMethodData);
+                    notImplementedMethods = methods.filter(isMethodNotImplemented, objectToCheck).map(transformMethodData);
 
                     if (notImplementedMethods.length) {
                         logger((isObject ? 'The given object' : '"' + object.getHash() + '"') + ' must implement the methods: "' + notImplementedMethods.join('", "') + '" !', 'error');
@@ -63,19 +64,19 @@ JAR.register({
         }
     });
 
-    function addSuperInterfaceMethod(superMethod) {
-        this.some(checkMethodExists, superMethod) || this.push(superMethod);
+    function proxiedGetMethods() {
+        return this._$methods;
     }
 
     function checkMethodExists(method) {
         return method[0] === this[0];
     }
 
-    function isMethodImplemented(methodData) {
+    function isMethodNotImplemented(methodData) {
         var methodToCheck = this[methodData[0]],
             args = methodData[1];
 
-        return !System.isFunction(methodToCheck) || (System.isNumber(args) && !(args === methodToCheck.length || args === methodToCheck.args));
+        return !System.isFunction(methodToCheck) || (System.isNumber(args) && !(args === methodToCheck.length || args === methodToCheck.arity));
     }
 
     function transformMethodData(methodData) {
