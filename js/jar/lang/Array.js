@@ -1,21 +1,92 @@
 JAR.register({
     MID: 'jar.lang.Array',
-    deps: ['..', 'System', '.Object']
-}, function(jar, System, Obj) {
-    var lang = this,
-        TE = TypeError,
-        ArrayCopy = jar.getConfig('allowProtoOverwrite') ? Array : lang.sandbox('Array', '__SYSTEM__'),
-        ArrayCopyProto,
-        isArrayLike = System.isArrayLike;
+    deps: 'System'
+}, function(System) {
+    'use strict';
 
-    ArrayCopyProto = {
+    var lang = this,
+        isArrayLike = System.isArrayLike,
+        ArrayCopy;
+
+    /**
+     * Extend jar.lang.Array with some useful methods
+     * If a native implementation exists it will be used instead
+     */
+    ArrayCopy = lang.extendNativeType('Array', {
+        contains: function(searchElement) {
+            return lang.callNativeTypeMethod(ArrayCopy, 'indexOf', this, [searchElement]) !== -1;
+        },
+
+        each: function(callback, array) {
+            callEach(this, [callback, array]);
+        },
+
+        every: function(callback, context) {
+            var arr = this,
+                len = arr.length >>> 0,
+                idx = 0;
+
+            lang.throwErrorIfNotSet('Array', arr, 'every');
+
+            lang.throwErrorIfNoFunction(callback);
+
+            for (; idx < len; idx++) {
+                if (idx in arr && !callback.call(context, arr[idx], idx, arr)) {
+                    return false;
+                }
+            }
+
+            return true;
+        },
+
+        filter: function(callback, context) {
+            var arr = this,
+                ret = new ArrayCopy();
+
+            lang.throwErrorIfNotSet('Array', arr, 'filter');
+
+            lang.throwErrorIfNoFunction(callback);
+
+            callEach(arr, [function(item, idx) {
+                if (callback.call(context, item, idx, arr)) {
+                    ret.push(item);
+                }
+            }]);
+
+            return ret;
+        },
+
+        find: function() {
+
+        },
+
+        findIndex: function() {
+
+        },
+
+        forEach: function(callback, context) {
+            var arr = this,
+                idx = 0,
+                len = arr.length >>> 0;
+
+            lang.throwErrorIfNotSet('Array', arr, 'forEach');
+
+            lang.throwErrorIfNoFunction(callback);
+
+            while (idx < len) {
+                if (idx in arr) {
+                    callback.call(context, arr[idx], idx++, arr);
+                }
+            }
+        },
+
         indexOf: function(searchElement, fromIndex) {
             var arr = this,
                 len = arr.length >>> 0,
                 ret = -1,
                 idx;
 
-            throwErrorIfNotSet(arr);
+            lang.throwErrorIfNotSet('Array', arr, 'indexOf');
 
             if (len > 0) {
                 idx = getFromIndex(fromIndex, 0, len);
@@ -37,7 +108,7 @@ JAR.register({
                 ret = -1,
                 idx;
 
-            throwErrorIfNotSet(arr);
+            lang.throwErrorIfNotSet('Array', arr, 'lastIndexOf');
 
             if (len > 0) {
                 idx = getFromIndex(fromIndex, len - 1, len);
@@ -53,76 +124,39 @@ JAR.register({
             return ret;
         },
 
-        every: function(callback, arrScope) {
-            var arr = this,
-                len = arr.length >>> 0,
-                idx = 0;
-
-            throwErrorIfNotSet(arr);
-
-            throwErrorIfNoFunction(callback);
-
-            for (; idx < len; idx++) {
-                if (idx in arr && !callback.call(arrScope, arr[idx], idx, arr)) {
-                    return false;
-                }
-            }
-
-            return true;
-        },
-
-        some: function(callback, arrScope) {
-            var arr = this,
-                len = arr.length >>> 0,
-                idx = 0;
-
-            throwErrorIfNotSet(arr);
-
-            throwErrorIfNoFunction(callback);
-
-            for (; idx < len; idx++) {
-                if (idx in arr && callback.call(arrScope, arr[idx], idx, arr)) {
-                    return true;
-                }
-            }
-
-            return false;
-        },
-
-        forEach: function(callback, arrScope) {
-            var arr = this,
-                idx = 0,
-                len = arr.length >>> 0;
-
-            throwErrorIfNotSet(arr);
-
-            throwErrorIfNoFunction(callback);
-
-            while (idx < len) {
-                callback.call(arrScope, arr[idx], idx, arr);
-                idx++;
-            }
-        },
-
-        each: function(callback, array) {
-            ArrayCopy.forEach(this, callback, array);
-        },
-
-        filter: function(callback, arrScope) {
+        map: function(callback, context) {
             var arr = this,
                 ret = new ArrayCopy();
 
-            throwErrorIfNotSet(arr);
+            lang.throwErrorIfNotSet('Array', arr, 'map');
 
-            throwErrorIfNoFunction(callback);
+            lang.throwErrorIfNoFunction(callback);
 
-            ArrayCopy.each(arr, function(item, idx) {
-                if (callback.call(arrScope, item, idx, arr)) {
-                    ret.push(item);
-                }
-            });
+            callEach(arr, [function(item, idx) {
+                ret.push(callback.call(context, item, idx, arr));
+            }]);
 
             return ret;
+        },
+
+        merge: function(array) {
+            if (isArrayLike(array)) {
+                this.push.apply(this, array);
+            }
+
+            return this;
+        },
+
+        mergeUnique: function(array) {
+            var arr = this;
+
+            callEach(array, [function(item) {
+                if (arr.indexOf(item) === -1) {
+                    arr.push(item);
+                }
+            }]);
+
+            return this;
         },
 
         reduce: function(callback, initialValue) {
@@ -132,9 +166,9 @@ JAR.register({
                 idx = 0,
                 ret;
 
-            throwErrorIfNotSet(arr);
+            lang.throwErrorIfNotSet('Array', arr, 'reduce');
 
-            throwErrorIfNoFunction(callback);
+            lang.throwErrorIfNoFunction(callback);
 
             if (arguments.length > 1) {
                 ret = initialValue;
@@ -153,7 +187,7 @@ JAR.register({
                 }
             }
 
-            throwErrorIfNoValueSet(isValueSet);
+            lang.throwErrorIfNoValueSet('array', isValueSet);
 
             return ret;
         },
@@ -165,9 +199,9 @@ JAR.register({
                 idx = len - 1,
                 ret;
 
-            throwErrorIfNotSet(arr);
+            lang.throwErrorIfNotSet('Array', arr, 'reduceRight');
 
-            throwErrorIfNoFunction(callback);
+            lang.throwErrorIfNoFunction(callback);
 
             if (arguments.length > 1) {
                 ret = initialValue;
@@ -186,87 +220,71 @@ JAR.register({
                 }
             }
 
-            throwErrorIfNoValueSet(isValueSet);
+            lang.throwErrorIfNoValueSet('array', isValueSet);
 
             return ret;
-        },
-
-        map: function(callback, arrScope) {
-            var arr = this,
-                ret = new ArrayCopy();
-
-            throwErrorIfNotSet(arr);
-
-            throwErrorIfNoFunction(callback);
-
-            ArrayCopy.each(arr, function(item, idx) {
-                ret.push(callback.call(arrScope, item, idx, arr));
-            });
-
-            return ret;
-        },
-
-        merge: function(array) {
-            if (isArrayLike(array)) {
-                this.push.apply(this, array);
-            }
-
-            return this;
-        },
-
-        mergeUnique: function(array) {
-            var arr = this;
-
-            ArrayCopy.each(array, function(item) {
-                if (arr.indexOf(item) === -1) {
-                    arr.push(item);
-                }
-            });
-
-            return this;
         },
 
         removeAll: function(array) {
             var arr = this;
 
-            ArrayCopy.each(array, function(item) {
+            callEach(array, [function(item) {
                 var index = arr.indexOf(item);
 
-                if (index != -1) {
+                while (index != -1) {
                     arr.splice(index, 1);
+                    index = arr.indexOf(item);
                 }
-            });
+            }]);
 
             return this;
-        }
-    };
+        },
 
-    /**
-     * Extend jar.lang.Array with some useful methods
-     * If a native implementation exists it will be used instead
-     */
-    ArrayCopy.prototype.extend(ArrayCopyProto);
+        some: function(callback, context) {
+            var arr = this,
+                len = arr.length >>> 0,
+                idx = 0;
 
-    ArrayCopy.extend({
+            lang.throwErrorIfNotSet(arr, 'some');
+
+            lang.throwErrorIfNoFunction(callback);
+
+            for (; idx < len; idx++) {
+                if (idx in arr && callback.call(context, arr[idx], idx, arr)) {
+                    return true;
+                }
+            }
+
+            return false;
+        },
+        // add some sugar (example: jar.lang.Array.push(arrayLike, value1, value2, ...) )
+        concat: true,
+
+        join: true,
+
+        pop: true,
+
+        push: true,
+
+        reverse: true,
+
+        shift: true,
+
+        slice: true,
+
+        sort: true,
+
+        splice: true,
+
+        unshift: true
+    }, {
         from: fromArray,
-        
+
         fromNative: fromArray,
 
         fromArguments: fromArray,
 
-        fromArrayLike: fromArray,
-
-        inArray: function(needle, hayStack) {
-            if (isArrayLike(hayStack)) {
-                return this.indexOf(hayStack, needle);
-            }
-
-            return -1;
-        }
-    });
-
-    Obj.each(ArrayCopyProto, function(method, methodName) {
-        lang.delegate(ArrayCopy.prototype, ArrayCopy, methodName, isArrayLike);
+        fromArrayLike: fromArray
     });
 
     function fromArray(array, offset) {
@@ -306,22 +324,8 @@ JAR.register({
         return idx;
     }
 
-    function throwErrorIfNotSet(obj) {
-        if (!System.isSet(obj)) {
-            throw new TE('Array.prototype.reduce called on null or undefined');
-        }
-    }
-
-    function throwErrorIfNoFunction(callback) {
-        if (!System.isFunction(callback)) {
-            throw new TE(callback + ' is not a function');
-        }
-    }
-
-    function throwErrorIfNoValueSet(isValueSet) {
-        if (!isValueSet) {
-            throw new TE('Reduce of empty array with no initial value');
-        }
+    function callEach(array, withData) {
+        return lang.callNativeTypeMethod(ArrayCopy, 'forEach', array, withData);
     }
 
     return ArrayCopy;

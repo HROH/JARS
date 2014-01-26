@@ -1,37 +1,51 @@
 JAR.register({
     MID: 'jar.lang.Object',
-    deps: ['..', 'System']
-}, function(jar, System) {
+    deps: ['System', '.Array']
+}, function(System, Arr) {
+    'use strict';
+
     var lang = this,
-        ObjectCopy = jar.getConfig('allowProtoOverwrite') ? Object : lang.sandbox('Object', '__SYSTEM__'),
-        ObjectCopyProto = ObjectCopy.prototype,
         mergeLevel = 0,
-        mergedObjects, pseudoObjectProto, methodName;
+        mergedObjects = Arr(),
+        ObjectCopy;
 
-    pseudoObjectProto = {
-        merge: function(mergeObj, deep, keepDefault) {
-            var obj = this,
-                prop;
+    /**
+     * Extend jar.lang.Object with some useful methods
+     */
+    ObjectCopy = lang.extendNativeType('Object', {
+        merge: function() {
+            var args = Arr.from(arguments),
+                object = this,
+                deep, keepDefault;
 
-            mergeLevel++ || (mergedObjects = []);
-            mergedObjects.push([mergeObj, obj]);
-
-            for (prop in mergeObj) {
-                mergeValue(obj, mergeObj, prop, deep, keepDefault);
+            while (!System.isSet(keepDefault) && isDeepOrKeepDefault(args[args.length - 1])) {
+                keepDefault = deep;
+                deep = args.pop() || false;
             }
 
-            --mergeLevel || (mergedObjects = null);
+            args.each(function(mergeObject) {
+                var prop;
 
-            return this;
+                mergeLevel++;
+                mergedObjects.push([mergeObject, object]);
+
+                for (prop in mergeObject) {
+                    mergeValue(object, mergeObject, prop, deep, keepDefault);
+                }
+
+                --mergeLevel || (mergedObjects = Arr());
+            });
+
+            return object;
         },
 
-        each: function(callback, objectScope) {
-            var obj = this,
+        each: function(callback, context) {
+            var object = this,
                 prop;
 
-            for (prop in obj) {
-                if (callHasOwn(obj, [prop])) {
-                    callback.call(objectScope, obj[prop], prop, obj);
+            for (prop in object) {
+                if (callHasOwn(object, [prop])) {
+                    callback.call(context, object[prop], prop, object);
                 }
             }
         },
@@ -40,33 +54,50 @@ JAR.register({
             return callReduce(this, [countProperties, 0]);
         },
 
-        map: function(callback, objectScope) {
-            var obj = this,
-                mapObj = new ObjectCopy(),
+        map: function(callback, context) {
+            var object = this,
+                mappedObject = new ObjectCopy(),
                 prop;
 
-            for (prop in obj) {
-                if (callHasOwn(obj, [prop])) {
-                    mapObj[prop] = callback.call(objectScope, obj[prop], prop, obj);
+            for (prop in object) {
+                if (callHasOwn(object, [prop])) {
+                    mappedObject[prop] = callback.call(context, object[prop], prop, object);
                 }
             }
 
-            return mapObj;
+            return mappedObject;
         },
 
-        extend: function(extObj, deep) {
-            return callMerge(this, [extObj, deep, true]);
+        extend: function() {
+            var args = Arr.from(arguments),
+                argsLen = args.length;
+
+            isDeepOrKeepDefault(args[argsLen - 1]) || (args[argsLen++] = false);
+
+            args[argsLen] = true;
+
+            return callMerge(this, args);
         },
 
         copy: function(deep) {
-            var copy = new ObjectCopy();
-
-            copy.extend(this, deep);
-
-            return copy;
+            return (new ObjectCopy()).extend(this, deep);
         },
 
-        hasOwn: ObjectCopyProto.hasOwnProperty,
+        filter: function(callback, context) {
+            var object = this,
+                filteredObject = new ObjectCopy(),
+                prop;
+
+            for (prop in object) {
+                if (callHasOwn(object, [prop]) && callback.call(context, object[prop], prop, object)) {
+                    filteredObject[prop] = object[prop];
+                }
+            }
+
+            return filteredObject;
+        },
+
+        hasOwn: Object.prototype.hasOwnProperty,
 
         reduce: function(callback, initialValue) {
             var object = this,
@@ -105,20 +136,18 @@ JAR.register({
         values: function() {
             return callReduce(this, [pushValue, []]);
         }
-    };
+    }, {
+        from: fromObject,
 
-    ObjectCopy.from = ObjectCopy.fromNative = fromObject;
-
-    /**
-     * Extend jar.lang.Object with some useful methods
-     */
-    for (methodName in pseudoObjectProto) {
-        ObjectCopyProto[methodName] = pseudoObjectProto[methodName];
-        lang.delegate(pseudoObjectProto, ObjectCopy, methodName);
-    }
+        fromNative: fromObject
+    });
 
     function fromObject(object, deep) {
-        return (System.isA(object, ObjectCopy) || !System.isObject(object)) ? object : new ObjectCopy().extend(object, deep);
+        return (System.isA(object, ObjectCopy) || !System.isObject(object)) ? object : ObjectCopy.copy(object, deep);
+    }
+
+    function isDeepOrKeepDefault(value) {
+        return System.isBoolean(value) || !System.isSet(value);
     }
 
     function mergeValue(obj, mergeObj, prop, deep, keepDefault) {
@@ -148,14 +177,14 @@ JAR.register({
     }
 
     function getAlreadyMergedValue(valueToMerge) {
-        var idx = 0,
-            mergedLen = mergedObjects.length,
-            mergedValue, mergedObjectData;
+        var mergedValue;
 
-        while (idx < mergedLen && !mergedValue) {
-            mergedObjectData = mergedObjects[idx++];
+        // TODO replace with Array#find if no longer experimental
+        mergedObjects.some(function(mergedObjectData) {
             mergedValue = mergedObjectData[0] === valueToMerge && mergedObjectData[1];
-        }
+
+            return mergedValue;
+        });
 
         return mergedValue;
     }
@@ -183,29 +212,15 @@ JAR.register({
     }
 
     function callReduce(object, withData) {
-        return callMethodOn(object, 'reduce', withData);
+        return lang.callNativeTypeMethod(ObjectCopy, 'reduce', object, withData);
     }
 
     function callHasOwn(object, withData) {
-        return callMethodOn(object, 'hasOwn', withData);
+        return lang.callNativeTypeMethod(ObjectCopy, 'hasOwn', object, withData);
     }
-    
+
     function callMerge(object, withData) {
-        return callMethodOn(object, 'merge', withData);
-    }
-
-    function callMethodOn(object, methodName, args) {
-        var callingObject;
-
-        if (object[methodName] === pseudoObjectProto[methodName]) {
-            callingObject = object;
-        }
-        else {
-            args.unshift(object);
-            callingObject = ObjectCopy;
-        }
-
-        return callingObject[methodName].apply(callingObject, args);
+        return lang.callNativeTypeMethod(ObjectCopy, 'merge', object, withData);
     }
 
     return ObjectCopy;

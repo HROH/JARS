@@ -1,70 +1,27 @@
 JAR.register({
     MID: 'jar.lang.Function',
-    deps: ['..', 'System', '.Array', '.Object']
-}, function(jar, System, Arr, Obj) {
-    var lang = this,
-        fnConverter = lang.sandbox('function(fn) { return function() { return fn.apply(this, arguments);} }', '__SYSTEM__'),
-        FunctionCopy = jar.getConfig('allowProtoOverwrite') ? Function : lang.sandbox('Function', '__SYSTEM__'),
-        fromArray = Arr.from,
-        FunctionCopyProto;
+    deps: ['System', '.Object', '.Array']
+}, function(System, Obj, Arr) {
+    'use strict';
 
-    FunctionCopyProto = {
+    var lang = this,
+        fnConverter = lang.sandbox('function(fn, arity) { function newFn(){return fn.apply(this,arguments)};newFn.arity=arity||fn.arity||fn.length;return newFn;}', '__SYSTEM__'),
+        fromArgs = Arr.from,
+        FunctionCopy, apply;
+
+    FunctionCopy = lang.extendNativeType('Function', {
         bind: function(context) {
             var fnToBind = this,
                 FnLink = function() {},
-                boundArgs = fromArray(arguments, 1),
-                boundFn = fromFunction(function() {
-                    return fnToBind.apply((System.isA(this, FnLink) && context) ? this : context, boundArgs.concat(fromArray(arguments)));
-                });
+                boundArgs = fromArgs(arguments, 1),
+                returnFn = fromFunction(function boundFn() {
+                    return apply(fnToBind, (System.isA(this, FnLink) && context) ? this : context, boundArgs.concat(fromArgs(arguments)));
+                }, fnToBind.arity || fnToBind.length);
 
             FnLink.prototype = fnToBind.prototype;
-            boundFn.prototype = new FnLink();
-            boundFn.args = fnToBind.length;
+            returnFn.prototype = new FnLink();
 
-            return boundFn;
-        },
-
-        partial: function() {
-            var partialFn = this,
-                partialArgs = fromArray(arguments);
-
-            return fromFunction(function() {
-                var newArgs = fromArray(arguments),
-                    args = partialArgs.map(applyPartialArg, newArgs);
-
-                return partialFn.apply(this, args.concat(newArgs));
-            });
-        },
-        /**
-         * Store the arguments in placeholderArgs
-         * They will be used in the call to func as default if no other arguments are available
-         * 
-         * Example:
-         * 
-         * function(a) {
-         *	return a || value;
-         * }
-         * 
-         * This would be equal to:
-         * 
-         * jar.lang.Function.from(function(a) {
-         *	return a;
-         * }).preset(value);
-         *
-         * 
-         *
-         *
-         */
-        preset: function() {
-            var placeholderFn = this,
-                placeholderArgs = fromArray(arguments);
-
-            return fromFunction(function() {
-                var newArgs = fromArray(arguments),
-                    args = placeholderArgs.map(applyPlaceholderArg, newArgs);
-
-                return placeholderFn.apply(this, args.concat(newArgs));
-            });
+            return returnFn;
         },
         /**
          * Repeat the given function n times
@@ -83,45 +40,40 @@ JAR.register({
          * '5 time(s) executed'
          */
         repeat: function(times) {
-            var args = fromArray(arguments, 1),
+            var args = fromArgs(arguments, 1),
                 results = Arr(),
                 idx = 0;
 
             for (; idx < times;) {
-                results[idx] = this.apply(this, args.concat(++idx));
+                results[idx] = apply(this, null, args.concat(++idx));
             }
 
             return results;
-        }
-    };
+        },
 
-    FunctionCopy.prototype.extend(FunctionCopyProto);
+        delay: function(ms) {
+            return window.setTimeout(this, ms);
+        },
 
-    FunctionCopy.fromNative = FunctionCopy.from = fromFunction;
+        call: true,
 
-    Obj.each(FunctionCopyProto, function(method, methodName) {
-        lang.delegate(FunctionCopy.prototype, FunctionCopy, methodName, System.isFunction);
+        apply: true
+    }, {
+        from: fromFunction,
+
+        fromNative: fromFunction
     });
 
-    function applyPartialArg(partialArg) {
-        return System.isNull(partialArg) ? this.shift() : partialArg;
-    }
+    apply = FunctionCopy.apply;
 
-    function applyPlaceholderArg(arg) {
-        var newArgs = this,
-            newArg;
-
-        if (newArgs.length) {
-            newArg = newArgs.shift();
-
-            System.isNull(newArg) || (arg = newArg);
-        }
-
-        return arg;
-    }
-    
-    function fromFunction(fn) {
-        return (System.isA(fn, FunctionCopy) || !System.isFunction(fn)) ? fn : fnConverter(fn);
+    /**
+     * 
+     * @param {Function} fn
+     * 
+     * @return {Function}
+     */
+    function fromFunction(fn, arity) {
+        return (System.isA(fn, FunctionCopy) || !System.isFunction(fn)) ? fn : fnConverter(fn, arity);
     }
 
     return FunctionCopy;
