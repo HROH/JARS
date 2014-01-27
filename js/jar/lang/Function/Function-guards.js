@@ -25,8 +25,50 @@ JAR.register({
             return createBlockedFunction(this, ms, Obj.extend(options || {}, defaultBlockedOptions));
         },
 
-        memoize: function() {}
+        memoize: function(serializer) {
+            var fn = this,
+                cache = {};
+
+            return fromFunction(function memoizedFn() {
+                var hash = (serializer || internalSerializer)(arguments);
+
+                return hash in cache ? cache[hash] : (cache[hash] = fn.apply(this, arguments));
+            });
+        },
+
+        once: function() {
+            return FunctionCopy.callN(this, 1);
+        },
+
+        callN: function(count) {
+            return createGuardedFunction(this, count, false);
+        },
+
+        blockN: function(count) {
+            return createGuardedFunction(this, count, true);
+        }
     });
+
+    function createGuardedFunction(fn, count, guardBefore) {
+        var called = 0,
+            result;
+
+        count = Math.round(Math.abs(count)) || 0;
+
+        return fromFunction(function guardedFn() {
+            var unguarded = guardBefore ? called >= count : called < count;
+
+            if (unguarded) {
+                result = fn.apply(this, arguments);
+            }
+
+            if (unguarded !== guardBefore) {
+                called++;
+            }
+
+            return result;
+        });
+    }
 
     /**
      *
@@ -67,12 +109,25 @@ JAR.register({
             }
         }, fn.arity || fn.length);
     }
+	
+	/**
+	 * TODO better implementation
+	 * 
+	 * @param {Arguments} args
+	 * 
+	 * @return {String}
+	 */
+    function internalSerializer(args) {
+		return JSON.stringify(args[0]);
+    }
 
     return {
         debounce: FunctionCopy.debounce,
 
         throttle: FunctionCopy.throttle,
-        
-        memoize: FunctionCopy.memoize
+
+        memoize: FunctionCopy.memoize,
+
+        once: FunctionCopy.once
     };
 });
