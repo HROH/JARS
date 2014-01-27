@@ -1,6 +1,6 @@
 JAR.register({
     MID: 'jar.lang.Class',
-    deps: ['System', '..' /*(jar)*/ , '.Object', '.Array']
+    deps: ['System', '..' /*(jar)*/ , '.Object', '.Array!check|search|manipulate']
 }, function(System, jar, Obj, Arr) {
     'use strict';
 
@@ -31,7 +31,7 @@ JAR.register({
             proxyFailed = 'Proxy failed! ',
             instanceMustBe = '{{instanceHash}} must be ',
             instanceOfClass = 'an instance of {{classHash}}',
-            inModules = 'in one of the following modules: {{moduleNames}}, but is in module {{moduleName}}';
+            inModules = 'in one of the following modules: {{missingAccess}}, but has only access to {{hasAccess}}';
 
         classFactoryMessageTemplates[MSG_ALREADY_DESTRUCTED] = proxyFailed + '{{hash}} was already destructed!';
         classFactoryMessageTemplates[MSG_INVALID_OR_EXISTING_CLASS] = 'Illegal or already existing Classname: {{name}}';
@@ -165,8 +165,9 @@ JAR.register({
 
     function isProxyAllowed(Instance, Class, moduleName) {
         var canProxy = false,
-            moduleNames = [],
-            instanceHash, InstanceClass, NextClass, failData, failMessage, nextModuleName;
+            allowModuleAccess = !! moduleName,
+            allowClassAccess = isClass(Class),
+            instanceHash, InstanceClass, failData, failMessage;
 
         if (isInstance(Instance)) {
             instanceHash = Instance.getHash();
@@ -175,37 +176,26 @@ JAR.register({
                 instanceHash: instanceHash
             });
 
-            if (moduleName) {
+            if (allowModuleAccess) {
                 InstanceClass = Instance.Class;
-                NextClass = Class;
 
-                canProxy = isClassInBundle(InstanceClass, moduleName);
-
-                while (!canProxy && isClass(NextClass)) {
-                    nextModuleName = NextClass.getModuleBaseName();
-                    canProxy = isClassInBundle(InstanceClass, nextModuleName);
-                    NextClass = NextClass.getSuperClass();
-
-                    canProxy || moduleNames.push(nextModuleName);
-                }
+                canProxy = allowClassAccess ? InstanceClass.canAccessClass(Class) : InstanceClass.canAccessModule(moduleName);
 
                 if (!canProxy) {
-                    moduleName === moduleNames[0] || moduleNames.unshift(moduleName);
-
                     failMessage = MSG_WRONG_MODULE;
                     failData.extend({
-                        moduleName: InstanceClass.getModuleBaseName(),
-                        moduleNames: moduleNames.join(', ')
+                        hasAccess: InstanceClass.getModuleAccess().join(', '),
+                        missingAccess: allowClassAccess ? Class.getModuleAccess().join(', ') : moduleName
                     });
                 }
             }
 
-            if (!canProxy && isClass(Class)) {
+            if (!canProxy && allowClassAccess) {
                 if (isA(Instance, Class)) {
                     canProxy = true;
                 }
                 else {
-                    failMessage = moduleName ? MSG_WRONG_CLASS_AND_MODULE : MSG_WRONG_CLASS;
+                    failMessage = allowModuleAccess ? MSG_WRONG_CLASS_AND_MODULE : MSG_WRONG_CLASS;
                     failData.extend({
                         classHash: Class.getHash()
                     });
@@ -219,21 +209,6 @@ JAR.register({
         canProxy || classFactoryLogger(failMessage, 'error', failData);
 
         return canProxy;
-    }
-
-    function isClassInBundle(Class, moduleName) {
-        var inBundle = false;
-
-        while (Class && !inBundle) {
-            if (moduleName.indexOf(Class.getModuleBaseName()) === 0) {
-                inBundle = true;
-            }
-            else {
-                Class = Class.getSuperClass();
-            }
-        }
-
-        return inBundle;
     }
 
     function createClassHash(name) {
@@ -304,7 +279,7 @@ JAR.register({
                 superProto, superMethod;
 
             // Never override Class()-, constructor()- and getHash()-methods
-            if (SuperClass && isFunction(method) && excludeOverride.indexOf(methodName) === -1) {
+            if (SuperClass && isFunction(method) && !excludeOverride.contains(methodName)) {
                 SuperClassHiddenProto = Classes[SuperClass.getHash()][protectedIdentifier]._$proto;
 
                 if (methodName in SuperClass.prototype) {
@@ -381,10 +356,28 @@ JAR.register({
                 baseName = Class._$modBaseName;
 
             if (!System.isSet(baseName)) {
-                Class._$modBaseName = baseName = (useModule(moduleName) === Class) ? moduleName.substring(0, moduleName.lastIndexOf('.')) : moduleName;
+                Class._$modBaseName = baseName = (useModule(moduleName) === Class) ? moduleName.substring(0, moduleName.lastIndexOf('.')) || moduleName : moduleName;
             }
 
             return baseName;
+        },
+
+        getModuleAccess: function() {
+            var Class = this,
+                moduleAccess = Class._$modAccess,
+                baseName;
+
+            if (!moduleAccess) {
+                Class._$modAccess = moduleAccess = Arr();
+
+                do {
+                    baseName = Class.getModuleBaseName();
+                    moduleAccess.contains(baseName) || moduleAccess.push(baseName);
+                    Class = Class.getSuperClass();
+                } while (isClass(Class));
+            }
+
+            return moduleAccess;
         },
 
         logger: function(data, type, values) {
@@ -479,6 +472,9 @@ JAR.register({
             else if (SuperClass === Class) {
                 message = 'The Class can\'t extend itself!';
             }
+            else if (Class._$Instances.size() || Class._$subClasses.size()) {
+                message = 'The Class already has instances or SubClasses!';
+            }
             else {
                 superClassHash = SuperClass.getHash();
 
@@ -515,22 +511,6 @@ JAR.register({
                         Arr.each([Class.prototype, Class._$proto], function(protoToOverride) {
                             protoToOverride.each(function(value, prop) {
                                 isFunction(value) && Class._$overrideMethod(prop, value);
-                            });
-                        });
-
-                        // protected properties are copied once for every Instance on creation
-                        // if extendz was called after an Instance was created
-                        // we have to re-evaluate these properties
-                        // TODO: overridden methods must be merged while properties must only be extended
-                        Class._$Instances.each(function(instanceData) {
-                            accessIdentifiers.each(function(accessIdentifier) {
-                                var InstanceHiddenProps = instanceData[accessIdentifier];
-
-                                Class[accessIdentifier + 'proto'].each(function(value, property) {
-                                    if (isFunction(value) || !(property in InstanceHiddenProps)) {
-                                        InstanceHiddenProps[property] = value;
-                                    }
-                                });
                             });
                         });
                     }
@@ -845,6 +825,16 @@ JAR.register({
             return useModule(this.getModuleBaseName());
         },
 
+        canAccessClass: function(Class) {
+            return isClass(Class) && Arr.some(Class.getModuleAccess(), this.canAccessModule, this);
+        },
+
+        canAccessModule: function(moduleName) {
+            return this.getModuleAccess().some(function(moduleAccess) {
+                return moduleName.indexOf(moduleAccess) === 0;
+            });
+        },
+
         createSubClass: function(name, proto, staticProperties) {
             var Class = this,
                 SubClass;
@@ -1030,6 +1020,8 @@ JAR.register({
                     _$modName: getCurrentModuleName(),
 
                     _$modBaseName: null,
+
+                    _$modAccess: null,
 
                     _$subClasses: Obj(),
 
