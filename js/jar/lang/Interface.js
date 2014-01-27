@@ -1,6 +1,6 @@
 JAR.register({
     MID: 'jar.lang.Interface',
-    deps: ['System', '.Class', '.Object', '.Array']
+    deps: ['System', '.Class', '.Object', '.Array!check|derive']
 }, function(System, Class, Obj, Arr) {
     'use strict';
 

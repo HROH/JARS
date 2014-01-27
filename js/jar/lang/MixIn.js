@@ -1,7 +1,9 @@
 JAR.register({
     MID: 'jar.lang.MixIn',
-    deps: ['System', '.Class', '.Object', '.Array', '.Function']
+    deps: ['System', '.Class', '.Object', '.Array!check|derive', '.Function']
 }, function(System, Class, Obj, Arr, Fn) {
+    'use strict';
+
     var MixIn = Class('MixIn', {
         $: {
             construct: function(mixInName, toMix, allowedClasses, destructor) {
@@ -14,24 +16,22 @@ JAR.register({
 
             mixInto: function(receiver, mixInAnyObject) {
                 var logger = this._$logger,
-                    receiverAllowed = false,
                     isReceiverAllowed = this._$isReceiverAllowed.bind(this, receiver),
                     toMix = this._$toMix,
                     allowedClasses = this._$allowedClasses,
-                    destructors = this._$destructor,
+                    destructor = this._$destructor,
                     objectToExtend;
 
                 if (receiver) {
-                    receiverAllowed = Arr.every(allowedClasses, isReceiverAllowed);
 
-                    if (receiverAllowed) {
+                    if (Arr.every(allowedClasses, isReceiverAllowed)) {
                         if (Class.isClass(receiver)) {
                             objectToExtend = receiver.prototype;
-                            receiver.addDestructor(destructors);
+                            receiver.addDestructor(destructor);
                         }
                         else if (Class.isInstance(receiver)) {
                             objectToExtend = receiver;
-                            receiver.Class.addDestructor(destructors, receiver);
+                            receiver.Class.addDestructor(destructor, receiver);
                         }
                         else if (mixInAnyObject && System.isObject(receiver)) {
                             objectToExtend = receiver;

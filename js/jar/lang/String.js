@@ -1,6 +1,6 @@
 JAR.register({
     MID: 'jar.lang.String',
-    deps: ['System', '.Array']
+    deps: ['System', '.Array!manipulate|reduce']
 }, function(System, Arr) {
     'use strict';
 
@@ -19,19 +19,17 @@ JAR.register({
 
             Arr.merge(toCapitalize, arguments);
 
-            camelized = Arr.reduce(toCapitalize, function(startString, nextString) {
-                return startString + (nextString ? StringCopy.capitalize(nextString) : '');
-            });
+            camelized = Arr.reduce(toCapitalize, buildCamelized);
 
-            return StringCopy.from(camelized);
+            return fromString(camelized);
         },
 
         capitalize: function() {
-            return StringCopy.from(this.charAt(0).toUpperCase() + this.substr(1));
+            return fromString(this.charAt(0).toUpperCase() + this.substr(1));
         },
 
         dashify: function() {
-            return StringCopy.from(this.replace(rCapitalLetter, dashifier));
+            return fromString(this.replace(rCapitalLetter, dashifier));
         },
 
         startsWith: function(start) {
@@ -63,7 +61,11 @@ JAR.register({
         }
 
         return string;
-    };
+    }
+
+    function buildCamelized(startString, nextString) {
+        return startString + (nextString ? StringCopy.capitalize(nextString) : '');
+    }
 
     function dashifier(match) {
         return '-' + match.toLowerCase();

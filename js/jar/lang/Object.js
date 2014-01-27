@@ -1,13 +1,13 @@
 JAR.register({
     MID: 'jar.lang.Object',
-    deps: ['System', '.Array']
+    deps: ['System', '.Array!reduce']
 }, function(System, Arr) {
     'use strict';
 
     var lang = this,
         mergeLevel = 0,
         mergedObjects = Arr(),
-        ObjectCopy;
+        ObjectCopy, hasOwn, reduce;
 
     /**
      * Extend jar.lang.Object with some useful methods
@@ -44,14 +44,14 @@ JAR.register({
                 prop;
 
             for (prop in object) {
-                if (callHasOwn(object, [prop])) {
+                if (hasOwn(object, prop)) {
                     callback.call(context, object[prop], prop, object);
                 }
             }
         },
 
         size: function() {
-            return callReduce(this, [countProperties, 0]);
+            return reduce(this, countProperties, 0);
         },
 
         map: function(callback, context) {
@@ -60,7 +60,7 @@ JAR.register({
                 prop;
 
             for (prop in object) {
-                if (callHasOwn(object, [prop])) {
+                if (hasOwn(object, prop)) {
                     mappedObject[prop] = callback.call(context, object[prop], prop, object);
                 }
             }
@@ -76,7 +76,7 @@ JAR.register({
 
             args[argsLen] = true;
 
-            return callMerge(this, args);
+            return lang.callNativeTypeMethod(ObjectCopy, 'merge', this, args);
         },
 
         copy: function(deep) {
@@ -89,12 +89,26 @@ JAR.register({
                 prop;
 
             for (prop in object) {
-                if (callHasOwn(object, [prop]) && callback.call(context, object[prop], prop, object)) {
+                if (hasOwn(object, prop) && callback.call(context, object[prop], prop, object)) {
                     filteredObject[prop] = object[prop];
                 }
             }
 
             return filteredObject;
+        },
+
+        extract: function(keys) {
+            var object = this;
+
+            return Arr.reduce(keys, function(extractedObject, key) {
+                extractedObject[key] = ObjectCopy.prop(object, key);
+
+                return extractedObject;
+            }, new ObjectCopy());
+        },
+
+        prop: function(property) {
+            return hasOwn(this, property) && this[property];
         },
 
         hasOwn: Object.prototype.hasOwnProperty,
@@ -111,7 +125,7 @@ JAR.register({
             }
 
             for (prop in object) {
-                if (callHasOwn(object, [prop])) {
+                if (hasOwn(object, [prop])) {
                     if (isValueSet) {
                         ret = callback(ret, object[prop], prop, object);
                     }
@@ -126,21 +140,24 @@ JAR.register({
         },
 
         transpose: function() {
-            return callReduce(this, [transpose, new ObjectCopy()]);
+            return reduce(this, transpose, new ObjectCopy());
         },
 
         keys: function() {
-            return callReduce(this, [pushKey, []]);
+            return reduce(this, pushKey, []);
         },
 
         values: function() {
-            return callReduce(this, [pushValue, []]);
+            return reduce(this, pushValue, []);
         }
     }, {
         from: fromObject,
 
         fromNative: fromObject
     });
+
+    hasOwn = ObjectCopy.hasOwn;
+    reduce = ObjectCopy.reduce;
 
     function fromObject(object, deep) {
         return (System.isA(object, ObjectCopy) || !System.isObject(object)) ? object : ObjectCopy.copy(object, deep);
@@ -153,9 +170,9 @@ JAR.register({
     function mergeValue(obj, mergeObj, prop, deep, keepDefault) {
         var isOwn, oldValue, newValue, valueToMerge, isOldValueObject;
 
-        if (callHasOwn(mergeObj, [prop])) {
+        if (hasOwn(mergeObj, [prop])) {
             valueToMerge = mergeObj[prop];
-            isOwn = callHasOwn(obj, [prop]);
+            isOwn = hasOwn(obj, [prop]);
             keepDefault = isOwn ? keepDefault : false;
             oldValue = isOwn ? obj[prop] : null;
 
@@ -173,7 +190,7 @@ JAR.register({
     }
 
     function mergeDeepValue(oldValue, valueToMerge, keepDefault) {
-        return getAlreadyMergedValue(valueToMerge) || callMerge(oldValue, [valueToMerge, true, keepDefault]);
+        return getAlreadyMergedValue(valueToMerge) || ObjectCopy.merge(oldValue, valueToMerge, true, keepDefault);
     }
 
     function getAlreadyMergedValue(valueToMerge) {
@@ -209,18 +226,6 @@ JAR.register({
         array[array.length] = value;
 
         return array;
-    }
-
-    function callReduce(object, withData) {
-        return lang.callNativeTypeMethod(ObjectCopy, 'reduce', object, withData);
-    }
-
-    function callHasOwn(object, withData) {
-        return lang.callNativeTypeMethod(ObjectCopy, 'hasOwn', object, withData);
-    }
-
-    function callMerge(object, withData) {
-        return lang.callNativeTypeMethod(ObjectCopy, 'merge', object, withData);
     }
 
     return ObjectCopy;

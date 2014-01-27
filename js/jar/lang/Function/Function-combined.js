@@ -1,6 +1,6 @@
 JAR.register({
     MID: 'jar.lang.Function.Function-combined',
-    deps: ['..', '..Array', 'System']
+    deps: ['..', '..Array!reduce', 'System']
 }, function(lang, Arr, System) {
     'use strict';
 
