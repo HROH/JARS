@@ -1,6 +1,6 @@
 JAR.register({
     MID: 'jar.lang.Class',
-    deps: ['System', '..' /*(jar)*/ , '.Object', '.Array!check|search|manipulate']
+    deps: ['System', '..' /*(jar)*/ , '.Object!all', '.Array!check|search|manipulate']
 }, function(System, jar, Obj, Arr) {
     'use strict';
 
@@ -24,9 +24,9 @@ JAR.register({
         MSG_WRONG_CLASS_AND_MODULE = 3,
         MSG_WRONG_CONTEXT = 4,
         MSG_WRONG_MODULE = 5,
-        ClassPrivilegedMethods, ClassProtectedProps, classFactoryLogger;
+        ClassPrivilegedMethods, ClassProtectedProps, classFactoryLog;
 
-    classFactoryLogger = (function classFactoryLoggerSetup() {
+    classFactoryLog = (function classFactoryLogSetup() {
         var classFactoryMessageTemplates = [],
             proxyFailed = 'Proxy failed! ',
             instanceMustBe = '{{instanceHash}} must be ',
@@ -40,7 +40,7 @@ JAR.register({
         classFactoryMessageTemplates[MSG_WRONG_CONTEXT] = proxyFailed + 'Method was called in wrong context!';
         classFactoryMessageTemplates[MSG_WRONG_MODULE] = proxyFailed + instanceMustBe + inModules + '!';
 
-        return System.getCustomLogger(getCurrentModuleName(), classFactoryMessageTemplates);
+        return System.getCustomLog(getCurrentModuleName(), classFactoryMessageTemplates);
     })();
 
     function proxyClass(Class, method, args) {
@@ -118,7 +118,7 @@ JAR.register({
     }
 
     function proxyDestructed(destructedHash) {
-        classFactoryLogger(MSG_ALREADY_DESTRUCTED, 'error', {
+        classFactoryLog(MSG_ALREADY_DESTRUCTED, 'error', {
             hash: destructedHash
         });
     }
@@ -206,7 +206,7 @@ JAR.register({
             failMessage = MSG_WRONG_CONTEXT;
         }
 
-        canProxy || classFactoryLogger(failMessage, 'error', failData);
+        canProxy || classFactoryLog(failMessage, 'error', failData);
 
         return canProxy;
     }
@@ -276,7 +276,7 @@ JAR.register({
                 protoToOverride,
                 SuperClass = Class._$superClass,
                 SuperClassHiddenProto,
-                superProto, superMethod;
+                superProto, methodToOverride, superMethod;
 
             // Never override Class()-, constructor()- and getHash()-methods
             if (SuperClass && isFunction(method) && !excludeOverride.contains(methodName)) {
@@ -290,14 +290,16 @@ JAR.register({
                     protoToOverride = ClassHiddenProto;
                     superProto = SuperClassHiddenProto;
                 }
+                
+                superProto && (methodToOverride = superProto[methodName]);
 
                 // check if the method is override a method in the SuperClass.prototype and is not already overridden in the current Class.prototype
-                if (superProto && isFunction(superProto[methodName]) && superProto[methodName] !== method && (!protoToOverride.hasOwn(methodName) || protoToOverride[methodName] === method)) {
-                    superMethod = function() {
-                        return superProto[methodName].apply(this, arguments);
+                if (isFunction(methodToOverride) && methodToOverride !== method && (!Obj.hasOwnProperty(protoToOverride, methodName) || protoToOverride[methodName] === method)) {
+                    superMethod = function $super() {
+                        return methodToOverride.apply(this, arguments);
                     };
 
-                    protoToOverride[methodName] = function() {
+                    protoToOverride[methodName] = function overrideMethod() {
                         var Instance = this,
                             result, currentSuper;
 
@@ -380,8 +382,8 @@ JAR.register({
             return moduleAccess;
         },
 
-        logger: function(data, type, values) {
-            this._$logger(data, type, values);
+        log: function(data, type, values) {
+            this._$log(data, type, values);
         },
         /**
          * @return {boolean} whether this Class has a singleton
@@ -517,7 +519,7 @@ JAR.register({
                 }
             }
 
-            message && Class.logger(message, 'warn');
+            message && Class.log(message, 'warn');
 
             return this;
         },
@@ -599,7 +601,7 @@ JAR.register({
                     Instance.Class.destruct(Instance);
                 }
                 else {
-                    Class.logger('"' + hash + '" is already destructed', 'warn');
+                    Class.log('"' + hash + '" is already destructed', 'warn');
                 }
 
                 return this;
@@ -668,13 +670,13 @@ JAR.register({
             // If Class is an abstract Class return an empty Object
             // Returning undefined won't work because of the function behaviour in combination with 'new'
             else if (classHiddenProtectedProps._$isAbstract) {
-                Class.logger('You can\'t create a new Instance of an abstract Class.', 'warn');
+                Class.log('You can\'t create a new Instance of an abstract Class.', 'warn');
 
                 returnValue = {};
             }
             // If a Singleton exists return it and skip the rest
             else if (classHiddenProtectedProps._$single) {
-                Class.logger('You can\'t create a new Instance of this Class.', 'warn');
+                Class.log('You can\'t create a new Instance of this Class.', 'warn');
 
                 returnValue = classHiddenProtectedProps._$single;
             }
@@ -840,7 +842,7 @@ JAR.register({
                 SubClass;
 
             if (Class.isFinal()) {
-                Class.logger('The Class is final and can\'t be extended!', 'warn');
+                Class.log('The Class is final and can\'t be extended!', 'warn');
             }
             else {
                 SubClass = ClassFactory(name, proto, staticProperties).extendz(Class);
@@ -1015,7 +1017,7 @@ JAR.register({
                 _$: Obj.from({
                     _$clsName: name,
 
-                    _$logger: System.getCustomLogger(classHash),
+                    _$log: System.getCustomLog(classHash),
 
                     _$modName: getCurrentModuleName(),
 
@@ -1084,7 +1086,7 @@ JAR.register({
             });
         }
         else {
-            classFactoryLogger(MSG_INVALID_OR_EXISTING_CLASS, 'warn', {
+            classFactoryLog(MSG_INVALID_OR_EXISTING_CLASS, 'warn', {
                 name: name
             });
         }

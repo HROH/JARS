@@ -1,18 +1,40 @@
 JAR.register({
     MID: 'jar.lang.Object',
-    deps: ['System', '.Array!reduce']
+    deps: ['System', '.Array'],
+    bundle: ['Object-derive', 'Object-info', 'Object-iterate', 'Object-reduce']
 }, function(System, Arr) {
     'use strict';
 
     var lang = this,
         mergeLevel = 0,
         mergedObjects = Arr(),
-        ObjectCopy, hasOwn, reduce;
+        hasOwn, ObjectCopy;
 
     /**
      * Extend jar.lang.Object with some useful methods
      */
     ObjectCopy = lang.extendNativeType('Object', {
+        /**
+         * @param {Boolean} deep
+         * 
+         * @return {Object}
+         */
+        copy: function(deep) {
+
+            return (new ObjectCopy()).extend(this, deep);
+        },
+        
+        extend: function() {
+            var args = Arr.from(arguments),
+                argsLen = args.length;
+
+            isDeepOrKeepDefault(args[argsLen - 1]) || (args[argsLen++] = false);
+
+            args[argsLen] = true;
+
+            return lang.callNativeTypeMethod(ObjectCopy, 'merge', this, args);
+        },
+
         merge: function() {
             var args = Arr.from(arguments),
                 object = this,
@@ -39,125 +61,14 @@ JAR.register({
             return object;
         },
 
-        each: function(callback, context) {
-            var object = this,
-                prop;
-
-            for (prop in object) {
-                if (hasOwn(object, prop)) {
-                    callback.call(context, object[prop], prop, object);
-                }
-            }
-        },
-
-        size: function() {
-            return reduce(this, countProperties, 0);
-        },
-
-        map: function(callback, context) {
-            var object = this,
-                mappedObject = new ObjectCopy(),
-                prop;
-
-            for (prop in object) {
-                if (hasOwn(object, prop)) {
-                    mappedObject[prop] = callback.call(context, object[prop], prop, object);
-                }
-            }
-
-            return mappedObject;
-        },
-
-        extend: function() {
-            var args = Arr.from(arguments),
-                argsLen = args.length;
-
-            isDeepOrKeepDefault(args[argsLen - 1]) || (args[argsLen++] = false);
-
-            args[argsLen] = true;
-
-            return lang.callNativeTypeMethod(ObjectCopy, 'merge', this, args);
-        },
-
-        copy: function(deep) {
-            return (new ObjectCopy()).extend(this, deep);
-        },
-
-        filter: function(callback, context) {
-            var object = this,
-                filteredObject = new ObjectCopy(),
-                prop;
-
-            for (prop in object) {
-                if (hasOwn(object, prop) && callback.call(context, object[prop], prop, object)) {
-                    filteredObject[prop] = object[prop];
-                }
-            }
-
-            return filteredObject;
-        },
-
-        extract: function(keys) {
-            var object = this;
-
-            return Arr.reduce(keys, function(extractedObject, key) {
-                extractedObject[key] = ObjectCopy.prop(object, key);
-
-                return extractedObject;
-            }, new ObjectCopy());
-        },
-
-        prop: function(property) {
-            return hasOwn(this, property) && this[property];
-        },
-
-        hasOwn: Object.prototype.hasOwnProperty,
-
-        reduce: function(callback, initialValue) {
-            var object = this,
-                isValueSet = false,
-                prop,
-                ret;
-
-            if (arguments.length > 1) {
-                ret = initialValue;
-                isValueSet = true;
-            }
-
-            for (prop in object) {
-                if (hasOwn(object, [prop])) {
-                    if (isValueSet) {
-                        ret = callback(ret, object[prop], prop, object);
-                    }
-                    else {
-                        ret = object[prop];
-                        isValueSet = true;
-                    }
-                }
-            }
-
-            return ret;
-        },
-
-        transpose: function() {
-            return reduce(this, transpose, new ObjectCopy());
-        },
-
-        keys: function() {
-            return reduce(this, pushKey, []);
-        },
-
-        values: function() {
-            return reduce(this, pushValue, []);
-        }
+        hasOwnProperty: true
     }, {
         from: fromObject,
 
         fromNative: fromObject
     });
-
-    hasOwn = ObjectCopy.hasOwn;
-    reduce = ObjectCopy.reduce;
+    
+    hasOwn = ObjectCopy.hasOwnProperty;
 
     function fromObject(object, deep) {
         return (System.isA(object, ObjectCopy) || !System.isObject(object)) ? object : ObjectCopy.copy(object, deep);
@@ -204,28 +115,6 @@ JAR.register({
         });
 
         return mergedValue;
-    }
-
-    function countProperties(size) {
-        return ++size;
-    }
-
-    function transpose(object, value, prop) {
-        object[value] = prop;
-
-        return object;
-    }
-
-    function pushKey(array, value, prop) {
-        array[array.length] = prop;
-
-        return array;
-    }
-
-    function pushValue(array, value) {
-        array[array.length] = value;
-
-        return array;
     }
 
     return ObjectCopy;
