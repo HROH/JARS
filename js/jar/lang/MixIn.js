@@ -1,22 +1,30 @@
 JAR.register({
     MID: 'jar.lang.MixIn',
-    deps: ['System', '.Class', '.Object', '.Array!check|derive', '.Function']
+    deps: ['System', '.Class', '.Object', '.Array!check|derive', '.Function!modargs']
 }, function(System, Class, Obj, Arr, Fn) {
     'use strict';
 
-    var MixIn = Class('MixIn', {
+    var RECEIVER_MISSING = 0,
+        RECEIVER_NOT_ALLOWED = 1,
+        mixinTemplates = [],
+        MixIn;
+
+    mixinTemplates[RECEIVER_MISSING] = 'There is no receiver given!';
+    mixinTemplates[RECEIVER_NOT_ALLOWED] = 'The given receiver "{{receiver}}" is not part of the allowed Classes!';
+
+    MixIn = Class('MixIn', {
         $: {
             construct: function(mixInName, toMix, allowedClasses, destructor) {
                 this._$name = mixInName;
                 this._$toMix = Obj.from(toMix);
                 this._$allowedClasses = Arr.filter(System.isArray(allowedClasses) ? allowedClasses : [allowedClasses], Class.isClass);
                 this._$destructor = destructor;
-                this._$logger = System.getCustomLogger('MixIn "#<' + mixInName + '>"');
+                this._$log = System.getCustomLog('MixIn "#<' + mixInName + '>"', mixinTemplates);
             },
 
             mixInto: function(receiver, mixInAnyObject) {
-                var logger = this._$logger,
-                    isReceiverAllowed = this._$isReceiverAllowed.bind(this, receiver),
+                var log = this._$log,
+                    isReceiverAllowed = Fn.partial(this._$isReceiverAllowed, receiver),
                     toMix = this._$toMix,
                     allowedClasses = this._$allowedClasses,
                     destructor = this._$destructor,
@@ -40,11 +48,13 @@ JAR.register({
                         objectToExtend && Obj.extend(objectToExtend, toMix);
                     }
                     else {
-                        logger('The given receiver "' + receiver + '" is not part of the allowed Classes!', 'warn');
+                        log(RECEIVER_NOT_ALLOWED, 'warn', {
+                            receiver: receiver
+                        });
                     }
                 }
                 else {
-                    logger('There is no receiver given!', 'warn');
+                    log(RECEIVER_MISSING, 'warn');
                 }
 
                 return receiver;
@@ -58,7 +68,7 @@ JAR.register({
         _$: {
             name: '',
 
-            logger: null,
+            log: null,
 
             toMix: null,
 
@@ -66,9 +76,9 @@ JAR.register({
 
             destructor: null,
 
-            isReceiverAllowed: Fn.from(function(receiver, allowedClass) {
+            isReceiverAllowed: function(receiver, allowedClass) {
                 return receiver === allowedClass || allowedClass.isSuperClassOf(receiver) || System.isA(receiver, allowedClass);
-            })
+            }
         }
     });
 
