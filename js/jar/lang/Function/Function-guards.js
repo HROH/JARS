@@ -32,7 +32,7 @@ JAR.register({
             return fromFunction(function memoizedFn() {
                 var hash = (serializer || internalSerializer)(arguments);
 
-                return hash in cache ? cache[hash] : (cache[hash] = fn.apply(this, arguments));
+                return hash in cache ? cache[hash] : (cache[hash] = apply(fn, this, arguments));
             });
         },
 
@@ -50,16 +50,16 @@ JAR.register({
     });
 
     function createGuardedFunction(fn, count, guardBefore) {
-        var called = 0,
-            result;
+        var called = 0;
 
         count = Math.round(Math.abs(count)) || 0;
 
         return fromFunction(function guardedFn() {
-            var unguarded = guardBefore ? called >= count : called < count;
+            var unguarded = guardBefore ? called >= count : called < count,
+                result;
 
             if (unguarded) {
-                result = fn.apply(this, arguments);
+                result = apply(fn, this, arguments);
             }
 
             if (unguarded !== guardBefore) {
@@ -109,16 +109,16 @@ JAR.register({
             }
         }, fn.arity || fn.length);
     }
-	
-	/**
-	 * TODO better implementation
-	 * 
-	 * @param {Arguments} args
-	 * 
-	 * @return {String}
-	 */
+    
+    /**
+     * TODO better implementation
+     * 
+     * @param {Arguments} args
+     * 
+     * @return {String}
+     */
     function internalSerializer(args) {
-		return JSON.stringify(args[0]);
+        return JSON.stringify(args[0]);
     }
 
     return {
@@ -128,6 +128,10 @@ JAR.register({
 
         memoize: FunctionCopy.memoize,
 
-        once: FunctionCopy.once
+        once: FunctionCopy.once,
+        
+        callN: FunctionCopy.callN,
+        
+        blockN: FunctionCopy.blockN
     };
 });

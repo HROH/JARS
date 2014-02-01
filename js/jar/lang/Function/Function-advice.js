@@ -8,27 +8,27 @@ JAR.register({
         apply = FunctionCopy.apply;
 
     lang.extendNativeType('Function', {
-        after: function(beforeFn) {
-            return createAdvice(this, beforeFn);
+        after: function(executeAfterwards) {
+            return createAdvice(this, null, executeAfterwards);
         },
 
-        before: function(afterFn) {
-            return createAdvice(this, null, afterFn);
+        before: function(executeBefore) {
+            return createAdvice(this, executeBefore);
         },
 
-        around: function(beforeFn, afterFn) {
-            return createAdvice(this, beforeFn, afterFn);
+        around: function(executeBefore, executeAfterwards) {
+            return createAdvice(this, executeBefore, executeAfterwards);
         }
     });
 
-    function createAdvice(fn, beforeFn, afterFn) {
+    function createAdvice(fn, executeBefore, executeAfterwards) {
         return FunctionCopy.from(function adviceFn() {
             var context = this,
                 result;
 
-            beforeFn && apply(beforeFn, context, arguments);
+            executeBefore && apply(executeBefore, context, arguments);
             result = apply(fn, context, arguments);
-            afterFn && apply(afterFn, context, arguments);
+            executeAfterwards && apply(executeAfterwards, context, arguments);
 
             return result;
         }, fn.arity || fn.length);

@@ -5,7 +5,8 @@ JAR.register({
     'use strict';
 
     var FunctionCopy = this,
-        fromFunction = FunctionCopy.from;
+        fromFunction = FunctionCopy.from,
+        apply = FunctionCopy.apply;
 
     lang.extendNativeType('Function', {
         compose: function() {
@@ -21,13 +22,17 @@ JAR.register({
                 context;
 
             function scoppedFn() {
-                return fn.apply(context, arguments);
+                var result = apply(fn, context, arguments);
+                
+                context = null;
+                
+                return result;
             }
 
             return fromFunction(function wrappedFn() {
                 context = this;
 
-                return wrapperFn.call(context, scoppedFn);
+                return apply(wrapperFn, context, [scoppedFn, arguments]);
             }, wrapperFn.arity || wrapperFn.length);
         }
     });
@@ -41,7 +46,7 @@ JAR.register({
      * @return {Function}
      */
     function createFunctionPipe(fn, functions, reversed) {
-        functions = Arr.from(functions);
+        functions = Arr.filter(functions, System.isFunction);
         functions.unshift(fn);
 
         reversed && (functions = functions.reverse());
@@ -52,7 +57,7 @@ JAR.register({
     }
 
     function callNextWithResult(result, next) {
-        return System.isFunction(next) ? next(result) : result;
+        return next(result);
     }
 
     return {
