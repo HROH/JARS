@@ -270,30 +270,41 @@ JAR.register({
     };
 
     function getNativeType(typeString) {
-        var Type = nativeTypes[typeString] || (jar.getConfig('modules').allowProtoOverride ? window[typeString] : getSandboxValue(typeString, '__SYSTEM__')),
-            moduleName;
+        var Type = nativeTypes[typeString] || (jar.getConfig('modules').allowProtoOverride ? window[typeString] : getSandboxValue(typeString, '__SYSTEM__'));
 
         if (!nativeTypes[typeString]) {
-            moduleName = jar.getModuleName() + '.' + typeString + '-';
 
-            Type.plugIn = function(pluginRequest) {
-                var extensions = pluginRequest.data.split('|'),
-                    extLen = extensions.length,
-                    idx = 0;
-
-                while (idx < extLen && extensions[idx]) {
-                    extensions[idx] = moduleName + extensions[idx++];
-                }
-
-                jar.lazyImport(extensions, function() {
-                    pluginRequest.onSuccess(Type);
-                }, pluginRequest.onError);
-            };
+            makePluggable(typeString, Type);
 
             nativeTypes[typeString] = Type;
         }
 
         return Type;
+    }
+
+    function makePluggable(typeString, Type) {
+        var moduleName = jar.getModuleName(),
+            subModuleName = moduleName + '.' + typeString + '-';
+
+        Type.plugIn = function(pluginRequest) {
+            var extensions = pluginRequest.data.split('|'),
+                extLen = extensions.length,
+                idx = 0;
+
+
+            if (extensions[0] === 'all') {
+                extensions = moduleName + '.*';
+            }
+            else {
+                while (idx < extLen && extensions[idx]) {
+                    extensions[idx] = subModuleName + extensions[idx++];
+                }
+            }
+
+            jar.lazyImport(extensions, function() {
+                pluginRequest.onSuccess(Type);
+            }, pluginRequest.onError);
+        };
     }
 
     /**
