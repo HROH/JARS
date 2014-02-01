@@ -1,7 +1,7 @@
 JAR.register({
     MID: 'jar.lang.Interface',
-    deps: ['System', '.Class', '.Object', '.Array!check|derive']
-}, function(System, Class, Obj, Arr) {
+    deps: ['System', '.Class', '.Array!check|derive']
+}, function(System, Class, Arr) {
     'use strict';
 
     var Interface = Class('Interface', {
@@ -10,7 +10,7 @@ JAR.register({
 
             methods: null,
 
-            logger: null,
+            log: null,
 
             addMethod: function(method) {
                 var methods = this._$methods;
@@ -23,7 +23,7 @@ JAR.register({
             construct: function(iFaceName, methods) {
                 this._$name = iFaceName;
                 this._$methods = Arr.from(methods);
-                this._$logger = System.getCustomLogger('Interface "#<' + iFaceName + '>"');
+                this._$log = System.getCustomLog('Interface "#<' + iFaceName + '>"');
             },
 
             extendz: function(superInterface) {
@@ -41,7 +41,7 @@ JAR.register({
             },
 
             isImplementedBy: function(object, checkAnyObject) {
-                var logger = this._$logger,
+                var log = this._$log,
                     methods = this._$methods,
                     isObject = checkAnyObject && System.isObject(object),
                     objectToCheck = Class.isClass(object) ? object.prototype : (Class.isInstance(object) || isObject) ? object : null,
@@ -51,12 +51,12 @@ JAR.register({
                     notImplementedMethods = methods.filter(isMethodNotImplemented, objectToCheck).map(transformMethodData);
 
                     if (notImplementedMethods.length) {
-                        logger((isObject ? 'The given object' : '"' + object.getHash() + '"') + ' must implement the methods: "' + notImplementedMethods.join('", "') + '" !', 'error');
+                        log((isObject ? 'The given object' : '"' + object.getHash() + '"') + ' must implement the methods: "' + notImplementedMethods.join('", "') + '" !', 'error');
                         object = false;
                     }
                 }
                 else {
-                    logger('No Class, Instance or Object given to check!', 'warn');
+                    log('No Class, Instance or Object given to check!', 'warn');
                 }
 
                 return object;
@@ -103,7 +103,7 @@ JAR.register({
             isImplemented = Arr.every(arguments, implementzInterface, currentClass);
         }
         else {
-            currentClass.logger('There is no interface given to compare with!', 'warn');
+            currentClass.log('There is no interface given to compare with!', 'warn');
         }
 
         return isImplemented && this;
