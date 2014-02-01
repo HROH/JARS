@@ -1,11 +1,12 @@
 JAR.register({
     MID: 'jar.lang.Function',
-    deps: ['System', '.Object', '.Array']
-}, function(System, Obj, Arr) {
+    deps: ['System', '.Array'],
+    bundle: ['Function-advice', 'Function-combined', 'Function-guards', 'Function-modargs']
+}, function(System, Arr) {
     'use strict';
 
     var lang = this,
-        fnConverter = lang.sandbox('function(fn, arity) { function newFn(){return fn.apply(this,arguments)};newFn.arity=arity||fn.arity||fn.length;return newFn;}', '__SYSTEM__'),
+        fnConverter = lang.sandbox('function(fn, arity) { var newFn=function(){return fn.apply(this,arguments)};newFn.arity=arity||fn.arity||fn.length;return newFn;}', '__SYSTEM__'),
         fromArgs = Arr.from,
         FunctionCopy, apply;
 
