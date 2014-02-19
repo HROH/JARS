@@ -390,7 +390,7 @@
          * @param {String} moduleName
          * @param {String} path
          */
-        function addScript(moduleName, path, onLoad) {
+        function addScript(moduleName, path) {
             var script = doc.createElement('script');
 
             head.appendChild(script);
@@ -556,7 +556,7 @@
              * 
              * @memberof Loader~
              */
-            MSG_DEPENDENCIES_FOUND = 7,
+            MSG_CIRCULAR_DEPENDENCIES_FOUND = 7,
             /**
              * @access private
              * 
@@ -564,7 +564,7 @@
              * 
              * @memberof Loader~
              */
-            MSG_DEPENDENCY_FOUND = 8,
+            MSG_DEPENDENCIES_FOUND = 8,
             /**
              * @access private
              * 
@@ -572,7 +572,7 @@
              * 
              * @memberof Loader~
              */
-            MSG_MODULE_ALREADY_LOADED = 9,
+            MSG_DEPENDENCY_FOUND = 9,
             /**
              * @access private
              * 
@@ -580,7 +580,7 @@
              * 
              * @memberof Loader~
              */
-            MSG_MODULE_ALREADY_LOADED_MANUAL = 10,
+            MSG_MODULE_ALREADY_LOADED = 10,
             /**
              * @access private
              * 
@@ -588,7 +588,7 @@
              * 
              * @memberof Loader~
              */
-            MSG_MODULE_ALREADY_LOADING = 11,
+            MSG_MODULE_ALREADY_LOADED_MANUAL = 11,
             /**
              * @access private
              * 
@@ -596,7 +596,7 @@
              * 
              * @memberof Loader~
              */
-            MSG_MODULE_ALREADY_REGISTERED = 12,
+            MSG_MODULE_ALREADY_LOADING = 12,
             /**
              * @access private
              * 
@@ -604,7 +604,7 @@
              * 
              * @memberof Loader~
              */
-            MSG_MODULE_LOADED = 13,
+            MSG_MODULE_ALREADY_REGISTERED = 13,
             /**
              * @access private
              * 
@@ -612,7 +612,7 @@
              * 
              * @memberof Loader~
              */
-            MSG_MODULE_LOADED_MANUAL = 14,
+            MSG_MODULE_LOADED = 14,
             /**
              * @access private
              * 
@@ -620,7 +620,7 @@
              * 
              * @memberof Loader~
              */
-            MSG_MODULE_LOADING = 15,
+            MSG_MODULE_LOADED_MANUAL = 15,
             /**
              * @access private
              * 
@@ -628,7 +628,7 @@
              * 
              * @memberof Loader~
              */
-            MSG_MODULE_NAME_INVALID = 16,
+            MSG_MODULE_LOADING = 16,
             /**
              * @access private
              * 
@@ -636,7 +636,7 @@
              * 
              * @memberof Loader~
              */
-            MSG_MODULE_RECOVERING = 17,
+            MSG_MODULE_NAME_INVALID = 17,
             /**
              * @access private
              * 
@@ -644,7 +644,7 @@
              * 
              * @memberof Loader~
              */
-            MSG_MODULE_REGISTERING = 18,
+            MSG_MODULE_RECOVERING = 18,
             /**
              * @access private
              * 
@@ -652,7 +652,7 @@
              * 
              * @memberof Loader~
              */
-            MSG_MODULE_REQUESTED = 19,
+            MSG_MODULE_REGISTERING = 19,
             /**
              * @access private
              * 
@@ -660,7 +660,7 @@
              * 
              * @memberof Loader~
              */
-            MSG_MODULE_SUBSCRIBED = 20,
+            MSG_MODULE_REQUESTED = 20,
             /**
              * @access private
              * 
@@ -668,7 +668,7 @@
              * 
              * @memberof Loader~
              */
-            MSG_MODULE_PUBLISHED = 21,
+            MSG_MODULE_SUBSCRIBED = 21,
             /**
              * @access private
              * 
@@ -676,7 +676,7 @@
              * 
              * @memberof Loader~
              */
-            MSG_TIMEOUT = 22,
+            MSG_MODULE_PUBLISHED = 22,
             /**
              * @access private
              * 
@@ -684,7 +684,15 @@
              * 
              * @memberof Loader~
              */
-            MSG_PLUGIN_NOT_FOUND = 23,
+            MSG_TIMEOUT = 23,
+            /**
+             * @access private
+             * 
+             * @const {Number}
+             * 
+             * @memberof Loader~
+             */
+            MSG_PLUGIN_NOT_FOUND = 24,
             // Module states
             /**
              * @access private
@@ -752,7 +760,8 @@
              * @memberof Loader~
              */
             MODULE_BUNDLE_LOADED = 2,
-            Module, currentModuleName, currentLoader, loaderManagerNormalize, loaderManagerLogMessage, loaderManagerSetModuleConfig, loaderManagerImport;
+            Module, currentModuleName, currentLoader,
+            loaderManagerNormalize, loaderManagerLogMessage, loaderManagerSetModuleConfig, loaderManagerImport;
 
         Module = (function moduleSetup() {
             /**
@@ -895,13 +904,23 @@
                 setBundleLoaded: function() {
                     var module = this,
                         bundleName = loaderManagerGetBundleName(module.name),
-                        messageID = module.bundle.length ? MSG_BUNDLE_LOADED : MSG_BUNDLE_NOT_DEFINED;
+                        messageType = module.bundle.length ? MSG_BUNDLE_LOADED : MSG_BUNDLE_NOT_DEFINED;
 
                     module.bundleState = MODULE_BUNDLE_LOADED;
 
-                    loaderManagerLogMessage(messageID, bundleName);
+                    loaderManagerLogMessage(messageType, bundleName);
 
                     currentLoader.notify(bundleName);
+                },
+
+                getAllDependencies: function() {
+                    var module = this,
+                        implizitDependency = module.dep,
+                        dependencies = module.deps ? module.deps.slice() : [];
+
+                    implizitDependency && dependencies.unshift(implizitDependency);
+
+                    return dependencies;
                 },
                 /**
                  * @access public
@@ -957,14 +976,14 @@
                 bundleReady: function() {
                     var module = this,
                         bundleName = loaderManagerGetBundleName(module.name),
-                        messageID = module.bundle.length ? MSG_BUNDLE_LOADED : MSG_BUNDLE_NOT_DEFINED;
+                        messageType = module.bundle.length ? MSG_BUNDLE_LOADED : MSG_BUNDLE_NOT_DEFINED;
 
                     if (!module.isBundleState(MODULE_BUNDLE_LOADED)) {
                         module.setBundleState(MODULE_BUNDLE_LOADED);
 
                         module.bundleState = MODULE_BUNDLE_LOADED;
 
-                        loaderManagerLogMessage(messageID, bundleName);
+                        loaderManagerLogMessage(messageType, bundleName);
 
                         currentLoader.notify(bundleName);
                     }
@@ -1072,7 +1091,6 @@
                 attemptLoadBundle = replaceBundle(attemptLoad),
                 loaderManagerLog;
 
-
             /**
              * 
              * @param {String} message
@@ -1150,6 +1168,7 @@
             }
 
             setTypeForMessages([
+            MSG_CIRCULAR_DEPENDENCIES_FOUND,
             MSG_MODULE_NAME_INVALID,
             MSG_PLUGIN_NOT_FOUND,
             MSG_TIMEOUT], 'error');
@@ -1171,12 +1190,15 @@
             messageTemplates[MSG_BUNDLE_NOT_DEFINED] = replaceWhy(attemptLoadBundle, 'bundle is not defined');
             messageTemplates[MSG_BUNDLE_REQUESTED] = replaceBundle(requested);
 
+            messageTemplates[MSG_CIRCULAR_DEPENDENCIES_FOUND] = replaceModule('found circular dependencies "{{deps}}" for {{what}}');
+
             messageTemplates[MSG_DEPENDENCIES_FOUND] = replaceModule('found explizit dependencies "{{deps}}" for {{what}}');
             messageTemplates[MSG_DEPENDENCY_FOUND] = replaceModule('found implizit dependency "{{dep}}" for {{what}}');
 
             messageTemplates[MSG_MODULE_ALREADY_LOADED] = replaceAlreadyLoaded(attemptLoadModule);
             messageTemplates[MSG_MODULE_ALREADY_LOADED_MANUAL] = replaceAlreadyLoaded(attemptLoadModule) + ' manual';
             messageTemplates[MSG_MODULE_ALREADY_LOADING] = replaceAlreadyLoading(attemptLoadModule);
+
             messageTemplates[MSG_MODULE_ALREADY_REGISTERED] = replaceWhy(replaceModule(attemptedTo + 'register {{what}} but {{why}}'), already + 'registered');
 
             messageTemplates[MSG_MODULE_LOADED] = replaceModule(endLoad);
@@ -1307,7 +1329,7 @@
              */
             function loaderManagerImportModule(moduleName) {
                 var module = loaderManagerGetModule(moduleName),
-                    messageID;
+                    messageType;
 
                 loaderManagerLogMessage(MSG_MODULE_REQUESTED, moduleName);
 
@@ -1325,9 +1347,17 @@
                     SourceManager.addScript(moduleName, module.getFullPath('js'), module.getConfig('adapter'));
                 }
                 else {
-                    messageID = module.isState(MODULE_LOADED) ? MSG_MODULE_ALREADY_LOADED : module.isState(MODULE_LOADED_MANUAL) ? MSG_MODULE_ALREADY_LOADED_MANUAL : MSG_MODULE_ALREADY_LOADING;
+                    if (module.isState(MODULE_LOADED)) {
+                        messageType = MSG_MODULE_ALREADY_LOADED;
+                    }
+                    else if (module.isState(MODULE_LOADED_MANUAL)) {
+                        messageType = MSG_MODULE_ALREADY_LOADED_MANUAL;
+                    }
+                    else {
+                        messageType = MSG_MODULE_ALREADY_LOADING;
+                    }
 
-                    loaderManagerLogMessage(messageID, moduleName);
+                    loaderManagerLogMessage(messageType, moduleName);
                 }
             }
 
@@ -1337,23 +1367,23 @@
              */
             function loaderManagerImportBundle(bundleName) {
                 var module = loaderManagerGetModule(bundleName),
-                    messageID;
+                    messageType;
 
                 loaderManagerLogMessage(MSG_BUNDLE_REQUESTED, bundleName);
 
                 if (module.isBundleState(MODULE_BUNDLE_LOADED)) {
-                    messageID = MSG_BUNDLE_ALREADY_LOADED;
+                    messageType = MSG_BUNDLE_ALREADY_LOADED;
                 }
                 else if (module.isBundleState(MODULE_BUNDLE_LOADING)) {
-                    messageID = MSG_BUNDLE_ALREADY_LOADING;
+                    messageType = MSG_BUNDLE_ALREADY_LOADING;
                 }
                 else {
                     loaderManagerListenFor([module.name], loaderManagerImportBundleForModule);
 
-                    messageID = MSG_BUNDLE_LOADING;
+                    messageType = MSG_BUNDLE_LOADING;
                 }
 
-                loaderManagerLogMessage(messageID, bundleName);
+                loaderManagerLogMessage(messageType, bundleName);
             }
 
             /**
@@ -1398,11 +1428,10 @@
          */
         function loaderManagerListenFor(moduleNames, callback, errback) {
             var moduleQueues = currentLoader.queues,
+                moduleCount = moduleNames.length,
                 idx = 0,
                 pluginArgs = {},
-                moduleCount = moduleNames.length,
-                pluginParts,
-                moduleName, module, queue, onModuleLoaded;
+                pluginParts, moduleName, module, queue, onModuleLoaded;
 
             function onPluginModuleLoaded(pluginName) {
                 var data = pluginArgs[pluginName],
@@ -1539,8 +1568,8 @@
         /**
          * 
          * @param {(string|Array|Object)} modules
-         * @param {String} ref
-         * @param {Boolean} isRootRef
+         * @param {String} referenceModule
+         * @param {Boolean} isRelative
          * 
          * @return {Array.<string>}
          */
@@ -1548,18 +1577,18 @@
             /**
              *
              * @param {Array} modules
-             * @param {String} ref
-             * @param {Boolean} isRootRef
+             * @param {String} referenceModule
+             * @param {Boolean} isRelative
              * 
              * @return {Array.<string>}
              */
-            function normalizeArray(modules, ref, isRootRef) {
+            function normalizeArray(modules, referenceModule, isRelative) {
                 var normalizedModules = [],
                     idx = 0,
                     moduleCount = modules.length;
 
                 for (; idx < moduleCount; idx++) {
-                    normalizedModules = normalizedModules.concat(normalize(modules[idx], ref, isRootRef));
+                    normalizedModules = normalizedModules.concat(normalize(modules[idx], referenceModule, isRelative));
                 }
 
                 return normalizedModules;
@@ -1568,77 +1597,79 @@
             /**
              *
              * @param {Object} modules
-             * @param {String} ref
-             * @param {Boolean} isRootRef
+             * @param {String} referenceModule
+             * @param {Boolean} isRelative
              * 
              * @return {Array}
              */
-            function normalizeObject(modules, ref, isRootRef) {
+            function normalizeObject(modules, referenceModule, isRelative) {
                 var normalizedModules = [],
-                    tmpRef;
+                    tmpReferenceModule;
 
-                for (tmpRef in modules) {
-                    if (hasOwnProp(modules, tmpRef)) {
-                        normalizedModules = normalizedModules.concat(normalize(modules[tmpRef], tmpRef, true));
+                for (tmpReferenceModule in modules) {
+                    if (hasOwnProp(modules, tmpReferenceModule)) {
+                        normalizedModules = normalizedModules.concat(normalize(modules[tmpReferenceModule], tmpReferenceModule, true));
                     }
                 }
 
-                return normalizeArray(normalizedModules, ref, isRootRef);
+                return normalizeArray(normalizedModules, referenceModule, isRelative);
             }
 
             /**
              *
              * @param {String} moduleName
-             * @param {String} ref
-             * @param {Boolean} isRootRef
+             * @param {String} referenceModule
+             * @param {Boolean} isRelative
              *
              * @return {Array}
              */
-            function normalizeString(moduleName, ref, isRootRef) {
-                var dot = '.',
-                    normalizedModules = [];
+            function normalizeString(moduleName, referenceModule, isRelative) {
+                var normalizedModules = [];
 
-                if (moduleName) {
-                    if (ref && isRootRef) {
-                        if (moduleName === dot) {
-                            moduleName = dot = '';
-                        }
-                        else if (!ref.replace(/\./g, '') || (loaderManagerIsPluginRequest(moduleName) && !loaderManagerExtractPluginModuleName(moduleName))) {
-                            dot = '';
-                        }
+                if (!isRelative) {
+                    while (referenceModule && rLeadingDot.test(moduleName)) {
+                        moduleName = moduleName.replace(rLeadingDot, '');
+                        referenceModule = loaderManagerExtractModuleName(referenceModule) || undef;
+                        isRelative = !! referenceModule;
+                    }
+                }
 
-                        moduleName = ref + dot + moduleName;
-                    }
-                    else {
-                        while (ref && rLeadingDot.test(moduleName)) {
-                            moduleName = moduleName.replace(rLeadingDot, '');
-                            ref = loaderManagerExtractModuleName(ref) || undef;
-                            isRootRef = !! ref;
-                        }
+                if (isRelative) {
+                    moduleName = buildAbsoluteModuleName(moduleName, referenceModule);
+                }
 
-                        isRootRef && (moduleName = normalizeString(moduleName || dot, ref, isRootRef)[0]);
-                    }
-
-                    if (rLeadingDot.test(moduleName) && !isRootRef) {
-                        loaderManagerLogMessage(MSG_MODULE_NAME_INVALID, moduleName);
-                    }
-                    else {
-                        normalizedModules = [moduleName];
-                    }
+                if (!moduleName || (!isRelative && rLeadingDot.test(moduleName))) {
+                    loaderManagerLogMessage(MSG_MODULE_NAME_INVALID, moduleName);
+                }
+                else {
+                    normalizedModules = [moduleName];
                 }
 
                 return normalizedModules;
             }
 
+            function buildAbsoluteModuleName(moduleName, referenceModule) {
+                var dot = '.';
+
+                if (!moduleName || moduleName === dot) {
+                    moduleName = dot = '';
+                }
+                else if (!referenceModule.replace(/\./g, '') || (loaderManagerIsPluginRequest(moduleName) && !loaderManagerExtractPluginModuleName(moduleName))) {
+                    dot = '';
+                }
+
+                return referenceModule + dot + moduleName;
+            }
+
             /**
              *
              * @param {(string|Object|Array)} modules
-             * @param {String} ref
-             * @param {Boolean} isRootRef
+             * @param {String} referenceModule
+             * @param {Boolean} isRelative
              *
              * @return {Array.<string>}
              */
-            function normalize(modules, ref, isRootRef) {
+            function normalize(modules, referenceModule, isRelative) {
                 var normalizer;
 
                 if (sxIsObject(modules)) {
@@ -1651,11 +1682,56 @@
                     normalizer = normalizeString;
                 }
 
-                return normalizer ? normalizer(modules, ref, isRootRef) : [];
+                return normalizer ? normalizer(modules, referenceModule, isRelative) : [];
             }
 
             return normalize;
         })();
+
+        function loaderManagerHasCircularDependencies(moduleName) {
+            var circularDependencies = loaderManagerFindCircularDependencies(moduleName),
+                hasCircularDependency = !!circularDependencies.length;
+
+            if (hasCircularDependency) {
+                loaderManagerLogMessage(MSG_CIRCULAR_DEPENDENCIES_FOUND, moduleName, {
+                    deps: circularDependencies.join(separator)
+                });
+            }
+
+            return hasCircularDependency;
+        }
+
+        // TODO is there a more performant way to check for circular dependencies?
+        function loaderManagerFindCircularDependencies(moduleName, traversedModules) {
+            var module = loaderManagerGetModule(moduleName),
+                dependencies = module.getAllDependencies(),
+                depLen = dependencies.length,
+                idx = 0,
+                circularDependencies = [];
+
+            moduleName = module.name;
+            traversedModules = traversedModules || {};
+
+            if (moduleName in traversedModules) {
+                circularDependencies = [moduleName];
+            }
+            else {
+                traversedModules[moduleName] = true;
+
+                for (; idx < depLen; idx++) {
+                    circularDependencies = loaderManagerFindCircularDependencies(dependencies[idx], traversedModules);
+
+                    if (circularDependencies.length) {
+                        circularDependencies.unshift(moduleName);
+                        break;
+                    }
+                }
+
+                delete traversedModules[moduleName];
+            }
+
+            return circularDependencies;
+        }
 
         /**
          *
@@ -1862,10 +1938,14 @@
              * @return {Module}
              */
             getModule: function(moduleName) {
-                var loader = this,
-                    extract = loaderManagerIsBundleRequest(moduleName) ? loaderManagerExtractModuleName : loaderManagerIsPluginRequest(moduleName) ? loaderManagerExtractPluginModuleName : null;
+                var loader = this;
 
-                moduleName = extract ? extract(moduleName) : moduleName;
+                if (loaderManagerIsBundleRequest(moduleName)) {
+                    moduleName = loaderManagerExtractModuleName(moduleName);
+                }
+                else if (loaderManagerIsPluginRequest(moduleName)) {
+                    moduleName = loaderManagerExtractPluginModuleName(moduleName);
+                }
 
                 return loader.modules[moduleName] || loader.createModule(moduleName);
             },
@@ -1955,6 +2035,10 @@
                             bundle: bundle.join(separator)
                         });
                     }
+
+                    if (loaderManagerHasCircularDependencies(moduleName)) {
+                        loaderManagerAbort(moduleName);
+                    }
                 }
                 else {
                     loaderManagerLogMessage(MSG_MODULE_ALREADY_REGISTERED, moduleName);
@@ -1999,11 +2083,9 @@
                     sortedModules = loader.sorted,
                     isBundleRequested = loaderManagerIsBundleRequest(moduleName),
                     module = loader.getModule(moduleName),
-                    implizitDependency = module.dep,
-                    dependencies = (module.deps || []).slice();
+                    dependencies = module.getAllDependencies();
 
                 moduleName = module.name;
-                implizitDependency && dependencies.unshift(implizitDependency);
 
                 if (module.isState(MODULE_LOADED)) {
                     if (!hasOwnProp(sortedModules, moduleName)) {
