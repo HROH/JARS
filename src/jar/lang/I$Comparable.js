@@ -2,8 +2,10 @@
 JAR.register({
     MID: 'jar.lang.I$Comparable',
     deps: '.Interface'
-}, function(Iface) {
-    var I$Comparable = new Iface('Comparable', [
+}, function(Interface) {
+    'use strict';
+
+    var I$Comparable = new Interface('Comparable', [
         ['compareTo', 1]
     ]);
 
