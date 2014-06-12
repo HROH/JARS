@@ -1,16 +1,26 @@
 JAR.register({
     MID: 'jar.lang.Interface',
-    deps: ['System', '.Class', '.Array!check|derive']
+    deps: ['System', '.Class', '.Array!check|derive|iterate']
 }, function(System, Class, Arr) {
     'use strict';
 
-    var Interface = Class('Interface', {
+    var interfaceTemplates = [],
+        IMPLEMENTED_METHODS_MISSING = 0,
+        IMPLEMENTOR_MISSING = 1,
+        IMPLEMENTORTYPE_MISMATCH = 2,
+        Interface;
+
+    interfaceTemplates[IMPLEMENTED_METHODS_MISSING] = '${impl} must implement the methods: "${missingMethods}" !';
+    interfaceTemplates[IMPLEMENTOR_MISSING] = 'No Class, instance or Object given to check!';
+    interfaceTemplates[IMPLEMENTORTYPE_MISMATCH] = 'You must provide a Class or instance to check';
+
+    Interface = Class('Interface', {
         _$: {
             name: '',
 
             methods: null,
 
-            log: null,
+            logger: null,
 
             addMethod: function(method) {
                 var methods = this._$methods;
@@ -23,7 +33,9 @@ JAR.register({
             construct: function(iFaceName, methods) {
                 this._$name = iFaceName;
                 this._$methods = Arr.from(methods);
-                this._$log = System.getCustomLog('Interface "#<' + iFaceName + '>"');
+                this._$logger = new System.Logger('Interface "#<' + iFaceName + '>"', {
+                    tpl: interfaceTemplates
+                });
             },
 
             extendz: function(superInterface) {
@@ -40,26 +52,37 @@ JAR.register({
                 return this._$name;
             },
 
-            isImplementedBy: function(object, checkAnyObject) {
-                var log = this._$log,
+            isImplementedBy: function(implementor, checkAny) {
+                var logger = this._$logger,
                     methods = this._$methods,
-                    isObject = checkAnyObject && System.isObject(object),
-                    objectToCheck = Class.isClass(object) ? object.prototype : (Class.isInstance(object) || isObject) ? object : null,
-                    notImplementedMethods;
+                    isImplemented = false,
+                    objectToCheck, notImplementedMethods;
 
-                if (objectToCheck) {
-                    notImplementedMethods = methods.filter(isMethodNotImplemented, objectToCheck).map(transformMethodData);
+                if (implementor) {
+                    objectToCheck = Class.isClass(implementor) ? implementor.prototype : (checkAny || Class.isInstance(implementor)) ? implementor: null;
+                    
+                    if (objectToCheck) {
+                        notImplementedMethods = methods.filter(isMethodNotImplemented, objectToCheck).map(transformMethodData);
 
-                    if (notImplementedMethods.length) {
-                        log((isObject ? 'The given object' : '"' + object.getHash() + '"') + ' must implement the methods: "' + notImplementedMethods.join('", "') + '" !', 'error');
-                        object = false;
+                        if (notImplementedMethods.length) {
+                            logger.error(IMPLEMENTED_METHODS_MISSING, {
+                                impl: (Class.isClass(implementor) || Class.isInstance(implementor)) ? implementor.getHash() : implementor,
+                                missingMethods: notImplementedMethods.join('", "')
+                            });
+                        }
+                        else {
+                            isImplemented = true;
+                        }
+                    }
+                    else {
+                        logger.warn(IMPLEMENTORTYPE_MISMATCH);
                     }
                 }
                 else {
-                    log('No Class, Instance or Object given to check!', 'warn');
+                    logger.warn(IMPLEMENTOR_MISSING);
                 }
 
-                return object;
+                return isImplemented;
             }
         }
     });
@@ -83,15 +106,15 @@ JAR.register({
         return methodData.join(' (arguments: ') + ')';
     }
 
-    function implementzInterface(Iface) {
-        return !System.isA(Iface, Interface) || Iface.isImplementedBy(this);
+    function implementzInterface(iface) {
+        return !System.isA(iface, Interface) || iface.isImplementedBy(this);
     }
 
     /**
      * Checks whether any method of InterFace.methods is defined in the Class
      * Returns the Class if all methods exist false otherwise
      * 
-     * @param Object Iface
+     * @param Object... iface
      * 
      * @return Object
      */
@@ -103,7 +126,7 @@ JAR.register({
             isImplemented = Arr.every(arguments, implementzInterface, currentClass);
         }
         else {
-            currentClass.log('There is no interface given to compare with!', 'warn');
+            currentClass.logger.warn('There is no interface given to compare with!');
         }
 
         return isImplemented && this;
