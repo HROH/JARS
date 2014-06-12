@@ -5,18 +5,21 @@
  */
 JAR.register({
     MID: 'jar.lang',
-    deps: ['.', 'System'],
-    bundle: ['Array', 'Class', 'Function', 'I$Comparable', 'I$Iterable', 'Interface', 'M$Cloneable', 'MixIn', 'Object', 'String']
-}, function(jar, System) {
+    deps: {
+        System: ['.', '!']
+    },
+    bundle: ['Array.*', 'Date', 'Class', 'Function.*', 'I$Comparable', 'I$Iterable', 'Interface', 'M$Cloneable', 'M$Destructable', 'MixIn', 'Object.*', 'String']
+}, function(System, config) {
     'use strict';
 
-    var sandboxes = {},
+    var jar = this,
+        sandboxes = {},
         container = document.documentElement,
         __SANDBOX__ = '__SANDBOX__',
         hasOwn = {}.hasOwnProperty,
         slice = [].slice,
         nativeTypes = {},
-        lang;
+        nativeTypeSandbox, lang;
 
     /**
      * @alias module:"jar.lang"
@@ -73,7 +76,7 @@ JAR.register({
 
         throwErrorIfNoValueSet: function(typeName, isValueSet) {
             if (!isValueSet) {
-                throwTypeError('Reduce of empty' + typeName + 'with no initial value');
+                throwTypeError('Reduce of empty ' + typeName + ' with no initial value');
             }
         },
         /**
@@ -89,40 +92,19 @@ JAR.register({
             return formatString.replace(/x/g, randomHex);
         },
 
-        sandbox: getSandboxValue,
-
-        unsandbox: deleteSandboxValue
+        /**
+         * @access public
+         * 
+         * @memberOf module:"jar.lang"
+         * 
+         * @param {string} domain
+         * 
+         * @return {Sandbox}
+         */
+        sandbox: function(domain) {
+            return sandboxes[domain] || (sandboxes[domain] = new Sandbox(domain));
+        }
     };
-
-    /**
-     * Hack to steal native objects like Object, Array, String, etc. from an iframe
-     * We save the native object in an iframe as a property of the window object
-     * and then access this property for example to extend the Object.prototype
-     * The Object.prototype of the current document won't be affected by this
-     * 
-     * Note: the iframe has to be open all the time to make sure
-     * that the current document has access to the native copies in some browsers
-     * 
-     * You can read more about this {@link http://dean.edwards.name/weblog/2006/11/hooray/|here}
-     * @todo check browser support (should work in all legacy browsers)
-     * 
-     * @access public
-     * 
-     * @memberOf module:"jar.lang"
-     * @inner
-     * 
-     * @param {string} value
-     * @param {string} domain
-     * 
-     * @return {*}
-     */
-    function getSandboxValue(value, domain) {
-        return getSandbox(domain).get(value);
-    }
-
-    function deleteSandboxValue(value, domain) {
-        getSandbox(domain).unset(value);
-    }
 
     function throwTypeError(message) {
         throw TypeError(message);
@@ -185,20 +167,17 @@ JAR.register({
     }
 
     /**
-     * @access private
+     * Hack to steal native objects like Object, Array, String, etc. from an iframe
+     * We save the native object in an iframe as a property of the window object
+     * and then access this property for example to extend the Object.prototype
+     * The Object.prototype of the current document won't be affected by this
      * 
-     * @memberOf module:"jar.lang"
-     * @inner
+     * Note: the iframe has to be open all the time to make sure
+     * that the current document has access to the native copies in some browsers
      * 
-     * @param {string} domain
+     * You can read more about this {@link http://dean.edwards.name/weblog/2006/11/hooray/|here}
+     * @todo check browser support (should work in all legacy browsers)
      * 
-     * @return {Sandbox}
-     */
-    function getSandbox(domain) {
-        return sandboxes[domain] || (sandboxes[domain] = new Sandbox(domain));
-    }
-
-    /**
      * @access private
      * 
      * @class module:"jar.lang"~Sandbox
@@ -237,7 +216,7 @@ JAR.register({
      * 
      * @return {*}
      */
-    Sandbox.prototype.get = function(value) {
+    Sandbox.prototype.add = function(value) {
         var sandbox = this,
             sandboxVars = sandbox[__SANDBOX__],
             sandboxedVar, accessor;
@@ -255,7 +234,7 @@ JAR.register({
         return sandboxedVar;
     };
 
-    Sandbox.prototype.unset = function(value) {
+    Sandbox.prototype.remove = function(value) {
         var sandbox = this,
             sandboxVars = sandbox[__SANDBOX__],
             accessor;
@@ -269,8 +248,10 @@ JAR.register({
         }
     };
 
+    nativeTypeSandbox = lang.sandbox('__SYSTEM__');
+
     function getNativeType(typeString) {
-        var Type = nativeTypes[typeString] || (jar.getConfig('modules').allowProtoOverride ? window[typeString] : getSandboxValue(typeString, '__SYSTEM__'));
+        var Type = nativeTypes[typeString] || (config('allowProtoOverride') ? window[typeString] : nativeTypeSandbox.add(typeString));
 
         if (!nativeTypes[typeString]) {
 
@@ -283,7 +264,7 @@ JAR.register({
     }
 
     function makePluggable(typeString, Type) {
-        var moduleName = jar.getModuleName(),
+        var moduleName = jar.getCurrentModuleName(),
             subModuleName = moduleName + '.' + typeString + '-';
 
         Type.plugIn = function(pluginRequest) {
@@ -293,7 +274,7 @@ JAR.register({
 
 
             if (extensions[0] === 'all') {
-                extensions = moduleName + '.*';
+                extensions = [moduleName + '.*'];
             }
             else {
                 while (idx < extLen && extensions[idx]) {
@@ -301,7 +282,7 @@ JAR.register({
                 }
             }
 
-            jar.lazyImport(extensions, function() {
+            pluginRequest.$importAndLink(extensions, function() {
                 pluginRequest.onSuccess(Type);
             }, pluginRequest.onError);
         };
