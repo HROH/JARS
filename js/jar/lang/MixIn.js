@@ -4,26 +4,38 @@ JAR.register({
 }, function(System, Class, Obj, Arr, Fn) {
     'use strict';
 
-    var RECEIVER_MISSING = 0,
+    // TODO
+    var isClass = Class.isClass,
+        isInstance = Class.isInstance,
+        RECEIVER_MISSING = 0,
         RECEIVER_NOT_ALLOWED = 1,
         mixinTemplates = [],
         MixIn;
 
     mixinTemplates[RECEIVER_MISSING] = 'There is no receiver given!';
-    mixinTemplates[RECEIVER_NOT_ALLOWED] = 'The given receiver "{{receiver}}" is not part of the allowed Classes!';
+    mixinTemplates[RECEIVER_NOT_ALLOWED] = 'The given receiver "${rec}" is not part or instance of the allowed Classes!';
 
     MixIn = Class('MixIn', {
         $: {
-            construct: function(mixInName, toMix, allowedClasses, destructor) {
+            construct: function(mixInName, toMix, options) {
+                var allowedClasses;
+
+                options = options || {};
+
+                allowedClasses = options.classes;
+
                 this._$name = mixInName;
                 this._$toMix = Obj.from(toMix);
-                this._$allowedClasses = Arr.filter(System.isArray(allowedClasses) ? allowedClasses : [allowedClasses], Class.isClass);
-                this._$destructor = destructor;
-                this._$log = System.getCustomLog('MixIn "#<' + mixInName + '>"', mixinTemplates);
+                this._$allowAny = options.allowAny;
+                this._$allowedClasses = Arr.filter(System.isArray(allowedClasses) ? allowedClasses : [allowedClasses], isClass);
+                this._$destructor = options.destructor;
+                this._$logger = new System.Logger('MixIn "#<' + mixInName + '>"', {
+                    tpl: mixinTemplates
+                });
             },
 
-            mixInto: function(receiver, mixInAnyObject) {
-                var log = this._$log,
+            mixInto: function(receiver) {
+                var logger = this._$logger,
                     isReceiverAllowed = Fn.partial(this._$isReceiverAllowed, receiver),
                     toMix = this._$toMix,
                     allowedClasses = this._$allowedClasses,
@@ -31,30 +43,29 @@ JAR.register({
                     objectToExtend;
 
                 if (receiver) {
-
-                    if (Arr.every(allowedClasses, isReceiverAllowed)) {
-                        if (Class.isClass(receiver)) {
+                    if (this._$allowAny || Arr.every(allowedClasses, isReceiverAllowed)) {
+                        if (isClass(receiver)) {
                             objectToExtend = receiver.prototype;
                             receiver.addDestructor(destructor);
                         }
-                        else if (Class.isInstance(receiver)) {
+                        else {
                             objectToExtend = receiver;
-                            receiver.Class.addDestructor(destructor, receiver);
-                        }
-                        else if (mixInAnyObject && System.isObject(receiver)) {
-                            objectToExtend = receiver;
+
+                            if (isInstance(receiver)) {
+                                receiver.Class.addDestructor(destructor, receiver);
+                            }
                         }
 
                         objectToExtend && Obj.extend(objectToExtend, toMix);
                     }
                     else {
-                        log(RECEIVER_NOT_ALLOWED, 'warn', {
-                            receiver: receiver
+                        logger.warn(RECEIVER_NOT_ALLOWED, {
+                            rec: (isClass(receiver) || isInstance(receiver)) ? receiver.getHash() : receiver
                         });
                     }
                 }
                 else {
-                    log(RECEIVER_MISSING, 'warn');
+                    logger.warn(RECEIVER_MISSING);
                 }
 
                 return receiver;
@@ -68,9 +79,11 @@ JAR.register({
         _$: {
             name: '',
 
-            log: null,
+            logger: null,
 
             toMix: null,
+
+            allowAny: false,
 
             allowedClasses: null,
 
@@ -82,15 +95,19 @@ JAR.register({
         }
     });
 
+    function checkAndMixInto(mixIn) {
+        if (System.isA(mixIn, MixIn)) {
+            mixIn.mixInto(this);
+        }
+    }
+
     /**
      * Define a mixin-method that mixes the MixIn into the Class
      * It is available for every Class created with jar.lang.Class()
      * as soon as this module is loaded
      */
-    function mixin(mixIn) {
-        if (System.isA(mixIn, MixIn)) {
-            mixIn.mixInto(this);
-        }
+    function mixin() {
+        Arr.each(arguments, checkAndMixInto, this);
 
         return this;
     }
