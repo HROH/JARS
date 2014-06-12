@@ -1,55 +1,61 @@
 JAR.register({
     MID: 'jar.lang.Class',
-    deps: ['System', '..' /*(jar)*/ , '.Object!all', '.Array!check|search|manipulate']
-}, function(System, jar, Obj, Arr) {
+    deps: ['System', '..' /* jar */ , '.Object!all', '.Array!check|iterate|manipulate|search', '.Function!advice']
+}, function(System, jar, Obj, Arr, Fn) {
     'use strict';
 
     var lang = this,
         isA = System.isA,
         isFunction = System.isFunction,
-        getCurrentModuleName = jar.getModuleName,
+        hasOwn = Obj.hasOwn,
+        getCurrentModuleName = jar.getCurrentModuleName,
         useModule = jar.use,
-        sandboxDomain = '__SYSTEM__.Class',
-        MetaClass = lang.sandbox('Function', sandboxDomain),
+        metaClassSandbox = lang.sandbox('__SYSTEM__.Class'),
+        MetaClass = metaClassSandbox.add('Function'),
         protectedIdentifier = '_$',
-        privateIdentifier = '_',
-        accessIdentifiers = Arr(protectedIdentifier, privateIdentifier),
+        //privateIdentifier = '_',
+        accessIdentifiers = Obj.from({
+            _: 'private',
+            _$: 'protected'
+        }),
         excludeOverride = Arr('Class', 'constructor', 'getHash', '$proxy'),
         rClass = /^[A-Z]\w+$/,
         Classes = Obj(),
-        classBluePrint = ['(function() {var _', '=function ', '() { return this instanceof _', ' ? _', '.New(this,arguments):_', '.New.apply(_', ',arguments);};return _', ';})();'],
+        classBluePrint = ['(function(){function ', '(){return this instanceof ', '?', '.New(this,arguments):', '.New.apply(', ',arguments)};return ', '})()'],
         MSG_ALREADY_DESTRUCTED = 0,
         MSG_INVALID_OR_EXISTING_CLASS = 1,
         MSG_WRONG_CLASS = 2,
         MSG_WRONG_CLASS_AND_MODULE = 3,
         MSG_WRONG_CONTEXT = 4,
         MSG_WRONG_MODULE = 5,
-        ClassPrivilegedMethods, ClassProtectedProps, classFactoryLog;
+        ClassPrivilegedMethods, ClassProtectedProperties, classFactoryLogger;
 
-    classFactoryLog = (function classFactoryLogSetup() {
+    classFactoryLogger = (function classFactoryLoggerSetup() {
         var classFactoryMessageTemplates = [],
             proxyFailed = 'Proxy failed! ',
-            instanceMustBe = '{{instanceHash}} must be ',
-            instanceOfClass = 'an instance of {{classHash}}',
-            inModules = 'in one of the following modules: {{missingAccess}}, but has only access to {{hasAccess}}';
+            instanceMustBe = '${instanceHash} must be ',
+            instanceOfClass = 'an instance of ${classHash}',
+            inModules = 'in one of the following modules: ${missingAccess}, but has only access to ${hasAccess}';
 
-        classFactoryMessageTemplates[MSG_ALREADY_DESTRUCTED] = proxyFailed + '{{hash}} was already destructed!';
-        classFactoryMessageTemplates[MSG_INVALID_OR_EXISTING_CLASS] = 'Illegal or already existing Classname: {{name}}';
+        classFactoryMessageTemplates[MSG_ALREADY_DESTRUCTED] = proxyFailed + '${hash} was already destructed!';
+        classFactoryMessageTemplates[MSG_INVALID_OR_EXISTING_CLASS] = 'Illegal or already existing Classname: ${name}';
         classFactoryMessageTemplates[MSG_WRONG_CLASS] = proxyFailed + instanceMustBe + instanceOfClass + '!';
         classFactoryMessageTemplates[MSG_WRONG_CLASS_AND_MODULE] = proxyFailed + instanceMustBe + instanceOfClass + ' or ' + inModules + '!';
         classFactoryMessageTemplates[MSG_WRONG_CONTEXT] = proxyFailed + 'Method was called in wrong context!';
         classFactoryMessageTemplates[MSG_WRONG_MODULE] = proxyFailed + instanceMustBe + inModules + '!';
 
-        return System.getCustomLog(getCurrentModuleName(), classFactoryMessageTemplates);
+        return System.Logger.forCurrentModule({
+            tpl: classFactoryMessageTemplates
+        });
     })();
 
     function proxyClass(Class, method, args) {
         var classHash = Class.getHash(),
-            ClassHidden = Classes[classHash],
+            classHidden = Classes[classHash],
             result;
 
-        if (ClassHidden) {
-            result = proxy(Class, ClassHidden, method, args);
+        if (classHidden) {
+            result = proxy(Class, classHidden, method, args);
         }
         else {
             proxyDestructed(classHash);
@@ -58,19 +64,19 @@ JAR.register({
         return result;
     }
 
-    function proxyInstance(Instance, method, args) {
-        var Class = Instance.Class,
+    function proxyInstance(instance, method, args) {
+        var Class = instance.Class,
             classHash = Class.getHash(),
-            ClassHidden = Classes[classHash],
-            ClassHiddenProtectedProps, instanceHash, InstanceHidden, result;
+            classHidden = Classes[classHash],
+            classHiddenProtectedProps, instanceHash, instanceHidden, result;
 
-        if (ClassHidden) {
-            ClassHiddenProtectedProps = ClassHidden[protectedIdentifier];
-            instanceHash = Instance.getHash();
-            InstanceHidden = ClassHiddenProtectedProps._$Instances[instanceHash];
+        if (classHidden) {
+            classHiddenProtectedProps = classHidden[protectedIdentifier];
+            instanceHash = instance.getHash();
+            instanceHidden = classHiddenProtectedProps._$instances[instanceHash];
 
-            if (InstanceHidden) {
-                result = proxy(Instance, InstanceHidden, method, args);
+            if (instanceHidden) {
+                result = proxy(instance, instanceHidden, method, args);
             }
             else {
                 proxyDestructed(instanceHash);
@@ -83,42 +89,41 @@ JAR.register({
         return result;
     }
 
-    function proxy(InstanceOrClass, InstanceOrClassHidden, method, args) {
-        var result, inPrivileged = InstanceOrClassHidden.$inPrivileged;
+    function proxy(instanceOrClass, instanceOrClassHidden, method, args) {
+        var inPrivileged = instanceOrClassHidden.$inPrivileged,
+            result;
 
-        inPrivileged || prepareBeforeProxy(InstanceOrClass, InstanceOrClassHidden);
+        inPrivileged || prepareBeforeProxy(instanceOrClass, instanceOrClassHidden, protectedIdentifier);
 
-        result = method.apply(InstanceOrClass, args || []);
+        result = method.apply(instanceOrClass, args || []);
 
-        inPrivileged || cleanupAfterProxy(InstanceOrClass, InstanceOrClassHidden);
+        inPrivileged || cleanupAfterProxy(instanceOrClass, instanceOrClassHidden, protectedIdentifier);
 
         return result;
     }
 
-    function prepareBeforeProxy(InstanceOrClass, InstanceOrClassHidden) {
-        var protectedProps = InstanceOrClassHidden[protectedIdentifier];
+    function prepareBeforeProxy(instanceOrClass, instanceOrClassHidden, accessIdentifier) {
+        instanceOrClassHidden.$inPrivileged = true;
 
-        InstanceOrClassHidden.$inPrivileged = true;
-
-        Obj.extend(InstanceOrClass, protectedProps);
+        Obj.extend(instanceOrClass, instanceOrClassHidden[accessIdentifier]);
     }
 
-    function cleanupAfterProxy(InstanceOrClass, InstanceOrClassHidden) {
-        var protectedProps = InstanceOrClassHidden[protectedIdentifier];
+    function cleanupAfterProxy(instanceOrClass, instanceOrClassHidden, accessIdentifier) {
+        instanceOrClassHidden.$inPrivileged = false;
 
-        InstanceOrClassHidden.$inPrivileged = false;
+        instanceOrClassHidden[accessIdentifier].each(updateHiddenProperty, instanceOrClass);
+    }
 
-        protectedProps.each(function(value, prop) {
-            if (InstanceOrClass[prop] !== value) {
-                protectedProps[prop] = InstanceOrClass[prop];
-            }
+    function updateHiddenProperty(value, property, hiddenProps) {
+        if (this[property] !== value) {
+            hiddenProps[property] = this[property];
+        }
 
-            delete InstanceOrClass[prop];
-        });
+        delete this[property];
     }
 
     function proxyDestructed(destructedHash) {
-        classFactoryLog(MSG_ALREADY_DESTRUCTED, 'error', {
+        classFactoryLogger.error(MSG_ALREADY_DESTRUCTED, {
             hash: destructedHash
         });
     }
@@ -129,15 +134,15 @@ JAR.register({
             isProxyDataCollected = false;
 
         function innerProxy() {
-            var Instance, method, args, result;
+            var instance, method, args, result;
 
             if (proxyType === 'instance') {
-                Instance = this,
+                instance = this,
                 method = proxyData.method,
                 args = arguments;
             }
             else {
-                Instance = arguments[0];
+                instance = arguments[0];
                 method = arguments[1];
                 args = arguments[2];
 
@@ -153,8 +158,8 @@ JAR.register({
                 }
             }
 
-            if (isProxyAllowed(Instance, Class, moduleName)) {
-                result = proxyInstance(Instance, method, args);
+            if (isProxyAllowed(instance, Class, moduleName)) {
+                result = proxyInstance(instance, method, args);
             }
 
             return result;
@@ -163,50 +168,54 @@ JAR.register({
         return innerProxy;
     }
 
-    function isProxyAllowed(Instance, Class, moduleName) {
+    function createProxy() {
+        return createProxyFor('module', {
+            module: getCurrentModuleName()
+        });
+    }
+
+    function createProxyForPrivilegedMethod(method) {
+        var privilegedMethod = createProxyFor('instance', {
+            method: method,
+            Class: this
+        });
+
+        privilegedMethod.arity = method.length || method.arity || 0;
+
+        return privilegedMethod;
+    }
+
+    function isProxyAllowed(instance, Class, moduleName) {
         var canProxy = false,
-            allowModuleAccess = !! moduleName,
-            allowClassAccess = isClass(Class),
-            instanceHash, InstanceClass, failData, failMessage;
+            shouldHaveModuleAccess = !! moduleName,
+            shouldHaveClassAccess = isClass(Class),
+            failMessage = MSG_WRONG_CONTEXT,
+            instanceClass, failData;
 
-        if (isInstance(Instance)) {
-            instanceHash = Instance.getHash();
-
+        if (isInstance(instance)) {
             failData = Obj.from({
-                instanceHash: instanceHash
+                instanceHash: instance.getHash()
             });
 
-            if (allowModuleAccess) {
-                InstanceClass = Instance.Class;
+            instanceClass = instance.Class;
 
-                canProxy = allowClassAccess ? InstanceClass.canAccessClass(Class) : InstanceClass.canAccessModule(moduleName);
-
-                if (!canProxy) {
-                    failMessage = MSG_WRONG_MODULE;
-                    failData.extend({
-                        hasAccess: InstanceClass.getModuleAccess().join(', '),
-                        missingAccess: allowClassAccess ? Class.getModuleAccess().join(', ') : moduleName
-                    });
-                }
+            if (shouldHaveModuleAccess && !(canProxy = shouldHaveClassAccess ? instanceClass.canAccessClass(Class) : instanceClass.canAccessModule(moduleName))) {
+                failMessage = MSG_WRONG_MODULE;
+                failData.extend({
+                    hasAccess: instanceClass.getModuleAccess().join(', '),
+                    missingAccess: shouldHaveClassAccess ? Class.getModuleAccess().join(', ') : moduleName
+                });
             }
 
-            if (!canProxy && allowClassAccess) {
-                if (isA(Instance, Class)) {
-                    canProxy = true;
-                }
-                else {
-                    failMessage = allowModuleAccess ? MSG_WRONG_CLASS_AND_MODULE : MSG_WRONG_CLASS;
-                    failData.extend({
-                        classHash: Class.getHash()
-                    });
-                }
+            if (!canProxy && shouldHaveClassAccess && !(canProxy = isA(instance, Class))) {
+                failMessage = shouldHaveModuleAccess ? MSG_WRONG_CLASS_AND_MODULE : MSG_WRONG_CLASS;
+                failData.extend({
+                    classHash: Class.getHash()
+                });
             }
         }
-        else {
-            failMessage = MSG_WRONG_CONTEXT;
-        }
 
-        canProxy || classFactoryLog(failMessage, 'error', failData);
+        canProxy || classFactoryLogger.error(failMessage, failData);
 
         return canProxy;
     }
@@ -221,40 +230,32 @@ JAR.register({
         return allClasses;
     }
 
-    function retrieveSubclasses(subclasses, subclassData) {
-        var SubClass = subclassData.Class;
+    function retrieveSubclasses(subClasses, SubClass) {
+        subClasses.push(SubClass);
+        subClasses.merge(SubClass.getSubClasses(true));
 
-        subclasses.push(SubClass);
-        subclasses.merge(SubClass.getSubClasses());
-
-        return subclasses;
+        return subClasses;
     }
 
     function retrieveInstances(instances, instanceData) {
-        instances.push(instanceData.Instance);
+        instances.push(instanceData.instance);
 
         return instances;
     }
 
-    function retrieveSubclassInstances(instances, subclassData) {
-        return instances.merge(subclassData.Class.getInstances(true));
+    function retrieveSubClassInstances(instances, SubClass) {
+        return instances.merge(SubClass.getInstances(true));
     }
 
-    function destructInstance(Instance) {
-        Instance.Class.destruct(Instance);
+    function destructInstance(instance) {
+        instance.Class.destruct(instance);
     }
 
-    function destructSubclass(SubClass) {
-        SubClass.destruct();
+    function destructSubClass(SubClass) {
+        SubClass.destruct(SubClass);
     }
 
-    function addPropertiesToPrototype(proto, properties, accessIdentifier) {
-        Obj.each(properties, function(value, property) {
-            proto[accessIdentifier + property] = value;
-        });
-    }
-
-    ClassProtectedProps = Obj.from({
+    ClassProtectedProperties = Obj.from({
         _$isAbstract: false,
 
         _$isFinal: false,
@@ -266,68 +267,56 @@ JAR.register({
         _$skipCtor: false,
 
         _$superClass: null,
+
+        _$modBaseName: null,
+
+        _$modAccess: null,
         /**
-         * @param {string} methodName
-         * @param {function()} method
+         * @param {string} method
+         * @param {function()} methodName
          */
-        _$overrideMethod: function(methodName, method) {
+        _$overrideMethod: function(method, methodName) {
             var Class = this,
-                ClassHiddenProto = Class._$proto,
+                classHiddenProto = Class._$proto,
                 protoToOverride,
                 SuperClass = Class._$superClass,
-                SuperClassHiddenProto,
-                superProto, methodToOverride, superMethod;
+                superClassHiddenProto,
+                superProto, superMethod, currentSuper;
 
-            // Never override Class()-, constructor()- and getHash()-methods
+            // Never override Class()-, constructor()-, $proxy()- and getHash()-methods
             if (SuperClass && isFunction(method) && !excludeOverride.contains(methodName)) {
-                SuperClassHiddenProto = Classes[SuperClass.getHash()][protectedIdentifier]._$proto;
+                superClassHiddenProto = Classes[SuperClass.getHash()][protectedIdentifier]._$proto;
 
                 if (methodName in SuperClass.prototype) {
                     protoToOverride = Class.prototype;
                     superProto = SuperClass.prototype;
                 }
-                else if (methodName in SuperClassHiddenProto) {
-                    protoToOverride = ClassHiddenProto;
-                    superProto = SuperClassHiddenProto;
+                else if (methodName in superClassHiddenProto) {
+                    protoToOverride = classHiddenProto;
+                    superProto = superClassHiddenProto;
                 }
-                
-                superProto && (methodToOverride = superProto[methodName]);
 
-                // check if the method is override a method in the SuperClass.prototype and is not already overridden in the current Class.prototype
-                if (isFunction(methodToOverride) && methodToOverride !== method && (!Obj.hasOwnProperty(protoToOverride, methodName) || protoToOverride[methodName] === method)) {
+                // check if the method is overriding a method in the SuperClass.prototype and is not already overridden in the current Class.prototype
+                if (superProto && isFunction(superProto[methodName]) && superProto[methodName] !== method && (!hasOwn(protoToOverride, methodName) || protoToOverride[methodName] === method)) {
                     superMethod = function $super() {
-                        return methodToOverride.apply(this, arguments);
+                        return superProto[methodName].apply(this, arguments);
                     };
 
-                    protoToOverride[methodName] = function overrideMethod() {
-                        var Instance = this,
-                            result, currentSuper;
-
-                        // if this.$super is already set store it for later
-                        if (Instance.$super) {
-                            currentSuper = Instance.$super;
-                        }
+                    protoToOverride[methodName] = Fn.around(method, function beforeMethodCall() {
+                        currentSuper = this.$super;
 
                         // create a new temporary this.$super that uses the method of the SuperClass.prototype
-                        Instance.$super = superMethod;
+                        this.$super = superMethod;
 
-                        result = method.apply(Instance, arguments);
-
+                    }, function afterMethodCall() {
                         // restore or delete this.$super
                         if (currentSuper) {
-                            Instance.$super = currentSuper;
+                            this.$super = currentSuper;
                         }
                         else {
-                            delete Instance.$super;
+                            delete this.$super;
                         }
-
-                        return result;
-                    };
-
-                    // Fix vor jar.lang.Interface
-                    // Interface checks method.length property for validation
-                    // either set args in Interface to undefined or supply method.arity as fallback
-                    protoToOverride[methodName].arity = method.length || method.arity || 0;
+                    });
                 }
             }
         }
@@ -336,7 +325,6 @@ JAR.register({
     ClassPrivilegedMethods = Obj.from({
         /**
          * Returns the name of the Class like it was passed to 'jar.lang.Class()'
-         * This is probably obsolete - now that we can access it through Class.name (readonly)
          *
          * @return {string} the classname that the Class was created with
          */
@@ -381,10 +369,6 @@ JAR.register({
 
             return moduleAccess;
         },
-
-        log: function(data, type, values) {
-            this._$log(data, type, values);
-        },
         /**
          * @return {boolean} whether this Class has a singleton
          */
@@ -428,8 +412,8 @@ JAR.register({
         /**
          * @return {Array.<Class>} an array of all SubClasses
          */
-        getSubClasses: function() {
-            return this._$subClasses.reduce(retrieveSubclasses, Arr());
+        getSubClasses: function(includeSubclasses) {
+            return includeSubclasses ? this._$subClasses.reduce(retrieveSubclasses, Arr()) : this._$subClasses.values();
         },
         /**
          * Method to mimick classical inheritance in JS
@@ -461,99 +445,87 @@ JAR.register({
          */
         extendz: function(SuperClass) {
             var Class = this,
-                classHash = Class.getHash(),
-                superClassHash, SuperClassHiddenProtectedProps, message;
+                superClassHiddenProtectedProps, message;
 
 
             if (!isClass(SuperClass)) {
                 message = 'There is no SuperClass given!';
             }
-            else if (Class._$superClass) {
-                message = 'The Class already has the SuperClass: "' + Class._$superClass.getHash() + '"!';
-            }
             else if (SuperClass === Class) {
                 message = 'The Class can\'t extend itself!';
             }
-            else if (Class._$Instances.size() || Class._$subClasses.size()) {
+            else if (Class._$superClass) {
+                message = 'The Class already has the SuperClass: "' + Class._$superClass.getHash() + '"!';
+            }
+            else if (Class._$instances.size() || Class._$subClasses.size()) {
                 message = 'The Class already has instances or SubClasses!';
             }
+            else if (SuperClass.isSubClassOf(Class)) {
+                message = 'The given SuperClass: "' + SuperClass.getHash() + '" is already inheriting from this Class!';
+            }
+            else if (SuperClass.isFinal()) {
+                message = 'The given SuperClass: "' + SuperClass.getHash() + '" is final and can\'t be extended!';
+            }
             else {
-                superClassHash = SuperClass.getHash();
+                superClassHiddenProtectedProps = Classes[SuperClass.getHash()][protectedIdentifier];
+                // add SuperClass reference
+                Class._$superClass = SuperClass;
+                // extend own private/protected prototype with that of the SuperClass
+                Class._$proto.extend(superClassHiddenProtectedProps._$proto);
+                // add SubClass reference in the SuperClass
+                superClassHiddenProtectedProps._$subClasses[Class.getHash()] = Class;
 
-                if (SuperClass.isSubClassOf(Class)) {
-                    message = 'The given SuperClass: "' + superClassHash + '" is already inheriting from this Class!';
-                }
-                else {
-                    SuperClassHiddenProtectedProps = Classes[superClassHash][protectedIdentifier];
+                // Prevent the default constructor and objectHash-generation to be executed
+                superClassHiddenProtectedProps._$isProto = true;
+                // Create a new instance of the SuperClass and merge it with the current prototype
+                // to override in the correct order
+                Class.prototype = new SuperClass().merge(Class.prototype);
+                // end inheriting
+                superClassHiddenProtectedProps._$isProto = false;
 
-                    if (SuperClassHiddenProtectedProps._$isFinal) {
-                        message = 'The given SuperClass: "' + superClassHash + '" is final and can\'t be extended!';
-                    }
-                    else {
-                        // add SuperClass reference
-                        Class._$superClass = SuperClass;
-                        // extend own private/protected prototype with that of the SuperClass
-                        Class._$proto.extend(SuperClassHiddenProtectedProps._$proto);
-                        // add SubClass reference in the SuperClass
-                        SuperClassHiddenProtectedProps._$subClasses[classHash] = Classes[classHash];
+                // extend Class with static methods of SuperClass
+                Obj.extend(Class, SuperClass);
 
-                        // Prevent the default constructor and objectHash-generation to be executed
-                        SuperClassHiddenProtectedProps._$isProto = true;
-                        // Create a new Instance of the SuperClass and merge it with the current prototype
-                        // to override in the correct order
-                        Class.prototype = new SuperClass().merge(Class.prototype);
-                        // end inheriting
-                        SuperClassHiddenProtectedProps._$isProto = false;
-
-                        // extend Class with static methods of SuperClass
-                        Obj.extend(Class, SuperClass);
-
-                        // Check if methods in the public and the private prototype were overridden
-                        // and do it properly so that this.$super() works in Instances
-                        Arr.each([Class.prototype, Class._$proto], function(protoToOverride) {
-                            protoToOverride.each(function(value, prop) {
-                                isFunction(value) && Class._$overrideMethod(prop, value);
-                            });
-                        });
-                    }
-                }
+                // Check if methods in the public and the protected prototype were overridden
+                // and do it properly so that this.$super() works in instances
+                Arr.each([Class.prototype, Class._$proto], overridePrototypeMethods, Class);
             }
 
-            message && Class.log(message, 'warn');
+            message && Class.logger.warn(message);
 
             return this;
         },
         /**
          * @return {Array.<Object>}
          */
-        getInstances: function(includeSubClasses) {
-            var instances = this._$Instances.reduce(retrieveInstances, Arr());
+        getInstances: function(includeSubclasses) {
+            var instances = this._$instances.reduce(retrieveInstances, Arr());
 
-            if (includeSubClasses) {
-                instances = this._$subClasses.reduce(retrieveSubclassInstances, instances);
+            if (includeSubclasses) {
+                instances = this._$subClasses.reduce(retrieveSubClassInstances, instances);
             }
 
             return instances;
         },
 
-        getInstance: function(InstanceHash) {
-            var InstanceData = this._$Instances[InstanceHash];
+        getInstance: function(instanceHash) {
+            var instanceData = this._$instances[instanceHash];
 
-            return InstanceData ? InstanceData.Instance : false;
+            return instanceData ? instanceData.instance : false;
         },
         /**
          * @param {function():void} destructor
-         * @param {Instance} Instance
+         * @param {Object} instance
          * 
          * @return {Class}
          */
-        addDestructor: function(destructor, Instance) {
+        addDestructor: function(destructor, instance) {
             var Class = this,
                 destructors;
 
             if (isFunction(destructor)) {
-                if (isA(Instance, Class)) {
-                    destructors = Class._$Instances[Instance.getHash()].$destructors;
+                if (isA(instance, Class)) {
+                    destructors = Class._$instances[instance.getHash()].$destructors;
                 }
                 else {
                     destructors = Class._$destructors;
@@ -565,26 +537,26 @@ JAR.register({
             return Class;
         },
         /**
-         * @param {Instance} Instance
+         * @param {Object} instance
          *
          * @return {Class}
          */
-        destruct: function(Instance) {
+        destruct: function(instance) {
             var Class = this,
                 SuperClass = Class._$superClass,
-                Instances = Class._$Instances,
+                instances = Class._$instances,
                 destructors,
                 hash;
 
-            if (isInstance(Instance)) {
-                hash = Instance.getHash();
+            if (isInstance(instance)) {
+                hash = instance.getHash();
 
-                if (isA(Instance, Class) && (hash in Instances)) {
-                    if (Class._$single === Instance) {
+                if (isA(instance, Class) && hasOwn(instances, hash)) {
+                    if (Class._$single === instance) {
                         Class._$single = null;
                     }
 
-                    destructors = Instances[hash].$destructors;
+                    destructors = instances[hash].$destructors;
 
                     do {
                         destructors.mergeUnique(Classes[Class.getHash()][protectedIdentifier]._$destructors);
@@ -592,47 +564,45 @@ JAR.register({
                     } while (Class);
 
                     while (destructors.length) {
-                        proxyInstance(Instance, destructors.shift());
+                        proxyInstance(instance, destructors.shift());
                     }
 
-                    delete Instances[hash];
+                    delete instances[hash];
                 }
-                else if (Instance.Class !== Class) {
-                    Instance.Class.destruct(Instance);
+                else if (instance.Class !== Class) {
+                    instance.Class.destruct(instance);
                 }
                 else {
-                    Class.log('"' + hash + '" is already destructed', 'warn');
+                    Class.logger.warn('"' + hash + '" is already destructed');
                 }
 
                 return this;
             }
             /* */
-            else if (Instance === Class) {
+            else if (instance === Class) {
                 hash = Class.getHash();
 
                 Class.getInstances().each(destructInstance);
 
-                Class.getSubClasses().each(destructSubclass);
+                Class.getSubClasses().each(destructSubClass);
 
                 if (SuperClass) {
                     delete Classes[SuperClass.getHash()][protectedIdentifier]._$subClasses[hash];
                 }
 
-                lang.unsandbox(classBluePrint.join(Class.getClassName()), sandboxDomain);
+                metaClassSandbox.remove(classBluePrint.join(Class.getClassName()));
 
                 delete Classes[hash];
 
                 return undefined;
             }
             /* */
-        },
-
-        getProtectedInitialValue: function(property) {
-            var value = this._$proto[protectedIdentifier + property];
-
-            return !isFunction(value) ? value : undefined;
         }
     });
+
+    function overridePrototypeMethods(protoToOverride) {
+        protoToOverride.each(this._$overrideMethod, this);
+    }
 
     function createClassProxyMethod(method, methodName) {
         MetaClass.prototype[methodName] = function() {
@@ -644,64 +614,65 @@ JAR.register({
 
     Obj.merge(MetaClass.prototype, {
         /**
-         * Initiates a new Instance
+         * Initiates a new instance
          * Although it accesses hidden properties on the Class
          * it doesn't use 'proxyClass()' to achieve this
-         * The reason is that this method calls 'construct()' on the Instance
+         * The reason is that this method calls 'construct()' on the instance
          * so there would be a possibility to manipulate the hidden Class-properties
          *
-         * @param {(Instance|Array)} Instance
+         * @param {(Object|Array)} instance
          * @param {Array} args
          * 
-         * @return {(Instance|Object|undefined)} Instance if singleton exists, called directly or via Class.extendz, empty object if abstract, else undefined
+         * @return {(Object|undefined)} instance if singleton exists, called directly or via Class.extendz, empty object if abstract, else undefined
          */
-        New: function(Instance, args) {
+        New: function(instance, args) {
             var Class = this,
+                logger = Class.logger,
                 classHash = Class.getHash(),
                 classHiddenProtectedProps = Classes[classHash][protectedIdentifier],
-                Instances = classHiddenProtectedProps._$Instances,
-                objectHashPrefix, objectHash, construct, returnValue;
+                instances = classHiddenProtectedProps._$instances,
+                instanceHashPrefix, instanceHash, construct, returnValue;
 
             // Class._$isProto is true when a SubClass is inheriting over SubClass.extendz(SuperClass)
-            // In this case we don't need the constructor to be executed neither do we need a new Instance to be saved
+            // In this case we don't need the constructor to be executed neither do we need a new instance to be saved
             if (classHiddenProtectedProps._$isProto) {
-                returnValue = Instance;
+                returnValue = instance;
             }
             // If Class is an abstract Class return an empty Object
             // Returning undefined won't work because of the function behaviour in combination with 'new'
             else if (classHiddenProtectedProps._$isAbstract) {
-                Class.log('You can\'t create a new Instance of an abstract Class.', 'warn');
+                logger.warn('You can\'t create a new instance of an abstract Class.');
 
                 returnValue = {};
             }
             // If a Singleton exists return it and skip the rest
             else if (classHiddenProtectedProps._$single) {
-                Class.log('You can\'t create a new Instance of this Class.', 'warn');
+                logger.warn('You can\'t create a new instance of this Class.');
 
                 returnValue = classHiddenProtectedProps._$single;
             }
             else {
-                if (isA(Instance, Class) && !isFunction(Instance.getHash)) {
-                    // If we have a new Instance that is not stored in the Instances yet
+                if (isA(instance, Class) && !isFunction(instance.getHash)) {
+                    // If we have a new instance that is not stored in the instances yet
                     // create a unique hash for it and store a reference under this hash for later use.
                     // This hash is also used to store the private/protected properties/methods.
                     //
-                    // Note: If an Instance isn't used anymore this reference has to be deleted over the destructor of the Instance
-                    // Otherwise this could lead to memory leaks if there are too many Instances
-                    objectHashPrefix = 'Object #<' + classHiddenProtectedProps._$clsName + '#';
+                    // Note: If an instance isn't used anymore this reference has to be deleted over the destructor of the instance
+                    // Otherwise this could lead to memory leaks if there are too many instances
+                    instanceHashPrefix = 'Object #<' + classHiddenProtectedProps._$clsName + '#';
 
                     do {
-                        objectHash = objectHashPrefix + lang.generateHash('xx-x-x-x-xxx') + '>';
+                        instanceHash = instanceHashPrefix + lang.generateHash('xx-x-x-x-xxx') + '>';
                     }
-                    while (objectHash in Instances);
+                    while (hasOwn(instances, instanceHash));
 
                     // !!!IMPORTANT: never delete or override this method!!!
-                    Instance.getHash = function() {
-                        return objectHash;
+                    instance.getHash = function() {
+                        return instanceHash;
                     };
 
-                    Instances[objectHash] = {
-                        Instance: Instance,
+                    instances[instanceHash] = {
+                        instance: instance,
 
                         $inPrivileged: false,
 
@@ -715,39 +686,39 @@ JAR.register({
                 else {
                     // We came here because Class.New was called directly
                     // [ Class.New(arg1, arg2, ...) <--> new Class(arg1, arg2, ...) ]
-                    // So we have to create a new Instance and return it
+                    // So we have to create a new instance and return it
 
-                    // Copy values from arguments into an array. Just using arguments seemes to be a problem
+                    // Copy values from arguments into an array. Just using arguments seems to be a problem
                     // (at least in chrome 31.0.1650.57 m, but it seems to be the normal case in all browsers),
-                    // because when we reassign Instance, which is arguments[0], arguments is reflecting the change and so does args
-                    // resulting in a wrong value being passed to Instance.construct()
+                    // because when we reassign instance, which is arguments[0], arguments is reflecting the change and so does args
+                    // resulting in a wrong value being passed to instance.construct()
                     //
                     // Example: SomeClass.New(arg1, arg2)
                     //
                     // arguments would first be:
-                    //	{0: arg1 (Instance), 1: arg2 (args)}
+                    //	{0: arg1 (instance), 1: arg2 (args)}
                     //
-                    // after reassinging Instance, arguments is:
-                    //	{0: InstanceOfSomeClass (Instance), 1: arg2 (args)}
+                    // after reassinging instance, arguments is:
+                    //	{0: instanceOfSomeClass (instance), 1: arg2 (args)}
                     //
                     // resulting in:
-                    //	InstanceOfSomeClass.construct(InstanceOfSomeClass, arg2)
+                    //	instanceOfSomeClass.construct(instanceOfSomeClass, arg2)
                     //
                     // instead of:
-                    //	InstanceOfSomeClass.construct(arg1, arg2)
+                    //	instanceOfSomeClass.construct(arg1, arg2)
                     args = Arr.fromArrayLike(arguments);
 
                     classHiddenProtectedProps._$skipCtor = true;
-                    Instance = new Class();
+                    instance = new Class();
                     classHiddenProtectedProps._$skipCtor = false;
 
-                    returnValue = Instance;
+                    returnValue = instance;
                 }
 
-                construct = Instance.construct;
+                construct = instance.construct;
 
                 if (!classHiddenProtectedProps._$skipCtor && construct) {
-                    construct.apply(Instance, args);
+                    construct.apply(instance, args);
                 }
             }
 
@@ -762,7 +733,7 @@ JAR.register({
          * if it doesn't already exist
          * It doesn't use 'proxyClass()' for the same reason as 'Class.New()'
          *
-         * @return {Instance} the created or existing singleton
+         * @return {Object} the created or existing singleton
          */
         singleton: function() {
             var Class = this,
@@ -786,7 +757,7 @@ JAR.register({
          * @return {boolean}
          */
         hasSubClasses: function() {
-            return this.getSubClasses().length > 0;
+            return this.getSubClasses(true).length > 0;
         },
         /**
          *
@@ -832,23 +803,13 @@ JAR.register({
         },
 
         canAccessModule: function(moduleName) {
-            return this.getModuleAccess().some(function(moduleAccess) {
+            return this.getModuleAccess().some(function isModuleNameStartingWith(moduleAccess) {
                 return moduleName.indexOf(moduleAccess) === 0;
             });
         },
 
         createSubClass: function(name, proto, staticProperties) {
-            var Class = this,
-                SubClass;
-
-            if (Class.isFinal()) {
-                Class.log('The Class is final and can\'t be extended!', 'warn');
-            }
-            else {
-                SubClass = ClassFactory(name, proto, staticProperties).extendz(Class);
-            }
-
-            return SubClass;
+            return ClassFactory(name, proto, staticProperties).extendz(this);
         },
 
         createAbstractSubClass: function(name, proto, staticProperties) {
@@ -886,10 +847,10 @@ JAR.register({
     }
 
     /**
-     *
+     * 
      * @param {String} moduleName
      * @param {String} className
-     *
+     * 
      * @return {Class}
      */
     function getClassFromModule(moduleName, className) {
@@ -921,12 +882,12 @@ JAR.register({
     }
 
     /**
-     * @param {Instance} Instance
+     * @param {Object} instance
      *
      * @return {boolean}
      */
-    function isInstance(Instance) {
-        return Instance && isClass(Instance.Class) && isA(Instance, Instance.Class);
+    function isInstance(instance) {
+        return instance && isClass(instance.Class) && isA(instance, instance.Class);
     }
 
     /**
@@ -949,20 +910,40 @@ JAR.register({
     /**
      * @param {(Class|string)} ClassOrHash
      * 
-     * @return {(Array.<Instance>|undefined)}
+     * @return {(Array.<Object>|undefined)}
      */
-    function getInstances(ClassOrHash, includeSubClasses) {
+    function getInstances(ClassOrHash, includeSubclasses) {
         if (!isClass(ClassOrHash)) {
             ClassOrHash = getClass(ClassOrHash);
         }
 
-        return ClassOrHash ? ClassOrHash.getInstances(includeSubClasses) : undefined;
+        return ClassOrHash ? ClassOrHash.getInstances(includeSubclasses) : undefined;
     }
 
-    function createProxy() {
-        return createProxyFor('module', {
-            module: getCurrentModuleName()
-        });
+    function buildAccessLookupPrototype(accessIdentifierAlias, accessIdentifier) {
+        var Class = this,
+            classHidden = Classes[Class.getHash()],
+            proto = Class.prototype,
+            hiddenProto = classHidden[accessIdentifier][accessIdentifier + 'proto'];
+
+        if (hasOwn(proto, accessIdentifier) || hasOwn(proto, accessIdentifierAlias)) {
+            Obj.each(proto[accessIdentifier] || proto[accessIdentifierAlias], function(value, property) {
+                hiddenProto[accessIdentifier + property] = value;
+            });
+
+            delete proto[accessIdentifier];
+            delete proto[accessIdentifierAlias];
+        }
+    }
+
+    function buildPrivilegedMethods(Class) {
+        var proto = Class.prototype;
+
+        if (hasOwn(proto, '$')) {
+            proto.extend(Obj.map(Obj.filter(proto.$, isFunction), createProxyForPrivilegedMethod, Class));
+
+            delete proto.$;
+        }
     }
 
     /**
@@ -992,24 +973,33 @@ JAR.register({
      * @return {function()} Class
      */
     function ClassFactory(name, proto, staticProperties) {
-        var Class, classHash = createClassHash(name),
-            ClassHidden, privilegedFunction;
+        var classHash = createClassHash(name),
+            Class;
 
-        // Extend the prototype with some methods defined in Obj (see module jar.lang.Object)
-        proto = Obj.from(proto || {});
+        if (rClass.test(name) && !hasOwn(Classes, classHash)) {
+            Class = metaClassSandbox.add(classBluePrint.join(name));
 
-        if (rClass.test(name) && !(classHash in Classes)) {
+            Obj.merge(Class, {
+                // Extend the prototype with some methods defined in Obj (see module jar.lang.Object)
+                prototype: Obj.from(proto || {}).extend({
+                    constructor: Class,
 
-            Class = lang.sandbox(classBluePrint.join(name), sandboxDomain);
+                    Class: Class,
 
-            Class.getHash = function() {
-                return classHash;
-            };
+                    toString: function() {
+                        return this.getHash();
+                    }
+                }),
 
-            System.isObject(staticProperties) && Obj.extend(Class, staticProperties);
+                logger: new System.Logger(classHash),
+
+                getHash: function() {
+                    return classHash;
+                }
+            }, staticProperties);
 
             // Store a reference of the Class and define some protected properties
-            ClassHidden = Classes[classHash] = Obj.from({
+            Classes[classHash] = Obj.from({
                 Class: Class,
 
                 $inPrivileged: false,
@@ -1017,13 +1007,7 @@ JAR.register({
                 _$: Obj.from({
                     _$clsName: name,
 
-                    _$log: System.getCustomLog(classHash),
-
                     _$modName: getCurrentModuleName(),
-
-                    _$modBaseName: null,
-
-                    _$modAccess: null,
 
                     _$subClasses: Obj(),
 
@@ -1033,60 +1017,22 @@ JAR.register({
                         })
                     }),
 
-                    _$Instances: Obj(),
+                    _$instances: Obj(),
 
                     _$destructors: Arr()
-                }).extend(ClassProtectedProps),
+                }).extend(ClassProtectedProperties),
                 // TODO
                 _: Obj.from({
                     _proto: Obj()
                 })
             });
 
-            /**
-             * Experimental create Classes with public, protected and privileged methods/properties
-             * Protected methods/properties in a SuperClass can be accessed in a SubClass
-             * 
-             */
-            accessIdentifiers.each(function(accessIdentifier) {
-                if (accessIdentifier in proto) {
-                    addPropertiesToPrototype(ClassHidden[accessIdentifier][accessIdentifier + 'proto'], proto[accessIdentifier], accessIdentifier);
+            accessIdentifiers.each(buildAccessLookupPrototype, Class);
 
-                    delete proto[accessIdentifier];
-                }
-            });
-
-            if ('$' in proto) {
-                proto.extend(Obj.map(proto.$, function(maybeMethod) {
-                    if (isFunction(maybeMethod)) {
-                        privilegedFunction = createProxyFor('instance', {
-                            method: maybeMethod,
-                            Class: Class
-                        });
-
-                        privilegedFunction.arity = maybeMethod.length || maybeMethod.arity || 0;
-
-                        return privilegedFunction;
-                    }
-
-                    return maybeMethod;
-                }));
-
-                delete proto.$;
-            }
-
-            Class.prototype = proto.extend({
-                constructor: Class,
-
-                Class: Class,
-
-                toString: function() {
-                    return this.getHash();
-                }
-            });
+            buildPrivilegedMethods(Class);
         }
         else {
-            classFactoryLog(MSG_INVALID_OR_EXISTING_CLASS, 'warn', {
+            classFactoryLogger.warn(MSG_INVALID_OR_EXISTING_CLASS, {
                 name: name
             });
         }
