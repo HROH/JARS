@@ -1,6 +1,6 @@
 JAR.register({
     MID: 'jar.lang.Object',
-    deps: ['System', '.Array'],
+    deps: ['System', '.Array!iterate|search'],
     bundle: ['Object-derive', 'Object-info', 'Object-iterate', 'Object-reduce']
 }, function(System, Arr) {
     'use strict';
@@ -20,10 +20,9 @@ JAR.register({
          * @return {Object}
          */
         copy: function(deep) {
-
             return (new ObjectCopy()).extend(this, deep);
         },
-        
+
         extend: function() {
             var args = Arr.from(arguments),
                 argsLen = args.length;
@@ -45,30 +44,23 @@ JAR.register({
                 deep = args.pop() || false;
             }
 
-            args.each(function(mergeObject) {
-                var prop;
-
-                mergeLevel++;
-                mergedObjects.push([mergeObject, object]);
-
-                for (prop in mergeObject) {
-                    mergeValue(object, mergeObject, prop, deep, keepDefault);
-                }
-
-                --mergeLevel || (mergedObjects = Arr());
+            args.each(initMerge, {
+                o: object,
+                d: deep,
+                k: keepDefault
             });
 
             return object;
         },
 
-        hasOwnProperty: true
+        hasOwn: Object.prototype.hasOwnProperty
     }, {
         from: fromObject,
 
         fromNative: fromObject
     });
-    
-    hasOwn = ObjectCopy.hasOwnProperty;
+
+    hasOwn = ObjectCopy.hasOwn;
 
     function fromObject(object, deep) {
         return (System.isA(object, ObjectCopy) || !System.isObject(object)) ? object : ObjectCopy.copy(object, deep);
@@ -78,14 +70,32 @@ JAR.register({
         return System.isBoolean(value) || !System.isSet(value);
     }
 
+    function initMerge(mergeObject) {
+        var prop;
+
+        mergeLevel++;
+        mergedObjects.push([mergeObject, this.o]);
+
+        for (prop in mergeObject) {
+            mergeValue(this.o, mergeObject, prop, this.d, this.k);
+        }
+
+        --mergeLevel || (mergedObjects = Arr());
+    }
+
     function mergeValue(obj, mergeObj, prop, deep, keepDefault) {
-        var isOwn, oldValue, newValue, valueToMerge, isOldValueObject;
+        var oldValue, newValue, valueToMerge, isOldValueObject;
 
         if (hasOwn(mergeObj, [prop])) {
             valueToMerge = mergeObj[prop];
-            isOwn = hasOwn(obj, [prop]);
-            keepDefault = isOwn ? keepDefault : false;
-            oldValue = isOwn ? obj[prop] : null;
+
+            if (hasOwn(obj, [prop])) {
+                oldValue = obj[prop];
+            }
+            else {
+                keepDefault = false;
+                oldValue = null;
+            }
 
             isOldValueObject = System.isObject(oldValue);
 
@@ -105,16 +115,13 @@ JAR.register({
     }
 
     function getAlreadyMergedValue(valueToMerge) {
-        var mergedValue;
+        var alreadyMergedData = mergedObjects.find(equalsMergedValue, valueToMerge);
+        
+        return alreadyMergedData ? alreadyMergedData[1] : undefined;
+    }
 
-        // TODO replace with Array#find if no longer experimental
-        mergedObjects.some(function(mergedObjectData) {
-            mergedValue = mergedObjectData[0] === valueToMerge && mergedObjectData[1];
-
-            return mergedValue;
-        });
-
-        return mergedValue;
+    function equalsMergedValue(mergedObjectData) {
+        return mergedObjectData[0] === this;
     }
 
     return ObjectCopy;

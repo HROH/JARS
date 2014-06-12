@@ -1,7 +1,7 @@
 JAR.register({
     MID: 'jar.lang.Function.Function-modargs',
-    deps: ['..', '..Array', 'System']
-}, function(lang, Arr, System) {
+    deps: ['System', '..', '..Array', '..Object!derive']
+}, function(System, lang, Arr, Obj) {
     'use strict';
 
     var FunctionCopy = this,
@@ -14,7 +14,7 @@ JAR.register({
             var fn = this;
 
             return fromFunction(function flippedFn() {
-                return apply(fn, this, fromArgs(arguments).reverse());
+                return apply(fn, this, Arr.reverse(arguments));
             }, fn.arity || fn.length);
         },
 
@@ -57,15 +57,17 @@ JAR.register({
          * 
          * jar.lang.Function.from(function(a) {
          *	return a;
-         * }).preset(value);
+         * }).defaults(value);
          *
          * 
          *
          *
          */
-        preset: function() {
+        defaults: function() {
             return createArgumentsMapper(this, arguments, applyPlaceholderArg);
         }
+    }, {
+        isPlaceholderArg: System.isNull
     });
 
     /**
@@ -94,7 +96,7 @@ JAR.register({
      * @return {*}
      */
     function applyPartialArg(partialArg) {
-        return System.isNull(partialArg) ? this.shift() : partialArg;
+        return FunctionCopy.isPlaceholderArg(partialArg) ? this.shift() : partialArg;
     }
 
     /**
@@ -110,19 +112,11 @@ JAR.register({
         if (newArgs.length) {
             newArg = newArgs.shift();
 
-            System.isNull(newArg) || (placeholderArg = newArg);
+            FunctionCopy.isPlaceholderArg(newArg) || (placeholderArg = newArg);
         }
 
         return placeholderArg;
     }
 
-    return {
-        flip: FunctionCopy.flip,
-
-        curry: FunctionCopy.curry,
-        
-        partial: FunctionCopy.partial,
-        
-        preset: FunctionCopy.preset
-    };
+    return Obj.extract(FunctionCopy, ['curry', 'defaults', 'flip', 'partial']);
 });

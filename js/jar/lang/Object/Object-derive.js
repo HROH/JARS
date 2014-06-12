@@ -1,10 +1,11 @@
 JAR.register({
     MID: 'jar.lang.Object.Object-derive',
-    deps: ['..', '..Array!reduce', '.!info|reduce']
+    deps: ['..', '..Array!reduce', '.!reduce']
 }, function(lang, Arr) {
     'use strict';
 
-    var ObjectCopy = this;
+    var ObjectCopy = this,
+        reduce = ObjectCopy.reduce;
 
     lang.extendNativeType('Object', {
         /**
@@ -16,7 +17,7 @@ JAR.register({
             var object = this;
 
             return Arr.reduce(keys, function(extractedObject, key) {
-                extractedObject[key] = ObjectCopy.prop(object, key);
+                extractedObject[key] = ObjectCopy.hasOwn(object, key) ? object[key] : undefined;
 
                 return extractedObject;
             }, new ObjectCopy());
@@ -30,7 +31,7 @@ JAR.register({
         filter: function(callback, context) {
             var object = this;
 
-            return ObjectCopy.reduce(object, function(filteredObject, value, prop) {
+            return reduce(object, function(filteredObject, value, prop) {
                 if (callback.call(context, value, prop, object)) {
                     filteredObject[prop] = value;
                 }
@@ -47,7 +48,7 @@ JAR.register({
         map: function(callback, context) {
             var object = this;
 
-            return ObjectCopy.reduce(object, function(mappedObject, value, prop) {
+            return reduce(object, function(mappedObject, value, prop) {
                 mappedObject[prop] = callback.call(context, value, prop, object);
 
                 return mappedObject;
@@ -56,24 +57,16 @@ JAR.register({
         /**
          * @return {Object}
          */
-        transpose: function() {
-            return ObjectCopy.reduce(this, transpose, new ObjectCopy());
+        invert: function() {
+            return reduce(this, invert, new ObjectCopy());
         }
     });
 
-    function transpose(transposedObject, value, prop) {
-        transposedObject[value] = prop;
+    function invert(invertedObject, value, prop) {
+        invertedObject[value] = prop;
 
-        return transposedObject;
+        return invertedObject;
     }
 
-    return {
-        extract: ObjectCopy.extract,
-
-        filter: ObjectCopy.filter,
-
-        map: ObjectCopy.map,
-
-        transpose: ObjectCopy.transpose
-    };
+    return ObjectCopy.extract(ObjectCopy, ['extract', 'filter', 'map', 'invert']);
 });

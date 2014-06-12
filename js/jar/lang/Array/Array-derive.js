@@ -1,16 +1,15 @@
 JAR.register({
     MID: 'jar.lang.Array.Array-derive',
-    deps: '..'
-}, function(lang) {
+    deps: ['..', '.!iterate', '..Object!derive']
+}, function(lang, Arr, Obj) {
     'use strict';
 	
-	var ArrayCopy = this,
-		forEach = ArrayCopy.forEach;
+	var forEach = Arr.forEach;
 	
     lang.extendNativeType('Array', {
         filter: function(callback, context) {
             var arr = this,
-                ret = new ArrayCopy();
+                ret = new Arr();
 
             lang.throwErrorIfNotSet('Array', arr, 'filter');
 
@@ -27,7 +26,7 @@ JAR.register({
 
         map: function(callback, context) {
             var arr = this,
-                ret = new ArrayCopy();
+                ret = new Arr();
 
             lang.throwErrorIfNotSet('Array', arr, 'map');
 
@@ -41,9 +40,5 @@ JAR.register({
         }
     });
 
-    return {
-		filter: ArrayCopy.filter,
-		
-		map: ArrayCopy.map
-    };
+    return Obj.extract(Arr, ['filter', 'map']);
 });

@@ -1,7 +1,7 @@
 JAR.register({
     MID: 'jar.lang.Function.Function-combined',
-    deps: ['..', '..Array!reduce', 'System']
-}, function(lang, Arr, System) {
+    deps: ['System', '..', '..Array!reduce', '..Object!derive']
+}, function(System, lang, Arr, Obj) {
     'use strict';
 
     var FunctionCopy = this,
@@ -21,7 +21,7 @@ JAR.register({
             var fn = this,
                 context;
 
-            function scoppedFn() {
+            function proceed() {
                 var result = apply(fn, context, arguments);
                 
                 context = null;
@@ -32,7 +32,7 @@ JAR.register({
             return fromFunction(function wrappedFn() {
                 context = this;
 
-                return apply(wrapperFn, context, [scoppedFn, arguments]);
+                return apply(wrapperFn, context, [proceed, arguments]);
             }, wrapperFn.arity || wrapperFn.length);
         }
     });
@@ -60,11 +60,5 @@ JAR.register({
         return next(result);
     }
 
-    return {
-        compose: FunctionCopy.compose,
-
-        pipeline: FunctionCopy.pipeline,
-        
-        wrap: FunctionCopy.wrap
-    };
+    return Obj.extract(FunctionCopy, ['compose', 'pipeline', 'wrap']);
 });

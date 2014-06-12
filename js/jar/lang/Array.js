@@ -1,38 +1,15 @@
 JAR.register({
     MID: 'jar.lang.Array',
     deps: 'System',
-    bundle: ['Array-check', 'Array-derive', 'Array-manipulate', 'Array-reduce', 'Array-search']
+    bundle: ['Array-check', 'Array-derive', 'Array-iterate', 'Array-manipulate', 'Array-reduce', 'Array-search']
 }, function(System) {
     'use strict';
-
-    var lang = this,
-        ArrayCopy;
 
     /**
      * Extend jar.lang.Array with some useful methods
      * If a native implementation exists it will be used instead
      */
-    ArrayCopy = lang.extendNativeType('Array', {
-        each: function(callback, array) {
-            ArrayCopy.forEach(this, callback, array);
-        },
-
-        forEach: function(callback, context) {
-            var arr = this,
-                idx = 0,
-                len = arr.length >>> 0;
-
-            lang.throwErrorIfNotSet('Array', arr, 'forEach');
-
-            lang.throwErrorIfNoFunction(callback);
-
-            while (idx < len) {
-                if (idx in arr) {
-                    callback.call(context, arr[idx], idx++, arr);
-                }
-            }
-        },
-
+    var ArrayCopy = this.extendNativeType('Array', {
         // add some sugar (example: jar.lang.Array.push(arrayLike, value1, value2, ...) )
         concat: true,
 

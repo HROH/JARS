@@ -19,7 +19,7 @@ JAR.register({
             }
 
             for (prop in object) {
-                if (ObjectCopy.hasOwnProperty(object, prop)) {
+                if (ObjectCopy.hasOwn(object, prop)) {
                     if (isValueSet) {
                         ret = callback(ret, object[prop], prop, object);
                     }

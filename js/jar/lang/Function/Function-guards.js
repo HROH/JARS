@@ -1,6 +1,6 @@
 JAR.register({
     MID: 'jar.lang.Function.Function-guards',
-    deps: ['..', '..Object']
+    deps: ['..', '..Object!derive']
 }, function(lang, Obj) {
     'use strict';
 
@@ -121,17 +121,5 @@ JAR.register({
         return JSON.stringify(args[0]);
     }
 
-    return {
-        debounce: FunctionCopy.debounce,
-
-        throttle: FunctionCopy.throttle,
-
-        memoize: FunctionCopy.memoize,
-
-        once: FunctionCopy.once,
-        
-        callN: FunctionCopy.callN,
-        
-        blockN: FunctionCopy.blockN
-    };
+    return Obj.extract(FunctionCopy, ['debounce', 'throttle', 'memoize', 'once', 'callN', 'blockN']);
 });

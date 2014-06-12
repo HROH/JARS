@@ -7,17 +7,13 @@ JAR.register({
     var ArrayCopy = this;
 
     lang.extendNativeType('Array', {
-        contains: function(searchElement) {
-            return ArrayCopy.indexOf(this, searchElement) !== -1;
+        contains: function(searchElement, fromIndex) {
+            return ArrayCopy.indexOf(this, searchElement, fromIndex) !== -1;
         },
 
-        find: function() {
+        find: createFinder(),
 
-        },
-
-        findIndex: function() {
-
-        },
+        findIndex: createFinder(true),
 
         indexOf: function(searchElement, fromIndex) {
             var arr = this,
@@ -63,6 +59,34 @@ JAR.register({
             return ret;
         }
     });
+
+    function createFinder(returnIndex) {
+        var methodName = 'find' + returnIndex ? 'Index' : '',
+            defaultReturn = returnIndex ? -1 : undefined;
+
+        return function finder(predicate, context) {
+            var arr = this,
+                len = arr.length >>> 0,
+                idx = 0,
+                ret = defaultReturn;
+
+            lang.throwErrorIfNotSet('Array', arr, methodName);
+
+            lang.throwErrorIfNoFunction(predicate);
+
+            for (; idx < len; idx++) {
+                if (idx in arr) {
+                    if (predicate.call(context, arr[idx], idx, arr)) {
+                        ret = returnIndex ? idx : arr[idx];
+
+                        break;
+                    }
+                }
+            }
+
+            return ret;
+        };
+    }
 
     function getFromIndex(fromIndex, defaultIndex, len) {
         var idx = Number(fromIndex),

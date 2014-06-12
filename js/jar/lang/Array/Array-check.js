@@ -1,52 +1,43 @@
 JAR.register({
     MID: 'jar.lang.Array.Array-check',
-    deps: '..'
-}, function(lang) {
+    deps: ['..', '..Object!derive']
+}, function(lang, Obj) {
     'use strict';
-    
+
     var ArrayCopy = this;
 
     lang.extendNativeType('Array', {
-        every: function(callback, context) {
-            var arr = this,
-                len = arr.length >>> 0,
-                idx = 0;
+        every: createCheck(false),
 
-            lang.throwErrorIfNotSet('Array', arr, 'every');
-
-            lang.throwErrorIfNoFunction(callback);
-
-            for (; idx < len; idx++) {
-                if (idx in arr && !callback.call(context, arr[idx], idx, arr)) {
-                    return false;
-                }
-            }
-
-            return true;
-        },
-
-        some: function(callback, context) {
-            var arr = this,
-                len = arr.length >>> 0,
-                idx = 0;
-
-            lang.throwErrorIfNotSet('Array', arr, 'some');
-
-            lang.throwErrorIfNoFunction(callback);
-
-            for (; idx < len; idx++) {
-                if (idx in arr && callback.call(context, arr[idx], idx, arr)) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
+        some: createCheck(true)
     });
 
-    return {
-		every: ArrayCopy.every,
-		
-		some: ArrayCopy.some
-    };
+    function createCheck(expectedResultForBreak) {
+        var methodName = expectedResultForBreak ? 'some' : 'every';
+
+        return function(callback, context) {
+            var arr = this,
+                len = arr.length >>> 0,
+                idx = 0,
+                result;
+
+            lang.throwErrorIfNotSet('Array', arr, methodName);
+
+            lang.throwErrorIfNoFunction(callback);
+
+            for (; idx < len; idx++) {
+                if (idx in arr) {
+                    result = !! callback.call(context, arr[idx], idx, arr);
+
+                    if (result === expectedResultForBreak) {
+                        return expectedResultForBreak;
+                    }
+                }
+            }
+
+            return !expectedResultForBreak;
+        };
+    }
+
+    return Obj.extract(ArrayCopy, ['every', 'some']);
 });

@@ -1,19 +1,22 @@
 JAR.register({
     MID: 'jar.lang.Object.Object-info',
-    deps: ['..', '.!reduce']
-}, function(lang) {
-	'use strict';
-	
-	var ObjectCopy = this,
-		reduce = ObjectCopy.reduce;
-	
+    deps: ['..', '.!reduce|derive']
+}, function(lang, Obj) {
+    'use strict';
+
+    var reduce = Obj.reduce;
+
     lang.extendNativeType('Object', {
         keys: function() {
             return reduce(this, pushKey, []);
         },
 
-        prop: function(property) {
-            return ObjectCopy.hasOwnProperty(this, property) && this[property];
+        pairs: function() {
+            return reduce(this, pushKeyValue, []);
+        },
+
+        prop: function(key) {
+            return Obj.hasOwn(this, key) ? this[key] : undefined;
         },
 
         size: function() {
@@ -29,8 +32,8 @@ JAR.register({
         return ++size;
     }
 
-    function pushKey(array, value, prop) {
-        array[array.length] = prop;
+    function pushKey(array, value, key) {
+        array[array.length] = key;
 
         return array;
     }
@@ -41,13 +44,11 @@ JAR.register({
         return array;
     }
 
-    return {
-		keys: ObjectCopy.keys,
-		
-		prop: ObjectCopy.prop,
-		
-		size: ObjectCopy.size,
-		
-		values: ObjectCopy.values
-    };
+    function pushKeyValue(array, value, key) {
+        array[array.length] = [key, value];
+
+        return array;
+    }
+
+    return Obj.extract(Obj, ['keys', 'pairs', 'prop', 'size', 'values']);
 });

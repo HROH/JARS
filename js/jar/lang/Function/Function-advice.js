@@ -1,7 +1,7 @@
 JAR.register({
     MID: 'jar.lang.Function.Function-advice',
-    deps: '..'
-}, function(lang) {
+    deps: ['..', '..Object!derive']
+}, function(lang, Obj) {
     'use strict';
 
     var FunctionCopy = this,
@@ -34,11 +34,5 @@ JAR.register({
         }, fn.arity || fn.length);
     }
 
-    return {
-        before: FunctionCopy.before,
-
-        after: FunctionCopy.after,
-
-        around: FunctionCopy.around
-    };
+    return Obj.extract(FunctionCopy, ['before', 'after', 'around']);
 });

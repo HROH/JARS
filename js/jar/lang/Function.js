@@ -6,7 +6,7 @@ JAR.register({
     'use strict';
 
     var lang = this,
-        fnConverter = lang.sandbox('function(fn, arity) { var newFn=function(){return fn.apply(this,arguments)};newFn.arity=arity||fn.arity||fn.length;return newFn;}', '__SYSTEM__'),
+        fnConverter = lang.sandbox('__SYSTEM__').add('function(cb, arity){var fn=function(){return cb.apply(this,arguments)};fn.arity=arity||cb.arity||cb.length;return fn;}'),
         fromArgs = Arr.from,
         FunctionCopy, apply;
 
@@ -29,7 +29,7 @@ JAR.register({
          * The last parameter refers to the current execution time
          *
          * jar.lang.Function.from(function(time) {
-         *	System.out(time + ' time(s) executed');
+         *	System.Logger.log(time + ' time(s) executed');
          * }).repeat(5);
          * 
          * outputs:

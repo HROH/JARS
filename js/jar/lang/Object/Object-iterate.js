@@ -1,10 +1,8 @@
 JAR.register({
     MID: 'jar.lang.Object.Object-iterate',
-    deps: '..'
-}, function(lang) {
+    deps: ['..', '.!derive']
+}, function(lang, Obj) {
     'use strict';
-
-    var ObjectCopy = this;
 
     lang.extendNativeType('Object', {
         each: forIn,
@@ -21,15 +19,11 @@ JAR.register({
             prop;
 
         for (prop in object) {
-            if (ObjectCopy.hasOwnProperty(object, prop)) {
+            if (Obj.hasOwn(object, prop)) {
                 callback.call(context, object[prop], prop, object);
             }
         }
     }
 
-    return {
-        each: ObjectCopy.each,
-
-        forEach: ObjectCopy.forEach
-    };
+    return Obj.extract(Obj, ['each', 'forEach']);
 });
