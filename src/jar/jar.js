@@ -229,7 +229,7 @@
              * 
              * @memberof Loader~
              */
-            MSG_BUNDLE_ALREADY_LOADED = 0,
+            MSG_BUNDLE_ABORTED = 0,
             /**
              * @access private
              * 
@@ -237,7 +237,7 @@
              * 
              * @memberof Loader~
              */
-            MSG_BUNDLE_ALREADY_LOADING = 1,
+            MSG_BUNDLE_ALREADY_LOADED = 1,
             /**
              * @access private
              * 
@@ -245,7 +245,7 @@
              * 
              * @memberof Loader~
              */
-            MSG_BUNDLE_FOUND = 2,
+            MSG_BUNDLE_ALREADY_LOADING = 2,
             /**
              * @access private
              * 
@@ -253,7 +253,7 @@
              * 
              * @memberof Loader~
              */
-            MSG_BUNDLE_LOADED = 3,
+            MSG_BUNDLE_FOUND = 3,
             /**
              * @access private
              * 
@@ -261,7 +261,7 @@
              * 
              * @memberof Loader~
              */
-            MSG_BUNDLE_LOADING = 4,
+            MSG_BUNDLE_LOADED = 4,
             /**
              * @access private
              * 
@@ -269,7 +269,7 @@
              * 
              * @memberof Loader~
              */
-            MSG_BUNDLE_NOT_DEFINED = 5,
+            MSG_BUNDLE_LOADING = 5,
             /**
              * @access private
              * 
@@ -277,7 +277,7 @@
              * 
              * @memberof Loader~
              */
-            MSG_BUNDLE_REQUESTED = 6,
+            MSG_BUNDLE_NOT_DEFINED = 6,
             /**
              * @access private
              * 
@@ -285,7 +285,7 @@
              * 
              * @memberof Loader~
              */
-            MSG_CIRCULAR_DEPENDENCIES_FOUND = 7,
+            MSG_BUNDLE_REQUESTED = 7,
             /**
              * @access private
              * 
@@ -293,7 +293,7 @@
              * 
              * @memberof Loader~
              */
-            MSG_DEPENDENCIES_FOUND = 8,
+            MSG_CIRCULAR_DEPENDENCIES_FOUND = 8,
             /**
              * @access private
              * 
@@ -301,7 +301,7 @@
              * 
              * @memberof Loader~
              */
-            MSG_DEPENDENCY_FOUND = 9,
+            MSG_DEPENDENCIES_FOUND = 9,
             /**
              * @access private
              * 
@@ -309,7 +309,7 @@
              * 
              * @memberof Loader~
              */
-            MSG_INTERCEPTION_ERROR = 10,
+            MSG_DEPENDENCY_FOUND = 10,
             /**
              * @access private
              * 
@@ -317,7 +317,7 @@
              * 
              * @memberof Loader~
              */
-            MSG_MODULE_ALREADY_LOADED = 11,
+            MSG_INTERCEPTION_ERROR = 11,
             /**
              * @access private
              * 
@@ -325,7 +325,7 @@
              * 
              * @memberof Loader~
              */
-            MSG_MODULE_ALREADY_LOADED_MANUAL = 12,
+            MSG_MODULE_ALREADY_LOADED = 12,
             /**
              * @access private
              * 
@@ -333,7 +333,7 @@
              * 
              * @memberof Loader~
              */
-            MSG_MODULE_ALREADY_LOADING = 13,
+            MSG_MODULE_ALREADY_LOADED_MANUAL = 13,
             /**
              * @access private
              * 
@@ -341,7 +341,7 @@
              * 
              * @memberof Loader~
              */
-            MSG_MODULE_ALREADY_REGISTERED = 14,
+            MSG_MODULE_ALREADY_LOADING = 14,
             /**
              * @access private
              * 
@@ -349,7 +349,7 @@
              * 
              * @memberof Loader~
              */
-            MSG_MODULE_LOADED = 15,
+            MSG_MODULE_ALREADY_REGISTERED = 15,
             /**
              * @access private
              * 
@@ -357,7 +357,7 @@
              * 
              * @memberof Loader~
              */
-            MSG_MODULE_LOADED_MANUAL = 16,
+            MSG_MODULE_LOADED = 16,
             /**
              * @access private
              * 
@@ -365,7 +365,7 @@
              * 
              * @memberof Loader~
              */
-            MSG_MODULE_LOADING = 17,
+            MSG_MODULE_LOADED_MANUAL = 17,
             /**
              * @access private
              * 
@@ -373,7 +373,7 @@
              * 
              * @memberof Loader~
              */
-            MSG_MODULE_NAME_INVALID = 18,
+            MSG_MODULE_LOADING = 18,
             /**
              * @access private
              * 
@@ -381,7 +381,7 @@
              * 
              * @memberof Loader~
              */
-            MSG_MODULE_RECOVERING = 19,
+            MSG_MODULE_NAME_INVALID = 19,
             /**
              * @access private
              * 
@@ -389,7 +389,7 @@
              * 
              * @memberof Loader~
              */
-            MSG_MODULE_REGISTERING = 20,
+            MSG_MODULE_RECOVERING = 20,
             /**
              * @access private
              * 
@@ -397,7 +397,7 @@
              * 
              * @memberof Loader~
              */
-            MSG_MODULE_REQUESTED = 21,
+            MSG_MODULE_REGISTERING = 21,
             /**
              * @access private
              * 
@@ -405,7 +405,7 @@
              * 
              * @memberof Loader~
              */
-            MSG_MODULE_SUBSCRIBED = 22,
+            MSG_MODULE_REQUESTED = 22,
             /**
              * @access private
              * 
@@ -413,7 +413,7 @@
              * 
              * @memberof Loader~
              */
-            MSG_MODULE_PUBLISHED = 23,
+            MSG_MODULE_SUBSCRIBED = 23,
             /**
              * @access private
              * 
@@ -421,7 +421,15 @@
              * 
              * @memberof Loader~
              */
-            MSG_TIMEOUT = 24,
+            MSG_MODULE_PUBLISHED = 24,
+            /**
+             * @access private
+             * 
+             * @const {Number}
+             * 
+             * @memberof Loader~
+             */
+            MSG_TIMEOUT = 25,
 
             // Module states
             /**
@@ -515,7 +523,7 @@
 
                 module.name = moduleName;
                 module.loader = loader;
-                module.queue = [];
+                module.depsQueue = [];
                 module.bundleQueue = [];
 
                 module.dep = implicitDependency;
@@ -611,21 +619,6 @@
                  */
                 setBundleState: function(bundleState) {
                     this.bundleState = bundleState;
-                },
-                /**
-                 * @access public
-                 * 
-                 * @memberof Module#
-                 */
-                unsetBundleLoading: function() {
-                    var module = this,
-                        loader = module.loader;
-
-                    if (module.isBundleState(MODULE_BUNDLE_LOADING)) {
-                        module.setBundleState(MODULE_BUNDLE_WAITING);
-
-                        module.dep && loader.getModule(module.dep).unsetBundleLoading();
-                    }
                 },
                 /**
                  * @access public
@@ -738,11 +731,12 @@
                 listenFor: function(moduleNames, asBundle) {
                     var module = this,
                         loader = module.loader,
-                        moduleName = module.name,
+                        moduleName = asBundle ? loaderManagerGetBundleName(module.name) : module.name,
                         moduleCount = moduleNames.length,
                         moduleDepsBundlePrefix = asBundle ? 'bundle' : 'deps',
                         moduleCounter = moduleDepsBundlePrefix + 'Counter',
-                        moduleReady = moduleDepsBundlePrefix + 'Ready';
+                        moduleReady = moduleDepsBundlePrefix + 'Ready',
+                        System = loaderManagerGetSystem();
 
                     module[moduleCounter] += moduleCount;
 
@@ -759,15 +753,79 @@
                                 pub: publishingModuleName
                             });
 
-                            if (loaderManagerGetSystem().isSet(data)) {
+                            if (System.isSet(data)) {
                                 module.data[publishingModuleName] = data;
                             }
 
                             --module[moduleCounter] || module[moduleReady]();
                         }, function onModuleAborted() {
-                            asBundle ? module.unsetBundleLoading() : loader.abort(moduleName);
+                            loader.abort(moduleName);
                         });
                     }
+                },
+
+                register: function(factory) {
+                    var module = this,
+                        moduleName = module.name,
+                        moduleState;
+
+                    module.factory = factory || Object;
+
+                    if (module.isState(MODULE_LOADING)) {
+                        global.clearTimeout(module.timeoutID);
+                        moduleState = MODULE_REGISTERED;
+                    }
+                    else {
+                        loaderManagerLogMessage(moduleName, MSG_MODULE_LOADED_MANUAL);
+
+                        moduleState = MODULE_LOADED_MANUAL;
+                    }
+
+                    module.setState(moduleState);
+                },
+                /**
+                 * @access public
+                 * 
+                 * @memberof Module#
+                 * 
+                 * @param {Array} bundle
+                 */
+                linkBundle: function(bundle) {
+                    var module = this,
+                        moduleName = module.name;
+
+                    bundle = loaderManagerNormalize(bundle, moduleName, true);
+
+                    module.bundle = bundle;
+
+                    if (bundle.length) {
+                        loaderManagerLogMessage(loaderManagerGetBundleName(moduleName), MSG_BUNDLE_FOUND, {
+                            bundle: bundle.join(separator)
+                        });
+                    }
+                },
+                /**
+                 * @access public
+                 * 
+                 * @memberof Module#
+                 * 
+                 * @param {Array} dependencies
+                 */
+                linkDeps: function(dependencies) {
+                    var module = this,
+                        moduleName = module.name;
+
+                    dependencies = loaderManagerNormalize(dependencies, moduleName);
+
+                    module.deps = dependencies;
+
+                    if (dependencies.length) {
+                        loaderManagerLogMessage(moduleName, MSG_DEPENDENCIES_FOUND, {
+                            deps: dependencies.join(separator)
+                        });
+                    }
+
+                    module.listenFor(dependencies);
                 },
                 /**
                  * @access public
@@ -800,12 +858,13 @@
                         depLen = dependencies.length,
                         depIndex = 0,
                         depRefs = [],
+                        System = loaderManagerGetSystem(),
                         data, dependencyName;
 
                     for (; depIndex < depLen; depIndex++) {
                         dependencyName = dependencies[depIndex];
                         data = module.data[dependencyName];
-                        depRefs.push(loaderManagerGetSystem().isSet(data) ? data : loader.getModule(dependencyName).ref);
+                        depRefs.push(System.isSet(data) ? data : loader.getModule(dependencyName).ref);
                     }
 
                     return depRefs;
@@ -840,6 +899,7 @@
                 alreadyLoaded = already + 'loaded',
                 attemptLoadModule = replaceModule(attemptLoad),
                 attemptLoadBundle = replaceBundle(attemptLoad),
+                abortedLoading = 'aborted loading ${what}',
                 loaderManagerLogger;
 
             /**
@@ -935,6 +995,7 @@
             MSG_MODULE_SUBSCRIBED], 'info');
 
             setLogLevelForMessageTypes([
+            MSG_BUNDLE_ABORTED,
             MSG_CIRCULAR_DEPENDENCIES_FOUND,
             MSG_INTERCEPTION_ERROR,
             MSG_MODULE_NAME_INVALID,
@@ -949,6 +1010,7 @@
             MSG_MODULE_ALREADY_LOADING,
             MSG_MODULE_ALREADY_REGISTERED], 'warn');
 
+			messageTemplates[MSG_BUNDLE_ABORTED] = replaceBundle(abortedLoading);
             messageTemplates[MSG_BUNDLE_ALREADY_LOADED] = replaceAlreadyLoaded(attemptLoadBundle);
             messageTemplates[MSG_BUNDLE_ALREADY_LOADING] = replaceAlreadyLoading(attemptLoadBundle);
             messageTemplates[MSG_BUNDLE_FOUND] = replaceBundle('found bundlemodules "${bundle}" for ${what}');
@@ -979,9 +1041,9 @@
             messageTemplates[MSG_MODULE_RECOVERING] = replaceModule('${what} tries to recover...');
             messageTemplates[MSG_MODULE_REGISTERING] = replaceModule('registering ${what}...');
             messageTemplates[MSG_MODULE_REQUESTED] = replaceModule(requested);
-            messageTemplates[MSG_MODULE_SUBSCRIBED] = replaceModule('${what} subscribed to "${subs}"');
+            messageTemplates[MSG_MODULE_SUBSCRIBED] = replaceModule('"${mod}" subscribed to "${subs}"');
 
-            messageTemplates[MSG_TIMEOUT] = replaceModule('aborted loading ${what} after ${sec} second(s) - module may not be available on path "${path}"');
+            messageTemplates[MSG_TIMEOUT] = replaceModule(abortedLoading) + ' after ${sec} second(s) - module may not be available on path "${path}"';
 
             /**
              * @access private
@@ -1373,7 +1435,7 @@
                             error = error.message;
                         }
 
-                        loaderManagerLogMessage(interceptedModuleName, System.isA(error, Error) ? error.message : error);
+                        loaderManagerLogMessage(interceptedModuleName, error);
 
                         errback(interceptedModuleName);
                     }
@@ -1512,25 +1574,15 @@
                 if (!module.isRegistered()) {
                     loaderManagerLogMessage(moduleName, MSG_MODULE_REGISTERING);
 
-                    module.factory = factory || Object;
-
-                    if (module.isState(MODULE_LOADING)) {
-                        global.clearTimeout(module.timeoutID);
-                        module.setState(MODULE_REGISTERED);
-                    }
-                    else {
-                        loaderManagerLogMessage(moduleName, MSG_MODULE_LOADED_MANUAL);
-
-                        module.setState(MODULE_LOADED_MANUAL);
-                    }
+                    module.register(factory);
 
                     if (properties.styles) {
                         SourceManager.addStyleSheet(moduleName, module.getFullPath('css'));
                     }
 
-                    loader.linkBundle(moduleName, properties.bundle);
+                    module.linkBundle(properties.bundle);
 
-                    loader.linkDeps(moduleName, properties.deps);
+                    module.linkDeps(properties.deps);
 
                     loader.manageImplicitDep(moduleName, properties.autoRegLvl);
 
@@ -1572,52 +1624,6 @@
                         module.listenFor([implicitDependency]);
                     }
                 }
-            },
-            /**
-             * @access public
-             * 
-             * @memberof Loader#
-             * 
-             * @param {String} moduleName
-             * @param {Array} bundle
-             */
-            linkBundle: function(moduleName, bundle) {
-                var loader = this,
-                    module = loader.getModule(moduleName);
-
-                bundle = loaderManagerNormalize(bundle, moduleName, true);
-
-                module.bundle = bundle;
-
-                if (bundle.length) {
-                    loaderManagerLogMessage(loaderManagerGetBundleName(moduleName), MSG_BUNDLE_FOUND, {
-                        bundle: bundle.join(separator)
-                    });
-                }
-            },
-            /**
-             * @access public
-             * 
-             * @memberof Loader#
-             * 
-             * @param {String} moduleName
-             * @param {Array} dependencies
-             */
-            linkDeps: function(moduleName, dependencies) {
-                var loader = this,
-                    module = loader.getModule(moduleName);
-
-                dependencies = loaderManagerNormalize(dependencies, moduleName);
-
-                module.deps = dependencies;
-
-                if (dependencies.length) {
-                    loaderManagerLogMessage(moduleName, MSG_DEPENDENCIES_FOUND, {
-                        deps: dependencies.join(separator)
-                    });
-                }
-
-                module.listenFor(dependencies);
             },
             /**
              * @access public
@@ -1676,7 +1682,7 @@
                     traversedModules[moduleName] = true;
 
                     for (; depIndex < depLen; depIndex++) {
-                        circularDependencies = loader.findCircularDeps(loaderManagerGetInterceptor(dependencies[depIndex]).moduleName, traversedModules);
+                        circularDependencies = loader.findCircularDeps(dependencies[depIndex], traversedModules);
 
                         if (circularDependencies.length) {
                             circularDependencies.unshift(moduleName);
@@ -1717,7 +1723,7 @@
 
                     module = loader.$import(moduleName);
 
-                    queue = module[isBundleRequest ? 'bundleQueue' : 'queue'];
+                    queue = module[(isBundleRequest ? 'bundle' : 'deps') + 'Queue'];
 
                     if (!module.isState(MODULE_LOADED) || (isBundleRequest && !module.isBundleState(MODULE_BUNDLE_LOADED))) {
                         queue.push([onModuleLoaded, errback]);
@@ -1809,8 +1815,13 @@
                     messageType = MSG_BUNDLE_ALREADY_LOADING;
                 }
                 else {
-                    loader.listenFor(rootModule, [module.name], function onModuleLoaded(moduleName) {
-                        loader.$importBundleForModule(moduleName);
+                    loader.modulesLoading++;
+                    module.setBundleState(MODULE_BUNDLE_LOADING);
+
+                    loader.listenFor(rootModule, [module.name], function onModuleLoaded() {
+                        module.listenFor(module.bundle, true);
+                    }, function onAbort() {
+                        loader.abort(bundleName);
                     });
 
                     messageType = MSG_BUNDLE_LOADING;
@@ -1826,60 +1837,58 @@
              * @memberof Loader#
              * 
              * @param {String} moduleName
-             */
-            $importBundleForModule: function(moduleName) {
-                var loader = this,
-                    module = loader.getModule(moduleName);
-
-                if (!(module.isBundleState(MODULE_BUNDLE_LOADING) || module.isBundleState(MODULE_BUNDLE_LOADED))) {
-                    loader.modulesLoading++;
-
-                    module.setBundleState(MODULE_BUNDLE_LOADING);
-
-                    module.listenFor(module.bundle, true);
-                }
-            },
-            /**
-             * @access public
-             * 
-             * @memberof Loader#
-             * 
-             * @param {String} moduleName
              * @param {Boolean} silent
              */
             abort: function(moduleName, silent) {
                 var loader = this,
                     module = loader.getModule(moduleName),
-                    queue = module.queue.concat(module.bundleQueue),
+                    isBundleRequest = loaderManagerIsBundleRequest(moduleName),
+                    queue = module[(isBundleRequest ? 'bundle' : 'deps') + 'Queue'],
+                    isLoading = module['is' + (isBundleRequest ? 'Bundle' : '') + 'State'](isBundleRequest ? MODULE_BUNDLE_LOADING : MODULE_LOADING),
+                    emptyQueue = false,
                     path;
 
-                if (module.isState(MODULE_LOADING)) {
-                    path = SourceManager.removeScript(loader.context + ':' + moduleName);
+                if (isLoading) {
+                    if (isBundleRequest) {
+                        loaderManagerLogMessage(moduleName, MSG_BUNDLE_ABORTED);
 
-                    if (!silent) {
-                        loaderManagerLogMessage(moduleName, MSG_TIMEOUT, {
-                            path: path,
-                            sec: module.getConfig('timeout')
-                        });
+                        module.setBundleState(MODULE_BUNDLE_WAITING);
+                        emptyQueue = true;
+                    }
+                    else {
+                        path = SourceManager.removeScript(loader.context + ':' + moduleName);
 
-                        module.setState(MODULE_WAITING);
+                        if (!silent) {
+                            loaderManagerLogMessage(moduleName, MSG_TIMEOUT, {
+                                path: path,
+                                sec: module.getConfig('timeout')
+                            });
 
-                        if (!loader.findRecover(moduleName)) {
-                            loader.dequeue(moduleName, queue, QUEUE_ERROR);
+                            module.setState(MODULE_WAITING);
+
+                            emptyQueue = !loader.findRecover(moduleName);
                         }
                     }
+                }
+                else if (module.isState(MODULE_REGISTERED) || module.isState(MODULE_LOADED_MANUAL)) {
+                    emptyQueue = true;
+                }
+
+                if (emptyQueue) {
+                    loader.dequeue(moduleName, queue, QUEUE_ERROR);
                 }
             },
 
             dequeue: function(moduleName, queue, queueType) {
-                var callback;
+                var System = loaderManagerGetSystem(),
+                    callback;
 
                 hasOwnProp(loaderCoreModules, moduleName) || this.modulesLoading--;
 
                 while (queue.length) {
                     callback = queue.shift()[queueType];
 
-                    if (loaderManagerGetSystem().isFunction(callback)) {
+                    if (System.isFunction(callback)) {
                         callback(moduleName);
                     }
                 }
@@ -1936,13 +1945,11 @@
              */
             notify: function(moduleName) {
                 var loader = this,
-                    queue = loader.getModule(moduleName)[loaderManagerIsBundleRequest(moduleName) ? 'bundleQueue' : 'queue'];
+                    queue = loader.getModule(moduleName)[(loaderManagerIsBundleRequest(moduleName) ? 'bundle' : 'deps') + 'Queue'];
 
                 loaderConfig.createDependencyURLList && loader.pushModule(moduleName);
 
-                if (queue) {
-                    loader.dequeue(moduleName, queue, QUEUE_SUCCESS);
-                }
+                loader.dequeue(moduleName, queue, QUEUE_SUCCESS);
             },
             /**
              * @access public
@@ -2003,7 +2010,9 @@
                 loader.sorted = {};
 
                 for (moduleName in loaderCoreModules) {
-                    loader.sorted[moduleName] = true;
+                    if (hasOwnProp(loaderCoreModules, moduleName)) {
+                        loader.sorted[moduleName] = true;
+                    }
                 }
             }
         };
@@ -2118,7 +2127,9 @@
                                 // create a copy of the recover-config
                                 // because it should update for every module independendly
                                 for (option in recoverConfig) {
-                                    hasOwnProp(recoverConfig, option) && (recover[option] = recoverConfig[option]);
+                                    if (hasOwnProp(recoverConfig, option)) {
+                                        (recover[option] = recoverConfig[option]);
+                                    }
                                 }
 
                                 recover.restrict = moduleName;
@@ -2730,7 +2741,7 @@
         function Logger(logContext, options) {
             var logger = this;
 
-            logger.context = logContext;
+            logger.context = logContext || 'Default';
 
             logger.options = options || {};
             logger.options.tpl = logger.options.tpl || {};
@@ -2822,28 +2833,29 @@
 
             function forwardConsole(method) {
                 return function log(data, logContext) {
-                    if (canUseGroups && config('groupByContext')) {
-                        if (lastLogContext !== logContext) {
-                            if (lastLogContext) {
-                                global.console.groupEnd(lastLogContext);
-                            }
+                    var useGroups = canUseGroups && config('groupByContext'),
+                        logContextChanged = lastLogContext !== logContext;
 
-                            if (logContext) {
-                                global.console.group(logContext);
-                            }
-
-                            lastLogContext = logContext;
-                        }
-                    }
-                    else {
-                        logContext && (data = '[' + logContext + '] ' + data);
+                    if (useGroups && logContextChanged && lastLogContext) {
+                        global.console.groupEnd(lastLogContext);
                     }
 
                     if (method === 'error' && config('throwError')) {
-                        throw new Error(data);
+                        throw new Error(logContext + ' - ' + data);
                     }
 
-                    return global.console[method](data);
+                    if (useGroups) {
+                        if (logContextChanged) {
+                            global.console.group(logContext);
+
+                            lastLogContext = logContext;
+                        }
+
+                        global.console[method](data);
+                    }
+                    else {
+                        global.console[method]('[' + logContext + ']', data);
+                    }
                 };
             }
 
@@ -3097,7 +3109,7 @@
          * @param {String} abortedModuleName
          */
         function globalErrback(abortedModuleName) {
-            LoaderManager.getModuleRef('System.Logger').error('Import of module "' + abortedModuleName + '" failed!');
+            LoaderManager.getModuleRef('System.Logger').error('Import of "' + abortedModuleName + '" failed!');
         }
 
         /**
