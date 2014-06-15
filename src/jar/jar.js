@@ -39,81 +39,9 @@
             createStyleSheet;
 
         /**
-         * @access public
-         * 
-         * @memberof SourceManager
-         * 
-         * @return {HTMLCollection}
-         */
-        function getScripts() {
-            return doc.getElementsByTagName('script');
-        }
-
-        /**
-         * @access public
-         * 
-         * @memberof SourceManager
-         * 
-         * @param {String} moduleName
-         * @param {String} path
-         */
-        function addScript(moduleName, path) {
-            var script = doc.createElement('script');
-
-            head.appendChild(script);
-
-            script.id = moduleName;
-            script.type = 'text/javascript';
-            script.src = path;
-            script.async = true;
-
-            scripts[moduleName] = script;
-        }
-
-        /**
-         * @access public
-         * 
-         * @memberof SourceManager
-         * 
-         * @param {String} moduleName
-         * 
-         * @return {Boolean}
-         */
-        function findScript(moduleName) {
-            var script = (doc.currentScript && doc.currentScript.id === moduleName) ? doc.currentScript : doc.getElementById(moduleName),
-                foundScript = !! script;
-
-            if (foundScript) {
-                script.id += ':loaded';
-            }
-
-            return foundScript;
-        }
-
-        /**
-         * @access public
-         * 
-         * @memberof SourceManager
-         * 
-         * @param {String} moduleName
-         * 
-         * @return {String} path
-         */
-        function removeScript(moduleName) {
-            var script = scripts[moduleName],
-                path = script.src;
-
-            head.removeChild(script);
-
-            delete scripts[moduleName];
-
-            return path;
-        }
-
-        /**
          * @access private
          * 
-         * @memberof SourceManager
+         * @memberof JAR~SourceManager
          * @inner
          * 
          * @param {String} path
@@ -126,67 +54,122 @@
             return doc.createElement('link');
         });
 
-        /**
-         * @access public
-         * 
-         * @memberof SourceManager
-         * 
-         * @param {String} moduleName
-         * @param {String} path
-         */
-        function addStyleSheet(moduleName, path) {
-            var styleSheet;
-
-            path = path;
-            styleSheet = createStyleSheet(path);
-
-            head.insertBefore(styleSheet, head.firstChild);
-
-            styleSheet.id = 'css:' + moduleName;
-            styleSheet.setAttribute('type', 'text/css');
-            styleSheet.setAttribute('rel', 'stylesheet');
-            styleSheet.setAttribute('href', path);
-            styleSheets[moduleName] = styleSheet;
-        }
-
-        /**
-         * @access public
-         * 
-         * @memberof SourceManager
-         * 
-         * @param {String} moduleName
-         * 
-         * @return {String}
-         */
-        function removeStyleSheet(moduleName) {
-            var styleSheet = styleSheets[moduleName],
-                path = styleSheet.href;
-
-            head.removeChild(styleSheet);
-            delete styleSheets[moduleName];
-
-            return path;
-        }
-
         return {
-            getScripts: getScripts,
+            /**
+             * @access public
+             * 
+             * @memberof JAR~SourceManager
+             * 
+             * @return {HTMLCollection}
+             */
+            getScripts: function() {
+                return doc.getElementsByTagName('script');
+            },
+            /**
+             * @access public
+             * 
+             * @memberof JAR~SourceManager
+             * 
+             * @param {String} moduleName
+             * @param {String} path
+             */
+            addScript: function(moduleName, path) {
+                var script = doc.createElement('script');
 
-            addScript: addScript,
+                head.appendChild(script);
 
-            findScript: findScript,
+                script.id = moduleName;
+                script.type = 'text/javascript';
+                script.src = path;
+                script.async = true;
 
-            removeScript: removeScript,
+                scripts[moduleName] = script;
+            },
+            /**
+             * @access public
+             * 
+             * @memberof JAR~SourceManager
+             * 
+             * @param {String} moduleName
+             * 
+             * @return {Boolean}
+             */
+            findScript: function(moduleName) {
+                var script = (doc.currentScript && doc.currentScript.id === moduleName) ? doc.currentScript : doc.getElementById(moduleName),
+                    foundScript = !! script;
 
-            addStyleSheet: addStyleSheet,
+                if (foundScript) {
+                    script.id += ':loaded';
+                }
 
-            removeStyleSheet: removeStyleSheet
+                return foundScript;
+            },
+            /**
+             * @access public
+             * 
+             * @memberof JAR~SourceManager
+             * 
+             * @param {String} moduleName
+             * 
+             * @return {String} path
+             */
+            removeScript: function(moduleName) {
+                var script = scripts[moduleName],
+                    path = script.src;
+
+                head.removeChild(script);
+
+                delete scripts[moduleName];
+
+                return path;
+            },
+            /**
+             * @access public
+             * 
+             * @memberof JAR~SourceManager
+             * 
+             * @param {String} moduleName
+             * @param {String} path
+             */
+            addStyleSheet: function(moduleName, path) {
+                var styleSheet;
+
+                path = path;
+                styleSheet = createStyleSheet(path);
+
+                head.insertBefore(styleSheet, head.firstChild);
+
+                styleSheet.id = 'css:' + moduleName;
+                styleSheet.setAttribute('type', 'text/css');
+                styleSheet.setAttribute('rel', 'stylesheet');
+                styleSheet.setAttribute('href', path);
+                styleSheets[moduleName] = styleSheet;
+            },
+            /**
+             * @access public
+             * 
+             * @memberof JAR~SourceManager
+             * 
+             * @param {String} moduleName
+             * 
+             * @return {String}
+             */
+            removeStyleSheet: function(moduleName) {
+                var styleSheet = styleSheets[moduleName],
+                    path = styleSheet.href;
+
+                head.removeChild(styleSheet);
+                delete styleSheets[moduleName];
+
+                return path;
+            }
         };
     })();
 
     /**
      * @access private
      * 
-     * @class LoaderManager
+     * @namespace LoaderManager
      * 
      * @memberof JAR
      * @inner
@@ -201,15 +184,15 @@
                 context: 'default',
 
                 modules: {
-                    restrict: rootModule,
+                    '*': {
+                        cache: false,
 
-                    cache: false,
+                        minified: false,
 
-                    minified: false,
+                        versionSuffix: '',
 
-                    versionSuffix: '',
-
-                    timeout: 5
+                        timeout: 5
+                    }
                 }
             },
             loaderCoreModules = {},
@@ -227,7 +210,8 @@
              * 
              * @const {Number}
              * 
-             * @memberof Loader~
+             * @memberof JAR~LoaderManager
+             * @inner
              */
             MSG_BUNDLE_ABORTED = 0,
             /**
@@ -235,7 +219,8 @@
              * 
              * @const {Number}
              * 
-             * @memberof Loader~
+             * @memberof JAR~LoaderManager
+             * @inner
              */
             MSG_BUNDLE_ALREADY_LOADED = 1,
             /**
@@ -243,7 +228,8 @@
              * 
              * @const {Number}
              * 
-             * @memberof Loader~
+             * @memberof JAR~LoaderManager
+             * @inner
              */
             MSG_BUNDLE_ALREADY_LOADING = 2,
             /**
@@ -251,7 +237,8 @@
              * 
              * @const {Number}
              * 
-             * @memberof Loader~
+             * @memberof JAR~LoaderManager
+             * @inner
              */
             MSG_BUNDLE_FOUND = 3,
             /**
@@ -259,7 +246,8 @@
              * 
              * @const {Number}
              * 
-             * @memberof Loader~
+             * @memberof JAR~LoaderManager
+             * @inner
              */
             MSG_BUNDLE_LOADED = 4,
             /**
@@ -267,7 +255,8 @@
              * 
              * @const {Number}
              * 
-             * @memberof Loader~
+             * @memberof JAR~LoaderManager
+             * @inner
              */
             MSG_BUNDLE_LOADING = 5,
             /**
@@ -275,7 +264,8 @@
              * 
              * @const {Number}
              * 
-             * @memberof Loader~
+             * @memberof JAR~LoaderManager
+             * @inner
              */
             MSG_BUNDLE_NOT_DEFINED = 6,
             /**
@@ -283,7 +273,8 @@
              * 
              * @const {Number}
              * 
-             * @memberof Loader~
+             * @memberof JAR~LoaderManager
+             * @inner
              */
             MSG_BUNDLE_REQUESTED = 7,
             /**
@@ -291,7 +282,8 @@
              * 
              * @const {Number}
              * 
-             * @memberof Loader~
+             * @memberof JAR~LoaderManager
+             * @inner
              */
             MSG_CIRCULAR_DEPENDENCIES_FOUND = 8,
             /**
@@ -299,7 +291,8 @@
              * 
              * @const {Number}
              * 
-             * @memberof Loader~
+             * @memberof JAR~LoaderManager
+             * @inner
              */
             MSG_DEPENDENCIES_FOUND = 9,
             /**
@@ -307,7 +300,8 @@
              * 
              * @const {Number}
              * 
-             * @memberof Loader~
+             * @memberof JAR~LoaderManager
+             * @inner
              */
             MSG_DEPENDENCY_FOUND = 10,
             /**
@@ -315,7 +309,8 @@
              * 
              * @const {Number}
              * 
-             * @memberof Loader~
+             * @memberof JAR~LoaderManager
+             * @inner
              */
             MSG_INTERCEPTION_ERROR = 11,
             /**
@@ -323,7 +318,8 @@
              * 
              * @const {Number}
              * 
-             * @memberof Loader~
+             * @memberof JAR~LoaderManager
+             * @inner
              */
             MSG_MODULE_ALREADY_LOADED = 12,
             /**
@@ -331,7 +327,8 @@
              * 
              * @const {Number}
              * 
-             * @memberof Loader~
+             * @memberof JAR~LoaderManager
+             * @inner
              */
             MSG_MODULE_ALREADY_LOADED_MANUAL = 13,
             /**
@@ -339,7 +336,8 @@
              * 
              * @const {Number}
              * 
-             * @memberof Loader~
+             * @memberof JAR~LoaderManager
+             * @inner
              */
             MSG_MODULE_ALREADY_LOADING = 14,
             /**
@@ -347,7 +345,8 @@
              * 
              * @const {Number}
              * 
-             * @memberof Loader~
+             * @memberof JAR~LoaderManager
+             * @inner
              */
             MSG_MODULE_ALREADY_REGISTERED = 15,
             /**
@@ -355,7 +354,8 @@
              * 
              * @const {Number}
              * 
-             * @memberof Loader~
+             * @memberof JAR~LoaderManager
+             * @inner
              */
             MSG_MODULE_LOADED = 16,
             /**
@@ -363,7 +363,8 @@
              * 
              * @const {Number}
              * 
-             * @memberof Loader~
+             * @memberof JAR~LoaderManager
+             * @inner
              */
             MSG_MODULE_LOADED_MANUAL = 17,
             /**
@@ -371,7 +372,8 @@
              * 
              * @const {Number}
              * 
-             * @memberof Loader~
+             * @memberof JAR~LoaderManager
+             * @inner
              */
             MSG_MODULE_LOADING = 18,
             /**
@@ -379,7 +381,8 @@
              * 
              * @const {Number}
              * 
-             * @memberof Loader~
+             * @memberof JAR~LoaderManager
+             * @inner
              */
             MSG_MODULE_NAME_INVALID = 19,
             /**
@@ -387,7 +390,8 @@
              * 
              * @const {Number}
              * 
-             * @memberof Loader~
+             * @memberof JAR~LoaderManager
+             * @inner
              */
             MSG_MODULE_RECOVERING = 20,
             /**
@@ -395,7 +399,8 @@
              * 
              * @const {Number}
              * 
-             * @memberof Loader~
+             * @memberof JAR~LoaderManager
+             * @inner
              */
             MSG_MODULE_REGISTERING = 21,
             /**
@@ -403,7 +408,8 @@
              * 
              * @const {Number}
              * 
-             * @memberof Loader~
+             * @memberof JAR~LoaderManager
+             * @inner
              */
             MSG_MODULE_REQUESTED = 22,
             /**
@@ -411,7 +417,8 @@
              * 
              * @const {Number}
              * 
-             * @memberof Loader~
+             * @memberof JAR~LoaderManager
+             * @inner
              */
             MSG_MODULE_SUBSCRIBED = 23,
             /**
@@ -419,7 +426,8 @@
              * 
              * @const {Number}
              * 
-             * @memberof Loader~
+             * @memberof JAR~LoaderManager
+             * @inner
              */
             MSG_MODULE_PUBLISHED = 24,
             /**
@@ -427,7 +435,8 @@
              * 
              * @const {Number}
              * 
-             * @memberof Loader~
+             * @memberof JAR~LoaderManager
+             * @inner
              */
             MSG_TIMEOUT = 25,
 
@@ -437,7 +446,8 @@
              * 
              * @const {Number}
              * 
-             * @memberof Loader~
+             * @memberof JAR~LoaderManager
+             * @inner
              */
             MODULE_WAITING = 1,
             /**
@@ -445,7 +455,8 @@
              * 
              * @const {Number}
              * 
-             * @memberof Loader~
+             * @memberof JAR~LoaderManager
+             * @inner
              */
             MODULE_LOADING = 2,
             /**
@@ -453,7 +464,8 @@
              * 
              * @const {Number}
              * 
-             * @memberof Loader~
+             * @memberof JAR~LoaderManager
+             * @inner
              */
             MODULE_LOADED = 3,
             /**
@@ -461,7 +473,8 @@
              * 
              * @const {Number}
              * 
-             * @memberof Loader~
+             * @memberof JAR~LoaderManager
+             * @inner
              */
             MODULE_REGISTERED = 4,
             /**
@@ -469,7 +482,8 @@
              * 
              * @const {Number}
              * 
-             * @memberof Loader~
+             * @memberof JAR~LoaderManager
+             * @inner
              */
             MODULE_LOADED_MANUAL = 5,
 
@@ -479,7 +493,8 @@
              * 
              * @const {Number}
              * 
-             * @memberof Loader~
+             * @memberof JAR~LoaderManager
+             * @inner
              */
             MODULE_BUNDLE_WAITING = 0,
             /**
@@ -487,7 +502,8 @@
              * 
              * @const {Number}
              * 
-             * @memberof Loader~
+             * @memberof JAR~LoaderManager
+             * @inner
              */
             MODULE_BUNDLE_LOADING = 1,
             /**
@@ -495,22 +511,22 @@
              * 
              * @const {Number}
              * 
-             * @memberof Loader~
+             * @memberof JAR~LoaderManager
+             * @inner
              */
             MODULE_BUNDLE_LOADED = 2,
-            Module, loaderManagerNormalize, loaderManagerLogMessage;
+            Module, loaderManagerLogMessage;
 
         Module = (function moduleSetup() {
             /**
              * @access private
              *
              * @constructor Module
-             * @alias Module
              * 
-             * @memberof LoaderManager
+             * @memberof JAR~LoaderManager
              * @inner
              * 
-             * @param {Loader} loader
+             * @param {JAR~LoaderManager~Loader} loader
              * @param {String} moduleName
              */
             function Module(loader, moduleName) {
@@ -522,11 +538,14 @@
                     firstLetterFileName = fileName.charAt(0);
 
                 module.name = moduleName;
+                module.bundleName = loaderManagerGetBundleName(moduleName);
                 module.loader = loader;
                 module.depsQueue = [];
                 module.bundleQueue = [];
 
                 module.dep = implicitDependency;
+                module.deps = [];
+                module.bundle = [];
 
                 if (firstLetterFileName === firstLetterFileName.toLowerCase()) {
                     pathParts.push(fileName);
@@ -537,7 +556,7 @@
                 module.state = MODULE_WAITING;
                 module.bundleState = MODULE_BUNDLE_WAITING;
 
-                module.data = {};
+                module.interceptorData = {};
                 module.interceptorDeps = [];
             }
 
@@ -545,9 +564,9 @@
                 /**
                  * @access public
                  *
-                 * @alias Module
+                 * @alias JAR~LoaderManager~Module
                  * 
-                 * @memberof Module#
+                 * @memberof JAR~LoaderManager~Module#
                  */
                 constructor: Module,
                 /**
@@ -555,7 +574,7 @@
                  * 
                  * @type {Number}
                  * 
-                 * @memberof Module#
+                 * @memberof JAR~LoaderManager~Module#
                  */
                 depsCounter: 0,
                 /**
@@ -563,13 +582,13 @@
                  * 
                  * @type {Number}
                  * 
-                 * @memberof Module#
+                 * @memberof JAR~LoaderManager~Module#
                  */
                 bundleCounter: 0,
                 /**
                  * @access public
                  * 
-                 * @memberof Module#
+                 * @memberof JAR~LoaderManager~Module#
                  * 
                  * @param {Number} state
                  * 
@@ -581,7 +600,7 @@
                 /**
                  * @access public
                  * 
-                 * @memberof Module#
+                 * @memberof JAR~LoaderManager~Module#
                  * 
                  * @param {Number} state
                  */
@@ -591,7 +610,7 @@
                 /**
                  * @access public
                  * 
-                 * @memberof Module#
+                 * @memberof JAR~LoaderManager~Module#
                  * 
                  * @return {Boolean}
                  */
@@ -601,7 +620,7 @@
                 /**
                  * @access public
                  * 
-                 * @memberof Module#
+                 * @memberof JAR~LoaderManager~Module#
                  * 
                  * @param {Number} bundleState
                  * 
@@ -613,7 +632,7 @@
                 /**
                  * @access public
                  * 
-                 * @memberof Module#
+                 * @memberof JAR~LoaderManager~Module#
                  * 
                  * @param {Number} bundleState
                  */
@@ -624,21 +643,28 @@
                  * @access public
                  * 
                  * @memberof Module#
+                 * 
+                 * @param {Number} messageType
+                 * @param {Object} values
                  */
-                setBundleLoaded: function() {
-                    var module = this,
-                        loader = module.loader,
-                        bundleName = loaderManagerGetBundleName(module.name),
-                        messageType = module.bundle.length ? MSG_BUNDLE_LOADED : MSG_BUNDLE_NOT_DEFINED;
-
-                    module.setBundleState(MODULE_BUNDLE_LOADED);
-
-                    loaderManagerLogMessage(bundleName, messageType);
-
-                    loader.notify(bundleName);
+                log: function(messageType, values) {
+                    loaderManagerLogMessage(this.name, messageType, values);
                 },
                 /**
                  * @access public
+                 * 
+                 * @memberof JAR~LoaderManager~Module#
+                 * 
+                 * @param {Number} messageType
+                 * @param {Object} values
+                 */
+                logBundle: function(messageType, values) {
+                    loaderManagerLogMessage(this.bundleName, messageType, values);
+                },
+                /**
+                 * @access public
+                 * 
+                 * @memberof JAR~LoaderManager~Module#
                  * 
                  * @return {Array}
                  */
@@ -654,7 +680,7 @@
                 /**
                  * @access public
                  * 
-                 * @memberof Module#
+                 * @memberof JAR~LoaderManager~Module#
                  * 
                  * @param {String} fileType
                  * 
@@ -675,55 +701,52 @@
                 /**
                  * @access public
                  * 
+                 * @memberof JAR~LoaderManager~Module#
+                 * 
                  * @param {String} option
                  * @param {String} skipUntil
                  * 
                  * @return {*}
                  */
                 getConfig: function(option, skipUntil) {
-                    return loaderManagerGetModuleConfig(this.name, option, skipUntil) || this.options[option];
+                    return LoaderManager.getModuleConfig(this.name, option, skipUntil) || this.options[option];
                 },
                 /**
                  * @access public
                  * 
-                 * @memberof Module#
+                 * @memberof JAR~LoaderManager~Module#
                  */
-                depsReady: function() {
-                    var module = this,
-                        loader = module.loader,
-                        moduleName = module.name;
+                depsLoaded: function() {
+                    var module = this;
 
                     if (module.isRegistered() && !module.isState(MODULE_LOADED)) {
                         module.init();
 
                         module.setState(MODULE_LOADED);
-                        loaderManagerLogMessage(moduleName, MSG_MODULE_LOADED);
-                        loader.notify(moduleName);
+                        module.log(MSG_MODULE_LOADED);
+                        module.notify();
                     }
                 },
                 /**
                  * @access public
                  * 
-                 * @memberof Module#
+                 * @memberof JAR~LoaderManager~Module#
                  */
-                bundleReady: function() {
-                    var module = this,
-                        loader = module.loader,
-                        bundleName = loaderManagerGetBundleName(module.name),
-                        messageType = module.bundle.length ? MSG_BUNDLE_LOADED : MSG_BUNDLE_NOT_DEFINED;
+                bundleLoaded: function() {
+                    var module = this;
 
                     if (!module.isBundleState(MODULE_BUNDLE_LOADED)) {
                         module.setBundleState(MODULE_BUNDLE_LOADED);
 
-                        loaderManagerLogMessage(bundleName, messageType);
+                        module.logBundle(module.bundle.length ? MSG_BUNDLE_LOADED : MSG_BUNDLE_NOT_DEFINED);
 
-                        loader.notify(bundleName);
+                        module.notify(true);
                     }
                 },
                 /**
                  * @access public
                  * 
-                 * @memberof Module#
+                 * @memberof JAR~LoaderManager~Module#
                  * 
                  * @param {Array<string>} moduleNames
                  * @param {Boolean} asBundle
@@ -731,52 +754,244 @@
                 listenFor: function(moduleNames, asBundle) {
                     var module = this,
                         loader = module.loader,
-                        moduleName = asBundle ? loaderManagerGetBundleName(module.name) : module.name,
+                        logAbortSuffix = asBundle ? 'Bundle' : '',
+                        log = 'log' + logAbortSuffix,
+                        abort = 'abort' + logAbortSuffix,
                         moduleCount = moduleNames.length,
-                        moduleDepsBundlePrefix = asBundle ? 'bundle' : 'deps',
-                        moduleCounter = moduleDepsBundlePrefix + 'Counter',
-                        moduleReady = moduleDepsBundlePrefix + 'Ready',
-                        System = loaderManagerGetSystem();
+                        System = loader.getSystem();
 
-                    module[moduleCounter] += moduleCount;
-
-                    if (!module[moduleCounter]) {
-                        module[moduleReady]();
-                    }
-                    else if (moduleCount) {
-                        loaderManagerLogMessage(moduleName, MSG_MODULE_SUBSCRIBED, {
+                    if (moduleCount && !module.setLoadedIfReady(moduleCount, asBundle)) {
+                        module[log](MSG_MODULE_SUBSCRIBED, {
                             subs: moduleNames.join(separator)
                         });
 
-                        loader.listenFor(moduleName, moduleNames, function onModuleLoaded(publishingModuleName, data) {
-                            loaderManagerLogMessage(moduleName, MSG_MODULE_PUBLISHED, {
+                        loader.listenFor(module.getName(asBundle), moduleNames, function onModuleLoaded(publishingModuleName, data) {
+                            module[log](MSG_MODULE_PUBLISHED, {
                                 pub: publishingModuleName
                             });
 
                             if (System.isSet(data)) {
-                                module.data[publishingModuleName] = data;
+                                module.interceptorData[publishingModuleName] = data;
                             }
 
-                            --module[moduleCounter] || module[moduleReady]();
+                            module.setLoadedIfReady(-1, asBundle);
                         }, function onModuleAborted() {
-                            loader.abort(moduleName);
+                            module[abort]();
                         });
                     }
                 },
+                /**
+                 * @access public
+                 * 
+                 * @memberof JAR~LoaderManager~Module#
+                 * 
+                 * @param {Number} count
+                 * @param {Boolean} forBundle
+                 * 
+                 * @return {Boolean}
+                 */
+                setLoadedIfReady: function(count, forBundle) {
+                    var module = this,
+                        moduleDepsBundlePrefix = forBundle ? 'bundle' : 'deps',
+                        moduleCounter = moduleDepsBundlePrefix + 'Counter',
+                        loaded = moduleDepsBundlePrefix + 'Loaded',
+                        isReady;
 
+                    module[moduleCounter] += count;
+                    isReady = !module[moduleCounter];
+
+                    if (isReady) {
+                        module[loaded]();
+                    }
+
+                    return isReady;
+                },
+                /**
+                 * @access public
+                 * 
+                 * @memberof JAR~LoaderManager~Module#
+                 */
+                load: function() {
+                    var module = this;
+
+                    module.manageImplicitDep();
+
+                    module.log(MSG_MODULE_LOADING);
+
+                    module.setState(MODULE_LOADING);
+
+                    module.timeoutID = global.setTimeout(function abortModule() {
+                        module.abort();
+                    }, module.getConfig('timeout') * 1000);
+
+                    SourceManager.addScript(module.loader.context + ':' + module.name, module.getFullPath('js'));
+                },
+                /**
+                 * @access public
+                 * 
+                 * @memberof JAR~LoaderManager~Module#
+                 * 
+                 * @return {Boolean}
+                 */
+                findRecover: function() {
+                    var module = this,
+                        foundRecover = module.getConfig('recover', module.nextRecover),
+                        recoverModuleName, nextRecoverModule;
+
+                    if (foundRecover) {
+                        recoverModuleName = foundRecover.restrict;
+
+                        // This is a recover on a higher level
+                        if (recoverModuleName !== module.name) {
+                            // extract the next recovermodule
+                            nextRecoverModule = module.loader.getModule(recoverModuleName).dep;
+                            nextRecoverModule && (module.nextRecover = nextRecoverModule.bundleName);
+
+                            // Only recover this module
+                            foundRecover.restrict = module.name;
+                        }
+
+                        LoaderManager.setModuleConfig(foundRecover);
+
+                        // Restore module recover assoziation
+                        foundRecover.restrict = recoverModuleName;
+
+                        module.log(MSG_MODULE_RECOVERING);
+
+                        module.load();
+                    }
+                    else {
+                        delete module.nextRecover;
+                    }
+
+                    return !!foundRecover;
+                },
+                /**
+                 * @access public
+                 * 
+                 * @memberof JAR~LoaderManager~Module#
+                 * 
+                 * @param {Boolean} silent
+                 */
+                abort: function(silent) {
+                    var module = this,
+                        emptyQueue = false;
+
+                    if (module.isState(MODULE_LOADING)) {
+                        if (!silent) {
+                            module.log(MSG_TIMEOUT, {
+                                path: SourceManager.removeScript(module.loader.context + ':' + module.name),
+                                sec: module.getConfig('timeout')
+                            });
+
+                            module.setState(MODULE_WAITING);
+
+                            emptyQueue = !module.findRecover();
+                        }
+                    }
+                    else if (module.isState(MODULE_REGISTERED) || module.isState(MODULE_LOADED_MANUAL)) {
+                        emptyQueue = true;
+                    }
+
+                    if (emptyQueue) {
+                        module.dequeue(QUEUE_ERROR);
+                    }
+                },
+                /**
+                 * @access public
+                 * 
+                 * @memberof JAR~LoaderManager~Module#
+                 */
+                abortBundle: function() {
+                    var module = this;
+
+                    if (module.isBundleState(MODULE_BUNDLE_LOADING)) {
+                        module.logBundle(MSG_BUNDLE_ABORTED);
+
+                        module.setBundleState(MODULE_BUNDLE_WAITING);
+                        module.dequeue(QUEUE_ERROR, true);
+                    }
+                },
+                /**
+                 * @access public
+                 * 
+                 * @memberof JAR~LoaderManager~Module#
+                 * 
+                 * @param {Boolean} forBundle
+                 * 
+                 * @return {String}
+                 */
+                getName: function(forBundle) {
+                    return this[forBundle ? 'bundleName' : 'name'];
+                },
+                /**
+                 * @access public
+                 * 
+                 * @memberof JAR~LoaderManager~Module#
+                 * 
+                 * @param {Boolean} forBundle
+                 * 
+                 * @return {Array}
+                 */
+                getQueue: function(forBundle) {
+                    return this[(forBundle ? 'bundle' : 'deps') + 'Queue'];
+                },
+                /**
+                 * @access public
+                 * 
+                 * @memberof JAR~LoaderManager~Module#
+                 * 
+                 * @param {Function} callback
+                 * @param {Function} errback
+                 * @param {Boolean} enqueueBundle
+                 */
+                enqueue: function(callback, errback, enqueueBundle) {
+                    this.getQueue(enqueueBundle).push([callback, errback]);
+                },
+                /**
+                 * @access public
+                 * 
+                 * @memberof JAR~LoaderManager~Module#
+                 * 
+                 * @param {Number} queueType
+                 * @param {Boolean} dequeueBundle
+                 */
+                dequeue: function(queueType, dequeueBundle) {
+                    var module = this,
+                        name = module.getName(dequeueBundle),
+                        queue = module.getQueue(dequeueBundle),
+                        System = module.loader.getSystem(),
+                        callback;
+
+                    while (queue.length) {
+                        callback = queue.shift()[queueType];
+
+                        if (System.isFunction(callback)) {
+                            callback(name);
+                        }
+                    }
+                },
+                /**
+                 * @access public
+                 * 
+                 * @memberof JAR~LoaderManager~Module#
+                 * 
+                 * @param {Function} factory
+                 */
                 register: function(factory) {
                     var module = this,
-                        moduleName = module.name,
                         moduleState;
 
                     module.factory = factory || Object;
+
+                    module.log(MSG_MODULE_REGISTERING);
 
                     if (module.isState(MODULE_LOADING)) {
                         global.clearTimeout(module.timeoutID);
                         moduleState = MODULE_REGISTERED;
                     }
                     else {
-                        loaderManagerLogMessage(moduleName, MSG_MODULE_LOADED_MANUAL);
+                        module.log(MSG_MODULE_LOADED_MANUAL);
 
                         moduleState = MODULE_LOADED_MANUAL;
                     }
@@ -786,20 +1001,17 @@
                 /**
                  * @access public
                  * 
-                 * @memberof Module#
+                 * @memberof JAR~LoaderManager~Module#
                  * 
                  * @param {Array} bundle
                  */
                 linkBundle: function(bundle) {
-                    var module = this,
-                        moduleName = module.name;
+                    var module = this;
 
-                    bundle = loaderManagerNormalize(bundle, moduleName, true);
-
-                    module.bundle = bundle;
+                    module.bundle = bundle = LoaderManager.normalize(bundle, module.name, true);
 
                     if (bundle.length) {
-                        loaderManagerLogMessage(loaderManagerGetBundleName(moduleName), MSG_BUNDLE_FOUND, {
+                        module.logBundle(MSG_BUNDLE_FOUND, {
                             bundle: bundle.join(separator)
                         });
                     }
@@ -807,30 +1019,74 @@
                 /**
                  * @access public
                  * 
-                 * @memberof Module#
+                 * @memberof JAR~LoaderManager~Module#
                  * 
                  * @param {Array} dependencies
                  */
                 linkDeps: function(dependencies) {
-                    var module = this,
-                        moduleName = module.name;
+                    var module = this;
 
-                    dependencies = loaderManagerNormalize(dependencies, moduleName);
-
-                    module.deps = dependencies;
+                    module.deps = dependencies = LoaderManager.normalize(dependencies, module.name);
 
                     if (dependencies.length) {
-                        loaderManagerLogMessage(moduleName, MSG_DEPENDENCIES_FOUND, {
+                        module.log(MSG_DEPENDENCIES_FOUND, {
                             deps: dependencies.join(separator)
                         });
-                    }
 
-                    module.listenFor(dependencies);
+                        module.listenFor(dependencies);
+                    }
+                    else {
+                        module.setLoadedIfReady(0);
+                    }
                 },
                 /**
                  * @access public
                  * 
-                 * @memberof Module#
+                 * @memberof JAR~LoaderManager~Module#
+                 * 
+                 * @param {Number} autoRegisterLevel
+                 */
+                manageImplicitDep: function(autoRegisterLevel) {
+                    var module = this,
+                        loader = module.loader,
+                        implicitDependency = module.dep;
+
+                    if (implicitDependency) {
+                        if (autoRegisterLevel > 0) {
+                            loader.getModule(implicitDependency).abort(true);
+
+                            loader.register({
+                                MID: implicitDependency,
+                                autoRegLvl: --autoRegisterLevel
+                            });
+                        }
+                        else if (module.isState(MODULE_LOADED_MANUAL) || module.isState(MODULE_WAITING)) {
+                            module.log(MSG_DEPENDENCY_FOUND, {
+                                dep: implicitDependency
+                            });
+
+                            module.listenFor([implicitDependency]);
+                        }
+                    }
+                },
+                /**
+                 * @access public
+                 * 
+                 * @memberof JAR~LoaderManager~Module#
+                 * 
+                 * @param {Boolean} notifyBundle
+                 */
+                notify: function(notifyBundle) {
+                    var module = this;
+
+                    loaderConfig.createDependencyURLList && module.loader.pushModule(module.getName(notifyBundle));
+
+                    module.dequeue(QUEUE_SUCCESS, notifyBundle);
+                },
+                /**
+                 * @access public
+                 * 
+                 * @memberof JAR~LoaderManager~Module#
                  */
                 init: function() {
                     var module = this,
@@ -849,21 +1105,23 @@
                 /**
                  * @access public
                  * 
+                 * @memberof JAR~LoaderManager~Module#
+                 * 
                  * @return {Array}
                  */
                 getDepRefs: function() {
                     var module = this,
                         loader = module.loader,
-                        dependencies = module.deps || [],
+                        dependencies = module.deps,
                         depLen = dependencies.length,
                         depIndex = 0,
                         depRefs = [],
-                        System = loaderManagerGetSystem(),
+                        System = loader.getSystem(),
                         data, dependencyName;
 
                     for (; depIndex < depLen; depIndex++) {
                         dependencyName = dependencies[depIndex];
-                        data = module.data[dependencyName];
+                        data = module.interceptorData[dependencyName];
                         depRefs.push(System.isSet(data) ? data : loader.getModule(dependencyName).ref);
                     }
 
@@ -877,7 +1135,8 @@
         /**
          * @access private
          * 
-         * @memberof LoaderManager
+         * @function
+         * @memberof JAR~LoaderManager
          * @inner
          * 
          * @param {String} moduleName
@@ -1010,7 +1269,7 @@
             MSG_MODULE_ALREADY_LOADING,
             MSG_MODULE_ALREADY_REGISTERED], 'warn');
 
-			messageTemplates[MSG_BUNDLE_ABORTED] = replaceBundle(abortedLoading);
+            messageTemplates[MSG_BUNDLE_ABORTED] = replaceBundle(abortedLoading);
             messageTemplates[MSG_BUNDLE_ALREADY_LOADED] = replaceAlreadyLoaded(attemptLoadBundle);
             messageTemplates[MSG_BUNDLE_ALREADY_LOADING] = replaceAlreadyLoading(attemptLoadBundle);
             messageTemplates[MSG_BUNDLE_FOUND] = replaceBundle('found bundlemodules "${bundle}" for ${what}');
@@ -1045,21 +1304,8 @@
 
             messageTemplates[MSG_TIMEOUT] = replaceModule(abortedLoading) + ' after ${sec} second(s) - module may not be available on path "${path}"';
 
-            /**
-             * @access private
-             * 
-             * @memberof LoaderManager
-             * @inner
-             * 
-             * @memberof LoaderManager
-             * @inner
-             * 
-             * @param {String} moduleName
-             * @param {Number} messageType
-             * @param {Object} values
-             */
             function loaderManagerLogMessage(moduleName, messageType, values) {
-                var Logger = loaderManagerGetModuleRef('System.Logger'),
+                var Logger = LoaderManager.getModuleRef('System.Logger'),
                     level = messageTypes[messageType] || 'error';
 
                 if (Logger) {
@@ -1082,10 +1328,10 @@
         /**
          * @access private
          * 
-         * @memberof LoaderManager
+         * @memberof JAR~LoaderManager
          * @inner
          * 
-         * @return {Loader}
+         * @return {JAR~LoaderManager~Loader}
          */
         function loaderManagerGetCurrentLoader() {
             return loaders[loaderConfig.context];
@@ -1094,7 +1340,7 @@
         /**
          * @access private
          * 
-         * @memberof LoaderManager
+         * @memberof JAR~LoaderManager
          * @inner
          * 
          * @param {String} moduleName
@@ -1108,7 +1354,7 @@
         /**
          * @access private
          * 
-         * @memberof LoaderManager
+         * @memberof JAR~LoaderManager
          * @inner
          * 
          * @param {String} moduleName
@@ -1122,7 +1368,7 @@
         /**
          * @access private
          * 
-         * @memberof LoaderManager
+         * @memberof JAR~LoaderManager
          * @inner
          * 
          * @param {String} moduleName
@@ -1136,7 +1382,7 @@
         /**
          * @access private
          * 
-         * @memberof LoaderManager
+         * @memberof JAR~LoaderManager
          * @inner
          * 
          * @param {String} moduleName
@@ -1150,7 +1396,7 @@
         /**
          * @access private
          * 
-         * @memberof LoaderManager
+         * @memberof JAR~LoaderManager
          * @inner
          * 
          * @param {String} moduleName
@@ -1186,210 +1432,7 @@
         /**
          * @access private
          * 
-         * @memberof LoaderManager
-         * @inner
-         * 
-         * @param {String} moduleName
-         * 
-         * @return {*}
-         */
-        function loaderManagerGetModuleRef(moduleName) {
-            return loaderManagerGetCurrentLoader().getModule(moduleName).ref;
-        }
-
-        function loaderManagerGetSystem() {
-            return loaderManagerGetModuleRef('System');
-        }
-
-        /**
-         * @access private
-         * 
-         * @memberof LoaderManager
-         * @inner
-         * 
-         * @param {(String|Array|Object)} modules
-         * @param {String} referenceModule
-         * @param {Boolean} isRelative
-         * 
-         * @return {Array<string>}
-         */
-        loaderManagerNormalize = (function loaderManagerNormalizeSetup() {
-            /**
-             *
-             * @param {Array} modules
-             * @param {String} referenceModule
-             * @param {Boolean} isRelative
-             * 
-             * @return {Array<string>}
-             */
-            function normalizeArray(modules, referenceModule, isRelative) {
-                var normalizedModules = [],
-                    moduleIndex = 0,
-                    moduleCount = modules.length;
-
-                for (; moduleIndex < moduleCount; moduleIndex++) {
-                    normalizedModules = normalizedModules.concat(normalize(modules[moduleIndex], referenceModule, isRelative));
-                }
-
-                return normalizedModules;
-            }
-
-            /**
-             *
-             * @param {Object} modules
-             * @param {String} referenceModule
-             * @param {Boolean} isRelative
-             * 
-             * @return {Array<string>}
-             */
-            function normalizeObject(modules, referenceModule, isRelative) {
-                var normalizedModules = [],
-                    tmpReferenceModule;
-
-                for (tmpReferenceModule in modules) {
-                    if (hasOwnProp(modules, tmpReferenceModule)) {
-                        normalizedModules = normalizedModules.concat(normalize(modules[tmpReferenceModule], tmpReferenceModule, true));
-                    }
-                }
-
-                return normalizeArray(normalizedModules, referenceModule, isRelative);
-            }
-
-            /**
-             *
-             * @param {String} moduleName
-             * @param {String} referenceModule
-             * @param {Boolean} isRelative
-             *
-             * @return {Array<string>}
-             */
-            function normalizeString(moduleName, referenceModule, isRelative) {
-                var normalizedModules = [];
-
-                if (!isRelative) {
-                    while (referenceModule && rLeadingDot.test(moduleName)) {
-                        moduleName = moduleName.replace(rLeadingDot, '');
-                        referenceModule = loaderManagerGetImplicitDependencyName(referenceModule) || undef;
-                        isRelative = !! referenceModule;
-                    }
-                }
-
-                if (isRelative) {
-                    moduleName = buildAbsoluteModuleName(moduleName, referenceModule);
-                }
-
-                if (!moduleName || (!isRelative && rLeadingDot.test(moduleName))) {
-                    loaderManagerLogMessage(moduleName, MSG_MODULE_NAME_INVALID);
-                }
-                else {
-                    normalizedModules = [moduleName];
-                }
-
-                return normalizedModules;
-            }
-
-            /**
-             *
-             * @param {String} moduleName
-             * @param {String} referenceModule
-             *
-             * @return {String}
-             */
-            function buildAbsoluteModuleName(moduleName, referenceModule) {
-                var dot = '.';
-
-                if (!moduleName || moduleName === dot) {
-                    moduleName = dot = '';
-                }
-                else if (!referenceModule.replace(/\./g, '') || !loaderManagerGetInterceptor(moduleName).moduleName) {
-                    dot = '';
-                }
-
-                return referenceModule + dot + moduleName;
-            }
-
-            /**
-             *
-             * @param {(String|Object|Array)} modules
-             * @param {String} referenceModule
-             * @param {Boolean} isRelative
-             *
-             * @return {Array<string>}
-             */
-            function normalize(modules, referenceModule, isRelative) {
-                var System, normalizer;
-
-                if (modules) {
-                    if (referenceModule === 'System') {
-                        normalizer = modules.toString() === modules ? normalizeString : normalizeArray;
-                    }
-                    else {
-                        System = loaderManagerGetSystem();
-
-                        if (System.isObject(modules)) {
-                            normalizer = normalizeObject;
-                        }
-                        else if (System.isArray(modules)) {
-                            normalizer = normalizeArray;
-                        }
-                        else if (System.isString(modules)) {
-                            normalizer = normalizeString;
-                        }
-                    }
-                }
-
-                return normalizer ? normalizer(modules, referenceModule, isRelative) : [];
-            }
-
-            return normalize;
-        })();
-
-        /**
-         * @access private
-         * 
-         * @memberof LoaderManager
-         * @inner
-         * 
-         * @param {String} moduleName
-         * @param {String} option
-         * @param {String} skipUntil
-         * 
-         * @return {*}
-         */
-        function loaderManagerGetModuleConfig(moduleName, option, skipUntil) {
-            var System = loaderManagerGetSystem(),
-                moduleConfigs = loaderConfig.modules,
-                nextLevel = moduleName,
-                skip = false,
-                result;
-
-            do {
-                if (!skip && moduleConfigs[moduleName]) {
-                    result = moduleConfigs[moduleName][option];
-                }
-
-                if (nextLevel) {
-                    moduleName = loaderManagerGetBundleName(nextLevel);
-                    nextLevel = loaderManagerGetImplicitDependencyName(nextLevel);
-                }
-                else {
-                    moduleName = moduleName !== rootModule ? rootModule : undef;
-                }
-
-                if (skipUntil) {
-                    skip = skipUntil !== moduleName;
-                    skip || (skipUntil = undef);
-                }
-
-            } while (!System.isSet(result) && moduleName);
-
-            return result;
-        }
-
-        /**
-         * @access private
-         * 
-         * @memberof LoaderManager
+         * @memberof JAR~LoaderManager
          * @inner
          * 
          * @param {String} listeningModuleName
@@ -1401,22 +1444,23 @@
          */
         function loaderManagerCreateListener(listeningModuleName, callback, errback, interceptor) {
             return function interceptionListener(moduleName) {
-                var listeningModule = loaderManagerGetCurrentLoader().getModule(listeningModuleName),
+                var loader = loaderManagerGetCurrentLoader(),
+                    listeningModule = loader.getModule(listeningModuleName),
                     interceptorDeps = listeningModule.interceptorDeps,
                     interceptedModuleName = interceptor.originalModuleName,
-                    System = loaderManagerGetSystem();
+                    System = loader.getSystem();
 
                 interceptor.intercept({
                     listener: listeningModuleName,
 
-                    module: loaderManagerGetModuleRef(moduleName),
+                    module: loader.getModuleRef(moduleName),
 
                     data: interceptor.data,
 
                     $import: LoaderManager.$importLazy,
 
                     $importAndLink: function(moduleNames, callback, errback, progressback) {
-                        moduleNames = loaderManagerNormalize(moduleNames);
+                        moduleNames = LoaderManager.normalize(moduleNames);
 
                         interceptorDeps.push.apply(interceptorDeps, moduleNames);
 
@@ -1446,9 +1490,9 @@
         /**
          * @access private
          * 
-         * @class Loader
+         * @constructor Loader
          * 
-         * @memberof LoaderManager
+         * @memberof JAR~LoaderManager
          * @inner
          * 
          * @param {String} context
@@ -1460,22 +1504,21 @@
             loader.currentModuleName = rootModule;
             loader.modules = {};
             loader.ref = {};
-            loader.modulesLoading = 0;
         }
 
         Loader.prototype = {
             /**
              * @access public
              *
-             * @alias Loader
+             * @alias JAR~LoaderManager~Loader
              * 
-             * @memberof Loader#
+             * @memberof JAR~LoaderManager~Loader#
              */
             constructor: Loader,
             /**
              * @access public
              * 
-             * @memberof Loader#
+             * @memberof JAR~LoaderManager~Loader#
              */
             init: function() {
                 var loader = this;
@@ -1487,7 +1530,7 @@
             /**
              * @access public
              * 
-             * @memberof Loader#
+             * @memberof JAR~LoaderManager~Loader#
              * 
              * @param {String} moduleName
              */
@@ -1497,7 +1540,7 @@
             /**
              * @access public
              * 
-             * @memberof Loader#
+             * @memberof JAR~LoaderManager~Loader#
              * 
              * @return {String}
              */
@@ -1507,11 +1550,33 @@
             /**
              * @access public
              * 
-             * @memberof Loader#
+             * @memberof JAR~LoaderManager~Loader#
+             *
+             * @return {Object}
+             */
+            getSystem: function() {
+                return this.getModuleRef('System');
+            },
+            /**
+             * @access public
+             * 
+             * @memberof JAR~LoaderManager~Loader#
              * 
              * @param {String} moduleName
              *
-             * @return {Module}
+             * @return {*}
+             */
+            getModuleRef: function(moduleName) {
+                return this.getModule(moduleName).ref;
+            },
+            /**
+             * @access public
+             * 
+             * @memberof JAR~LoaderManager~Loader#
+             * 
+             * @param {String} moduleName
+             *
+             * @return {JAR~LoaderManager~Module}
              */
             getModule: function(moduleName) {
                 var loader = this;
@@ -1528,11 +1593,11 @@
             /**
              * @access public
              * 
-             * @memberof Loader#
+             * @memberof JAR~LoaderManager~Loader#
              * 
              * @param {String} moduleName
              *
-             * @return {Module}
+             * @return {JAR~LoaderManager~Module}
              */
             createModule: function(moduleName) {
                 var loader = this,
@@ -1543,7 +1608,7 @@
             /**
              * @access public
              * 
-             * @memberof Loader#
+             * @memberof JAR~LoaderManager~Loader#
              */
             registerCore: function() {
                 var loader = this,
@@ -1561,7 +1626,7 @@
             /**
              * @access public
              * 
-             * @memberof Loader#
+             * @memberof JAR~LoaderManager~Loader#
              * 
              * @param {Object<string, *>} properties
              * @param {function():*} factory
@@ -1572,8 +1637,6 @@
                     module = loader.getModule(moduleName);
 
                 if (!module.isRegistered()) {
-                    loaderManagerLogMessage(moduleName, MSG_MODULE_REGISTERING);
-
                     module.register(factory);
 
                     if (properties.styles) {
@@ -1584,51 +1647,20 @@
 
                     module.linkDeps(properties.deps);
 
-                    loader.manageImplicitDep(moduleName, properties.autoRegLvl);
+                    module.manageImplicitDep(properties.autoRegLvl);
 
                     if (loader.checkForCircularDeps(moduleName)) {
-                        loader.abort(moduleName);
+                        module.abort();
                     }
                 }
                 else {
-                    loaderManagerLogMessage(moduleName, MSG_MODULE_ALREADY_REGISTERED);
+                    module.log(MSG_MODULE_ALREADY_REGISTERED);
                 }
             },
             /**
              * @access public
              * 
-             * @memberof Loader#
-             * 
-             * @param {String} moduleName
-             * @param {Number} autoRegisterLevel
-             */
-            manageImplicitDep: function(moduleName, autoRegisterLevel) {
-                var loader = this,
-                    module = loader.getModule(moduleName),
-                    implicitDependency = module.dep;
-
-                if (implicitDependency) {
-                    if (autoRegisterLevel > 0) {
-                        loader.abort(implicitDependency, true);
-
-                        loader.register({
-                            MID: implicitDependency,
-                            autoRegLvl: --autoRegisterLevel
-                        });
-                    }
-                    else if (module.isState(MODULE_LOADED_MANUAL) || module.isState(MODULE_WAITING)) {
-                        loaderManagerLogMessage(moduleName, MSG_DEPENDENCY_FOUND, {
-                            dep: implicitDependency
-                        });
-
-                        module.listenFor([implicitDependency]);
-                    }
-                }
-            },
-            /**
-             * @access public
-             * 
-             * @memberof Loader#
+             * @memberof JAR~LoaderManager~Loader#
              * 
              * @param {String} moduleName
              * 
@@ -1636,6 +1668,7 @@
              */
             checkForCircularDeps: function(moduleName) {
                 var loader = this,
+                    module = loader.getModule(moduleName),
                     hasCircularDependency = false,
                     circularDependencies;
 
@@ -1644,7 +1677,7 @@
                     hasCircularDependency = !! circularDependencies.length;
 
                     if (hasCircularDependency) {
-                        loaderManagerLogMessage(moduleName, MSG_CIRCULAR_DEPENDENCIES_FOUND, {
+                        module.log(MSG_CIRCULAR_DEPENDENCIES_FOUND, {
                             deps: circularDependencies.join(separator)
                         });
                     }
@@ -1657,7 +1690,7 @@
             /**
              * @access public
              * 
-             * @memberof Loader#
+             * @memberof JAR~LoaderManager~Loader#
              * 
              * @param {String} moduleName
              * @param {Object} traversedModules
@@ -1698,7 +1731,7 @@
             /**
              * @access public
              * 
-             * @memberof Loader#
+             * @memberof JAR~LoaderManager~Loader#
              * 
              * @param {String} listeningModuleName
              * @param {Array<string>} moduleNames
@@ -1709,7 +1742,7 @@
                 var loader = this,
                     moduleCount = moduleNames.length,
                     moduleIndex = 0,
-                    moduleName, module, isBundleRequest, queue, interceptor, onModuleLoaded;
+                    moduleName, module, isBundleRequest, interceptor, onModuleLoaded;
 
                 for (; moduleIndex < moduleCount; moduleIndex++) {
                     moduleName = moduleNames[moduleIndex];
@@ -1723,10 +1756,8 @@
 
                     module = loader.$import(moduleName);
 
-                    queue = module[(isBundleRequest ? 'bundle' : 'deps') + 'Queue'];
-
                     if (!module.isState(MODULE_LOADED) || (isBundleRequest && !module.isBundleState(MODULE_BUNDLE_LOADED))) {
-                        queue.push([onModuleLoaded, errback]);
+                        module.enqueue(onModuleLoaded, errback, isBundleRequest);
                     }
                     else {
                         onModuleLoaded(moduleName);
@@ -1736,11 +1767,11 @@
             /**
              * @access public
              * 
-             * @memberof Loader#
+             * @memberof JAR~LoaderManager~Loader#
              * 
              * @param {String} moduleName
              * 
-             * @return {Module}
+             * @return {JAR~LoaderManager~Module}
              */
             $import: function(moduleName) {
                 return this['$import' + (loaderManagerIsBundleRequest(moduleName) ? 'Bundle' : 'Module')](moduleName);
@@ -1748,46 +1779,26 @@
             /**
              * @access public
              * 
-             * @memberof Loader#
+             * @memberof JAR~LoaderManager~Loader#
              * 
              * @param {String} moduleName
              * 
-             * @return {Module}
+             * @return {JAR~LoaderManager~Module}
              */
             $importModule: function(moduleName) {
                 var loader = this,
                     module = loader.getModule(moduleName),
                     messageType;
 
-                loaderManagerLogMessage(moduleName, MSG_MODULE_REQUESTED);
+                module.log(MSG_MODULE_REQUESTED);
 
                 if (module.isState(MODULE_WAITING)) {
-                    loader.modulesLoading++;
-
-                    loader.manageImplicitDep(moduleName);
-
-                    loaderManagerLogMessage(moduleName, MSG_MODULE_LOADING);
-
-                    module.setState(MODULE_LOADING);
-
-                    module.timeoutID = global.setTimeout(function abortModule() {
-                        loader.abort(moduleName);
-                    }, module.getConfig('timeout') * 1000);
-
-                    SourceManager.addScript(loader.context + ':' + moduleName, module.getFullPath('js'), module.getConfig('adapter'));
+                    module.load();
                 }
                 else {
-                    if (module.isState(MODULE_LOADED)) {
-                        messageType = MSG_MODULE_ALREADY_LOADED;
-                    }
-                    else if (module.isState(MODULE_LOADED_MANUAL)) {
-                        messageType = MSG_MODULE_ALREADY_LOADED_MANUAL;
-                    }
-                    else {
-                        messageType = MSG_MODULE_ALREADY_LOADING;
-                    }
+                    messageType = module.isState(MODULE_LOADED) ? MSG_MODULE_ALREADY_LOADED : module.isState(MODULE_LOADED_MANUAL) ? MSG_MODULE_ALREADY_LOADED_MANUAL : MSG_MODULE_ALREADY_LOADING;
 
-                    loaderManagerLogMessage(moduleName, messageType);
+                    module.log(messageType);
                 }
 
                 return module;
@@ -1795,166 +1806,42 @@
             /**
              * @access public
              * 
-             * @memberof Loader#
+             * @memberof JAR~LoaderManager~Loader#
              * 
              * @param {String} bundleName
              * 
-             * @return {Module}
+             * @return {JAR~LoaderManager~Module}
              */
             $importBundle: function(bundleName) {
                 var loader = this,
                     module = loader.getModule(bundleName),
                     messageType;
 
-                loaderManagerLogMessage(bundleName, MSG_BUNDLE_REQUESTED);
+                module.logBundle(MSG_BUNDLE_REQUESTED);
 
-                if (module.isBundleState(MODULE_BUNDLE_LOADED)) {
-                    messageType = MSG_BUNDLE_ALREADY_LOADED;
-                }
-                else if (module.isBundleState(MODULE_BUNDLE_LOADING)) {
-                    messageType = MSG_BUNDLE_ALREADY_LOADING;
-                }
-                else {
-                    loader.modulesLoading++;
+                if (module.isBundleState(MODULE_BUNDLE_WAITING)) {
                     module.setBundleState(MODULE_BUNDLE_LOADING);
 
-                    loader.listenFor(rootModule, [module.name], function onModuleLoaded() {
+                    loader.listenFor(bundleName, [module.name], function onModuleLoaded() {
                         module.listenFor(module.bundle, true);
                     }, function onAbort() {
-                        loader.abort(bundleName);
+                        module.abortBundle();
                     });
 
                     messageType = MSG_BUNDLE_LOADING;
                 }
+                else {
+                    messageType = module.isBundleState(MODULE_BUNDLE_LOADED) ? MSG_BUNDLE_ALREADY_LOADED : MSG_BUNDLE_ALREADY_LOADING;
+                }
 
-                loaderManagerLogMessage(bundleName, messageType);
+                module.logBundle(messageType);
 
                 return module;
             },
             /**
              * @access public
              * 
-             * @memberof Loader#
-             * 
-             * @param {String} moduleName
-             * @param {Boolean} silent
-             */
-            abort: function(moduleName, silent) {
-                var loader = this,
-                    module = loader.getModule(moduleName),
-                    isBundleRequest = loaderManagerIsBundleRequest(moduleName),
-                    queue = module[(isBundleRequest ? 'bundle' : 'deps') + 'Queue'],
-                    isLoading = module['is' + (isBundleRequest ? 'Bundle' : '') + 'State'](isBundleRequest ? MODULE_BUNDLE_LOADING : MODULE_LOADING),
-                    emptyQueue = false,
-                    path;
-
-                if (isLoading) {
-                    if (isBundleRequest) {
-                        loaderManagerLogMessage(moduleName, MSG_BUNDLE_ABORTED);
-
-                        module.setBundleState(MODULE_BUNDLE_WAITING);
-                        emptyQueue = true;
-                    }
-                    else {
-                        path = SourceManager.removeScript(loader.context + ':' + moduleName);
-
-                        if (!silent) {
-                            loaderManagerLogMessage(moduleName, MSG_TIMEOUT, {
-                                path: path,
-                                sec: module.getConfig('timeout')
-                            });
-
-                            module.setState(MODULE_WAITING);
-
-                            emptyQueue = !loader.findRecover(moduleName);
-                        }
-                    }
-                }
-                else if (module.isState(MODULE_REGISTERED) || module.isState(MODULE_LOADED_MANUAL)) {
-                    emptyQueue = true;
-                }
-
-                if (emptyQueue) {
-                    loader.dequeue(moduleName, queue, QUEUE_ERROR);
-                }
-            },
-
-            dequeue: function(moduleName, queue, queueType) {
-                var System = loaderManagerGetSystem(),
-                    callback;
-
-                hasOwnProp(loaderCoreModules, moduleName) || this.modulesLoading--;
-
-                while (queue.length) {
-                    callback = queue.shift()[queueType];
-
-                    if (System.isFunction(callback)) {
-                        callback(moduleName);
-                    }
-                }
-            },
-            /**
-             * @access public
-             * 
-             * @memberof Loader#
-             * 
-             * @param {String} moduleName
-             * 
-             * @return {Boolean}
-             */
-            findRecover: function(moduleName) {
-                var loader = this,
-                    module = loader.getModule(moduleName),
-                    foundRecover = module.getConfig('recover', module.nextRecover),
-                    recoverModuleName, recoverModuleDependency;
-
-                if (foundRecover) {
-                    recoverModuleName = foundRecover.restrict;
-
-                    // This is a recover on a higher level
-                    if (recoverModuleName !== moduleName) {
-                        // extract the next recovermodule
-                        recoverModuleDependency = loader.getModule(recoverModuleName).dep;
-                        module.nextRecover = recoverModuleDependency ? loaderManagerGetBundleName(recoverModuleDependency) : undef;
-
-                        // Only recover this module
-                        foundRecover.restrict = moduleName;
-                    }
-
-                    LoaderManager.setModuleConfig(foundRecover);
-
-                    // Restore module recover assoziation
-                    foundRecover.restrict = recoverModuleName;
-
-                    loaderManagerLogMessage(moduleName, MSG_MODULE_RECOVERING);
-
-                    loader.$import(moduleName);
-                }
-                else {
-                    delete module.nextRecover;
-                }
-
-                return !!foundRecover;
-            },
-            /**
-             * @access public
-             * 
-             * @memberof Loader#
-             * 
-             * @param {String} moduleName
-             */
-            notify: function(moduleName) {
-                var loader = this,
-                    queue = loader.getModule(moduleName)[(loaderManagerIsBundleRequest(moduleName) ? 'bundle' : 'deps') + 'Queue'];
-
-                loaderConfig.createDependencyURLList && loader.pushModule(moduleName);
-
-                loader.dequeue(moduleName, queue, QUEUE_SUCCESS);
-            },
-            /**
-             * @access public
-             * 
-             * @memberof Loader#
+             * @memberof JAR~LoaderManager~Loader#
              * 
              * @param {Array} modules
              */
@@ -1971,7 +1858,7 @@
             /**
              * @access public
              * 
-             * @memberof Loader#
+             * @memberof JAR~LoaderManager~Loader#
              * 
              * @param {String} moduleName
              */
@@ -2000,7 +1887,7 @@
             /**
              * @access public
              * 
-             * @memberof Loader#
+             * @memberof JAR~LoaderManager~Loader#
              */
             resetModulesURLList: function() {
                 var loader = this,
@@ -2018,11 +1905,152 @@
         };
 
         return {
-            normalize: loaderManagerNormalize,
             /**
              * @access public
              * 
-             * @memberof LoaderManager
+             * @function
+             * @memberof JAR~LoaderManager
+             * 
+             * @param {(String|Array|Object)} modules
+             * @param {String} referenceModule
+             * @param {Boolean} isRelative
+             * 
+             * @return {Array<string>}
+             */
+            normalize: (function loaderManagerNormalizeSetup() {
+                /**
+                 *
+                 * @param {Array} modules
+                 * @param {String} referenceModule
+                 * @param {Boolean} isRelative
+                 * 
+                 * @return {Array<string>}
+                 */
+                function normalizeArray(modules, referenceModule, isRelative) {
+                    var normalizedModules = [],
+                        moduleIndex = 0,
+                        moduleCount = modules.length;
+
+                    for (; moduleIndex < moduleCount; moduleIndex++) {
+                        normalizedModules = normalizedModules.concat(normalize(modules[moduleIndex], referenceModule, isRelative));
+                    }
+
+                    return normalizedModules;
+                }
+
+                /**
+                 *
+                 * @param {Object} modules
+                 * @param {String} referenceModule
+                 * @param {Boolean} isRelative
+                 * 
+                 * @return {Array<string>}
+                 */
+                function normalizeObject(modules, referenceModule, isRelative) {
+                    var normalizedModules = [],
+                        tmpReferenceModule;
+
+                    for (tmpReferenceModule in modules) {
+                        if (hasOwnProp(modules, tmpReferenceModule)) {
+                            normalizedModules = normalizedModules.concat(normalize(modules[tmpReferenceModule], tmpReferenceModule, true));
+                        }
+                    }
+
+                    return normalizeArray(normalizedModules, referenceModule, isRelative);
+                }
+
+                /**
+                 *
+                 * @param {String} moduleName
+                 * @param {String} referenceModule
+                 * @param {Boolean} isRelative
+                 *
+                 * @return {Array<string>}
+                 */
+                function normalizeString(moduleName, referenceModule, isRelative) {
+                    var normalizedModules = [];
+
+                    if (!isRelative) {
+                        while (referenceModule && rLeadingDot.test(moduleName)) {
+                            moduleName = moduleName.replace(rLeadingDot, '');
+                            referenceModule = loaderManagerGetImplicitDependencyName(referenceModule) || undef;
+                            isRelative = !! referenceModule;
+                        }
+                    }
+
+                    if (isRelative) {
+                        moduleName = buildAbsoluteModuleName(moduleName, referenceModule);
+                    }
+
+                    if (!moduleName || (!isRelative && rLeadingDot.test(moduleName))) {
+                        loaderManagerLogMessage(moduleName, MSG_MODULE_NAME_INVALID);
+                    }
+                    else {
+                        normalizedModules = [moduleName];
+                    }
+
+                    return normalizedModules;
+                }
+
+                /**
+                 *
+                 * @param {String} moduleName
+                 * @param {String} referenceModule
+                 *
+                 * @return {String}
+                 */
+                function buildAbsoluteModuleName(moduleName, referenceModule) {
+                    var dot = '.';
+
+                    if (!moduleName || moduleName === dot) {
+                        moduleName = dot = '';
+                    }
+                    else if (!referenceModule.replace(/\./g, '') || !loaderManagerGetInterceptor(moduleName).moduleName) {
+                        dot = '';
+                    }
+
+                    return referenceModule + dot + moduleName;
+                }
+
+                /**
+                 *
+                 * @param {(String|Object|Array)} modules
+                 * @param {String} referenceModule
+                 * @param {Boolean} isRelative
+                 *
+                 * @return {Array<string>}
+                 */
+                function normalize(modules, referenceModule, isRelative) {
+                    var System, normalizer;
+
+                    if (modules) {
+                        if (referenceModule === 'System') {
+                            normalizer = modules.toString() === modules ? normalizeString : normalizeArray;
+                        }
+                        else {
+                            System = LoaderManager.getSystem();
+
+                            if (System.isObject(modules)) {
+                                normalizer = normalizeObject;
+                            }
+                            else if (System.isArray(modules)) {
+                                normalizer = normalizeArray;
+                            }
+                            else if (System.isString(modules)) {
+                                normalizer = normalizeString;
+                            }
+                        }
+                    }
+
+                    return normalizer ? normalizer(modules, referenceModule, isRelative) : [];
+                }
+
+                return normalize;
+            })(),
+            /**
+             * @access public
+             * 
+             * @memberof JAR~LoaderManager
              * 
              * @param {String} option
              * @param {*} value
@@ -2037,7 +2065,7 @@
             /**
              * @access public
              * 
-             * @memberof LoaderManager
+             * @memberof JAR~LoaderManager
              * 
              * @param {String} context
              * 
@@ -2056,7 +2084,8 @@
             /**
              * @access public
              * 
-             * @memberof LoaderManager
+             * @function
+             * @memberof JAR~LoaderManager
              * 
              * @param {(Object|Array)} moduleConfigs
              * 
@@ -2087,7 +2116,26 @@
                         },
 
                         config: {
-                            check: objectCheck
+                            check: objectCheck,
+                            /**
+                             * @param {Object} config
+                             * @param {String} moduleName
+                             * 
+                             * @return {Object}
+                             */
+                            transform: function(config, moduleName) {
+                                var oldModuleConfig = loaderConfig.modules,
+                                    oldConfig = oldModuleConfig[moduleName].config || {},
+                                    option;
+
+                                for (option in config) {
+                                    if (hasOwnProp(config, option)) {
+                                        oldConfig[option] = config[option];
+                                    }
+                                }
+
+                                return oldConfig;
+                            }
                         },
 
                         dirPath: {
@@ -2184,7 +2232,7 @@
                  * @param {*} propertyValue
                  */
                 function setProperty(moduleConfig, moduleName, property, propertyValue) {
-                    var System = loaderManagerGetSystem(),
+                    var System = LoaderManager.getSystem(),
                         propertyDefinition = propertyDefinitions[property],
                         propertyTransform = propertyDefinition.transform,
                         propertyCheck = 'is' + propertyDefinition.check;
@@ -2197,17 +2245,8 @@
                     }
                 }
 
-                /**
-                 * @access public
-                 * 
-                 * @memberof LoaderManager
-                 * 
-                 * @param {(Object|Array)} moduleConfigs
-                 * 
-                 * @return {Object}
-                 */
                 function loaderManagerSetModuleConfig(moduleConfigs) {
-                    var System = loaderManagerGetSystem(),
+                    var System = LoaderManager.getSystem(),
                         oldModuleConfigs = loaderConfig.modules,
                         configIndex = 0,
                         property, moduleConfigsLen, oldModuleConfig, modules, moduleName, moduleIndex, moduleCount;
@@ -2220,7 +2259,7 @@
                         }
                     }
                     else if (System.isObject(moduleConfigs)) {
-                        modules = loaderManagerNormalize(moduleConfigs.restrict || rootModule);
+                        modules = LoaderManager.normalize(moduleConfigs.restrict || rootModule);
                         moduleCount = modules.length;
 
                         for (moduleIndex = 0; moduleIndex < moduleCount; moduleIndex++) {
@@ -2241,7 +2280,7 @@
             /**
              * @access public
              * 
-             * @memberof LoaderManager
+             * @memberof JAR~LoaderManager
              * 
              * @param {String} moduleName
              * @param {Object} properties
@@ -2253,10 +2292,10 @@
             /**
              * @access public
              * 
-             * @memberof LoaderManager
+             * @memberof JAR~LoaderManager
              * 
              * @param {String} interceptorType
-             * @param {function(string, *, string, function(*, array), function(string))} interceptor
+             * @param {function(object)} interceptor
              */
             addInterceptor: function(interceptorType, interceptor) {
                 if (!hasOwnProp(interceptors, interceptorType)) {
@@ -2268,7 +2307,7 @@
             /**
              * @access public
              * 
-             * @memberof LoaderManager
+             * @memberof JAR~LoaderManager
              * 
              * @return {String}
              */
@@ -2276,55 +2315,117 @@
                 return loaderManagerGetCurrentLoader().getCurrentModuleName();
             },
             /**
-             * Computes an array of all the loaded modules
-             * in the order they are dependending on each other
+             * <p>Computes an array of all the loaded modules
+             * in the order they are dependending on each other.
              * This method can be used to create a custom build
-             * preferable with grunt and phantomjs
+             * preferable with grunt and phantomjs.</p>
              *
-             * it is possible to recompute the list
-             * this is only for aesthetics
-             * even without recomputation the list will still be valid
+             * <p>It is possible to recompute the list.
+             * This is only for aesthetics.
+             * Even without recomputation the list will still be valid.</p>
              * 
              * @access public
              * 
-             * @memberof LoaderManager
+             * @memberof JAR~LoaderManager
              * 
+             * @param {Function(array)} loadedCallback
              * @param {Boolean} forceRecompute
-             *
-             * @return {Array}
              */
             getModulesURLList: function(loadedCallback, forceRecompute) {
-                var currentLoader = loaderManagerGetCurrentLoader(),
-                    loaderModules = currentLoader.modules,
+                var loader = loaderManagerGetCurrentLoader(),
+                    loaderModules = loader.modules,
+                    modulesToLoad = [],
                     moduleName;
 
-                if (currentLoader.modulesLoading) {
-                    global.setTimeout(function() {
+                for (moduleName in loaderModules) {
+                    if (hasOwnProp(loaderModules, moduleName) && loaderModules[moduleName].isState(MODULE_LOADING)) {
+                        modulesToLoad.push(moduleName);
+                    }
+                }
+
+                if (modulesToLoad.length) {
+                    LoaderManager.$importLazy(modulesToLoad, function() {
                         LoaderManager.getModulesURLList(loadedCallback, forceRecompute);
-                    }, 100);
+                    });
                 }
                 else {
-                    if (forceRecompute || !(loaderConfig.createDependencyURLList || currentLoader.list.length)) {
-                        currentLoader.resetModulesList();
+                    if (forceRecompute || !(loaderConfig.createDependencyURLList || loader.list.length)) {
+                        loader.resetModulesURLList();
 
                         for (moduleName in loaderModules) {
-                            hasOwnProp(loaderModules, moduleName) && currentLoader.pushModule(moduleName);
+                            hasOwnProp(loaderModules, moduleName) && loader.pushModule(moduleName);
                         }
                     }
 
-                    loadedCallback(currentLoader.list);
+                    loadedCallback(loader.list);
                 }
             },
-
-            getModuleConfig: loaderManagerGetModuleConfig,
-
-            getModuleRef: loaderManagerGetModuleRef,
-
-            getSystem: loaderManagerGetSystem,
             /**
              * @access public
              * 
-             * @memberof LoaderManager
+             * @memberof JAR~LoaderManager
+             * 
+             * @param {String} moduleName
+             * @param {String} option
+             * @param {String} skipUntil
+             * 
+             * @return {*}
+             */
+            getModuleConfig: function loaderManagerGetModuleConfig(moduleName, option, skipUntil) {
+                var System = LoaderManager.getSystem(),
+                    moduleConfigs = loaderConfig.modules,
+                    nextLevel = moduleName,
+                    skip = false,
+                    result;
+
+                do {
+                    if (!skip && moduleConfigs[moduleName]) {
+                        result = moduleConfigs[moduleName][option];
+                    }
+
+                    if (nextLevel) {
+                        moduleName = loaderManagerGetBundleName(nextLevel);
+                        nextLevel = loaderManagerGetImplicitDependencyName(nextLevel);
+                    }
+                    else {
+                        moduleName = moduleName !== rootModule ? rootModule : undef;
+                    }
+
+                    if (skipUntil) {
+                        skip = skipUntil !== moduleName;
+                        skip || (skipUntil = undef);
+                    }
+
+                } while (!System.isSet(result) && moduleName);
+
+                return result;
+            },
+            /**
+             * @access public
+             * 
+             * @memberof JAR~LoaderManager
+             * 
+             * @param {String} moduleName
+             * 
+             * @return {*}
+             */
+            getModuleRef: function(moduleName) {
+                return loaderManagerGetCurrentLoader().getModuleRef(moduleName);
+            },
+            /**
+             * @access public
+             * 
+             * @memberof JAR~LoaderManager
+             * 
+             * @return {Object}
+             */
+            getSystem: function() {
+                return loaderManagerGetCurrentLoader().getSystem();
+            },
+            /**
+             * @access public
+             * 
+             * @memberof JAR~LoaderManager
              * 
              * @return {Object}
              */
@@ -2334,7 +2435,7 @@
             /**
              * @access public
              * 
-             * @memberof LoaderManager
+             * @memberof JAR~LoaderManager
              * 
              * @param {(Object|Array|String)} moduleNames
              * @param {function(...*)} callback
@@ -2342,13 +2443,14 @@
              * @param {function(string)} progressback
              */
             $importLazy: function(moduleNames, callback, errback, progressback) {
-                var System = loaderManagerGetSystem(),
+                var loader = loaderManagerGetCurrentLoader(),
+                    System = loader.getSystem(),
                     refs = [],
                     refsIndexLookUp = {},
                     moduleIndex = 0,
                     ref, counter, moduleCount;
 
-                moduleNames = loaderManagerNormalize(moduleNames);
+                moduleNames = LoaderManager.normalize(moduleNames);
                 counter = moduleCount = moduleNames.length;
 
                 for (; moduleIndex < moduleCount; moduleIndex++) {
@@ -2357,8 +2459,8 @@
 
                 System.isFunction(progressback) || (progressback = undef);
 
-                loaderManagerGetCurrentLoader().listenFor(rootModule, moduleNames, function publishLazy(moduleName, data) {
-                    ref = System.isSet(data) ? data : loaderManagerGetModuleRef(moduleName);
+                loader.listenFor(rootModule, moduleNames, function publishLazy(moduleName, data) {
+                    ref = System.isSet(data) ? data : loader.getModuleRef(moduleName);
                     refs[refsIndexLookUp[moduleName]] = ref;
 
                     counter--;
@@ -2371,14 +2473,14 @@
             /**
              * @access public
              * 
-             * @memberof LoaderManager
+             * @memberof JAR~LoaderManager
              * 
              * @param {Object} properties
              * @param {function()} factory
              */
             register: function(properties, factory) {
                 var defaultContext = loaderConfig.context,
-                    loaderContext, currentLoader;
+                    loaderContext, loader;
 
                 if (!SourceManager.findScript(defaultContext + ':' + properties.MID)) {
                     for (loaderContext in loaders) {
@@ -2388,11 +2490,11 @@
                     }
                 }
 
-                currentLoader = loaderManagerGetCurrentLoader();
+                loader = loaderManagerGetCurrentLoader();
 
-                currentLoader.register(properties, factory);
+                loader.register(properties, factory);
 
-                if (currentLoader !== loaders[defaultContext]) {
+                if (loader !== loaders[defaultContext]) {
                     LoaderManager.setContext(defaultContext);
                 }
             }
@@ -2405,11 +2507,11 @@
 
         delete options.module;
 
-        if (LoaderManager.getSystem().isFunction(moduleRef.plugIn)) {
-            moduleRef.plugIn(options);
+        if (LoaderManager.getSystem().isFunction(moduleRef.$plugIn)) {
+            moduleRef.$plugIn(options);
         }
         else {
-            errback('could not call method "plugIn" on module "${mod}"');
+            errback('could not call method "$plugIn" on module "${mod}"');
         }
     });
 
@@ -2425,71 +2527,276 @@
             isArgs, System;
 
         /**
-         * @access private
+         * @access public
          * 
          * @namespace System
-         * 
-         * @borrows window.isNaN as isNaN
-         * @borrows window.isFinite as isFinite
          */
         System = {
-            getType: getType,
+            /**
+             * @access public
+             * 
+             * @memberof System
+             * 
+             * @param {*} value
+             * 
+             * @return {String}
+             */
+            getType: function getType(value) {
+                var type;
 
-            isNaN: isNaN,
+                if (System.isSet(value)) {
+                    if (value.nodeType === 1 || value.nodeType === 9) {
+                        type = 'element';
+                    }
+                    else {
+                        type = typeLookup[toString.call(value)];
 
-            isFinite: isFinite,
+                        if (type === 'number') {
+                            if (isNaN(value)) {
+                                type = 'nan';
+                            }
+                            else if (!isFinite(value)) {
+                                type = 'infinity';
+                            }
+                        }
+                    }
+                }
+                else {
+                    type = String(value);
+                }
 
-            isSet: isSet
+                return type || typeof value;
+            },
+            /**
+             * @access public
+             * 
+             * @memberof System
+             * 
+             * @param {*} value
+             * @param {*} compareValue
+             * 
+             * @return {Boolean}
+             */
+            isEqual: function(value, compareValue) {
+                return value === compareValue;
+            },
+            /**
+             * @access public
+             * 
+             * @memberof System
+             * 
+             * @param {*} value
+             * 
+             * @return {Boolean}
+             */
+            isSet: function(value) {
+                return value != nothing;
+            },
+            /**
+             * @access public
+             * 
+             * @memberof System
+             * 
+             * @param {*} value
+             * 
+             * @return {Boolean}
+             */
+            isArrayLike: function(value) {
+                return System.isArray(value) || System.isArguments(value);
+            },
+            /**
+             * @access public
+             * 
+             * @memberof System
+             * 
+             * @param {*} value
+             * 
+             * @return {Boolean}
+             */
+            isDefined: function(value) {
+                return !System.isUndefined(value);
+            },
+            /**
+             * @access public
+             * 
+             * @function
+             * @memberof System
+             * 
+             * @param {*} value
+             * 
+             * @return {Boolean}
+             */
+            isInteger: Number.isInteger || function(value) {
+                return System.isNumber(value) && parseInt(value, 10) === value;
+            },
+            /**
+             * @access public
+             * 
+             * @memberof System
+             * 
+             * @param {*} value
+             * 
+             * @return {Boolean}
+             */
+            isNaN: function(value) {
+                return global.isNaN(value) && value !== value;
+            },
+            /**
+             * @access public
+             * 
+             * @memberof System
+             * 
+             * @param {Object} instance
+             * @param {(Function|Array<function>)} Class
+             * 
+             * @return {Boolean}
+             */
+            isA: function(instance, Class) {
+                var isA = false,
+                    classIndex = 0,
+                    classLen = Class.length;
+
+                if (System.isArray(Class)) {
+                    for (; classIndex < classLen; classIndex++) {
+                        isA = System.isA(instance, Class[classIndex]);
+
+                        if (isA) {
+                            break;
+                        }
+                    }
+                }
+                else {
+                    isA = instance instanceof Class;
+                }
+
+                return isA;
+            },
+            /**
+             * @access public
+             * 
+             * @memberof System
+             * 
+             * @param {Object} pluginRequest
+             */
+            $plugIn: function(pluginRequest) {
+                pluginRequest.onSuccess(function configGetter(option) {
+                    var config = LoaderManager.getModuleConfig(pluginRequest.listener, 'config');
+
+                    return System.isObject(config) && hasOwnProp(config, option) ? config[option] : undef;
+                });
+            }
         };
 
         /**
          * @access public
          * 
+         * @function isNull
          * @memberof System
          * 
          * @param {*} value
          * 
          * @return {Boolean}
          */
-        function isSet(value) {
-            return value != nothing;
-        }
 
         /**
          * @access public
          * 
+         * @function isUndefined
          * @memberof System
          * 
          * @param {*} value
          * 
-         * @return {String}
+         * @return {Boolean}
          */
-        function getType(value) {
-            var type;
 
-            if (isSet(value)) {
-                if (value.nodeType === 1 || value.nodeType === 9) {
-                    type = 'element';
-                }
-                else {
-                    type = typeLookup[toString.call(value)];
+        /**
+         * @access public
+         * 
+         * @function isString
+         * @memberof System
+         * 
+         * @param {*} value
+         * 
+         * @return {Boolean}
+         */
 
-                    if (type === 'number') {
-                        if (isNaN(value)) {
-                            type = 'nan';
-                        }
-                        else if (!isFinite(value)) {
-                            type = 'infinity';
-                        }
-                    }
-                }
-            }
-            else {
-                type = String(value);
-            }
+        /**
+         * @access public
+         * 
+         * @function isNumber
+         * @memberof System
+         * 
+         * @param {*} value
+         * 
+         * @return {Boolean}
+         */
 
-            return type || typeof value;
-        }
+        /**
+         * @access public
+         * 
+         * @function isBoolean
+         * @memberof System
+         * 
+         * @param {*} value
+         * 
+         * @return {Boolean}
+         */
+
+        /**
+         * @access public
+         * 
+         * @function isArray
+         * @memberof System
+         * 
+         * @param {*} value
+         * 
+         * @return {Boolean}
+         */
+
+        /**
+         * @access public
+         * 
+         * @function isObject
+         * @memberof System
+         * 
+         * @param {*} value
+         * 
+         * @return {Boolean}
+         */
+
+        /**
+         * @access public
+         * 
+         * @function isFunction
+         * @memberof System
+         * 
+         * @param {*} value
+         * 
+         * @return {Boolean}
+         */
+
+        /**
+         * @access public
+         * 
+         * @function isDate
+         * @memberof System
+         * 
+         * @param {*} value
+         * 
+         * @return {Boolean}
+         */
+
+        /**
+         * @access public
+         * 
+         * @function isRegExp
+         * @memberof System
+         * 
+         * @param {*} value
+         * 
+         * @return {Boolean}
+         */
+
         /**
          * @access private
          * 
@@ -2506,7 +2813,7 @@
             typeLookup['[object ' + typeDef + ']'] = typeDef = typeDef.toLowerCase();
 
             return nativeTypeTest || function typeTest(value) {
-                return getType(value) === typeDef;
+                return System.getType(value) === typeDef;
             };
         }
 
@@ -2518,6 +2825,8 @@
 
         /**
          * @access public
+         * 
+         * @memberof System
          * 
          * @param {*} value
          * 
@@ -2533,81 +2842,6 @@
             }
 
             return isArguments;
-        };
-
-        /**
-         * @access public
-         * 
-         * @param {*} value
-         * 
-         * @return {Boolean}
-         */
-        System.isArrayLike = function(value) {
-            return System.isArray(value) || System.isArguments(value);
-        };
-
-        /**
-         * @access public
-         * 
-         * @param {*} value
-         * 
-         * @return {Boolean}
-         */
-        System.isDefined = function(value) {
-            return !System.isUndefined(value);
-        };
-
-        /**
-         * @access public
-         * 
-         * @param {*} value
-         * 
-         * @return {Boolean}
-         */
-        System.isInteger = Number.isInteger || function(value) {
-            return System.isNumber(value) && parseInt(value, 10) === value;
-        };
-
-        /**
-         * @access public
-         * 
-         * @param {*} instance
-         * @param {*} Class
-         * 
-         * @return {Boolean}
-         */
-        System.isA = function(instance, Class) {
-            var isA = false,
-                classIndex = 0,
-                classLen = Class.length;
-
-            if (System.isArray(Class)) {
-                for (; classIndex < classLen; classIndex++) {
-                    isA = System.isA(instance, Class[classIndex]);
-
-                    if (isA) {
-                        break;
-                    }
-                }
-            }
-            else {
-                isA = instance instanceof Class;
-            }
-
-            return isA;
-        };
-
-        /**
-         * @access public
-         * 
-         * @param {Object} pluginRequest
-         */
-        System.plugIn = function(pluginRequest) {
-            pluginRequest.onSuccess(function configGetter(option) {
-                var config = LoaderManager.getModuleConfig(pluginRequest.listener, 'config');
-
-                return System.isObject(config) && hasOwnProp(config, option) ? config[option] : undef;
-            });
         };
 
         return System;
@@ -2629,17 +2863,23 @@
          * 
          * @memberof System.Logger
          * @inner
+         */
+        function noop() {}
+
+        /**
+         * @access private
+         * 
+         * @memberof System.Logger
+         * @inner
          * 
          * @param {Array} match
          * @param {String} key
          * 
          * @return {String}
          */
-        function replacer(match, key) {
-            return replacer.values[key] || 'UNKNOWN';
+        function formatLog(match, key) {
+            return formatLog.values[key] || 'UNKNOWN';
         }
-
-        function noop() {}
 
         /**
          * @access private
@@ -2681,10 +2921,30 @@
             return debug && comparePriority(level) && compareDebugContext(context);
         }
 
+        /**
+         * @access private
+         * 
+         * @memberof System.Logger
+         * @inner
+         * 
+         * @param {String} level
+         * 
+         * @return {Boolean}
+         */
         function comparePriority(level) {
             return getPriority(level) >= getPriority(config('level'));
         }
 
+        /**
+         * @access private
+         * 
+         * @memberof System.Logger
+         * @inner
+         * 
+         * @param {String} context
+         * 
+         * @return {Boolean}
+         */
         function compareDebugContext(context) {
             var debugContext = config('context'),
                 includeContext, excludeContext;
@@ -2700,6 +2960,17 @@
             return includeContext ? inContextList(context, includeContext) : excludeContext ? !inContextList(context, excludeContext) : true;
         }
 
+        /**
+         * @access private
+         * 
+         * @memberof System.Logger
+         * @inner
+         * 
+         * @param {String} level
+         * @param {(Array|String)} contextList
+         * 
+         * @return {Boolean}
+         */
         function inContextList(context, contextList) {
             var contextDelimiter = ',';
 
@@ -2711,7 +2982,6 @@
 
             return contextList.indexOf(contextDelimiter + context + contextDelimiter) > -1;
         }
-
 
         /**
          * @access private
@@ -2728,10 +2998,9 @@
         }
 
         /**
-         * @access private
+         * @access public
          * 
          * @memberof System
-         * @inner
          * 
          * @class Logger
          * 
@@ -2747,6 +3016,15 @@
             logger.options.tpl = logger.options.tpl || {};
         }
 
+        /**
+         * @access private
+         * 
+         * @memberof System.Logger#
+         * 
+         * @param {String} level
+         * @param {*} data
+         * @param {(Object|Array)} values
+         */
         Logger.prototype._out = function(level, data, values) {
             var logger = this,
                 context = logger.context,
@@ -2758,21 +3036,35 @@
                 data = options.tpl[data] || data;
 
                 if (System.isString(data) && (System.isObject(values) || System.isArray(values))) {
-                    replacer.values = values;
+                    formatLog.values = values;
 
-                    data = data.replace(rTemplateKey, replacer);
+                    data = data.replace(rTemplateKey, formatLog);
 
-                    replacer.values = null;
+                    formatLog.values = null;
                 }
 
                 output.call(currentDebugger, data, context);
             }
         };
-
+        /**
+         * @access public
+         * 
+         * @memberof System.Logger
+         * 
+         * @type {Object<string, number>}
+         */
         Logger.logLevels = {
             ALL: -Infinity
         };
 
+        /**
+         * @access public
+         * 
+         * @memberof System.Logger
+         * 
+         * @param {String} level
+         * @param {Number} priority
+         */
         Logger.addLogLevel = function(level, priority) {
             var levelConst = level.toUpperCase();
 
@@ -2796,8 +3088,39 @@
         /**
          * @access public
          * 
-         * @memberof System
-         * @inner
+         * @memberof System.Logger
+         *
+         * @param {Object} options
+         * 
+         * @return {System.Logger}
+         */
+        Logger.forCurrentModule = function(options) {
+            var logContext = LoaderManager.getCurrentModuleName();
+
+            return logContext === rootModule ? baseLogger : new Logger(logContext, options);
+        };
+
+        /**
+         * @access public
+         * 
+         * @memberof System.Logger
+         *
+         * @param {Object} pluginRequest
+         */
+        Logger.$plugIn = function(pluginRequest) {
+            var data = pluginRequest.data.split(':');
+
+            pluginRequest.$importAndLink(data[1], function(Debugger) {
+                Logger.addDebugger(data[0], Debugger.setup);
+
+                pluginRequest.onSuccess(Logger);
+            }, pluginRequest.onError);
+        };
+
+        /**
+         * @access public
+         * 
+         * @memberof System.Logger
          *
          * @param {String} mode
          * @param {Function} debuggerSetup
@@ -2862,22 +3185,6 @@
             return pseudoConsole;
         });
 
-        Logger.forCurrentModule = function(options) {
-            var logContext = LoaderManager.getCurrentModuleName();
-
-            return logContext === rootModule ? baseLogger : new Logger(logContext, options);
-        };
-
-        Logger.plugIn = function(pluginRequest) {
-            var data = pluginRequest.data.split(':');
-
-            pluginRequest.$importAndLink(data[1], function(Debugger) {
-                Logger.addDebugger(data[0], Debugger.setup);
-
-                pluginRequest.onSuccess(Logger);
-            }, pluginRequest.onError);
-        };
-
         return Logger;
     });
 
@@ -2885,11 +3192,17 @@
         bundle: ['async.*', 'feature.*', 'html.*', 'lang.*', 'util.*']
     }, function() {
         /**
-         *
          * @namespace jar
+         * 
+         * @borrows LoaderManager.getModuleRef as use
+         * @borrows LoaderManager.$importLazy as $importLazy
+         * @borrows LoaderManager.getCurrentModuleName as getCurrentModuleName
          */
         var jar = {
             /**
+             * @access public
+             * 
+             * @memberof jar
              *
              * @param {(Object|Array|String)} moduleNames
              *
@@ -2909,12 +3222,7 @@
 
                 return refs;
             },
-            /**
-             *
-             * @param {String} moduleName
-             *
-             * @return {*}
-             */
+
             use: LoaderManager.getModuleRef,
 
             $importLazy: LoaderManager.$importLazy,
@@ -2929,9 +3237,6 @@
 
     global.JAR = (function jarSetup() {
         var previousJAR = global.JAR,
-            baseUrl = './',
-            scripts = SourceManager.getScripts(),
-            scriptCount = scripts.length - 1,
             moduleNamesQueue = [],
             configurators = {},
             configs = {
@@ -2941,12 +3246,10 @@
                 globalAccess: false,
                 supressErrors: false
             },
-            defaultConfig = {},
-            mainScript, JAR;
+            JAR;
 
         /**
          * @namespace JAR
-         * @property {String} version
          * 
          * @borrows LoaderManager.register as register
          * @borrows LoaderManager.getModulesURLList as getModulesURLList
@@ -2956,10 +3259,9 @@
              * @access public
              * 
              * @memberof JAR
-             * @inner
-             *
-             * @param {function(this:root)} main
-             * @param {function(string)} onAbort
+             * 
+             * @param {function():undefined} main
+             * @param {function(string):undefined} onAbort
              */
             main: function(main, onAbort) {
                 var System = LoaderManager.getSystem(),
@@ -2994,20 +3296,25 @@
 
                 moduleNamesQueue.length = 0;
             },
-
             /**
              * @access public
              * 
-             * 
              * @memberof JAR
-             * @inner
-             *
+             * 
              * @param {(String|Object|Array)} moduleData
              */
-            $import: function jarImport(moduleData) {
+            $import: function(moduleData) {
                 moduleNamesQueue = moduleNamesQueue.concat(moduleData === rootModule ? configs.bundle : moduleData);
             },
-
+            /**
+             * @access public
+             * 
+             * @memberof JAR
+             * 
+             * @param {String} moduleName
+             * @param {(Array|Function)} bundle
+             * @param {Function|Undefined} factory
+             */
             $export: function(moduleName, bundle, factory) {
                 var System = LoaderManager.getSystem(),
                     normalizedModules = LoaderManager.normalize(moduleNamesQueue, moduleName);
@@ -3041,17 +3348,16 @@
             /**
              * @access public
              * 
-             * @memberof jar
-             * @inner
-             *
+             * @memberof JAR
+             * 
              * @param {(Object|String)} config
-             * @param {(Object|Function)} configurator
+             * @param {(Function)} configurator
              */
             addConfigurator: function(config, configurator) {
                 var System = LoaderManager.getSystem(),
                     option;
 
-                if (System.isString(config) && System.isFunction(configurator) && !hasOwnProp(configurators, config)) {
+                if (System.isString(config) && !hasOwnProp(configurators, config) && System.isFunction(configurator)) {
                     configurators[config] = configurator;
                 }
                 else if (System.isObject(config)) {
@@ -3063,9 +3369,8 @@
             /**
              * @access public
              * 
-             * @memberof jar
-             * @inner
-             *
+             * @memberof JAR
+             * 
              * @param {(Object|String)} config
              * @param {*} value
              */
@@ -3087,8 +3392,10 @@
 
             getModulesURLList: LoaderManager.getModulesURLList,
             /**
+             * @access public
+             * 
              * @memberof JAR
-             *
+             * 
              * @return {Object}
              */
             noConflict: function() {
@@ -3096,7 +3403,13 @@
 
                 return JAR;
             },
-
+            /**
+             * @access public
+             * 
+             * @memberof JAR
+             * 
+             * @type {String}
+             */
             version: '0.2.0'
         };
 
@@ -3105,7 +3418,7 @@
          * 
          * @memberof JAR
          * @inner
-         *
+         * 
          * @param {String} abortedModuleName
          */
         function globalErrback(abortedModuleName) {
@@ -3117,13 +3430,51 @@
          * 
          * @memberof JAR
          * @inner
-         *
+         * 
          * @param {Boolean} expose
          */
         function exposeModulesGlobal(expose) {
             if (expose) {
                 JAR.mods = LoaderManager.getRoot();
             }
+        }
+
+        /**
+         * @access private
+         * 
+         * @memberof JAR
+         * @inner
+         */
+        function bootstrapJAR() {
+            var baseUrl = './',
+                scripts = SourceManager.getScripts(),
+                scriptCount = scripts.length - 1,
+                bootstrapConfig = global.jarconfig || {},
+                bootstrapModules = bootstrapConfig.modules,
+                mainScript;
+
+            for (; scriptCount > -1; scriptCount--) {
+                mainScript = scripts[scriptCount].getAttribute('data-main');
+
+                if (mainScript) {
+                    baseUrl = mainScript.substring(0, mainScript.lastIndexOf(slash)) || baseUrl;
+                    break;
+                }
+            }
+
+            if (mainScript && !bootstrapConfig.main) {
+                bootstrapConfig.main = mainScript;
+            }
+
+            if (!LoaderManager.getSystem().isArray(bootstrapModules)) {
+                bootstrapModules = bootstrapConfig.modules = bootstrapModules ? [bootstrapModules] : [];
+            }
+
+            bootstrapModules.unshift({
+                baseUrl: baseUrl
+            });
+
+            JAR.configure(bootstrapConfig);
         }
 
         JAR.addConfigurator({
@@ -3201,7 +3552,11 @@
 
                 return newEnvironment;
             },
-
+            /**
+             * @param {(Object|Array)} newModuleConfigs
+             * 
+             * @return {Object}
+             */
             modules: function(newModuleConfigs) {
                 return LoaderManager.setModuleConfig(newModuleConfigs);
             },
@@ -3215,15 +3570,29 @@
 
                 return newContext;
             },
-
+            /**
+             * @param {Boolean} checkCircularDeps
+             * 
+             * @return {Boolean}
+             */
             checkCircularDeps: function(checkCircularDeps) {
                 return LoaderManager.setConfig('checkCircularDeps', checkCircularDeps);
             },
-
+            /**
+             * @param {Boolean} createDependencyURLList
+             * 
+             * @return {Boolean}
+             */
             createDependencyURLList: function(createDependencyURLList) {
                 return LoaderManager.setConfig('createDependencyURLList', createDependencyURLList);
             },
-
+            /**
+             * @param {Object} newInterceptors
+             * @param {Object} oldInterceptors
+             * @param {Object} System
+             * 
+             * @return {Object}
+             */
             interceptors: function(newInterceptors, oldInterceptors, System) {
                 var interceptorType;
 
@@ -3264,27 +3633,8 @@
                 });
             }
         };*/
-
-        for (; scriptCount > -1; scriptCount--) {
-            mainScript = scripts[scriptCount].getAttribute('data-main');
-
-            if (mainScript) {
-                baseUrl = mainScript.substring(0, mainScript.lastIndexOf(slash)) || baseUrl;
-                break;
-            }
-        }
-
-        if (mainScript) {
-            defaultConfig.main = mainScript;
-        }
-
-        defaultConfig.modules = {
-            baseUrl: baseUrl
-        };
-
-        JAR.configure(defaultConfig);
-
-        global.jarconfig && JAR.configure(global.jarconfig);
+        
+        bootstrapJAR();
 
         return JAR;
     })();

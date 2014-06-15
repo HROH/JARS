@@ -1,8 +1,3 @@
-/**
- * @module "jar.lang"
- * 
- * @borrows module:"jar.lang"~getSandBoxValue as sandbox
- */
 JAR.register({
     MID: 'jar.lang',
     deps: {
@@ -22,13 +17,13 @@ JAR.register({
         nativeTypeSandbox, lang;
 
     /**
-     * @alias module:"jar.lang"
+     * @namespace jar.lang
      */
     lang = {
         /**
          * @access public
          * 
-         * @memberof module:"jar.lang"
+         * @memberof jar.lang
          * 
          * @param {string} typeString
          * @param {Object} prototypeMethods
@@ -59,21 +54,46 @@ JAR.register({
 
             return Type;
         },
-
-        callNativeTypeMethod: callNativeTypeMethod,
-
+        /**
+         * @access public
+         * 
+         * @memberof jar.lang
+         * 
+         * @param {String} typeName
+         * @param {*} object
+         * @param {String} methodName
+         *
+         * @throws {TypeError}
+         */
         throwErrorIfNotSet: function(typeName, object, methodName) {
             if (!System.isSet(object)) {
                 throwTypeError(typeName + '.prototype.' + methodName + ' called on null or undefined');
             }
         },
-
+        /**
+         * @access public
+         * 
+         * @memberof jar.lang
+         * 
+         * @param {Function} callback
+         *
+         * @throws {TypeError}
+         */
         throwErrorIfNoFunction: function(callback) {
             if (!System.isFunction(callback)) {
                 throwTypeError(callback + ' is not a function');
             }
         },
-
+        /**
+         * @access public
+         * 
+         * @memberof jar.lang
+         * 
+         * @param {String} typeName
+         * @param {Boolean} isValueSet
+         *
+         * @throws {TypeError}
+         */
         throwErrorIfNoValueSet: function(typeName, isValueSet) {
             if (!isValueSet) {
                 throwTypeError('Reduce of empty ' + typeName + ' with no initial value');
@@ -82,11 +102,11 @@ JAR.register({
         /**
          * @access public
          * 
-         * @memberof module:"jar.lang"
+         * @memberof jar.lang
          * 
-         * @param {string} formatString
+         * @param {String} formatString
          * 
-         * @return {string}
+         * @return {String}
          */
         generateHash: function(formatString) {
             return formatString.replace(/x/g, randomHex);
@@ -95,21 +115,44 @@ JAR.register({
         /**
          * @access public
          * 
-         * @memberOf module:"jar.lang"
+         * @memberOf jar.lang
          * 
-         * @param {string} domain
+         * @param {String} domain
          * 
-         * @return {Sandbox}
+         * @return {jar.lang~Sandbox}
          */
         sandbox: function(domain) {
             return sandboxes[domain] || (sandboxes[domain] = new Sandbox(domain));
         }
     };
 
+    /**
+     * @access private
+     * 
+     * @memberof jar.lang
+     * @inner
+     * 
+     * @param {String} message
+     *
+     * @throws {TypeError}
+     */
     function throwTypeError(message) {
         throw TypeError(message);
     }
 
+    /**
+     * @access private
+     * 
+     * @memberOf jar.lang
+     * @inner
+     * 
+     * @param {Object} Type
+     * @param {string} methodName
+     * @param {*} targetObject
+     * @param {Array} args
+     * 
+     * @return {*}
+     */
     function callNativeTypeMethod(Type, methodName, targetObject, args) {
         var callingObject;
 
@@ -126,7 +169,7 @@ JAR.register({
     /**
      * @access private
      * 
-     * @memberOf module:"jar.lang"
+     * @memberOf jar.lang
      * @inner
      * 
      * @param {Object} delegateType
@@ -151,7 +194,7 @@ JAR.register({
     /**
      * @access private
      * 
-     * @memberOf module:"jar.lang"
+     * @memberOf jar.lang
      * @inner
      * 
      * @param {HTMLDocument} sandboxDoc
@@ -167,20 +210,24 @@ JAR.register({
     }
 
     /**
-     * Hack to steal native objects like Object, Array, String, etc. from an iframe
+     * <p>Hack to steal native objects like Object, Array, String, etc. from an iframe
      * We save the native object in an iframe as a property of the window object
-     * and then access this property for example to extend the Object.prototype
-     * The Object.prototype of the current document won't be affected by this
+     * and then access this property for example to extend the <code>Object.prototype</code>
+     * The <code>Object.prototype</code> of the current document won't be affected by this.</p>
      * 
-     * Note: the iframe has to be open all the time to make sure
-     * that the current document has access to the native copies in some browsers
+     * <p>Note: the iframe has to be open all the time to make sure
+     * that the current document has access to the native copies in some browsers.</p>
      * 
-     * You can read more about this {@link http://dean.edwards.name/weblog/2006/11/hooray/|here}
+     * <p>You can read more about this {@link http://dean.edwards.name/weblog/2006/11/hooray/|here}</p>
+     * 
      * @todo check browser support (should work in all legacy browsers)
      * 
      * @access private
      * 
-     * @class module:"jar.lang"~Sandbox
+     * @memberof jar.lang
+     * @inner
+     * 
+     * @class Sandbox
      * 
      * @param {string} domain
      */
@@ -210,7 +257,8 @@ JAR.register({
     /**
      * @access public
      * 
-     * @memberof module:"jar.lang"~Sandbox#
+     * @method add
+     * @memberof jar.lang~Sandbox#
      * 
      * @param {string} value
      * 
@@ -234,6 +282,14 @@ JAR.register({
         return sandboxedVar;
     };
 
+    /**
+     * @access public
+     * 
+     * @method remove
+     * @memberof jar.lang~Sandbox#
+     * 
+     * @param {string} value
+     */
     Sandbox.prototype.remove = function(value) {
         var sandbox = this,
             sandboxVars = sandbox[__SANDBOX__],
@@ -249,7 +305,17 @@ JAR.register({
     };
 
     nativeTypeSandbox = lang.sandbox('__SYSTEM__');
-
+	
+	/**
+	 * @access private
+	 * 
+	 * @memberof jar.lang
+	 * @inner
+	 * 
+	 * @param {String} typeString
+	 * 
+	 * @return {Object}
+	 */
     function getNativeType(typeString) {
         var Type = nativeTypes[typeString] || (config('allowProtoOverride') ? window[typeString] : nativeTypeSandbox.add(typeString));
 
@@ -263,11 +329,20 @@ JAR.register({
         return Type;
     }
 
+	/**
+	 * @access private
+	 * 
+	 * @memberof jar.lang
+	 * @inner
+	 * 
+	 * @param {String} typeString
+	 * @param {Object} Type
+	 */
     function makePluggable(typeString, Type) {
         var moduleName = jar.getCurrentModuleName(),
             subModuleName = moduleName + '.' + typeString + '-';
 
-        Type.plugIn = function(pluginRequest) {
+        Type.$plugIn = function(pluginRequest) {
             var extensions = pluginRequest.data.split('|'),
                 extLen = extensions.length,
                 idx = 0;
@@ -291,10 +366,10 @@ JAR.register({
     /**
      * @access private
      * 
-     * @memberOf module:"jar.lang"
+     * @memberOf jar.lang
      * @inner
      * 
-     * @return {string}
+     * @return {String}
      */
     function randomHex() {
         return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);

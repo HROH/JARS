@@ -30,8 +30,9 @@ JAR.register({
             isDeepOrKeepDefault(args[argsLen - 1]) || (args[argsLen++] = false);
 
             args[argsLen] = true;
+            args.unshift(this);
 
-            return lang.callNativeTypeMethod(ObjectCopy, 'merge', this, args);
+            return ObjectCopy.merge.apply(ObjectCopy, args);
         },
 
         merge: function() {
