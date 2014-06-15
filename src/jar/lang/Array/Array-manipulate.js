@@ -1,6 +1,6 @@
 JAR.register({
     MID: 'jar.lang.Array.Array-manipulate',
-    deps: ['System', '..', '.!iterate|search', '..Object!derive']
+    deps: ['System', '..', '.!index|iterate', '..Object!derive']
 }, function(System, lang, Arr, Obj) {
     'use strict';
 

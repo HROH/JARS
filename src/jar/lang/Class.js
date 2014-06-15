@@ -1,6 +1,6 @@
 JAR.register({
     MID: 'jar.lang.Class',
-    deps: ['System', '..' /* jar */ , '.Object!all', '.Array!check|iterate|manipulate|search', '.Function!advice']
+    deps: ['System', '..' /* jar */ , '.Object!all', '.Array!check|index|iterate|manipulate', '.Function!advice']
 }, function(System, jar, Obj, Arr, Fn) {
     'use strict';
 

@@ -1,7 +1,7 @@
 JAR.register({
     MID: 'jar.lang.Array',
     deps: 'System',
-    bundle: ['Array-check', 'Array-derive', 'Array-iterate', 'Array-manipulate', 'Array-reduce', 'Array-search']
+    bundle: ['Array-check', 'Array-derive', 'Array-find', 'Array-index', 'Array-iterate', 'Array-manipulate', 'Array-reduce']
 }, function(System) {
     'use strict';
 
