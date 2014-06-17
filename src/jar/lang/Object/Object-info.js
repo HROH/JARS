@@ -1,7 +1,7 @@
 JAR.register({
     MID: 'jar.lang.Object.Object-info',
-    deps: ['..', '.!reduce|derive']
-}, function(lang, Obj) {
+    deps: ['..', '.!reduce|derive', '..Array!reduce']
+}, function(lang, Obj, Arr) {
     'use strict';
 
     var reduce = Obj.reduce;
@@ -16,7 +16,9 @@ JAR.register({
         },
 
         prop: function(key) {
-            return Obj.hasOwn(this, key) ? this[key] : undefined;
+            var propList = key.split('.');
+
+            return Arr.reduce(propList, extractProperty, this);
         },
 
         size: function() {
@@ -27,6 +29,10 @@ JAR.register({
             return reduce(this, pushValue, []);
         }
     });
+
+    function extractProperty(obj, key) {
+        return (obj && Obj.hasOwn(obj, key)) ? obj[key] : undefined;
+    }
 
     function countProperties(size) {
         return ++size;
