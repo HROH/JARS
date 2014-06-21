@@ -59,8 +59,8 @@ JAR.register({
                     objectToCheck, notImplementedMethods;
 
                 if (implementor) {
-                    objectToCheck = Class.isClass(implementor) ? implementor.prototype : (checkAny || Class.isInstance(implementor)) ? implementor: null;
-                    
+                    objectToCheck = Class.isClass(implementor) ? implementor.prototype : (checkAny || Class.isInstance(implementor)) ? implementor : null;
+
                     if (objectToCheck) {
                         notImplementedMethods = methods.filter(isMethodNotImplemented, objectToCheck).map(transformMethodData);
 
@@ -107,7 +107,11 @@ JAR.register({
     }
 
     function implementzInterface(iface) {
-        return !System.isA(iface, Interface) || iface.isImplementedBy(this);
+        return iface.isImplementedBy(this);
+    }
+
+    function isInterface(iface) {
+        return System.isA(iface, Interface);
     }
 
     /**
@@ -120,10 +124,12 @@ JAR.register({
      */
     function implementz() {
         var isImplemented = false,
-            currentClass = this;
+            currentClass = this,
 
-        if (arguments.length) {
-            isImplemented = Arr.every(arguments, implementzInterface, currentClass);
+            interfaces = Arr.filter(arguments, isInterface);
+
+        if (interfaces.length) {
+            isImplemented = Arr.every(interfaces, implementzInterface, currentClass);
         }
         else {
             currentClass.logger.warn('There is no interface given to compare with!');
