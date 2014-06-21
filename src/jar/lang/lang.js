@@ -16,6 +16,10 @@ JAR.register({
         nativeTypes = {},
         nativeTypeSandbox, lang;
 
+    function hasOwnProp(object, property) {
+        return hasOwn.call(object, property);
+    }
+
     /**
      * @namespace jar.lang
      */
@@ -37,17 +41,17 @@ JAR.register({
                 methodName;
 
             for (methodName in prototypeMethods) {
-                if (hasOwn.call(prototypeMethods, methodName)) {
-                    if (!hasOwn.call(typePrototype, methodName)) {
+                if (hasOwnProp(prototypeMethods, methodName)) {
+                    if (!hasOwnProp(typePrototype, methodName)) {
                         typePrototype[methodName] = prototypeMethods[methodName];
                     }
 
-                    hasOwn.call(Type, methodName) || (Type[methodName] = createDelegate(Type, methodName));
+                    hasOwnProp(Type, methodName) || (Type[methodName] = createDelegate(Type, methodName));
                 }
             }
 
             for (methodName in staticMethods) {
-                if (hasOwn.call(staticMethods, methodName) && !hasOwn.call(Type, methodName)) {
+                if (hasOwnProp(staticMethods, methodName) && !hasOwnProp(Type, methodName)) {
                     Type[methodName] = staticMethods[methodName];
                 }
             }
@@ -272,7 +276,7 @@ JAR.register({
         if (System.isString(value)) {
             accessor = encodeURI(value);
 
-            if (!(accessor in sandboxVars)) {
+            if (!hasOwnProp(sandboxVars, accessor)) {
                 createSandboxScript(sandbox.doc, __SANDBOX__ + '["' + accessor + '"]=' + value);
             }
 
@@ -298,24 +302,24 @@ JAR.register({
         if (System.isString(value)) {
             accessor = encodeURI(value);
 
-            if (accessor in sandboxVars) {
+            if (hasOwnProp(sandboxVars, accessor)) {
                 delete sandboxVars[accessor];
             }
         }
     };
 
     nativeTypeSandbox = lang.sandbox('__SYSTEM__');
-	
-	/**
-	 * @access private
-	 * 
-	 * @memberof jar.lang
-	 * @inner
-	 * 
-	 * @param {String} typeString
-	 * 
-	 * @return {Object}
-	 */
+
+    /**
+     * @access private
+     * 
+     * @memberof jar.lang
+     * @inner
+     * 
+     * @param {String} typeString
+     * 
+     * @return {Object}
+     */
     function getNativeType(typeString) {
         var Type = nativeTypes[typeString] || (config('allowProtoOverride') ? window[typeString] : nativeTypeSandbox.add(typeString));
 
@@ -329,15 +333,15 @@ JAR.register({
         return Type;
     }
 
-	/**
-	 * @access private
-	 * 
-	 * @memberof jar.lang
-	 * @inner
-	 * 
-	 * @param {String} typeString
-	 * @param {Object} Type
-	 */
+    /**
+     * @access private
+     * 
+     * @memberof jar.lang
+     * @inner
+     * 
+     * @param {String} typeString
+     * @param {Object} Type
+     */
     function makePluggable(typeString, Type) {
         var moduleName = jar.getCurrentModuleName(),
             subModuleName = moduleName + '.' + typeString + '-';
@@ -352,14 +356,16 @@ JAR.register({
                 extensions = [moduleName + '.*'];
             }
             else {
-                while (idx < extLen && extensions[idx]) {
+                while (idx < extLen) {
                     extensions[idx] = subModuleName + extensions[idx++];
                 }
             }
 
             pluginRequest.$importAndLink(extensions, function() {
                 pluginRequest.onSuccess(Type);
-            }, pluginRequest.onError);
+            }, function(extensionName) {
+                pluginRequest.onError('Could not import the extension "' + extensionName + '" requested by "' + pluginRequest.listener + '"');
+            });
         };
     }
 
