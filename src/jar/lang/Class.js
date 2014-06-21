@@ -38,7 +38,7 @@ JAR.register({
             inModules = 'in one of the following modules: ${missingAccess}, but has only access to ${hasAccess}';
 
         classFactoryMessageTemplates[MSG_ALREADY_DESTRUCTED] = proxyFailed + '${hash} was already destructed!';
-        classFactoryMessageTemplates[MSG_INVALID_OR_EXISTING_CLASS] = 'Illegal or already existing Classname: ${name}';
+        classFactoryMessageTemplates[MSG_INVALID_OR_EXISTING_CLASS] = 'Illegal or already existing Class: ${hash}';
         classFactoryMessageTemplates[MSG_WRONG_CLASS] = proxyFailed + instanceMustBe + instanceOfClass + '!';
         classFactoryMessageTemplates[MSG_WRONG_CLASS_AND_MODULE] = proxyFailed + instanceMustBe + instanceOfClass + ' or ' + inModules + '!';
         classFactoryMessageTemplates[MSG_WRONG_CONTEXT] = proxyFailed + 'Method was called in wrong context!';
@@ -220,8 +220,8 @@ JAR.register({
         return canProxy;
     }
 
-    function createClassHash(name) {
-        return 'Class #<' + name + '>';
+    function createClassHash(name, moduleName) {
+        return 'Class #<' + moduleName + ':' + name + '>';
     }
 
     function retrieveClass(allClasses, classData) {
@@ -846,24 +846,6 @@ JAR.register({
         Obj.extend(MetaClass.prototype, props);
     }
 
-    /**
-     * 
-     * @param {String} moduleName
-     * @param {String} className
-     * 
-     * @return {Class}
-     */
-    function getClassFromModule(moduleName, className) {
-        var module, Class;
-
-        if (System.isString(moduleName)) {
-            module = useModule(moduleName);
-            Class = (module && className) ? module[className] : module;
-        }
-
-        return isClass(Class) ? Class : null;
-    }
-
     function abstractClass(name, proto, staticProperties) {
         return ClassFactory(name, proto, staticProperties).toAbstract();
     }
@@ -895,8 +877,8 @@ JAR.register({
      *
      * @return {Class}
      */
-    function getClass(classHashOrName) {
-        return (Classes[classHashOrName] || Classes[createClassHash(classHashOrName)] || {}).Class;
+    function getClass(classHashOrName, moduleName) {
+        return (Classes[classHashOrName] || Classes[createClassHash(classHashOrName, moduleName || getCurrentModuleName())] || {}).Class;
     }
 
     /**
@@ -973,7 +955,8 @@ JAR.register({
      * @return {function()} Class
      */
     function ClassFactory(name, proto, staticProperties) {
-        var classHash = createClassHash(name),
+        var moduleName = getCurrentModuleName(),
+            classHash = createClassHash(name, moduleName),
             Class;
 
         if (rClass.test(name) && !hasOwn(Classes, classHash)) {
@@ -1007,7 +990,7 @@ JAR.register({
                 _$: Obj.from({
                     _$clsName: name,
 
-                    _$modName: getCurrentModuleName(),
+                    _$modName: moduleName,
 
                     _$subClasses: Obj(),
 
@@ -1033,7 +1016,7 @@ JAR.register({
         }
         else {
             classFactoryLogger.warn(MSG_INVALID_OR_EXISTING_CLASS, {
-                name: name
+                hash: classHash
             });
         }
 
@@ -1052,8 +1035,6 @@ JAR.register({
         isClass: isClass,
 
         isInstance: isInstance,
-
-        getClassFromModule: getClassFromModule,
 
         Abstract: abstractClass,
 
