@@ -18,12 +18,16 @@ JAR.register({
             }, fn.arity || fn.length);
         },
 
+        functional: function(arity) {
+            return FunctionCopy.curry(FunctionCopy.flip(this), arity);
+        },
+
         curry: function(arity) {
             var fn = this;
 
-            arity = arity || this.arity || this.length;
+            arity = arity || fn.arity || fn.length;
 
-            return fromFunction(arity < 2 ? this : function curryFn() {
+            return fromFunction(arity < 2 ? fn : function curryFn() {
                 var args = fromArgs(arguments),
                     result;
 
@@ -118,5 +122,5 @@ JAR.register({
         return placeholderArg;
     }
 
-    return Obj.extract(FunctionCopy, ['curry', 'defaults', 'flip', 'partial']);
+    return Obj.extract(FunctionCopy, ['curry', 'defaults', 'flip', 'functional', 'partial']);
 });
