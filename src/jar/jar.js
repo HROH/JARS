@@ -1075,8 +1075,7 @@
                 },
 
                 requestBundle: function() {
-                    var module = this,
-                        messageType;
+                    var module = this;
 
                     module.logBundle(MSG_BUNDLE_REQUESTED);
 
@@ -1084,18 +1083,15 @@
                         module.setBundleState(MODULE_BUNDLE_LOADING);
 
                         module.loader.listenFor(module.bundleName, [module.name], function onModuleLoaded() {
+                            module.logBundle(MSG_BUNDLE_LOADING);
                             module.listenFor(module.bundle, true);
                         }, function onAbort() {
                             module.abortBundle();
                         });
-
-                        messageType = MSG_BUNDLE_LOADING;
                     }
                     else {
-                        messageType = module.isBundleState(MODULE_BUNDLE_LOADED) ? MSG_BUNDLE_ALREADY_LOADED : MSG_BUNDLE_ALREADY_LOADING;
+                        module.logBundle(module.isBundleState(MODULE_BUNDLE_LOADED) ? MSG_BUNDLE_ALREADY_LOADED : MSG_BUNDLE_ALREADY_LOADING);
                     }
-
-                    module.logBundle(messageType);
 
                     return module;
                 },
@@ -1153,6 +1149,8 @@
                  */
                 findRecover: function() {
                     var module = this,
+                        loader = module.loader,
+                        moduleName = module.name,
                         foundRecover = module.getConfig('recover', module.nextRecover),
                         recoverModuleName, nextRecoverModule;
 
@@ -1160,13 +1158,13 @@
                         recoverModuleName = foundRecover.restrict;
 
                         // This is a recover on a higher level
-                        if (recoverModuleName !== module.name) {
+                        if (recoverModuleName !== moduleName) {
                             // extract the next recovermodule
-                            nextRecoverModule = module.loader.getModule(recoverModuleName).dep;
+                            nextRecoverModule = loader.getModule(loader.getModule(recoverModuleName).dep);
                             nextRecoverModule && (module.nextRecover = nextRecoverModule.bundleName);
 
                             // Only recover this module
-                            foundRecover.restrict = module.name;
+                            foundRecover.restrict = moduleName;
                         }
 
                         LoaderManager.setModuleConfig(foundRecover);
@@ -2058,8 +2056,8 @@
                  * 
                  * @memberof JAR~LoaderManager~Resolver
                  * 
+                 * @param {Array} refParts
                  * @param {String} moduleName
-                 * @param {String} referenceModuleName
                  *
                  * @return {String}
                  */
@@ -2565,7 +2563,7 @@
             moduleRef.$plugIn(options);
         }
         else {
-            errback('could not call method "$plugIn" on this module');
+            errback('Could not call method "$plugIn" on this module');
         }
     });
 
@@ -3096,7 +3094,7 @@
                     formatLog.values = null;
                 }
 
-                output.call(currentDebugger, data, context);
+                output.call(currentDebugger, context, data);
             }
         };
         /**
@@ -3208,7 +3206,7 @@
             }
 
             function forwardConsole(method) {
-                return function log(data, logContext) {
+                return function log(logContext, data) {
                     var useGroups = canUseGroups && config('groupByContext'),
                         logContextChanged = lastLogContext !== logContext;
 
@@ -3601,10 +3599,10 @@
              * @return {String}
              */
             environment: function(newEnvironment, oldEnvironment, System) {
-                var envCallback = configs.environments[newEnvironment];
+                var environment = configs.environments[newEnvironment];
 
-                if (newEnvironment !== oldEnvironment && System.isFunction(envCallback)) {
-                    envCallback();
+                if (newEnvironment !== oldEnvironment && System.isObject(environment)) {
+                    JAR.configure(environment);
                 }
 
                 return newEnvironment;
@@ -3666,28 +3664,24 @@
         });
 
         /*defaultConfig.environments = {
-            production: function() {
-                JAR.configure({
-                    modules: {
-                        minified: true
-                    },
-                    
-                    debugging: true,
+            production: {
+                modules: {
+                    minified: true
+                },
 
-                    globalAccess: false
-                });
+                debugging: true,
+
+                globalAccess: false
             },
 
-            development: function() {
-                JAR.configure({
-                    modules: {
-                        minified: false
-                    },
-                    
-                    debugging: true,
+            development: {
+                modules: {
+                    minified: false
+                },
 
-                    globalAccess: true
-                });
+                debugging: true,
+
+                globalAccess: true
             }
         };*/
 
