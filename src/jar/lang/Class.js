@@ -659,7 +659,7 @@ JAR.register({
                     //
                     // Note: If an instance isn't used anymore this reference has to be deleted over the destructor of the instance
                     // Otherwise this could lead to memory leaks if there are too many instances
-                    instanceHashPrefix = 'Object #<' + classHiddenProtectedProps._$clsName + '#';
+                    instanceHashPrefix = 'Object #<' + classHiddenProtectedProps._$modName + ':' + classHiddenProtectedProps._$clsName + '#';
 
                     do {
                         instanceHash = instanceHashPrefix + lang.generateHash('xx-x-x-x-xxx') + '>';
