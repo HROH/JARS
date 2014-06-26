@@ -108,9 +108,6 @@ JAR.configure(option, value);
 ```
 where <code>options</code> includes one of the following:
 
-* **checkCircularDeps {Boolean}** (<code>true</code> causes the Loader to check for circular dependencies - default: <code>false</code>)
-Can be very slow, so only use this feature if your app is not loading properly and you don't get any error messages.
-* **createDependencyURLList {Boolean}** (specify <code>true</code> to let the Loader create a list of all dependencies when they are loaded - default: <code>false</code>)
 Maybe useful in a buildstep using something like phantomjs. You can get the list by calling <code>JAR.getModulesURLList(callback)</code>.
 * **debugging {Object|Boolean}** (Shortcut for defining <code>modules.config</code>)
  * **context {Object|Array|String}** (define a comma-separated list of loggers that are allowed to log messages)
@@ -133,8 +130,12 @@ Maybe useful in a buildstep using something like phantomjs. You can get the list
 	JAR.configure('environment', 'myEnvironment');
     ```
 * **globalAccess {Boolean}** (root-modules can be accessed over the namespace <code>JAR.mods</code>. This may be useful in developement - default: <code>false</code>)
+* **loader {Object}** (configure loaderspecific options)
+ * **checkCircularDeps {Boolean}** (<code>true</code> causes the Loader to check for circular dependencies - default: <code>false</code>)
+ Can be very slow, so only use this feature if your app is not loading properly and you don't get any error messages.
+ * **createDependencyURLList {Boolean}** (specify <code>true</code> to let the Loader create a list of all dependencies when they are loaded - default: <code>false</code>)
 * **main {String}** (define the main-file of your application)
-* **modules {Object}** (configure modulespecific options like <code>baseUrl</code> or <code>recover</code>)  
+* **modules {Object|Array}** (configure modulespecific options like <code>baseUrl</code> or <code>recover</code>)  
 You can customize the following options for your modules:
  * **baseUrl {String}** (url to the rootdirectory of your modules - default: current directory)
  * **cache {Boolean}** (<code>false</code> prevents caching of the files - default: <code>true</code>)

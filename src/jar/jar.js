@@ -4,7 +4,7 @@
     var separator = '", "',
         object = {},
         hasOwn = object.hasOwnProperty,
-        SourceManager, LoaderManager;
+        SourceManager, LoaderManager, ConfigurationManager;
 
     /**
      * @access private
@@ -20,6 +20,327 @@
     function hasOwnProp(object, prop) {
         return hasOwn.call(object, prop);
     }
+
+    ConfigurationManager = (function configurationManagerSetup() {
+        var minTimeout = 0.5,
+            stringCheck = 'String',
+            objectCheck = 'Object',
+            booleanCheck = 'Boolean',
+            loaderConfig = {
+                checkCircularDeps: false,
+
+                createDependencyURLList: false
+            },
+            modulesConfig = {
+                '*': {
+                    cache: false,
+
+                    minified: false,
+
+                    versionSuffix: '',
+
+                    timeout: 5
+                }
+            },
+            ConfigurationManager, definitions;
+
+        definitions = {
+            baseUrl: {
+                check: stringCheck,
+
+                transform: function(baseUrl) {
+                    return LoaderManager.Resolver.ensureEndsWithSlash(baseUrl);
+                }
+            },
+
+            cache: {
+                check: booleanCheck,
+                /**
+                 * @param {Boolean} cache
+                 * 
+                 * @return {Boolean}
+                 */
+                transform: function cacheTransform(cache) {
+                    return !!cache;
+                }
+            },
+
+            config: {
+                check: objectCheck,
+                /**
+                 * @param {Object} config
+                 * @param {String} moduleName
+                 * 
+                 * @return {Object}
+                 */
+                transform: function configTransform(config, moduleName) {
+                    var oldConfig = modulesConfig[moduleName].config || {},
+                        option;
+
+                    for (option in config) {
+                        if (hasOwnProp(config, option)) {
+                            oldConfig[option] = config[option];
+                        }
+                    }
+
+                    return oldConfig;
+                }
+            },
+
+            dirPath: {
+                check: stringCheck,
+
+                transform: function(baseUrl) {
+                    return LoaderManager.Resolver.ensureEndsWithSlash(baseUrl);
+                }
+            },
+
+            fileName: {
+                check: stringCheck
+            },
+
+            minified: {
+                check: booleanCheck,
+                /**
+                 * @param {Boolean} loadMin
+                 * 
+                 * @return {String}
+                 */
+                transform: function minTransform(loadMin) {
+                    return loadMin ? '.min' : '';
+                }
+            },
+
+            recover: {
+                check: objectCheck,
+                /**
+                 * @param {Object} recoverConfig
+                 * @param {String} moduleName
+                 * 
+                 * @return {Object}
+                 */
+                transform: function recoverTransform(recoverConfig, moduleName) {
+                    var recover = {},
+                        option;
+
+                    // create a copy of the recover-config
+                    // because it should update for every module independendly
+                    for (option in recoverConfig) {
+                        if (hasOwnProp(recoverConfig, option)) {
+                            (recover[option] = recoverConfig[option]);
+                        }
+                    }
+
+                    recover.restrict = moduleName;
+                    // if no next recover-config is given set it explicitly
+                    // this is important because the recoverflow is as follows:
+                    // - if the module has a recover-config, use it to update its config
+                    // - if it has no recover-config look for it in a higher bundle-config
+                    // - if such a config is found, update the config for the module
+                    // - when the module-config is updated, options will always be overwritten but never deleted
+                    // So if the module has a recover-config that doesn't get replaced
+                    // it may repeatedly try to recover with this config
+                    recover.recover || (recover.recover = null);
+
+                    return recover;
+                }
+            },
+
+            timeout: {
+                check: 'Number',
+                /**
+                 * @param {Number} timeout
+                 * 
+                 * @return {Number}
+                 */
+                transform: function timeoutTransform(timeout) {
+                    timeout = Number(timeout);
+
+                    return timeout > minTimeout ? timeout : minTimeout;
+                }
+            },
+
+            versionSuffix: {
+                check: stringCheck
+            }
+        };
+
+        /**
+         * @access private
+         * 
+         * @memberof JAR~ConfigurationManager
+         * @inner
+         * 
+         * @param {String} moduleName
+         * @param {String} option
+         * @param {*} value
+         */
+        function configurationManagerTransformModuleConfig(moduleName, option, value) {
+            var transform = definitions[option].transform;
+
+            return transform ? transform(value, moduleName) : value;
+        }
+
+        /**
+         * @access private
+         * 
+         * @memberof JAR~ConfigurationManager
+         * @inner
+         * 
+         * @param {String} moduleName
+         * @param {Object} newConfig
+         */
+        function configurationManagerUpdateModuleConfig(moduleName, newConfig) {
+            var System = LoaderManager.getSystem(),
+                config = modulesConfig[moduleName] = modulesConfig[moduleName] || {},
+                definition, option, value;
+
+            for (option in newConfig) {
+                if (hasOwnProp(newConfig, option) && hasOwnProp(definitions, option)) {
+                    definition = definitions[option];
+                    value = newConfig[option];
+
+                    if (System['is' + definition.check](value)) {
+                        config[option] = configurationManagerTransformModuleConfig(moduleName, option, value);
+                    }
+                    else if (System.isFunction(value)) {
+                        config[option] = value;
+                    }
+                    else if (System.isNull(value)) {
+                        delete config[option];
+                    }
+                }
+            }
+        }
+
+        /**
+         * @access private
+         * 
+         * @namespace ConfigurationManager
+         * 
+         * @memberof JAR
+         * @inner
+         */
+        ConfigurationManager = {
+            /**
+             * @access public
+             * 
+             * @memberof JAR~ConfigurationManager
+             * 
+             * @param {(Object|Array)} newConfig
+             * 
+             * @return {Object}
+             */
+            setModuleConfig: function(newConfig) {
+                var System = LoaderManager.getSystem(),
+                    index = 0,
+                    length, modules;
+
+                if (System.isArray(newConfig)) {
+                    length = newConfig.length;
+
+                    for (; index < length; index++) {
+                        ConfigurationManager.setModuleConfig(newConfig[index]);
+                    }
+                }
+                else if (System.isObject(newConfig)) {
+                    modules = newConfig.restrict ? LoaderManager.Resolver.resolve(newConfig.restrict) : [LoaderManager.Resolver.getRootName()];
+                    length = modules.length;
+
+                    for (; index < length; index++) {
+                        configurationManagerUpdateModuleConfig(modules[index], newConfig);
+                    }
+                }
+
+                return modulesConfig;
+            },
+            /**
+             * @access public
+             * 
+             * @memberof JAR~ConfigurationManager
+             * 
+             * @param {String} moduleName
+             * @param {String} option
+             * @param {Boolean} skipUntil
+             * 
+             * @return {*}
+             */
+            getModuleConfig: function(moduleName, option, skipUntil) {
+                var System = LoaderManager.getSystem(),
+                    origModuleName = moduleName,
+                    nextLevel = moduleName,
+                    skip = false,
+                    transformations = [],
+                    result;
+
+                do {
+                    if (!skip && modulesConfig[moduleName]) {
+                        result = modulesConfig[moduleName][option];
+
+                        if (System.isFunction(result)) {
+                            transformations.push(result);
+                            result = undef;
+                        }
+                    }
+
+                    if (nextLevel) {
+                        moduleName = LoaderManager.Resolver.getBundleName(nextLevel);
+                        nextLevel = LoaderManager.Resolver.getImplicitDependencyName(nextLevel);
+                    }
+                    else {
+                        moduleName = !LoaderManager.Resolver.isRootName(moduleName) ? LoaderManager.Resolver.getRootName() : undef;
+                    }
+
+                    if (skipUntil) {
+                        skip = skipUntil !== moduleName;
+                        skip || (skipUntil = undef);
+                    }
+
+                } while (!System.isSet(result) && moduleName);
+
+                while (transformations.length) {
+                    result = configurationManagerTransformModuleConfig(origModuleName, option, transformations.shift()(result, origModuleName));
+                }
+
+                return result;
+            },
+            /**
+             * @access public
+             * 
+             * @memberof JAR~ConfigurationManager
+             * 
+             * @param {String} option
+             * @param {Object} value
+             * 
+             * @return {Object}
+             */
+            setLoaderConfig: function(config) {
+                var option;
+
+                for (option in config) {
+                    if (hasOwnProp(config, option)) {
+                        loaderConfig[option] = config[option];
+                    }
+                }
+
+                return loaderConfig;
+            },
+            /**
+             * @access public
+             * 
+             * @memberof JAR~ConfigurationManager
+             * 
+             * @param {String} option
+             * 
+             * @return {*}
+             */
+            getLoaderConfig: function(option) {
+                return loaderConfig[option];
+            }
+        };
+
+        return ConfigurationManager;
+    })();
 
     /**
      * @access private
@@ -164,41 +485,11 @@
         };
     })();
 
-    /**
-     * @access private
-     * 
-     * @namespace LoaderManager
-     * 
-     * @memberof JAR
-     * @inner
-     * 
-     * @borrows Resolver.isRootName as isRootName
-     * @borrows Resolver.resolve as resolve
-     */
-    LoaderManager = (function loaderSetup() {
+    LoaderManager = (function loaderManagerSetup() {
         var loaders = {},
-            loaderConfig = {
-                checkCircularDeps: false,
-
-                createDependencyURLList: false,
-
-                context: 'default',
-
-                modules: {
-                    '*': {
-                        cache: false,
-
-                        minified: false,
-
-                        versionSuffix: '',
-
-                        timeout: 5
-                    }
-                }
-            },
             loaderCoreModules = {},
             interceptors = {},
-            Module, Resolver;
+            Module, Resolver, LoaderManager;
 
         Module = (function moduleSetup() {
             var QUEUE_SUCCESS = 0,
@@ -856,7 +1147,7 @@
                         hasCircularDependency = false,
                         circularDependencies;
 
-                    if (loaderConfig.checkCircularDeps) {
+                    if (module.loader.getConfig('checkCircularDeps')) {
                         circularDependencies = module.findCircularDeps();
                         hasCircularDependency = !! circularDependencies.length;
 
@@ -958,7 +1249,17 @@
                  * @return {*}
                  */
                 getConfig: function(option, skipUntil) {
-                    return LoaderManager.getModuleConfig(this.name, option, skipUntil) || this.options[option];
+                    return ConfigurationManager.getModuleConfig(this.name, option, skipUntil) || this.options[option];
+                },
+                /**
+                 * @access public
+                 * 
+                 * @memberof JAR~LoaderManager~Module#
+                 * 
+                 * @param {Object} config
+                 */
+                setConfig: function(config) {
+                    ConfigurationManager.setModuleConfig(config);
                 },
                 /**
                  * @access public
@@ -1167,7 +1468,7 @@
                             foundRecover.restrict = moduleName;
                         }
 
-                        LoaderManager.setModuleConfig(foundRecover);
+                        module.setConfig(foundRecover);
 
                         // Restore module recover assoziation
                         foundRecover.restrict = recoverModuleName;
@@ -1392,7 +1693,7 @@
                 notify: function(notifyBundle) {
                     var module = this;
 
-                    loaderConfig.createDependencyURLList && module.addToURLList(notifyBundle);
+                    module.loader.getConfig('createDependencyURLList') && module.addToURLList(notifyBundle);
 
                     module.dequeue(QUEUE_SUCCESS, notifyBundle);
                 },
@@ -1521,6 +1822,18 @@
              */
             setCurrentModuleName: function(moduleName) {
                 this.currentModuleName = moduleName;
+            },
+            /**
+             * @access public
+             * 
+             * @memberof JAR~LoaderManager~Loader#
+             * 
+             * @param {String} option
+             * 
+             * @return {*}
+             */
+            getConfig: function(option) {
+                return ConfigurationManager.getLoaderConfig(option);
             },
             /**
              * @access public
@@ -1809,21 +2122,21 @@
                 bundlePrefix = '.*',
                 rLeadingDot = /^\./,
                 rootModuleName = '*',
-                interceptorInfoCache = {};
+                interceptorInfoCache = {},
+                Resolver;
 
             /**
-             * @access private
+             * @access public
              * 
              * @namespace Resolver
              * 
              * @memberof JAR~LoaderManager
-             * @inner
              */
             Resolver = {
                 /**
                  * @access public
                  * 
-                 * @memberof JAR~LoaderManager~Resolver
+                 * @memberof JAR~LoaderManager.Resolver
                  * 
                  * @param {String} moduleName
                  * 
@@ -1835,7 +2148,7 @@
                 /**
                  * @access public
                  * 
-                 * @memberof JAR~LoaderManager~Resolver
+                 * @memberof JAR~LoaderManager.Resolver
                  * 
                  * 
                  * @return {String}
@@ -1846,7 +2159,7 @@
                 /**
                  * @access public
                  * 
-                 * @memberof JAR~LoaderManager~Resolver
+                 * @memberof JAR~LoaderManager.Resolver
                  * 
                  * @param {String} moduleName
                  * 
@@ -1869,7 +2182,7 @@
                 /**
                  * @access public
                  * 
-                 * @memberof JAR~LoaderManager~Resolver
+                 * @memberof JAR~LoaderManager.Resolver
                  * 
                  * @param {String} path
                  * 
@@ -1881,7 +2194,7 @@
                 /**
                  * @access public
                  * 
-                 * @memberof JAR~LoaderManager~Resolver
+                 * @memberof JAR~LoaderManager.Resolver
                  * 
                  * @param {String} moduleName
                  * 
@@ -1893,7 +2206,7 @@
                 /**
                  * @access public
                  * 
-                 * @memberof JAR~LoaderManager~Resolver
+                 * @memberof JAR~LoaderManager.Resolver
                  * 
                  * @param {String} moduleName
                  * 
@@ -1905,7 +2218,7 @@
                 /**
                  * @access public
                  * 
-                 * @memberof JAR~LoaderManager~Resolver
+                 * @memberof JAR~LoaderManager.Resolver
                  * 
                  * @param {String} moduleName
                  * 
@@ -1917,7 +2230,7 @@
                 /**
                  * @access public
                  * 
-                 * @memberof JAR~LoaderManager~Resolver
+                 * @memberof JAR~LoaderManager.Resolver
                  * 
                  * @param {String} moduleName
                  * 
@@ -1929,7 +2242,7 @@
                 /**
                  * @access public
                  * 
-                 * @memberof JAR~LoaderManager~Resolver
+                 * @memberof JAR~LoaderManager.Resolver
                  * 
                  * @param {String} moduleName
                  * 
@@ -1964,7 +2277,7 @@
                 /**
                  * @access public
                  * 
-                 * @memberof JAR~LoaderManager~Resolver
+                 * @memberof JAR~LoaderManager.Resolver
                  * 
                  * @param {Array} modules
                  * @param {String} referenceModuleName
@@ -1986,7 +2299,7 @@
                 /**
                  * @access public
                  * 
-                 * @memberof JAR~LoaderManager~Resolver
+                 * @memberof JAR~LoaderManager.Resolver
                  * 
                  * @param {Object} modules
                  * @param {String} referenceModuleName
@@ -2009,7 +2322,7 @@
                 /**
                  * @access public
                  * 
-                 * @memberof JAR~LoaderManager~Resolver
+                 * @memberof JAR~LoaderManager.Resolver
                  * 
                  * @param {String} moduleName
                  * @param {String} referenceModuleName
@@ -2054,7 +2367,7 @@
                 /**
                  * @access public
                  * 
-                 * @memberof JAR~LoaderManager~Resolver
+                 * @memberof JAR~LoaderManager.Resolver
                  * 
                  * @param {Array} refParts
                  * @param {String} moduleName
@@ -2078,7 +2391,7 @@
                 /**
                  * @access public
                  * 
-                 * @memberof JAR~LoaderManager~Resolver
+                 * @memberof JAR~LoaderManager.Resolver
                  * 
                  * @param {(String|Object|Array)} modules
                  * @param {String} referenceModuleName
@@ -2104,25 +2417,16 @@
             return Resolver;
         })();
 
-        return {
-            isRootName: Resolver.isRootName,
-
-            resolve: Resolver.resolve,
-            /**
-             * @access public
-             * 
-             * @memberof JAR~LoaderManager
-             * 
-             * @param {String} option
-             * @param {*} value
-             * 
-             * @return {*}
-             */
-            setConfig: function(option, value) {
-                loaderConfig[option] = value;
-
-                return value;
-            },
+        /**
+         * @access private
+         * 
+         * @namespace LoaderManager
+         * 
+         * @memberof JAR
+         * @inner
+         */
+        LoaderManager = {
+            Resolver: Resolver,
             /**
              * @access public
              * 
@@ -2135,199 +2439,11 @@
             setContext: function(context) {
                 var createContext = !hasOwnProp(loaders, context);
 
-                loaderConfig.context = context;
-
                 LoaderManager.loader = loaders[context] = createContext ? new Loader(context) : loaders[context];
                 createContext && loaders[context].init();
 
                 return context;
             },
-            /**
-             * @access public
-             * 
-             * @function
-             * @memberof JAR~LoaderManager
-             * 
-             * @param {(Object|Array)} moduleConfigs
-             * 
-             * @return {Object}
-             */
-            setModuleConfig: (function moduleConfigSetterSetup() {
-                var stringCheck = 'String',
-                    objectCheck = 'Object',
-                    booleanCheck = 'Boolean',
-                    propertyDefinitions = {
-                        baseUrl: {
-                            check: stringCheck,
-
-                            transform: Resolver.ensureEndsWithSlash
-                        },
-
-                        cache: {
-                            check: booleanCheck,
-                            /**
-                             * @param {Boolean} cache
-                             * 
-                             * @return {Boolean}
-                             */
-                            transform: function cacheTransform(cache) {
-                                return !!cache;
-                            }
-                        },
-
-                        config: {
-                            check: objectCheck,
-                            /**
-                             * @param {Object} config
-                             * @param {String} moduleName
-                             * 
-                             * @return {Object}
-                             */
-                            transform: function(config, moduleName) {
-                                var oldModuleConfig = loaderConfig.modules,
-                                    oldConfig = oldModuleConfig[moduleName].config || {},
-                                    option;
-
-                                for (option in config) {
-                                    if (hasOwnProp(config, option)) {
-                                        oldConfig[option] = config[option];
-                                    }
-                                }
-
-                                return oldConfig;
-                            }
-                        },
-
-                        dirPath: {
-                            check: stringCheck,
-
-                            transform: Resolver.ensureEndsWithSlash
-                        },
-
-                        fileName: {
-                            check: stringCheck
-                        },
-
-                        minified: {
-                            check: booleanCheck,
-                            /**
-                             * @param {Boolean} loadMin
-                             * 
-                             * @return {String}
-                             */
-                            transform: function minTransform(loadMin) {
-                                return loadMin ? '.min' : '';
-                            }
-                        },
-
-                        recover: {
-                            check: objectCheck,
-                            /**
-                             * @param {Object} recoverConfig
-                             * @param {String} moduleName
-                             * 
-                             * @return {Object}
-                             */
-                            transform: function recoverTransform(recoverConfig, moduleName) {
-                                var recover = {},
-                                    option;
-
-                                // create a copy of the recover-config
-                                // because it should update for every module independendly
-                                for (option in recoverConfig) {
-                                    if (hasOwnProp(recoverConfig, option)) {
-                                        (recover[option] = recoverConfig[option]);
-                                    }
-                                }
-
-                                recover.restrict = moduleName;
-                                // if no next recover-config is given set it explicitly
-                                // this is important because the recoverflow is as follows:
-                                // - if the module has a recover-config, use it to update its config
-                                // - if it has no recover-config look for it in a higher bundle-config
-                                // - if such a config is found, update the config for the module
-                                // - when the module-config is updated, options will always be overwritten but never deleted
-                                // So if the module has a recover-config that doesn't get replaced
-                                // it may repeatedly try to recover with this config
-                                recover.recover || (recover.recover = null);
-
-                                return recover;
-                            }
-                        },
-
-                        timeout: {
-                            check: 'Number',
-                            /**
-                             * @param {Number} timeout
-                             * 
-                             * @return {Number}
-                             */
-                            transform: function timeoutTransform(timeout) {
-                                var minTimeout = 0.5;
-
-                                timeout = Number(timeout);
-
-                                return minTimeout > timeout ? minTimeout : timeout;
-                            }
-                        },
-
-                        versionSuffix: {
-                            check: stringCheck
-                        }
-                    };
-
-                /**
-                 * @param {Object} moduleConfig
-                 * @param {String} moduleName
-                 * @param {String} property
-                 * @param {*} propertyValue
-                 */
-                function setProperty(moduleConfig, moduleName, property, propertyValue) {
-                    var System = LoaderManager.getSystem(),
-                        propertyDefinition = propertyDefinitions[property],
-                        propertyTransform = propertyDefinition.transform,
-                        propertyCheck = 'is' + propertyDefinition.check;
-
-                    if (System[propertyCheck](propertyValue)) {
-                        moduleConfig[property] = propertyTransform ? propertyTransform(propertyValue, moduleName) : propertyValue;
-                    }
-                    else if (System.isNull(propertyValue)) {
-                        delete moduleConfig[property];
-                    }
-                }
-
-                function loaderManagerSetModuleConfig(moduleConfigs) {
-                    var System = LoaderManager.getSystem(),
-                        oldModuleConfigs = loaderConfig.modules,
-                        configIndex = 0,
-                        property, moduleConfigsLen, oldModuleConfig, modules, moduleName, moduleIndex, moduleCount;
-
-                    if (System.isArray(moduleConfigs)) {
-                        moduleConfigsLen = moduleConfigs.length;
-
-                        for (; configIndex < moduleConfigsLen; configIndex++) {
-                            loaderManagerSetModuleConfig(moduleConfigs[configIndex], oldModuleConfigs);
-                        }
-                    }
-                    else if (System.isObject(moduleConfigs)) {
-                        modules = moduleConfigs.restrict ? Resolver.resolve(moduleConfigs.restrict) : [Resolver.getRootName()];
-                        moduleCount = modules.length;
-
-                        for (moduleIndex = 0; moduleIndex < moduleCount; moduleIndex++) {
-                            moduleName = modules[moduleIndex];
-                            oldModuleConfig = oldModuleConfigs[moduleName] = oldModuleConfigs[moduleName] || {};
-
-                            for (property in propertyDefinitions) {
-                                hasOwnProp(propertyDefinitions, property) && setProperty(oldModuleConfig, moduleName, property, moduleConfigs[property]);
-                            }
-                        }
-                    }
-
-                    return oldModuleConfigs;
-                }
-
-                return loaderManagerSetModuleConfig;
-            })(),
             /**
              * @access public
              * 
@@ -2386,7 +2502,7 @@
                 var loader = LoaderManager.loader,
                     modulesToLoad = [];
 
-                loader.eachModules(function(module) {
+                loader.eachModules(function addModuleToLoad(module) {
                     if (module.isLoading()) {
                         modulesToLoad.push(module.name);
                     }
@@ -2398,56 +2514,16 @@
                     });
                 }
                 else {
-                    if (forceRecompute || !(loaderConfig.createDependencyURLList || loader.list.length)) {
+                    if (forceRecompute || !(loader.getConfig('createDependencyURLList') || loader.list.length)) {
                         loader.resetModulesURLList();
 
-                        loader.eachModules(function(module) {
+                        loader.eachModules(function addModuleToURLList(module) {
                             module.addToURLList();
                         });
                     }
 
                     loadedCallback(loader.list);
                 }
-            },
-            /**
-             * @access public
-             * 
-             * @memberof JAR~LoaderManager
-             * 
-             * @param {String} moduleName
-             * @param {String} option
-             * @param {String} skipUntil
-             * 
-             * @return {*}
-             */
-            getModuleConfig: function(moduleName, option, skipUntil) {
-                var System = LoaderManager.getSystem(),
-                    moduleConfigs = loaderConfig.modules,
-                    nextLevel = moduleName,
-                    skip = false,
-                    result;
-
-                do {
-                    if (!skip && moduleConfigs[moduleName]) {
-                        result = moduleConfigs[moduleName][option];
-                    }
-
-                    if (nextLevel) {
-                        moduleName = Resolver.getBundleName(nextLevel);
-                        nextLevel = Resolver.getImplicitDependencyName(nextLevel);
-                    }
-                    else {
-                        moduleName = !Resolver.isRootName(moduleName) ? Resolver.getRootName() : undef;
-                    }
-
-                    if (skipUntil) {
-                        skip = skipUntil !== moduleName;
-                        skip || (skipUntil = undef);
-                    }
-
-                } while (!System.isSet(result) && moduleName);
-
-                return result;
             },
             /**
              * @access public
@@ -2530,7 +2606,7 @@
              */
             register: function(properties, factory) {
                 var moduleName = properties.MID,
-                    defaultContext = loaderConfig.context,
+                    defaultContext = LoaderManager.loader.context,
                     loaderContext, loader;
 
                 if (!SourceManager.findScript(defaultContext + ':' + moduleName)) {
@@ -2551,6 +2627,8 @@
                 }
             }
         };
+
+        return LoaderManager;
     })();
 
     LoaderManager.addInterceptor('!', function pluginInterceptor(options) {
@@ -2729,8 +2807,10 @@
              * @param {Object} pluginRequest
              */
             $plugIn: function(pluginRequest) {
+                var module = LoaderManager.loader.getModule(pluginRequest.listener);
+
                 pluginRequest.onSuccess(function configGetter(option) {
-                    var config = LoaderManager.getModuleConfig(pluginRequest.listener, 'config');
+                    var config = module.getConfig('config');
 
                     return System.isObject(config) && hasOwnProp(config, option) ? config[option] : undef;
                 });
@@ -3148,7 +3228,7 @@
         Logger.forCurrentModule = function(options) {
             var logContext = LoaderManager.getCurrentModuleName();
 
-            LoaderManager.isRootName(logContext) && (logContext = 'JAR');
+            LoaderManager.Resolver.isRootName(logContext) && (logContext = 'JAR');
 
             return loggerCache[logContext] || new Logger(logContext, options);
         };
@@ -3182,7 +3262,7 @@
             var modeConfig = mode + 'Config';
 
             if (!hasOwnProp(debuggers, mode) && System.isFunction(debuggerSetup)) {
-                debuggers[mode] = debuggerSetup(function(option) {
+                debuggers[mode] = debuggerSetup(function debuggerConfigGetter(option) {
                     return (config(modeConfig) || {})[option];
                 });
             }
@@ -3264,7 +3344,7 @@
                     refs = [],
                     moduleCount;
 
-                moduleNames = LoaderManager.resolve(moduleNames);
+                moduleNames = LoaderManager.Resolver.resolve(moduleNames);
                 moduleCount = moduleNames.length;
 
                 for (; moduleIndex < moduleCount; moduleIndex++) {
@@ -3359,7 +3439,7 @@
              * @param {(String|Object|Array)} moduleData
              */
             $import: function(moduleData) {
-                moduleNamesQueue = moduleNamesQueue.concat(LoaderManager.isRootName(moduleData) ? configs.bundle : moduleData);
+                moduleNamesQueue = moduleNamesQueue.concat(LoaderManager.Resolver.isRootName(moduleData) ? configs.bundle : moduleData);
             },
             /**
              * @access public
@@ -3372,7 +3452,7 @@
              */
             $export: function(moduleName, bundle, factory) {
                 var System = LoaderManager.getSystem(),
-                    resolvedModules = LoaderManager.resolve(moduleNamesQueue, moduleName);
+                    resolvedModules = LoaderManager.Resolver.resolve(moduleNamesQueue, moduleName);
 
                 if (System.isFunction(bundle)) {
                     factory = bundle;
@@ -3613,7 +3693,7 @@
              * @return {Object}
              */
             modules: function(newModuleConfigs) {
-                return LoaderManager.setModuleConfig(newModuleConfigs);
+                return ConfigurationManager.setModuleConfig(newModuleConfigs);
             },
 
             context: function(newContext, oldContext) {
@@ -3626,20 +3706,12 @@
                 return newContext;
             },
             /**
-             * @param {Boolean} checkCircularDeps
+             * @param {Object} loaderConfig
              * 
-             * @return {Boolean}
+             * @return {Object}
              */
-            checkCircularDeps: function(checkCircularDeps) {
-                return LoaderManager.setConfig('checkCircularDeps', checkCircularDeps);
-            },
-            /**
-             * @param {Boolean} createDependencyURLList
-             * 
-             * @return {Boolean}
-             */
-            createDependencyURLList: function(createDependencyURLList) {
-                return LoaderManager.setConfig('createDependencyURLList', createDependencyURLList);
+            loader: function(loaderConfig) {
+                return ConfigurationManager.setLoaderConfig(loaderConfig);
             },
             /**
              * @param {Object} newInterceptors
