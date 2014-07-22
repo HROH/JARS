@@ -3,7 +3,7 @@ JAR.register({
     deps: {
         System: ['.', '!']
     },
-    bundle: ['Array.*', 'Date', 'Class', 'Function.*', 'I$Comparable', 'I$Iterable', 'Interface', 'M$Cloneable', 'M$Destructable', 'MixIn', 'Object.*', 'String']
+    bundle: ['Array.*', 'Date', 'Class.*', 'Function.*', 'I$Comparable', 'I$Iterable', 'Interface', 'M$Cloneable', 'M$Destructable', 'MixIn', 'Object.*', 'String']
 }, function(System, config) {
     'use strict';
 
