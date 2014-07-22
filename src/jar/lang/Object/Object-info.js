@@ -8,11 +8,11 @@ JAR.register({
 
     lang.extendNativeType('Object', {
         keys: function() {
-            return reduce(this, pushKey, []);
+            return reduce(this, pushKey, Arr());
         },
 
         pairs: function() {
-            return reduce(this, pushKeyValue, []);
+            return reduce(this, pushKeyValue, Arr());
         },
 
         prop: function(key) {
@@ -26,7 +26,7 @@ JAR.register({
         },
 
         values: function() {
-            return reduce(this, pushValue, []);
+            return reduce(this, pushValue, Arr());
         }
     });
 
@@ -51,7 +51,7 @@ JAR.register({
     }
 
     function pushKeyValue(array, value, key) {
-        array[array.length] = [key, value];
+        array[array.length] = Arr(key, value);
 
         return array;
     }
