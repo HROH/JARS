@@ -1,7 +1,7 @@
 JAR.register({
     MID: 'jar.lang.MixIn',
-    deps: ['System', '.Class', '.Object', '.Array!check|derive', '.Function!modargs']
-}, function(System, Class, Obj, Arr, Fn) {
+    deps: ['System', 'jar', '.Class', '.Object', '.Array!check|derive', '.Function!modargs']
+}, function(System, jar, Class, Obj, Arr, Fn) {
     'use strict';
 
     // TODO
@@ -29,7 +29,7 @@ JAR.register({
                 this._$allowAny = options.allowAny;
                 this._$allowedClasses = Arr.filter(System.isArray(allowedClasses) ? allowedClasses : [allowedClasses], isClass);
                 this._$destructor = options.destructor;
-                this._$logger = new System.Logger('MixIn "#<' + mixInName + '>"', {
+                this._$logger = new System.Logger('MixIn "#<' + jar.getCurrentModuleName() + ':' + mixInName + '>"', {
                     tpl: mixinTemplates
                 });
             },
