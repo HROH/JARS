@@ -33,7 +33,7 @@
             },
             modulesConfig = {
                 '*': {
-                    cache: false,
+                    cache: true,
 
                     minified: false,
 
