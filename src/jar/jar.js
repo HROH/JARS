@@ -1,9 +1,7 @@
 (function globalSetup(global, undef) {
     'use strict';
 
-    var separator = '", "',
-        object = {},
-        hasOwn = object.hasOwnProperty,
+    var hasOwn = ({}).hasOwnProperty,
         SourceManager, LoaderManager, ConfigurationManager;
 
     /**
@@ -22,10 +20,10 @@
     }
 
     ConfigurationManager = (function configurationManagerSetup() {
-        var minTimeout = 0.5,
-            stringCheck = 'String',
-            objectCheck = 'Object',
-            booleanCheck = 'Boolean',
+        var MIN_TIMEOUT = 0.5,
+            STRING_CHECK = 'String',
+            OBJECT_CHECK = 'Object',
+            BOOLEAN_CHECK = 'Boolean',
             loaderConfig = {
                 checkCircularDeps: false,
 
@@ -46,7 +44,7 @@
 
         definitions = {
             baseUrl: {
-                check: stringCheck,
+                check: STRING_CHECK,
 
                 transform: function(baseUrl) {
                     return LoaderManager.Resolver.ensureEndsWithSlash(baseUrl);
@@ -54,7 +52,7 @@
             },
 
             cache: {
-                check: booleanCheck,
+                check: BOOLEAN_CHECK,
                 /**
                  * @param {Boolean} cache
                  * 
@@ -66,7 +64,7 @@
             },
 
             config: {
-                check: objectCheck,
+                check: OBJECT_CHECK,
                 /**
                  * @param {Object} config
                  * @param {String} moduleName
@@ -88,19 +86,19 @@
             },
 
             dirPath: {
-                check: stringCheck,
+                check: STRING_CHECK,
 
-                transform: function(baseUrl) {
+                transform: function dirPathTransform(baseUrl) {
                     return LoaderManager.Resolver.ensureEndsWithSlash(baseUrl);
                 }
             },
 
             fileName: {
-                check: stringCheck
+                check: STRING_CHECK
             },
 
             minified: {
-                check: booleanCheck,
+                check: BOOLEAN_CHECK,
                 /**
                  * @param {Boolean} loadMin
                  * 
@@ -112,7 +110,7 @@
             },
 
             recover: {
-                check: objectCheck,
+                check: OBJECT_CHECK,
                 /**
                  * @param {Object} recoverConfig
                  * @param {String} moduleName
@@ -154,14 +152,12 @@
                  * @return {Number}
                  */
                 transform: function timeoutTransform(timeout) {
-                    timeout = Number(timeout);
-
-                    return timeout > minTimeout ? timeout : minTimeout;
+                    return timeout > MIN_TIMEOUT ? timeout : MIN_TIMEOUT;
                 }
             },
 
             versionSuffix: {
-                check: stringCheck
+                check: STRING_CHECK
             }
         };
 
@@ -265,7 +261,7 @@
              * 
              * @return {*}
              */
-            getModuleConfig: function(moduleName, option, skipUntil) {
+            getModuleConfig: function(moduleName, option, defaultValue, skipUntil) {
                 var System = LoaderManager.getSystem(),
                     origModuleName = moduleName,
                     nextLevel = moduleName,
@@ -297,6 +293,8 @@
                     }
 
                 } while (!System.isSet(result) && moduleName);
+
+                System.isSet(result) || (result = defaultValue);
 
                 while (transformations.length) {
                     result = configurationManagerTransformModuleConfig(origModuleName, option, transformations.shift()(result, origModuleName));
@@ -486,7 +484,8 @@
     })();
 
     LoaderManager = (function loaderManagerSetup() {
-        var loaders = {},
+        var separator = '", "',
+            loaders = {},
             loaderCoreModules = {},
             interceptors = {},
             Module, Resolver, LoaderManager;
@@ -928,40 +927,14 @@
                 /**
                  * @access public
                  * 
-                 * @memberof JAR~LoaderManager~Module#
-                 * 
-                 * @param {Number} messageType
-                 * @param {Object} values
-                 */
-                log: function(messageType, values) {
-                    var module = this;
-
-                    module.logMessage(module.name, messageType, values);
-                },
-                /**
-                 * @access public
-                 * 
-                 * @memberof JAR~LoaderManager~Module#
-                 * 
-                 * @param {Number} messageType
-                 * @param {Object} values
-                 */
-                logBundle: function(messageType, values) {
-                    var module = this;
-
-                    module.logMessage(module.bundleName, messageType, values);
-                },
-                /**
-                 * @access public
-                 * 
                  * @function
                  * @memberof JAR~LoaderManager~Module#
                  * 
-                 * @param {String} moduleName
                  * @param {Number} messageType
+                 * @param {Boolean} logBundle
                  * @param {Object} values
                  */
-                logMessage: (function moduleLogMessageSetup() {
+                log: (function moduleLogMessageSetup() {
                     var messageTemplates = [],
                         messageTypes = {},
                         module = 'module',
@@ -976,7 +949,8 @@
                         alreadyLoaded = already + 'loaded',
                         attemptLoadModule = replaceModule(attemptLoad),
                         attemptLoadBundle = replaceBundle(attemptLoad),
-                        abortedLoading = 'aborted loading ${what}';
+                        abortedLoading = 'aborted loading ${what}',
+                        loggerOptions;
 
                     /**
                      * 
@@ -1119,16 +1093,19 @@
 
                     messageTemplates[MSG_TIMEOUT] = replaceModule(abortedLoading) + ' after ${sec} second(s) - module may not be available on path "${path}"';
 
-                    function moduleLogMessage(moduleName, messageType, values) {
-                        var Logger = LoaderManager.getModuleRef('System.Logger'),
+                    loggerOptions = {
+                        tpl: messageTemplates
+                    };
+
+                    function moduleLogMessage(messageType, logBundle, values) {
+                        var moduleName = this.getName(logBundle),
+                            Logger = LoaderManager.getModuleRef('System.Logger'),
                             level = messageTypes[messageType] || 'error';
 
                         if (Logger) {
                             values = values || {};
 
-                            Logger[level + 'WithContext']('Loader:' + moduleName, messageType, values, {
-                                tpl: messageTemplates
-                            });
+                            Logger[level + 'WithContext']('Loader:' + moduleName, messageType, values, loggerOptions);
                         }
                     }
 
@@ -1152,7 +1129,7 @@
                         hasCircularDependency = !! circularDependencies.length;
 
                         if (hasCircularDependency) {
-                            module.log(MSG_CIRCULAR_DEPENDENCIES_FOUND, {
+                            module.log(MSG_CIRCULAR_DEPENDENCIES_FOUND, false, {
                                 deps: circularDependencies.join(separator)
                             });
                         }
@@ -1288,7 +1265,7 @@
                     if (!module.isBundleState(MODULE_BUNDLE_LOADED)) {
                         module.setBundleState(MODULE_BUNDLE_LOADED);
 
-                        module.logBundle(module.bundle.length ? MSG_BUNDLE_LOADED : MSG_BUNDLE_NOT_DEFINED);
+                        module.log(module.bundle.length ? MSG_BUNDLE_LOADED : MSG_BUNDLE_NOT_DEFINED, true);
 
                         module.notify(true);
                     }
@@ -1304,19 +1281,16 @@
                 listenFor: function(moduleNames, asBundle) {
                     var module = this,
                         loader = module.loader,
-                        logAbortSuffix = asBundle ? 'Bundle' : '',
-                        log = 'log' + logAbortSuffix,
-                        abort = 'abort' + logAbortSuffix,
                         moduleCount = moduleNames.length,
                         System = loader.getSystem();
 
                     if (!module.setLoadedIfReady(moduleCount, asBundle) && moduleCount) {
-                        module[log](MSG_MODULE_SUBSCRIBED, {
+                        module.log(MSG_MODULE_SUBSCRIBED, asBundle, {
                             subs: moduleNames.join(separator)
                         });
 
                         loader.listenFor(module.getName(asBundle), moduleNames, function onModuleLoaded(publishingModuleName, data) {
-                            module[log](MSG_MODULE_PUBLISHED, {
+                            module.log(MSG_MODULE_PUBLISHED, asBundle, {
                                 pub: publishingModuleName
                             });
 
@@ -1326,7 +1300,7 @@
 
                             module.setLoadedIfReady(-1, asBundle);
                         }, function onModuleAborted() {
-                            module[abort]();
+                            module.abort(false, asBundle);
                         });
                     }
                 },
@@ -1343,15 +1317,14 @@
                 setLoadedIfReady: function(count, forBundle) {
                     var module = this,
                         moduleDepsBundlePrefix = forBundle ? 'bundle' : 'deps',
-                        moduleCounter = moduleDepsBundlePrefix + 'Counter',
-                        loaded = moduleDepsBundlePrefix + 'Loaded',
+                        depsBundleCounter = moduleDepsBundlePrefix + 'Counter',
                         isReady;
 
-                    module[moduleCounter] += count;
-                    isReady = !module[moduleCounter];
+                    module[depsBundleCounter] += count;
+                    isReady = !module[depsBundleCounter];
 
                     if (isReady) {
-                        module[loaded]();
+                        module[moduleDepsBundlePrefix + 'Loaded']();
                     }
 
                     return isReady;
@@ -1378,20 +1351,20 @@
                 requestBundle: function() {
                     var module = this;
 
-                    module.logBundle(MSG_BUNDLE_REQUESTED);
+                    module.log(MSG_BUNDLE_REQUESTED, true);
 
                     if (module.isBundleState(MODULE_BUNDLE_WAITING)) {
                         module.setBundleState(MODULE_BUNDLE_LOADING);
 
                         module.loader.listenFor(module.bundleName, [module.name], function onModuleLoaded() {
-                            module.logBundle(MSG_BUNDLE_LOADING);
+                            module.log(MSG_BUNDLE_LOADING, true);
                             module.listenFor(module.bundle, true);
                         }, function onAbort() {
-                            module.abortBundle();
+                            module.abort(false, true);
                         });
                     }
                     else {
-                        module.logBundle(module.isBundleState(MODULE_BUNDLE_LOADED) ? MSG_BUNDLE_ALREADY_LOADED : MSG_BUNDLE_ALREADY_LOADING);
+                        module.log(module.isBundleState(MODULE_BUNDLE_LOADED) ? MSG_BUNDLE_ALREADY_LOADED : MSG_BUNDLE_ALREADY_LOADING, true);
                     }
 
                     return module;
@@ -1408,7 +1381,7 @@
                         error = error.message;
                     }
 
-                    module.log(error, interceptionInfo);
+                    module.log(error, false, interceptionInfo);
                 },
 
                 onLoad: function(callback, errback, isBundleRequest) {
@@ -1489,14 +1462,23 @@
                  * @memberof JAR~LoaderManager~Module#
                  * 
                  * @param {Boolean} silent
+                 * @param {Boolean} abortBundle
                  */
-                abort: function(silent) {
+                abort: function(silent, abortBundle) {
                     var module = this,
                         emptyQueue = false;
 
-                    if (module.isState(MODULE_LOADING)) {
+                    if (abortBundle) {
+                        if (module.isBundleState(MODULE_BUNDLE_LOADING)) {
+                            module.log(MSG_BUNDLE_ABORTED, true);
+
+                            module.setBundleState(MODULE_BUNDLE_WAITING);
+                            emptyQueue = true;
+                        }
+                    }
+                    else if (module.isState(MODULE_LOADING)) {
                         if (!silent) {
-                            module.log(MSG_TIMEOUT, {
+                            module.log(MSG_TIMEOUT, false, {
                                 path: SourceManager.removeScript(module.loader.context + ':' + module.name),
                                 sec: module.getConfig('timeout')
                             });
@@ -1511,22 +1493,7 @@
                     }
 
                     if (emptyQueue) {
-                        module.dequeue(QUEUE_ERROR);
-                    }
-                },
-                /**
-                 * @access public
-                 * 
-                 * @memberof JAR~LoaderManager~Module#
-                 */
-                abortBundle: function() {
-                    var module = this;
-
-                    if (module.isBundleState(MODULE_BUNDLE_LOADING)) {
-                        module.logBundle(MSG_BUNDLE_ABORTED);
-
-                        module.setBundleState(MODULE_BUNDLE_WAITING);
-                        module.dequeue(QUEUE_ERROR, true);
+                        module.dequeue(QUEUE_ERROR, abortBundle);
                     }
                 },
                 /**
@@ -1625,12 +1592,12 @@
                 linkBundle: function(bundle) {
                     var module = this;
 
-                    module.bundle = bundle = Resolver.resolve(bundle, module.name, 1);
+                    module.bundle = bundle = Resolver.resolveBundle(bundle, module.name);
 
                     if (bundle.length) {
-                        module.logBundle(MSG_BUNDLE_FOUND, {
+                        module.log(MSG_BUNDLE_FOUND, false, {
                             bundle: bundle.join(separator)
-                        });
+                        }, true);
                     }
                 },
                 /**
@@ -1646,7 +1613,7 @@
                     module.deps = dependencies = Resolver.resolve(dependencies, module.name);
 
                     if (dependencies.length) {
-                        module.log(MSG_DEPENDENCIES_FOUND, {
+                        module.log(MSG_DEPENDENCIES_FOUND, false, {
                             deps: dependencies.join(separator)
                         });
                     }
@@ -1675,7 +1642,7 @@
                             });
                         }
                         else if (module.isState(MODULE_LOADED_MANUAL) || module.isState(MODULE_WAITING)) {
-                            module.log(MSG_DEPENDENCY_FOUND, {
+                            module.log(MSG_DEPENDENCY_FOUND, false, {
                                 dep: implicitDependency
                             });
 
@@ -2119,11 +2086,26 @@
             var rEndSlash = /\/$/,
                 slash = '/',
                 rBundleRequest = /\.\*$/,
-                bundlePrefix = '.*',
+                bundleSuffix = '.*',
                 rLeadingDot = /^\./,
+                dot = '.',
                 rootModuleName = '*',
                 interceptorInfoCache = {},
+                defaultResolverErrorMessage = 'Could not resolve "${0}" relative to "${1}": ',
+                resolveErrorTemplates = [],
+                RESOLVE_DEPS = 0,
+                RESOLVE_BUNDLE = 1,
+                RESOLVE_NESTED = 2,
+                resolveLoggerOptions,
                 Resolver;
+
+            resolveErrorTemplates[RESOLVE_DEPS] = defaultResolverErrorMessage + 'a dependency modulename must be absolute or relative to the current module.';
+            resolveErrorTemplates[RESOLVE_BUNDLE] = defaultResolverErrorMessage + 'a bundle modulename must not start with a ".".';
+            resolveErrorTemplates[RESOLVE_NESTED] = defaultResolverErrorMessage + 'a nested modulename must not start with a "." or only contain it as a special symbol.';
+
+            resolveLoggerOptions = {
+                tpl: resolveErrorTemplates
+            };
 
             /**
              * @access public
@@ -2201,7 +2183,7 @@
                  * @return {String}
                  */
                 getBundleName: function(moduleName) {
-                    return moduleName + bundlePrefix;
+                    return moduleName + bundleSuffix;
                 },
                 /**
                  * @access public
@@ -2281,17 +2263,17 @@
                  * 
                  * @param {Array} modules
                  * @param {String} referenceModuleName
-                 * @param {Number} relativeLevelToRef
+                 * @param {Number} resolveType
                  * 
                  * @return {Array<string>}
                  */
-                resolveArray: function(modules, referenceModuleName, relativeLevelToRef) {
+                resolveArray: function(modules, referenceModuleName, resolveType) {
                     var resolvedModules = [],
                         moduleIndex = 0,
                         moduleCount = modules.length;
 
                     for (; moduleIndex < moduleCount; moduleIndex++) {
-                        resolvedModules = resolvedModules.concat(Resolver.resolve(modules[moduleIndex], referenceModuleName, relativeLevelToRef));
+                        resolvedModules = resolvedModules.concat(Resolver.resolve(modules[moduleIndex], referenceModuleName, resolveType));
                     }
 
                     return resolvedModules;
@@ -2303,21 +2285,21 @@
                  * 
                  * @param {Object} modules
                  * @param {String} referenceModuleName
-                 * @param {Number} relativeLevelToRef
+                 * @param {Number} resolveType
                  * 
                  * @return {Array<string>}
                  */
-                resolveObject: function(modules, referenceModuleName, relativeLevelToRef) {
+                resolveObject: function(modules, referenceModuleName, resolveType) {
                     var resolvedModules = [],
                         tmpReferenceModuleName;
 
                     for (tmpReferenceModuleName in modules) {
                         if (hasOwnProp(modules, tmpReferenceModuleName)) {
-                            resolvedModules = resolvedModules.concat(Resolver.resolve(modules[tmpReferenceModuleName], tmpReferenceModuleName, 2));
+                            resolvedModules = resolvedModules.concat(Resolver.resolve(modules[tmpReferenceModuleName], tmpReferenceModuleName, RESOLVE_NESTED));
                         }
                     }
 
-                    return Resolver.resolveArray(resolvedModules, referenceModuleName, relativeLevelToRef);
+                    return Resolver.resolveArray(resolvedModules, referenceModuleName, resolveType);
                 },
                 /**
                  * @access public
@@ -2326,24 +2308,24 @@
                  * 
                  * @param {String} moduleName
                  * @param {String} referenceModuleName
-                 * @param {Number} relativeLevelToRef
+                 * @param {Number} resolveType
                  *
                  * @return {Array<string>}
                  */
-                resolveString: function(moduleName, referenceModuleName, relativeLevelToRef) {
+                resolveString: function(moduleName, referenceModuleName, resolveType) {
                     var origModuleName = moduleName,
                         isValidModuleName = !rLeadingDot.test(moduleName),
                         resolvedModules = [],
-                        refParts;
+                        refParts, Logger;
 
-                    if (!Resolver.isRootName(referenceModuleName) && (relativeLevelToRef || !isValidModuleName)) {
-                        refParts = referenceModuleName.split('.');
+                    if (!Resolver.isRootName(referenceModuleName) && (resolveType !== RESOLVE_DEPS || !isValidModuleName)) {
+                        refParts = referenceModuleName.split(dot);
 
-                        if (relativeLevelToRef === 2 && !isValidModuleName && moduleName === '.') {
+                        if (resolveType === RESOLVE_NESTED && !isValidModuleName && moduleName === dot) {
                             moduleName = '';
                             isValidModuleName = true;
                         }
-                        else if (!relativeLevelToRef && !isValidModuleName && !rLeadingDot.test(referenceModuleName)) {
+                        else if (resolveType === RESOLVE_DEPS && !isValidModuleName && !rLeadingDot.test(referenceModuleName)) {
                             while (refParts.length && rLeadingDot.test(moduleName)) {
                                 moduleName = moduleName.substr(1);
                                 refParts.pop();
@@ -2359,7 +2341,8 @@
                         resolvedModules = [moduleName];
                     }
                     else {
-                        LoaderManager.getModuleRef('System.Logger').errorWithContext('Resolver', 'Could not resolve "${0}" relative to "${1}"', [origModuleName, referenceModuleName]);
+                        Logger = LoaderManager.getModuleRef('System.Logger');
+                        Logger.errorWithContext('Resolver', resolveType, [origModuleName, referenceModuleName], resolveLoggerOptions);
                     }
 
                     return resolvedModules;
@@ -2395,11 +2378,11 @@
                  * 
                  * @param {(String|Object|Array)} modules
                  * @param {String} referenceModuleName
-                 * @param {Number} relativeLevelToRef
+                 * @param {Number} resolveType
                  *
                  * @return {Array<string>}
                  */
-                resolve: function(modules, referenceModuleName, relativeLevelToRef) {
+                resolve: function(modules, referenceModuleName, resolveType) {
                     var resolverFn, type;
 
                     if (modules) {
@@ -2410,7 +2393,20 @@
                         resolverFn += (type.charAt(0).toUpperCase() + type.substr(1));
                     }
 
-                    return Resolver[resolverFn] ? Resolver[resolverFn](modules, referenceModuleName || Resolver.getRootName(), relativeLevelToRef || 0) : [];
+                    return Resolver[resolverFn] ? Resolver[resolverFn](modules, referenceModuleName || Resolver.getRootName(), resolveType || RESOLVE_DEPS) : [];
+                },
+                /**
+                 * @access public
+                 * 
+                 * @memberof JAR~LoaderManager.Resolver
+                 * 
+                 * @param {(String|Object|Array)} modules
+                 * @param {String} referenceModuleName
+                 *
+                 * @return {Array<string>}
+                 */
+                resolveBundle: function(modules, referenceModuleName) {
+                    return Resolver.resolve(modules, referenceModuleName, RESOLVE_BUNDLE);
                 }
             };
 
@@ -2650,7 +2646,7 @@
             nothing = null,
             typesLen = types.length,
             typeLookup = {},
-            toString = object.toString,
+            toString = ({}).toString,
             typeIndex = 0,
             isArgs, System;
 
