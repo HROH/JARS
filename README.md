@@ -28,16 +28,31 @@ Because there are some cases that are not covered by such loaders:
 
 * Module hierarchy tree:  
 The Loader automatically creates a module hierarchy tree so that a module like <code>jar.lang</code> can be later accessed as <code>jar.lang</code> in javascript.
+This also gives your project more structure, because it maps one to one to your file system and namespaces your code by default encouraging you to write "themed bundles".
+Although there exists a default file mapping, modules don't depend on it, so you can completely reconfigure their location in the file system without ever touching the module.
 
 * Bundles:  
 It is possible to define and import bundles like <code>jar.lang.\*</code> .
 This will import the module <code>jar.lang</code> and all its submodules.
 A bundle is defined in the module's properties.
 
+
+Example for bundle:
+```js
+    JAR.register({
+        MID: 'anotherBundle',
+        bundle: ['Module', 'Module2']
+    }, function() {
+        // setup here...
+    });
+```
+
 * Automatic dependency-detection and complex dependency-definition:  
 There are two kinds of dependencies - implizit dependencies like <code>jar</code> for <code>jar.lang</code> and explizit dependencies.
 Explizit dependencies are declared in the module itself.
-To see how it works, just look into the existing modules.  
+To see how it works, just look into the existing modules.
+
+
 Some examples for explizit dependencies:
 
  * String:
@@ -108,21 +123,22 @@ JAR.configure(option, value);
 ```
 where <code>options</code> includes one of the following:
 
-Maybe useful in a buildstep using something like phantomjs. You can get the list by calling <code>JAR.getModulesURLList(callback)</code>.
-* **debugging {Object|Boolean}** (Shortcut for defining <code>modules.config</code>)
+* **debugging {Object|Boolean}** (Shortcut for defining <code>modules.config</code> for <code>System.Logger</code>)
+If you just pass a boolean value, it has the same effect as the debug option.
+Or you can provide an object with the following options:
  * **context {Object|Array|String}** (define a comma-separated list of loggers that are allowed to log messages)
  You can also define an Object with include- and exclude-properties.
  * **debug {Boolean}** (turn debugging on or off - default: <code>false</code>)
  * **level {String|Number}** (The level that still should be logged - default: <code>System.Logger.logLevels.ALL</code>)
  A level of **warn** will log all messages with equal or higher priorities (warn, error).
  * **mode {String}** (stdout if debugging is turned on <code>console, ...</code> - default: <code>console</code>)  
- You can provide your own Debugger via the <code>System.Logger.addDebugger(debuggerSetup)</code> function in the <code>System.Logger</code>-module
+ You can provide your own debugger via the <code>System.Logger.addDebugger(debuggerSetup)</code> function in the <code>System.Logger</code>-module
 * **environment {String}** (switch between environments)
 * **environments {Object}** (define environments, that you can switch between)
     ```js
 	JAR.configure('environments', {
-		myEnvironment: function(configure) {
-			configure( /*...configure environment...*/ );
+		myEnvironment: {
+		    /*...environment options...*/
 		}
 	});
 	
@@ -134,6 +150,8 @@ Maybe useful in a buildstep using something like phantomjs. You can get the list
  * **checkCircularDeps {Boolean}** (<code>true</code> causes the Loader to check for circular dependencies - default: <code>false</code>)
  Can be very slow, so only use this feature if your app is not loading properly and you don't get any error messages.
  * **createDependencyURLList {Boolean}** (specify <code>true</code> to let the Loader create a list of all dependencies when they are loaded - default: <code>false</code>)
+ Maybe useful in a buildstep using something like phantomjs.
+ You can get the list by calling <code>JAR.getModulesURLList(callback)</code>.
 * **main {String}** (define the main-file of your application)
 * **modules {Object|Array}** (configure modulespecific options like <code>baseUrl</code> or <code>recover</code>)  
 You can customize the following options for your modules:
@@ -158,6 +176,7 @@ You can customize the following options for your modules:
  This may be useful if you switch from an older to a newer version.
  It is not recommended or possible to load two different versions of one module.
  
+ 
  You can also pass the additional option <code>restrict</code> which defines the modules that are affected by this configuration.
  This can be a String, an Array or an Object similar to the dependency-declaration in <code>JAR.register(properties, factory)</code>.
  
@@ -176,8 +195,8 @@ You can customize the following options for your modules:
  So if there exists no configuration for a specific module the Loader will look for a configuration on a higher or - if you omit the restriction - on the global level.
 * **supressErrors {Boolean}** (whether thrown errors in a <code>JAR.main</code>-block should be caught - default: <code>false</code>)
 
-Examples
---------------
+Example for main file
+---------------------
 ```js
 JAR.$import('jar.lang.Class'); // import the module (also accepts an Array or Object)
 
@@ -226,9 +245,9 @@ JAR.main(function(Class) { // waits for all the modules to be loaded
 
     ro.constructor === RO // true
     ro.Class === RO // true
-    ro.getHash() // unique hash like 'Object #<ReadOnly#...>'
+    ro.getHash() // unique hash like 'Object #<*:ReadOnly#...>'
     RO.getClassName() // 'ReadOnly'
-    RO.getHash() // unique hash like 'Class #<ReadOnly>'
+    RO.getHash() // unique hash like 'Class #<*:ReadOnly>'
     RO.getSubClasses()[0] === RW // true
     RW.getSuperClass() === RO // true
     RO.getInstances()[0] === ro // true
