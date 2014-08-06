@@ -26,7 +26,7 @@ JAR.register({
             return Abstract(name, proto, staticProperties).extendz(this);
         }
     });
-    
+
     /**
      * 
      * @param {Class}
@@ -60,6 +60,12 @@ JAR.register({
     function Abstract(name, proto, staticProperties) {
         return toAbstract(ClassFactory(name, proto, staticProperties));
     }
+
+    Abstract.abstractMethod = function(methodName) {
+        return function abstractMethod() {
+            this.Class.logger.error('Override ${0}()!', [methodName]);
+        };
+    };
 
     return Abstract;
 });
