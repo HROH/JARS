@@ -100,6 +100,7 @@ JAR.register({
      * @return {*}
      */
     function applyPartialArg(partialArg) {
+        /*jslint validthis: true */
         return FunctionCopy.isPlaceholderArg(partialArg) ? this.shift() : partialArg;
     }
 
@@ -110,6 +111,7 @@ JAR.register({
      * @return {*}
      */
     function applyPlaceholderArg(placeholderArg) {
+        /*jslint validthis: true */
         var newArgs = this,
             newArg;
 

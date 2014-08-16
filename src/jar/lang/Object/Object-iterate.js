@@ -15,6 +15,7 @@ JAR.register({
      * @param {*} context
      */
     function forIn(callback, context) {
+        /*jslint validthis: true */
         var object = this,
             prop;
 

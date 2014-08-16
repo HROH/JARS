@@ -26,6 +26,7 @@ JAR.register({
     }
 
     function equalsSearchElement(value) {
+        /*jslint validthis: true */
         return value === this.valueOf(); // use valueOf() to compare numbers correctly
     }
 

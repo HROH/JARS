@@ -96,6 +96,7 @@ JAR.register({
     });
 
     function checkAndMixInto(mixIn) {
+        /*jslint validthis: true */
         if (System.isA(mixIn, MixIn)) {
             mixIn.mixInto(this);
         }
@@ -107,6 +108,7 @@ JAR.register({
      * as soon as this module is loaded
      */
     function mixin() {
+        /*jslint validthis: true */
         Arr.each(arguments, checkAndMixInto, this);
 
         return this;

@@ -72,6 +72,7 @@ JAR.register({
     }
 
     function initMerge(mergeObject) {
+        /*jslint validthis: true */
         var prop;
 
         mergeLevel++;
@@ -117,11 +118,12 @@ JAR.register({
 
     function getAlreadyMergedValue(valueToMerge) {
         var alreadyMergedData = mergedObjects.find(equalsMergedValue, valueToMerge);
-        
+
         return alreadyMergedData ? alreadyMergedData[1] : undefined;
     }
 
     function equalsMergedValue(mergedObjectData) {
+        /*jslint validthis: true */
         return mergedObjectData[0] === this;
     }
 

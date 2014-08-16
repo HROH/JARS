@@ -95,14 +95,17 @@ JAR.register({
     });
 
     function proxiedGetMethods() {
+        /*jslint validthis: true */
         return this._$methods;
     }
 
     function checkMethodExists(method) {
+        /*jslint validthis: true */
         return method[0] === this[0];
     }
 
     function isMethodNotImplemented(methodData) {
+        /*jslint validthis: true */
         var methodToCheck = this[methodData[0]],
             args = methodData[1];
 
@@ -114,6 +117,7 @@ JAR.register({
     }
 
     function implementzInterface(iface) {
+        /*jslint validthis: true */
         return iface.isImplementedBy(this.impl, this.any);
     }
 
@@ -130,6 +134,7 @@ JAR.register({
      * @return Object
      */
     function implementz() {
+        /*jslint validthis: true */
         var isImplemented = false,
             currentClass = this,
 
