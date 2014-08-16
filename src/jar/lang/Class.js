@@ -52,55 +52,33 @@ JAR.register({
         });
     })();
 
-    function proxyClass(Class, method, args) {
-        var classHash = Class.getHash(),
-            classHidden = Classes[classHash],
-            result;
+    function instanceOrClassExists(instanceOrClass, checkInstance) {
+        var exists = false;
 
-        if (classHidden) {
-            result = proxy(Class, classHidden, method, args);
-        }
-        else {
-            proxyDestructed(classHash);
+        if (checkInstance && instanceOrClassExists(instanceOrClass.Class) || isClass(instanceOrClass)) {
+            (exists = !! getHidden(instanceOrClass, checkInstance)) || proxyDestructed(instanceOrClass.getHash());
         }
 
-        return result;
+        return exists;
     }
 
-    function proxyInstance(instance, method, args) {
-        var Class = instance.Class,
-            classHash = Class.getHash(),
-            classHidden = Classes[classHash],
-            classHiddenProtectedProps, instanceHash, instanceHidden, result;
-
-        if (classHidden) {
-            classHiddenProtectedProps = classHidden[protectedIdentifier];
-            instanceHash = instance.getHash();
-            instanceHidden = classHiddenProtectedProps._$instances[instanceHash];
-
-            if (instanceHidden) {
-                result = proxy(instance, instanceHidden, method, args);
-            }
-            else {
-                proxyDestructed(instanceHash);
-            }
-        }
-        else {
-            proxyDestructed(classHash);
-        }
-
-        return result;
+    function getHidden(instanceOrClass, fromInstance) {
+        return (fromInstance ? getHidden(instanceOrClass.Class)[protectedIdentifier]._$instances : Classes)[instanceOrClass.getHash()];
     }
 
-    function proxy(instanceOrClass, instanceOrClassHidden, method, args) {
-        var inPrivileged = instanceOrClassHidden.$inPrivileged,
-            result;
+    function proxy(instanceOrClass, method, args, forInstance) {
+        var instanceOrClassHidden, inPrivileged, result;
 
-        inPrivileged || prepareBeforeProxy(instanceOrClass, instanceOrClassHidden, protectedIdentifier);
+        if (instanceOrClassExists(instanceOrClass, forInstance)) {
+            instanceOrClassHidden = getHidden(instanceOrClass, forInstance);
+            inPrivileged = instanceOrClassHidden.$inPrivileged;
 
-        result = method.apply(instanceOrClass, args || []);
+            inPrivileged || prepareBeforeProxy(instanceOrClass, instanceOrClassHidden, protectedIdentifier);
 
-        inPrivileged || cleanupAfterProxy(instanceOrClass, instanceOrClassHidden, protectedIdentifier);
+            result = method.apply(instanceOrClass, args || []);
+
+            inPrivileged || cleanupAfterProxy(instanceOrClass, instanceOrClassHidden, protectedIdentifier);
+        }
 
         return result;
     }
@@ -118,6 +96,7 @@ JAR.register({
     }
 
     function updateHiddenProperty(value, property, hiddenProps) {
+        /*jslint validthis: true */
         if (this[property] !== value) {
             hiddenProps[property] = this[property];
         }
@@ -136,6 +115,7 @@ JAR.register({
             moduleName = proxyData.module,
             isProxyDataCollected = false;
 
+        /*jslint validthis: true */
         function proxiedMethod() {
             var instance, method, args, result;
 
@@ -162,7 +142,7 @@ JAR.register({
             }
 
             if (isProxyAllowed(instance, Class, moduleName)) {
-                result = proxyInstance(instance, method, args);
+                result = proxy(instance, method, args, true);
             }
 
             return result;
@@ -178,6 +158,7 @@ JAR.register({
     }
 
     function createProxyForPrivilegedMethod(method) {
+        /*jslint validthis: true */
         var privilegedMethod = createProxyFor('instance', {
             method: method,
             Class: this
@@ -282,7 +263,7 @@ JAR.register({
 
             // Never override Class()-, constructor()-, $proxy()- and getHash()-methods
             if (SuperClass && isFunction(method) && !excludeOverride.contains(methodName)) {
-                superClassHiddenProto = Classes[SuperClass.getHash()][protectedIdentifier]._$proto;
+                superClassHiddenProto = getHidden(SuperClass)[protectedIdentifier]._$proto;
 
                 if (methodName in SuperClass.prototype) {
                     protoToOverride = Class.prototype;
@@ -320,6 +301,7 @@ JAR.register({
     });
 
     function overridePrototypeMethods(protoToOverride) {
+        /*jslint validthis: true */
         protoToOverride.each(this._$overrideMethod, this);
     }
 
@@ -610,7 +592,7 @@ JAR.register({
             else {
                 buildPrototypeMapping(Class, proto);
 
-                superClassHiddenProtectedProps = Classes[SuperClass.getHash()][protectedIdentifier];
+                superClassHiddenProtectedProps = getHidden(SuperClass)[protectedIdentifier];
                 // add SuperClass reference
                 Class._$superClass = SuperClass;
                 // extend own private/protected prototype with that of the SuperClass
@@ -696,12 +678,12 @@ JAR.register({
                     destructors = instances[hash].$destructors;
 
                     do {
-                        destructors.mergeUnique(Classes[Class.getHash()][protectedIdentifier]._$destructors);
+                        destructors.mergeUnique(getHidden(Class)[protectedIdentifier]._$destructors);
                         Class = Class.getSuperClass();
                     } while (Class);
 
                     while (destructors.length) {
-                        proxyInstance(instance, destructors.shift());
+                        proxy(instance, destructors.shift(), true);
                     }
 
                     delete instances[hash];
@@ -724,7 +706,7 @@ JAR.register({
                 Class.getSubClasses().each(destructSubClass);
 
                 if (SuperClass) {
-                    delete Classes[SuperClass.getHash()][protectedIdentifier]._$subClasses[hash];
+                    delete getHidden(SuperClass)[protectedIdentifier]._$subClasses[hash];
                 }
 
                 metaClassSandbox.remove(classBluePrint.join(Class.getClassName()));
@@ -746,27 +728,29 @@ JAR.register({
     }, 'The Class can\'t extend itself!');
 
     isExtendableWhen(function classHasNoSuperClass(data) {
-        var hasNoSuperClass = !data.Class._$superClass;
+        var hasNoSuperClass = !data.Class.hasSuperClass();
 
-        hasNoSuperClass || (data.SuperClass = data.Class._$superClass);
+        hasNoSuperClass || (data.SuperClass = data.Class.getSuperClass());
 
         return hasNoSuperClass;
     }, 'The Class already has the SuperClass: "${superClassHash}"!');
 
     isExtendableWhen(function classHasNoInstancesAndSubClasses(data) {
-        return !data.Class._$instances.size() && !data.Class._$subClasses.size();
+        return !data.Class.getInstances().length && !data.Class.hasSubClasses();
     }, 'The Class already has instances or SubClasses!');
 
     isExtendableWhen(function superclassIsNoSubClassOfClass(data) {
         return !data.SuperClass.isSubClassOf(data.Class);
     }, 'The given SuperClass: "${superClassHash}" is already inheriting from this Class!');
 
-    function isModuleNameStartingWith(moduleAccess) {
-        return this.indexOf(moduleAccess) === 0;
+    function predicateFails(predicateData) {
+        /*jslint validthis: true */
+        return !predicateData.predicate(this);
     }
 
-    function predicateFails(predicateData) {
-        return !predicateData.predicate(this);
+    function isModuleNameStartingWith(moduleAccess) {
+        /*jslint validthis: true */
+        return this.indexOf(moduleAccess) === 0;
     }
 
     /**
@@ -798,7 +782,7 @@ JAR.register({
                 methodName = methodName.substring(1);
 
                 newMethod = function proxiedMetaMethod() {
-                    return proxyClass(this, method, arguments);
+                    return proxy(this, method, arguments);
                 };
             }
 
@@ -901,8 +885,9 @@ JAR.register({
      * @param {String} accessIdentifier
      */
     function buildAccessLookupPrototype(accessIdentifierAlias, accessIdentifier) {
+        /*jslint validthis: true */
         var Class = this,
-            classHidden = Classes[Class.getHash()],
+            classHidden = getHidden(Class),
             proto = Class.prototype,
             hiddenProto = classHidden[accessIdentifier][accessIdentifier + 'proto'];
 
