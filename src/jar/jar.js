@@ -1,8 +1,7 @@
 (function globalSetup(global, undef) {
     'use strict';
 
-    var hasOwn = ({}).hasOwnProperty,
-        SourceManager, LoaderManager, ConfigurationManager;
+    var SourceManager, LoaderManager, ConfigurationManager, hasOwnProp;
 
     /**
      * @access private
@@ -15,9 +14,13 @@
      * 
      * @return {Boolean}
      */
-    function hasOwnProp(object, prop) {
-        return hasOwn.call(object, prop);
-    }
+    hasOwnProp = (function hasOwnPropSetup() {
+        var hasOwn = ({}).hasOwnProperty;
+
+        return function hasOwnProp(object, prop) {
+            return hasOwn.call(object, prop);
+        };
+    })();
 
     ConfigurationManager = (function configurationManagerSetup() {
         var MIN_TIMEOUT = 0.5,
@@ -94,6 +97,10 @@
             },
 
             fileName: {
+                check: STRING_CHECK
+            },
+
+            fileType: {
                 check: STRING_CHECK
             },
 
@@ -297,7 +304,7 @@
                 System.isSet(result) || (result = defaultValue);
 
                 while (transformations.length) {
-                    result = configurationManagerTransformModuleConfig(origModuleName, option, transformations.shift()(result, origModuleName));
+                    result = configurationManagerTransformModuleConfig(origModuleName, option, transformations.pop()(result, origModuleName));
                 }
 
                 return result;
@@ -815,6 +822,7 @@
                 module.loader = loader;
                 module.bundleName = Resolver.getBundleName(moduleName);
                 module.options = Resolver.getPathOptions(moduleName);
+                module.options.fileType = 'js';
 
                 module.dep = Resolver.getImplicitDependencyName(moduleName);
                 module.deps = [];
@@ -901,6 +909,16 @@
                  */
                 isLoading: function() {
                     return this.isState(MODULE_LOADING);
+                },
+                /**
+                 * @access public
+                 * 
+                 * @memberof JAR~LoaderManager~Module#
+                 * 
+                 * @return {Boolean}
+                 */
+                isLoaded: function() {
+                    return this.isState(MODULE_LOADED);
                 },
                 /**
                  * @access public
@@ -1098,6 +1116,7 @@
                     };
 
                     function moduleLogMessage(messageType, logBundle, values) {
+                        /*jslint validthis: true */
                         var moduleName = this.getName(logBundle),
                             Logger = LoaderManager.getModuleRef('System.Logger'),
                             level = messageTypes[messageType] || 'error';
@@ -1207,7 +1226,9 @@
                     var module = this,
                         fullPath = [module.getConfig('baseUrl'), module.getConfig('dirPath'), module.getConfig('fileName')];
 
-                    if (fileType == 'js') {
+                    fileType = fileType || module.getConfig('fileType');
+
+                    if (fileType !== 'css') {
                         fullPath.push(module.getConfig('versionSuffix'), module.getConfig('minified'));
                     }
 
@@ -1226,7 +1247,7 @@
                  * @return {*}
                  */
                 getConfig: function(option, skipUntil) {
-                    return ConfigurationManager.getModuleConfig(this.name, option, skipUntil) || this.options[option];
+                    return ConfigurationManager.getModuleConfig(this.name, option, this.options[option], skipUntil);
                 },
                 /**
                  * @access public
@@ -1412,7 +1433,7 @@
                         module.abort();
                     }, module.getConfig('timeout') * 1000);
 
-                    SourceManager.addScript(module.loader.context + ':' + module.name, module.getFullPath('js'));
+                    SourceManager.addScript(module.loader.context + ':' + module.name, module.getFullPath());
                 },
                 /**
                  * @access public
@@ -1595,9 +1616,9 @@
                     module.bundle = bundle = Resolver.resolveBundle(bundle, module.name);
 
                     if (bundle.length) {
-                        module.log(MSG_BUNDLE_FOUND, false, {
+                        module.log(MSG_BUNDLE_FOUND, true, {
                             bundle: bundle.join(separator)
-                        }, true);
+                        });
                     }
                 },
                 /**
@@ -1663,33 +1684,6 @@
                     module.loader.getConfig('createDependencyURLList') && module.addToURLList(notifyBundle);
 
                     module.dequeue(QUEUE_SUCCESS, notifyBundle);
-                },
-                /**
-                 * @access public
-                 * 
-                 * @memberof JAR~LoaderManager~Module#
-                 * 
-                 * @param {Boolean} addBundle
-                 */
-                addToURLList: function(addBundle) {
-                    var module = this,
-                        loader = module.loader,
-                        moduleName = module.name,
-                        sortedModules = loader.sorted,
-                        dependencies = module.getAllDeps();
-
-                    if (module.isState(MODULE_LOADED)) {
-                        if (!hasOwnProp(sortedModules, moduleName)) {
-                            loader.pushModules(dependencies);
-
-                            loader.list.push(module.getFullPath('js'));
-                            sortedModules[moduleName] = true;
-                        }
-
-                        if (addBundle) {
-                            loader.pushModules(module.bundle);
-                        }
-                    }
                 },
                 /**
                  * @access public
@@ -2050,16 +2044,45 @@
              * 
              * @memberof JAR~LoaderManager~Loader#
              * 
+             * @param {JAR~LoaderManager~Module} module
+             * @param {Boolean} addBundle
+             */
+            addToURLList: function(module, addBundle) {
+                var loader = this,
+                    moduleName = module.name,
+                    sortedModules = loader.sorted,
+                    dependencies = module.getAllDeps();
+
+                if (module.isLoaded()) {
+                    if (!hasOwnProp(sortedModules, moduleName)) {
+                        loader.pushModules(dependencies);
+
+                        loader.list.push(module.getFullPath());
+                        sortedModules[moduleName] = true;
+                    }
+
+                    if (addBundle) {
+                        loader.pushModules(module.bundle);
+                    }
+                }
+            },
+            /**
+             * @access public
+             * 
+             * @memberof JAR~LoaderManager~Loader#
+             * 
              * @param {Array} modules
              */
             pushModules: function(modules) {
                 var moduleIndex = 0,
-                    moduleCount;
+                    moduleCount, moduleName;
 
                 moduleCount = modules ? modules.length : 0;
 
                 for (; moduleIndex < moduleCount; moduleIndex++) {
-                    this.getModule(modules[moduleIndex]).addToURLList(Resolver.isBundleRequest(modules[moduleIndex]));
+                    moduleName = modules[moduleIndex];
+
+                    this.addToURLList(this.getModule(moduleName), Resolver.isBundleRequest(moduleName));
                 }
             },
             /**
@@ -2092,20 +2115,34 @@
                 rootModuleName = '*',
                 interceptorInfoCache = {},
                 defaultResolverErrorMessage = 'Could not resolve "${0}" relative to "${1}": ',
-                resolveErrorTemplates = [],
+                resolverErrorTemplates = [],
                 RESOLVE_DEPS = 0,
                 RESOLVE_BUNDLE = 1,
                 RESOLVE_NESTED = 2,
-                resolveLoggerOptions,
+                resolverLoggerOptions,
                 Resolver;
 
-            resolveErrorTemplates[RESOLVE_DEPS] = defaultResolverErrorMessage + 'a dependency modulename must be absolute or relative to the current module.';
-            resolveErrorTemplates[RESOLVE_BUNDLE] = defaultResolverErrorMessage + 'a bundle modulename must not start with a ".".';
-            resolveErrorTemplates[RESOLVE_NESTED] = defaultResolverErrorMessage + 'a nested modulename must not start with a "." or only contain it as a special symbol.';
+            resolverErrorTemplates[RESOLVE_DEPS] = defaultResolverErrorMessage + 'a dependency modulename must be absolute or relative to the current module.';
+            resolverErrorTemplates[RESOLVE_BUNDLE] = defaultResolverErrorMessage + 'a bundle modulename must not start with a ".".';
+            resolverErrorTemplates[RESOLVE_NESTED] = defaultResolverErrorMessage + 'a nested modulename must not start with a "." or only contain it as a special symbol.';
 
-            resolveLoggerOptions = {
-                tpl: resolveErrorTemplates
+            resolverLoggerOptions = {
+                tpl: resolverErrorTemplates
             };
+
+            /**
+             * @access private
+             * 
+             * @memberof JAR~LoaderManager.Resolver
+             * @inner
+             * 
+             * @param {String} moduleName
+             * 
+             * @return {Boolean}
+             */
+            function resolverIsRelativeModuleName(moduleName) {
+                return rLeadingDot.test(moduleName);
+            }
 
             /**
              * @access public
@@ -2314,9 +2351,10 @@
                  */
                 resolveString: function(moduleName, referenceModuleName, resolveType) {
                     var origModuleName = moduleName,
-                        isValidModuleName = !rLeadingDot.test(moduleName),
+                        isValidModuleName = !resolverIsRelativeModuleName(moduleName),
                         resolvedModules = [],
-                        refParts, Logger;
+                        refParts = [],
+                        Logger;
 
                     if (!Resolver.isRootName(referenceModuleName) && (resolveType !== RESOLVE_DEPS || !isValidModuleName)) {
                         refParts = referenceModuleName.split(dot);
@@ -2325,24 +2363,22 @@
                             moduleName = '';
                             isValidModuleName = true;
                         }
-                        else if (resolveType === RESOLVE_DEPS && !isValidModuleName && !rLeadingDot.test(referenceModuleName)) {
-                            while (refParts.length && rLeadingDot.test(moduleName)) {
+                        else if (resolveType === RESOLVE_DEPS && !isValidModuleName && !resolverIsRelativeModuleName(referenceModuleName)) {
+                            while (refParts.length && resolverIsRelativeModuleName(moduleName)) {
                                 moduleName = moduleName.substr(1);
                                 refParts.pop();
                             }
 
-                            isValidModuleName = !rLeadingDot.test(moduleName) && (moduleName || refParts.length);
+                            isValidModuleName = !resolverIsRelativeModuleName(moduleName) && !! (moduleName || refParts.length);
                         }
-
-                        isValidModuleName && (moduleName = Resolver.buildAbsoluteModuleName(refParts, moduleName));
                     }
 
                     if (isValidModuleName) {
-                        resolvedModules = [moduleName];
+                        resolvedModules = [Resolver.buildAbsoluteModuleName(refParts, moduleName)];
                     }
                     else {
                         Logger = LoaderManager.getModuleRef('System.Logger');
-                        Logger.errorWithContext('Resolver', resolveType, [origModuleName, referenceModuleName], resolveLoggerOptions);
+                        Logger.errorWithContext('Resolver', resolveType, [origModuleName, referenceModuleName], resolverLoggerOptions);
                     }
 
                     return resolvedModules;
@@ -2505,7 +2541,7 @@
                 });
 
                 if (modulesToLoad.length) {
-                    LoaderManager.$importLazy(modulesToLoad, function() {
+                    loader.listenFor(Resolver.getRootName(), modulesToLoad, function() {
                         LoaderManager.getModulesURLList(loadedCallback, forceRecompute);
                     });
                 }
@@ -2514,7 +2550,7 @@
                         loader.resetModulesURLList();
 
                         loader.eachModules(function addModuleToURLList(module) {
-                            module.addToURLList();
+                            loader.addToURLList(module);
                         });
                     }
 
@@ -2641,6 +2677,18 @@
         }
     });
 
+    LoaderManager.addInterceptor('::', function partialModuleInterceptor(options) {
+        var moduleRef = options.module,
+            property = options.data;
+
+        if (moduleRef && hasOwnProp(moduleRef, property)) {
+            options.onSuccess(moduleRef[property]);
+        }
+        else {
+            options.onError('the module has no property "' + property + '"');
+        }
+    });
+
     LoaderManager.addCoreModule('System', {}, function systemSetup() {
         var types = 'Null Undefined String Number Boolean Array Arguments Object Function Date RegExp'.split(' '),
             nothing = null,
@@ -2690,19 +2738,6 @@
                 }
 
                 return type || typeof value;
-            },
-            /**
-             * @access public
-             * 
-             * @memberof System
-             * 
-             * @param {*} value
-             * @param {*} compareValue
-             * 
-             * @return {Boolean}
-             */
-            isEqual: function(value, compareValue) {
-                return value === compareValue;
             },
             /**
              * @access public
@@ -2933,18 +2968,18 @@
          * 
          * @return {Function(*):boolean}
          */
-        function typeTestSetup(typeDef) {
-            var nativeTypeTest = global[typeDef] && global[typeDef]['is' + typeDef];
+        function typeValidatorSetup(typeDef) {
+            var nativeTypeValidator = global[typeDef] && global[typeDef]['is' + typeDef];
 
             typeLookup['[object ' + typeDef + ']'] = typeDef = typeDef.toLowerCase();
 
-            return nativeTypeTest || function typeTest(value) {
+            return nativeTypeValidator || function typeValidator(value) {
                 return System.getType(value) === typeDef;
             };
         }
 
         for (; typeIndex < typesLen; typeIndex++) {
-            System['is' + types[typeIndex]] = typeTestSetup(types[typeIndex]);
+            System['is' + types[typeIndex]] = typeValidatorSetup(types[typeIndex]);
         }
 
         isArgs = System.isArguments;
@@ -2971,6 +3006,229 @@
         };
 
         return System;
+    });
+
+    LoaderManager.addCoreModule('System.Comparators', {}, function systemComparatorsSetup() {
+        var comparisons = {
+            Equal: {
+                operator: '==',
+                alias: 'eq'
+            },
+            StrictEqual: {
+                operator: '===',
+                alias: 'seq'
+            },
+            LowerThan: {
+                operator: '<',
+                alias: 'lt'
+            },
+            LowerThanOrEqual: {
+                operator: '<=',
+                alias: 'lte'
+            },
+            GreaterThan: {
+                operator: '>',
+                alias: 'gt'
+            },
+            GreaterThanOrEqual: {
+                operator: '>=',
+                alias: 'gte'
+            }
+        },
+            comparisonName, comparison, Comparators;
+
+        /**
+         * @access public
+         * 
+         * @namespace Comparators
+         * @memberof System
+         */
+        Comparators = {};
+
+        /**
+         * @access private
+         * 
+         * @memberof System
+         * @inner
+         * 
+         * @param {String} operator
+         * @param {Boolean} negate
+         * 
+         * @return {Function(*, *):boolean}
+         */
+        function comparatorSetup(operator, negate) {
+            /*jslint evil: true */
+            var comparator = new Function('a,b', 'return ' + (negate ? '!' : '') + '(a' + operator + 'b)');
+
+            return comparator;
+        }
+
+        for (comparisonName in comparisons) {
+            if (hasOwnProp(comparisons, comparisonName)) {
+                comparison = comparisons[comparisonName];
+
+                Comparators['is' + comparisonName] = Comparators[comparison.alias] = comparatorSetup(comparison.operator);
+                Comparators['isNot' + comparisonName] = Comparators['n' + comparison.alias] = comparatorSetup(comparison.operator, true);
+            }
+        }
+
+        /**
+         * @access public
+         * 
+         * @function isEqual
+         * @alias eq
+         * @memberof System.Comparators
+         * 
+         * @param {*} value
+         * @param {*} compareValue
+         * 
+         * @return {Boolean}
+         */
+
+        /**
+         * @access public
+         * 
+         * @function isNotEqual
+         * @alias neq
+         * @memberof System.Comparators
+         * 
+         * @param {*} value
+         * @param {*} compareValue
+         * 
+         * @return {Boolean}
+         */
+
+        /**
+         * @access public
+         * 
+         * @function isStrictEqual
+         * @alias seq
+         * @memberof System.Comparators
+         * 
+         * @param {*} value
+         * @param {*} compareValue
+         * 
+         * @return {Boolean}
+         */
+
+        /**
+         * @access public
+         * 
+         * @function isNotStrictEqual
+         * @alias nseq
+         * @memberof System.Comparators
+         * 
+         * @param {*} value
+         * @param {*} compareValue
+         * 
+         * @return {Boolean}
+         */
+
+        /**
+         * @access public
+         * 
+         * @function isLowerThan
+         * @alias lt
+         * @memberof System.Comparators
+         * 
+         * @param {*} value
+         * @param {*} compareValue
+         * 
+         * @return {Boolean}
+         */
+
+        /**
+         * @access public
+         * 
+         * @function isNotLowerThan
+         * @alias nlt
+         * @memberof System.Comparators
+         * 
+         * @param {*} value
+         * @param {*} compareValue
+         * 
+         * @return {Boolean}
+         */
+
+        /**
+         * @access public
+         * 
+         * @function isLowerThanOrEqual
+         * @alias lte
+         * @memberof System.Comparators
+         * 
+         * @param {*} value
+         * @param {*} compareValue
+         * 
+         * @return {Boolean}
+         */
+
+        /**
+         * @access public
+         * 
+         * @function isNotLowerThanOrEqual
+         * @alias nlte
+         * @memberof System.Comparators
+         * 
+         * @param {*} value
+         * @param {*} compareValue
+         * 
+         * @return {Boolean}
+         */
+
+        /**
+         * @access public
+         * 
+         * @function isGreaterThan
+         * @alias gt
+         * @memberof System.Comparators
+         * 
+         * @param {*} value
+         * @param {*} compareValue
+         * 
+         * @return {Boolean}
+         */
+
+        /**
+         * @access public
+         * 
+         * @function isNotGreaterThan
+         * @alias ngt
+         * @memberof System.Comparators
+         * 
+         * @param {*} value
+         * @param {*} compareValue
+         * 
+         * @return {Boolean}
+         */
+
+        /**
+         * @access public
+         * 
+         * @function isGreaterThanOrEqual
+         * @alias gte
+         * @memberof System.Comparators
+         * 
+         * @param {*} value
+         * @param {*} compareValue
+         * 
+         * @return {Boolean}
+         */
+
+        /**
+         * @access public
+         * 
+         * @function isNotGreaterThanOrQual
+         * @alias ngte
+         * @memberof System.Comparators
+         * 
+         * @param {*} value
+         * @param {*} compareValue
+         * 
+         * @return {Boolean}
+         */
+
+        return Comparators;
     });
 
     LoaderManager.addCoreModule('System.Logger', {
