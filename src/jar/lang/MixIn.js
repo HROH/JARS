@@ -1,6 +1,6 @@
 JAR.register({
     MID: 'jar.lang.MixIn',
-    deps: ['System', 'jar', '.Class', '.Object', '.Array!check|derive', '.Function!modargs']
+    deps: ['System', 'jar', '.Class', '.Object', '.Array!check,derive', '.Function!modargs']
 }, function(System, jar, Class, Obj, Arr, Fn) {
     'use strict';
 

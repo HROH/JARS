@@ -1,6 +1,6 @@
 JAR.register({
     MID: 'jar.lang.Interface',
-    deps: ['System', 'jar', '.Class', '.Array!check|derive|iterate']
+    deps: ['System', 'jar', '.Class', '.Array!check,derive,iterate']
 }, function(System, jar, Class, Arr) {
     'use strict';
 

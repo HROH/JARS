@@ -1,6 +1,6 @@
 JAR.register({
     MID: 'jar.lang.Object.Object-info',
-    deps: ['..', '.!reduce|derive', '..Array!reduce']
+    deps: ['..', '.!reduce,derive', '..Array!reduce']
 }, function(lang, Obj, Arr) {
     'use strict';
 

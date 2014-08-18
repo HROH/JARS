@@ -1,6 +1,6 @@
 JAR.register({
     MID: 'jar.lang.String',
-    deps: ['System', '.Array!manipulate|reduce']
+    deps: ['System', '.Array!manipulate,reduce']
 }, function(System, Arr) {
     'use strict';
 

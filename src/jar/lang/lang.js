@@ -347,7 +347,7 @@ JAR.register({
             subModuleName = moduleName + '.' + typeString + '-';
 
         Type.$plugIn = function(pluginRequest) {
-            var extensions = pluginRequest.data.split('|'),
+            var extensions = pluginRequest.data.split(','),
                 extLen = extensions.length,
                 idx = 0;
 
