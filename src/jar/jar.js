@@ -32,17 +32,7 @@
 
                 createDependencyURLList: false
             },
-            modulesConfig = {
-                '*': {
-                    cache: true,
-
-                    minified: false,
-
-                    versionSuffix: '',
-
-                    timeout: 5
-                }
-            },
+            modulesConfig = {},
             ConfigurationManager, definitions;
 
         definitions = {
@@ -3860,7 +3850,15 @@
             }
 
             bootstrapModules.unshift({
-                baseUrl: baseUrl
+                baseUrl: baseUrl,
+
+                cache: true,
+
+                minified: false,
+
+                versionSuffix: '',
+
+                timeout: 5
             });
 
             JAR.configure(bootstrapConfig);
