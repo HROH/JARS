@@ -880,6 +880,8 @@
                  * 
                  * @memberof JAR~LoaderManager~Module#
                  * 
+                 * @param {Boolean} logState
+                 * 
                  * @return {Boolean}
                  */
                 isRegistered: function(logState) {
@@ -1107,8 +1109,9 @@
 
                     function moduleLogMessage(messageType, logBundle, values) {
                         /*jslint validthis: true */
-                        var moduleName = this.getName(logBundle),
-                            Logger = LoaderManager.getModuleRef('System.Logger'),
+                        var module = this,
+                            moduleName = module.getName(logBundle),
+                            Logger = module.loader.getModuleRef('System.Logger'),
                             level = messageTypes[messageType] || 'error';
 
                         if (Logger) {
@@ -1147,7 +1150,7 @@
                     return hasCircularDependency;
                 },
                 // TODO is there a more performant way to check for circular dependencies?
-                // for now turned of in production but can be enabled over JAR.configure('checkCircularDeps', true)
+                // for now turned of in production but can be enabled over JAR.configure('loader', {checkCircularDeps: true})
                 /**
                  * @access public
                  * 
@@ -2831,9 +2834,7 @@
                 var module = LoaderManager.loader.getModule(pluginRequest.listener);
 
                 pluginRequest.onSuccess(function configGetter(option) {
-                    var config = module.getConfig('config');
-
-                    return System.isObject(config) && hasOwnProp(config, option) ? config[option] : undef;
+                    return (module.getConfig('config') || {})[option];
                 });
             }
         };
@@ -3397,28 +3398,32 @@
          * @memberof System.Logger#
          * 
          * @param {String} level
-         * @param {*} data
+         * @param {*} message
          * @param {(Object|Array)} values
          */
-        Logger.prototype._out = function(level, data, values) {
+        Logger.prototype._out = function(level, message, values) {
             var logger = this,
                 context = logger.context,
                 options = logger.options,
                 currentDebugger = getActiveDebugger(options.mode || config('mode')),
-                output = currentDebugger[level] || currentDebugger.log;
+                debuggerMethod = currentDebugger[level] ? level : 'log';
 
-            if (isDebuggingEnabled(options.debug || config('debug'), level, context) && System.isFunction(output)) {
-                data = options.tpl[data] || data;
+            if (isDebuggingEnabled(options.debug || config('debug'), level, context) && System.isFunction(currentDebugger[debuggerMethod])) {
+                message = options.tpl[message] || message;
 
-                if (System.isString(data) && (System.isObject(values) || System.isArray(values))) {
+                if (System.isString(message) && (System.isObject(values) || System.isArray(values))) {
                     formatLog.values = values;
 
-                    data = data.replace(rTemplateKey, formatLog);
+                    message = message.replace(rTemplateKey, formatLog);
 
                     formatLog.values = null;
                 }
 
-                output.call(currentDebugger, context, data);
+                currentDebugger[debuggerMethod](context, {
+                    timestamp: new Date().toUTCString(),
+
+                    message: message
+                });
             }
         };
         /**
@@ -3531,29 +3536,27 @@
 
             function forwardConsole(method) {
                 return function log(logContext, data) {
-                    var useGroups = canUseGroups && config('groupByContext'),
-                        logContextChanged = lastLogContext !== logContext;
+                    var throwError = method === 'error' && config('throwError'),
+                        metainfo = [];
 
-                    if (useGroups && logContextChanged && lastLogContext) {
-                        global.console.groupEnd(lastLogContext);
-                    }
+                    config('timestamp') && metainfo.push('[' + data.timestamp + ']');
 
-                    if (method === 'error' && config('throwError')) {
-                        throw new Error(logContext + ' - ' + data);
-                    }
+                    if (!(canUseGroups && config('groupByContext')) || throwError) {
+                        metainfo.push('[' + logContext + ']');
 
-                    if (useGroups) {
-                        if (logContextChanged) {
-                            global.console.group(logContext);
-
-                            lastLogContext = logContext;
+                        if (throwError) {
+                            throw new Error(metainfo.join(' ') + ' -> ' + data.message);
                         }
+                    }
+                    else if (lastLogContext !== logContext) {
+                        lastLogContext && global.console.groupEnd(lastLogContext);
 
-                        global.console[method](data);
+                        global.console.group(logContext);
+
+                        lastLogContext = logContext;
                     }
-                    else {
-                        global.console[method]('[' + logContext + ']', data);
-                    }
+
+                    global.console[method](metainfo.join(' '), data.message);
                 };
             }
 
