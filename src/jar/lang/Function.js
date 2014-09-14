@@ -6,7 +6,7 @@ JAR.register({
     'use strict';
 
     var lang = this,
-        fnConverter = lang.sandbox('__SYSTEM__').add('function(cb, arity){var fn=function(){return cb.apply(this,arguments)};fn.arity=arity||cb.arity||cb.length;return fn;}'),
+        fnConverter = lang.sandbox('__SYSTEM__').add('function(f, a){function fn(){return f.apply(this,arguments)};fn.arity=a||f.arity||flength;return fn;}'),
         fromArgs = Arr.from,
         FunctionCopy, apply;
 
@@ -31,9 +31,9 @@ JAR.register({
          * jar.lang.Function.from(function(time) {
          *	System.Logger.log(time + ' time(s) executed');
          * }).repeat(5);
-         * 
+         *
          * outputs:
-         * 
+         *
          * '1 time(s) executed'
          * '2 time(s) executed'
          * '3 time(s) executed'
@@ -62,15 +62,21 @@ JAR.register({
     }, {
         from: fromFunction,
 
-        fromNative: fromFunction
+        fromNative: fromFunction,
+
+        noop: function() {},
+
+        identity: function(value) {
+            return value;
+        }
     });
 
     apply = FunctionCopy.apply;
 
     /**
-     * 
+     *
      * @param {Function} fn
-     * 
+     *
      * @return {Function}
      */
     function fromFunction(fn, arity) {

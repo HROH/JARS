@@ -1,10 +1,10 @@
 JAR.register({
     MID: 'jar.lang',
     deps: {
-        System: ['.', '!']
+        System: ['::isSet', '::isFunction', '::isString', '!']
     },
     bundle: ['Array.*', 'Date', 'Class.*', 'Function.*', 'I$Comparable', 'I$Iterable', 'Interface', 'M$Cloneable', 'M$Destructable', 'MixIn', 'Object.*', 'String']
-}, function(System, config) {
+}, function(isSet, isFunction, isString, config) {
     'use strict';
 
     var jar = this,
@@ -12,7 +12,6 @@ JAR.register({
         container = document.documentElement,
         __SANDBOX__ = '__SANDBOX__',
         hasOwn = {}.hasOwnProperty,
-        slice = [].slice,
         nativeTypes = {},
         nativeTypeSandbox, lang;
 
@@ -46,7 +45,7 @@ JAR.register({
                         typePrototype[methodName] = prototypeMethods[methodName];
                     }
 
-                    hasOwnProp(Type, methodName) || (Type[methodName] = createDelegate(Type, methodName));
+                    hasOwnProp(Type, methodName) || (Type[methodName] = createDelegate(typePrototype[methodName]));
                 }
             }
 
@@ -70,7 +69,7 @@ JAR.register({
          * @throws {TypeError}
          */
         throwErrorIfNotSet: function(typeName, object, methodName) {
-            if (!System.isSet(object)) {
+            if (!isSet(object)) {
                 throwTypeError(typeName + '.prototype.' + methodName + ' called on null or undefined');
             }
         },
@@ -84,7 +83,7 @@ JAR.register({
          * @throws {TypeError}
          */
         throwErrorIfNoFunction: function(callback) {
-            if (!System.isFunction(callback)) {
+            if (!isFunction(callback)) {
                 throwTypeError(callback + ' is not a function');
             }
         },
@@ -141,7 +140,7 @@ JAR.register({
      * @throws {TypeError}
      */
     function throwTypeError(message) {
-        throw TypeError(message);
+        throw new TypeError(message);
     }
 
     /**
@@ -150,38 +149,11 @@ JAR.register({
      * @memberOf jar.lang
      * @inner
      * 
-     * @param {Object} Type
-     * @param {string} methodName
-     * @param {*} targetObject
-     * @param {Array} args
-     * 
-     * @return {*}
-     */
-    function callNativeTypeMethod(Type, methodName, targetObject, args) {
-        var callingObject;
-
-        if (targetObject[methodName] === Type.prototype[methodName]) {
-            callingObject = targetObject;
-        }
-        else {
-            callingObject = Type.prototype;
-        }
-
-        return callingObject[methodName].apply(targetObject, args);
-    }
-
-    /**
-     * @access private
-     * 
-     * @memberOf jar.lang
-     * @inner
-     * 
-     * @param {Object} delegateType
-     * @param {string} methodName
+     * @param {Function} methodName
      * 
      * @return {function(*):*}
      */
-    function createDelegate(delegateType, methodName) {
+    function createDelegate(method) {
         /**
          *
          * @param {*} targetObject
@@ -189,7 +161,14 @@ JAR.register({
          * @return {*}
          */
         function delegater(targetObject) {
-            return callNativeTypeMethod(delegateType, methodName, targetObject, slice.call(arguments, 1));
+            var slicedArgs = [],
+                argLen = arguments.length;
+
+            while (--argLen) {
+                slicedArgs[argLen - 1] = arguments[argLen];
+            }
+
+            return method.apply(targetObject, slicedArgs);
         }
 
         return delegater;
@@ -273,7 +252,7 @@ JAR.register({
             sandboxVars = sandbox[__SANDBOX__],
             sandboxedVar, accessor;
 
-        if (System.isString(value)) {
+        if (isString(value)) {
             accessor = encodeURI(value);
 
             if (!hasOwnProp(sandboxVars, accessor)) {
@@ -299,7 +278,7 @@ JAR.register({
             sandboxVars = sandbox[__SANDBOX__],
             accessor;
 
-        if (System.isString(value)) {
+        if (isString(value)) {
             accessor = encodeURI(value);
 
             if (hasOwnProp(sandboxVars, accessor)) {
@@ -361,10 +340,10 @@ JAR.register({
                 }
             }
 
-            pluginRequest.$importAndLink(extensions, function() {
-                pluginRequest.onSuccess(Type);
-            }, function(extensionName) {
-                pluginRequest.onError('Could not import the extension "' + extensionName + '" requested by "' + pluginRequest.listener + '"');
+            pluginRequest.$importAndLink(extensions, function extensionsLoaded() {
+                pluginRequest.success(Type);
+            }, function extensionsAborted(extensionName) {
+                pluginRequest.fail('Could not import the extension "' + extensionName + '" requested by "' + pluginRequest.listener + '"');
             });
         };
     }

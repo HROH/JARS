@@ -1,7 +1,7 @@
 JAR.register({
     MID: 'jar.lang.Object',
     deps: ['System', '.Array!find,iterate'],
-    bundle: ['Object-derive', 'Object-info', 'Object-iterate', 'Object-reduce']
+    bundle: ['Object-derive', 'Object-info', 'Object-iterate', 'Object-manipulate', 'Object-reduce']
 }, function(System, Arr) {
     'use strict';
 

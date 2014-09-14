@@ -92,16 +92,16 @@ JAR.register({
     function cleanupAfterProxy(instanceOrClass, instanceOrClassHidden, accessIdentifier) {
         instanceOrClassHidden.$inPrivileged = false;
 
-        instanceOrClassHidden[accessIdentifier].each(updateHiddenProperty, instanceOrClass);
+        instanceOrClassHidden[accessIdentifier].update(updateHiddenProperty, instanceOrClass);
     }
 
-    function updateHiddenProperty(value, property, hiddenProps) {
+    function updateHiddenProperty(value, property) {
         /*jslint validthis: true */
-        if (this[property] !== value) {
-            hiddenProps[property] = this[property];
-        }
+        var newValue = this[property];
 
         delete this[property];
+
+        return newValue;
     }
 
     function proxyDestructed(destructedHash) {
@@ -321,8 +321,7 @@ JAR.register({
         New: function(instance, args) {
             var Class = this,
                 logger = Class.logger,
-                classHash = Class.getHash(),
-                classProtectedProps = Classes[classHash][protectedIdentifier],
+                classProtectedProps = getHidden(Class)[protectedIdentifier],
                 instances = classProtectedProps._$instances,
                 instanceHashPrefix, instanceHash, construct, returnValue, failingPredicate;
 
@@ -486,7 +485,7 @@ JAR.register({
         /**
          * Returns the name of the Class like it was passed to 'jar.lang.Class()'
          *
-         * @return {string} the classname that the Class was created with
+         * @return {String} the classname that the Class was created with
          */
         $getClassName: function() {
             return this._$clsName;
@@ -580,7 +579,7 @@ JAR.register({
             failingPredicate = extensionPredicates.find(predicateFails, data);
 
             if (failingPredicate) {
-                message = failingPredicate.message || 'The Class can\'t be extended!';
+                message = 'The Class can\'t be extended! ' + failingPredicate.message;
                 SuperClass = data.SuperClass;
 
                 Class.logger.error(message, {
@@ -648,7 +647,7 @@ JAR.register({
 
             if (isFunction(destructor)) {
                 if (isA(instance, Class)) {
-                    destructors = Class._$instances[instance.getHash()].$destructors;
+                    destructors = getHidden(instance).$destructors;
                 }
                 else {
                     destructors = Class._$destructors;

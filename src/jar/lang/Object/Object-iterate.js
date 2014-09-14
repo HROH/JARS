@@ -4,27 +4,32 @@ JAR.register({
 }, function(lang, Obj) {
     'use strict';
 
-    lang.extendNativeType('Object', {
-        each: forIn,
+    var forOwn = createForIn(true),
+        forInherited = createForIn();
 
-        forEach: forIn
-    });
+    function createForIn(skipNotOwn) {
+        return function forIn(callback, context) {
+            /*jslint validthis: true */
+            var object = this,
+                prop;
 
-    /**
-     * @param {Function} callback
-     * @param {*} context
-     */
-    function forIn(callback, context) {
-        /*jslint validthis: true */
-        var object = this,
-            prop;
-
-        for (prop in object) {
-            if (Obj.hasOwn(object, prop)) {
-                callback.call(context, object[prop], prop, object);
+            for (prop in object) {
+                if (!skipNotOwn || Obj.hasOwn(object, prop)) {
+                    callback.call(context, object[prop], prop, object);
+                }
             }
-        }
+        };
     }
+
+    lang.extendNativeType('Object', {
+        each: forOwn,
+
+        forEach: forOwn,
+
+        eachInherited: forInherited,
+
+        forEachInherited: forInherited
+    });
 
     return Obj.extract(Obj, ['each', 'forEach']);
 });
