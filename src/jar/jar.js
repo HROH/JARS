@@ -39,7 +39,7 @@
             baseUrl: {
                 check: STRING_CHECK,
 
-                transform: function(baseUrl) {
+                transform: function baseUrlTransform(baseUrl) {
                     return LoaderManager.Resolver.ensureEndsWithSlash(baseUrl);
                 }
             },
@@ -339,7 +339,7 @@
 
     /**
      * @access private
-     *
+     * 
      * @namespace SourceManager
      * 
      * @memberof JAR
@@ -796,7 +796,7 @@
 
             /**
              * @access private
-             *
+             * 
              * @constructor Module
              * 
              * @memberof JAR~LoaderManager
@@ -831,7 +831,7 @@
             Module.prototype = {
                 /**
                  * @access public
-                 *
+                 * 
                  * @alias JAR~LoaderManager~Module
                  * 
                  * @memberof JAR~LoaderManager~Module#
@@ -963,6 +963,7 @@
                         loggerOptions;
 
                     /**
+                     * @access private
                      * 
                      * @param {String} message
                      * @param {String} what
@@ -974,6 +975,7 @@
                     }
 
                     /**
+                     * @access private
                      * 
                      * @param {String} message
                      * 
@@ -984,6 +986,7 @@
                     }
 
                     /**
+                     * @access private
                      * 
                      * @param {String} message
                      * 
@@ -994,6 +997,7 @@
                     }
 
                     /**
+                     * @access private
                      * 
                      * @param {String} message
                      * @param {String} why
@@ -1005,6 +1009,7 @@
                     }
 
                     /**
+                     * @access private
                      * 
                      * @param {String} message
                      * 
@@ -1015,6 +1020,7 @@
                     }
 
                     /**
+                     * @access private
                      * 
                      * @param {String} message
                      * 
@@ -1025,6 +1031,7 @@
                     }
 
                     /**
+                     * @access private
                      * 
                      * @param {Array<number>} messages
                      * @param {String} logLevel
@@ -1093,7 +1100,7 @@
 
                     messageTemplates[MSG_MODULE_LOADED] = replaceModule(endLoad);
                     messageTemplates[MSG_MODULE_LOADED_MANUAL] = replaceModule('${what} was loaded manual');
-                    messageTemplates[MSG_MODULE_LOADING] = replaceModule(startLoad);
+                    messageTemplates[MSG_MODULE_LOADING] = replaceModule(startLoad) + ' from path "${path}"';
 
                     messageTemplates[MSG_MODULE_PUBLISHED] = 'was notified by "${pub}"';
                     messageTemplates[MSG_MODULE_RECOVERING] = replaceModule('${what} tries to recover...');
@@ -1127,7 +1134,6 @@
                  * @access public
                  * 
                  * @memberof JAR~LoaderManager~Module#
-                 * 
                  * 
                  * @return {Boolean}
                  */
@@ -1343,7 +1349,13 @@
 
                     return isReady;
                 },
-
+                /**
+                 * @access public
+                 * 
+                 * @memberof JAR~LoaderManager~Module#
+                 * 
+                 * @return {Module}
+                 */
                 request: function() {
                     var module = this,
                         messageType;
@@ -1361,7 +1373,13 @@
 
                     return module;
                 },
-
+                /**
+                 * @access public
+                 * 
+                 * @memberof JAR~LoaderManager~Module#
+                 * 
+                 * @return {Module}
+                 */
                 requestBundle: function() {
                     var module = this;
 
@@ -1383,7 +1401,14 @@
 
                     return module;
                 },
-
+                /**
+                 * @access public
+                 * 
+                 * @memberof JAR~LoaderManager~Module#
+                 * 
+                 * @param {Object} interceptionInfo
+                 * @param {(String|Error)} error
+                 */
                 logInterceptionError: function(interceptionInfo, error) {
                     var module = this,
                         System = module.loader.getSystem();
@@ -1397,7 +1422,15 @@
 
                     module.log(error, false, interceptionInfo);
                 },
-
+                /**
+                 * @access public
+                 * 
+                 * @memberof JAR~LoaderManager~Module#
+                 * 
+                 * @param {Function()} callbcack
+                 * @param {Function()} errback
+                 * @param {Boolean} isBundleRequest
+                 */
                 onLoad: function(callback, errback, isBundleRequest) {
                     var module = this;
 
@@ -1414,11 +1447,14 @@
                  * @memberof JAR~LoaderManager~Module#
                  */
                 load: function() {
-                    var module = this;
+                    var module = this,
+                        path = module.getFullPath();
 
                     module.manageImplicitDep();
 
-                    module.log(MSG_MODULE_LOADING);
+                    module.log(MSG_MODULE_LOADING, false, {
+                        path: path
+                    });
 
                     module.setState(MODULE_LOADING);
 
@@ -1426,7 +1462,7 @@
                         module.abort();
                     }, module.getConfig('timeout') * 1000);
 
-                    SourceManager.addScript(module.loader.context + ':' + module.name, module.getFullPath());
+                    SourceManager.addScript(module.loader.context + ':' + module.name, path);
                 },
                 /**
                  * @access public
@@ -1742,14 +1778,12 @@
 
             loader.context = context;
             loader.currentModuleName = Resolver.getRootName();
-            loader.modules = {};
-            loader.ref = {};
         }
 
         Loader.prototype = {
             /**
              * @access public
-             *
+             * 
              * @alias JAR~LoaderManager~Loader
              * 
              * @memberof JAR~LoaderManager~Loader#
@@ -1762,6 +1796,9 @@
              */
             init: function() {
                 var loader = this;
+
+                loader.modules = {};
+                loader.ref = {};
 
                 loader.resetModulesURLList();
 
@@ -1803,7 +1840,7 @@
              * @access public
              * 
              * @memberof JAR~LoaderManager~Loader#
-             *
+             * 
              * @return {Object}
              */
             getSystem: function() {
@@ -1815,7 +1852,7 @@
              * @memberof JAR~LoaderManager~Loader#
              * 
              * @param {String} moduleName
-             *
+             * 
              * @return {*}
              */
             getModuleRef: function(moduleName) {
@@ -1827,7 +1864,7 @@
              * @memberof JAR~LoaderManager~Loader#
              * 
              * @param {String} moduleName
-             *
+             * 
              * @return {JAR~LoaderManager~Module}
              */
             getModule: function(moduleName) {
@@ -1848,7 +1885,7 @@
              * @memberof JAR~LoaderManager~Loader#
              * 
              * @param {String} moduleName
-             *
+             * 
              * @return {JAR~LoaderManager~Module}
              */
             createModule: function(moduleName) {
@@ -1984,11 +2021,11 @@
                             LoaderManager.$importLazy(moduleNames, callback, errback, progressback);
                         },
 
-                        onSuccess: function(data) {
+                        success: function(data) {
                             callback(interceptedModuleName, data);
                         },
 
-                        onError: function(error) {
+                        fail: function(error) {
                             loader.getModule(interceptedModuleName).logInterceptionError(interceptorInfo, error);
 
                             errback(interceptedModuleName);
@@ -2105,6 +2142,8 @@
                 bundleSuffix = '.*',
                 rLeadingDot = /^\./,
                 dot = '.',
+                versionDelimiter = '@',
+                rVersionWithoutPatch = /(\d+\.\d+\.)\d+.+/,
                 rootModuleName = '*',
                 interceptorInfoCache = {},
                 defaultResolverErrorMessage = 'Could not resolve "${0}" relative to "${1}": ',
@@ -2162,7 +2201,6 @@
                  * 
                  * @memberof JAR~LoaderManager.Resolver
                  * 
-                 * 
                  * @return {String}
                  */
                 getRootName: function() {
@@ -2179,9 +2217,12 @@
                  */
                 getPathOptions: function(moduleName) {
                     var options = {},
-                        pathParts = moduleName.split('.'),
+                        versionParts = moduleName.split(versionDelimiter),
+                        pathParts = versionParts[0].split(dot),
                         fileName = options.fileName = pathParts.pop(),
                         firstLetterFileName = fileName.charAt(0);
+
+                    versionParts[1] && (options.versionSuffix = '-' + versionParts[1]);
 
                     if (firstLetterFileName === firstLetterFileName.toLowerCase()) {
                         pathParts.push(fileName);
@@ -2225,7 +2266,42 @@
                  * @return {String}
                  */
                 getImplicitDependencyName: function(moduleName) {
-                    return moduleName.substr(0, moduleName.lastIndexOf('.'));
+                    var versionParts = moduleName.split(versionDelimiter),
+                        version = versionParts[1];
+
+                    moduleName = versionParts[0];
+                    moduleName = moduleName.substr(0, moduleName.lastIndexOf('.'));
+
+                    versionParts[0] = moduleName;
+
+                    version && (version = version.replace(rVersionWithoutPatch, '$10'));
+
+                    return Resolver.appendVersion(moduleName, version);
+                },
+                /**
+                 * @access public
+                 * 
+                 * @memberof JAR~LoaderManager.Resolver
+                 * 
+                 * @param {String} moduleName
+                 * 
+                 * @return {Boolean}
+                 */
+                isVersionedModule: function(moduleName) {
+                    return moduleName.indexOf(versionDelimiter) > -1;
+                },
+                /**
+                 * @access public
+                 * 
+                 * @memberof JAR~LoaderManager.Resolver
+                 * 
+                 * @param {String} moduleName
+                 * @param {String} version
+                 * 
+                 * @return {String}
+                 */
+                appendVersion: function(moduleName, version) {
+                    return (moduleName && version) ? [moduleName, version].join(versionDelimiter) : moduleName;
                 },
                 /**
                  * @access public
@@ -2339,7 +2415,7 @@
                  * @param {String} moduleName
                  * @param {String} referenceModuleName
                  * @param {Number} resolveType
-                 *
+                 * 
                  * @return {Array<string>}
                  */
                 resolveString: function(moduleName, referenceModuleName, resolveType) {
@@ -2383,7 +2459,7 @@
                  * 
                  * @param {Array} refParts
                  * @param {String} moduleName
-                 *
+                 * 
                  * @return {String}
                  */
                 buildAbsoluteModuleName: function(refParts, moduleName) {
@@ -2408,7 +2484,7 @@
                  * @param {(String|Object|Array)} modules
                  * @param {String} referenceModuleName
                  * @param {Number} resolveType
-                 *
+                 * 
                  * @return {Array<string>}
                  */
                 resolve: function(modules, referenceModuleName, resolveType) {
@@ -2431,7 +2507,7 @@
                  * 
                  * @param {(String|Object|Array)} modules
                  * @param {String} referenceModuleName
-                 *
+                 * 
                  * @return {Array<string>}
                  */
                 resolveBundle: function(modules, referenceModuleName) {
@@ -2468,6 +2544,29 @@
                 createContext && loaders[context].init();
 
                 return context;
+            },
+            /**
+             * @access public
+             * 
+             * @memberof JAR~LoaderManager
+             * 
+             * @param {String} context
+             * 
+             * @return {Boolean}
+             */
+            flush: function(context) {
+                var loader = context ? loaders[context] : LoaderManager.loader;
+
+                if (loader) {
+                    loader.eachModules(function(module) {
+                        module.abort(true);
+                    });
+
+                    loader.init();
+                    loader.getModuleRef('System.Logger').info('flushed Loader with context "${0}"', [loader.context]);
+                }
+
+                return !!loader;
             },
             /**
              * @access public
@@ -2511,7 +2610,7 @@
              * in the order they are dependending on each other.
              * This method can be used to create a custom build
              * preferable with grunt and phantomjs.</p>
-             *
+             * 
              * <p>It is possible to recompute the list.
              * This is only for aesthetics.
              * Even without recomputation the list will still be valid.</p>
@@ -2523,19 +2622,21 @@
              * @param {Function(array)} loadedCallback
              * @param {Boolean} forceRecompute
              */
-            getModulesURLList: function(loadedCallback, forceRecompute) {
+            getDependencyURLList: function(loadedCallback, forceRecompute) {
                 var loader = LoaderManager.loader,
-                    modulesToLoad = [];
+                    modulesToLoad = [],
+                    modulesLoading = 0;
 
                 loader.eachModules(function addModuleToLoad(module) {
                     if (module.isLoading()) {
                         modulesToLoad.push(module.name);
+                        modulesLoading++;
                     }
                 });
 
-                if (modulesToLoad.length) {
+                if (modulesLoading) {
                     loader.listenFor(Resolver.getRootName(), modulesToLoad, function() {
-                        LoaderManager.getModulesURLList(loadedCallback, forceRecompute);
+                        --modulesLoading || LoaderManager.getDependencyURLList(loadedCallback, forceRecompute);
                     });
                 }
                 else {
@@ -2630,7 +2731,7 @@
              * @param {Function()} factory
              */
             register: function(properties, factory) {
-                var moduleName = properties.MID,
+                var moduleName = properties.MID = Resolver.appendVersion(properties.MID, properties.version),
                     defaultContext = LoaderManager.loader.context,
                     loaderContext, loader;
 
@@ -2658,7 +2759,7 @@
 
     LoaderManager.addInterceptor('!', function pluginInterceptor(options) {
         var moduleRef = options.module,
-            errback = options.onError;
+            errback = options.fail;
 
         delete options.module;
 
@@ -2675,10 +2776,10 @@
             property = options.data;
 
         if (moduleRef && hasOwnProp(moduleRef, property)) {
-            options.onSuccess(moduleRef[property]);
+            options.success(moduleRef[property]);
         }
         else {
-            options.onError('the module has no property "' + property + '"');
+            options.fail('the module has no property "' + property + '"');
         }
     });
 
@@ -2754,7 +2855,16 @@
              * @return {Boolean}
              */
             isArrayLike: function(value) {
-                return System.isArray(value) || System.isArguments(value);
+                var isArrayLike = false,
+                    length;
+
+                if (value) {
+                    length = value.length;
+
+                    isArrayLike = System.isArray(value) || (System.isNumber(length) && length === 0 || (length > 0 && ((length - 1) in value)));
+                }
+
+                return isArrayLike;
             },
             /**
              * @access public
@@ -2833,7 +2943,7 @@
             $plugIn: function(pluginRequest) {
                 var module = LoaderManager.loader.getModule(pluginRequest.listener);
 
-                pluginRequest.onSuccess(function configGetter(option) {
+                pluginRequest.success(function configGetter(option) {
                     return (module.getConfig('config') || {})[option];
                 });
             }
@@ -2985,15 +3095,7 @@
          * @return {Boolean}
          */
         System.isArguments = function(value) {
-            var isArguments = false,
-                length;
-
-            if (value) {
-                length = value.length;
-                isArguments = isArgs(value) || (System.isNumber(length) && length === 0 || (length > 0 && ((length - 1) in value)));
-            }
-
-            return isArguments;
+            return value && (isArgs(value) || System.isArrayLike(value));
         };
 
         return System;
@@ -3238,14 +3340,6 @@
          * 
          * @memberof System.Logger
          * @inner
-         */
-        function noop() {}
-
-        /**
-         * @access private
-         * 
-         * @memberof System.Logger
-         * @inner
          * 
          * @param {Array} match
          * @param {String} key
@@ -3469,7 +3563,7 @@
          * @access public
          * 
          * @memberof System.Logger
-         *
+         * 
          * @param {Object} options
          * 
          * @return {System.Logger}
@@ -3486,7 +3580,7 @@
          * @access public
          * 
          * @memberof System.Logger
-         *
+         * 
          * @param {Object} pluginRequest
          */
         Logger.$plugIn = function(pluginRequest) {
@@ -3495,15 +3589,15 @@
             pluginRequest.$importAndLink(data[1], function(Debugger) {
                 Logger.addDebugger(data[0], Debugger.setup);
 
-                pluginRequest.onSuccess(Logger);
-            }, pluginRequest.onError);
+                pluginRequest.success(Logger);
+            }, pluginRequest.fail);
         };
 
         /**
          * @access public
          * 
          * @memberof System.Logger
-         *
+         * 
          * @param {String} mode
          * @param {Function} debuggerSetup
          */
@@ -3533,6 +3627,8 @@
                 method = stdLevels[levelIndex];
                 pseudoConsole[method] = console ? forwardConsole(console[method] ? method : stdLevels[0]) : noop;
             }
+
+            function noop() {}
 
             function forwardConsole(method) {
                 return function log(logContext, data) {
@@ -3581,9 +3677,9 @@
              * @access public
              * 
              * @memberof jar
-             *
+             * 
              * @param {(Object|Array|String)} moduleNames
-             *
+             * 
              * @return {Array}
              */
             useAll: function(moduleNames) {
@@ -3630,7 +3726,7 @@
          * @namespace JAR
          * 
          * @borrows LoaderManager.register as register
-         * @borrows LoaderManager.getModulesURLList as getModulesURLList
+         * @borrows LoaderManager.getDependencyURLList as getDependencyURLList
          */
         JAR = {
             /**
@@ -3772,7 +3868,23 @@
                 }
             },
 
-            getModulesURLList: LoaderManager.getModulesURLList,
+            getDependencyURLList: LoaderManager.getDependencyURLList,
+            /**
+             * @access public
+             * 
+             * @memberof JAR
+             * 
+             * @param {String} context
+             * 
+             * @return {Boolean}
+             */
+            flush: function(context) {
+                var flushed = LoaderManager.flush(context);
+
+                exposeModulesGlobal(configs.globalAccess);
+
+                return flushed;
+            },
             /**
              * @access public
              * 
@@ -3859,7 +3971,7 @@
 
                 minified: false,
 
-                versionSuffix: '',
+                versionSuffix: null,
 
                 timeout: 5
             });
@@ -3882,7 +3994,6 @@
                 });
             },
             /**
-             * 
              * @param {Boolean} makeGlobal
              * @param {Boolean} isGlobal
              * 
@@ -3899,7 +4010,6 @@
                 return !!makeGlobal;
             },
             /**
-             * 
              * @param {String} mainScript
              * @param {String} oldMainScript
              * 
@@ -3909,10 +4019,9 @@
                 return oldMainScript || (mainScript && SourceManager.addScript('main', mainScript + '.js'));
             },
             /**
-             *
              * @param {Object} environments
              * @param {Object} oldEnvironments
-             *
+             * 
              * @return {Object<string, function>}
              */
             environments: function(newEnvironments, oldEnvironments) {
@@ -3927,10 +4036,9 @@
                 return oldEnvironments;
             },
             /**
-             *
              * @param {String} environment
              * @param {String} oldEnvironment
-             *
+             * 
              * @return {String}
              */
             environment: function(newEnvironment, oldEnvironment, System) {

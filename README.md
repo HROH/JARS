@@ -228,10 +228,10 @@ The <code>pluginRequest</code> has the following information:
 
  * **data {String}** the passed in data
 
- * **onSuccess([value]) {Function}** call this method to resume loading.  
+ * **success([value]) {Function}** call this method to resume loading.  
  If you pass in a value, the requiring module will receive it instead of the required module.
 
- * **onError([error]) {Function}** calling this method will abort loading and show the error or a default message in the debugger (default: console)
+ * **fail([error]) {Function}** calling this method will abort loading and show the error or a default message in the debugger (default: console)
 
  * **$import(modules, callback, errback, progressback) {Function}** import additional modules (equal to <code>jar.$importLazy()</code> from the <code>jar</code>-module)
 
@@ -259,7 +259,7 @@ The <code>pluginRequest</code> has the following information:
     }, function() {
         return {
             $plugIn: function(pluginRequest) {
-                pluginRequest.$import(pluginRequest.data /* 'c' */, pluginRequest.onSuccess, pluginRequest.onError);
+                pluginRequest.$import(pluginRequest.data /* 'c' */, pluginRequest.success, pluginRequest.fail);
             }
         };
     })
@@ -365,8 +365,15 @@ JAR.main(function(Class) { // waits for all the modules to be loaded
 });
 ```
 
-Copyright and licensing
-----------------------------------
+##Versioning
+
+This project follows SemVer guidelines.
+There are no fixed milestones set for now, so I will update the minor version when I feel that I completed some bigger changes in the codebase.
+I will also not make any patches before version 1.0.0 because everything is still unstable.
+
+The latest version is 0.3.0.
+
+##Copyright and licensing
 
 Copyright(c) 2013-2015 Holger Haas
 
