@@ -647,7 +647,7 @@ JAR.register({
 
             if (isFunction(destructor)) {
                 if (isA(instance, Class)) {
-                    destructors = getHidden(instance).$destructors;
+                    destructors = getHidden(instance, true).$destructors;
                 }
                 else {
                     destructors = Class._$destructors;
