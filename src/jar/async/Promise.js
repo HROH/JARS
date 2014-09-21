@@ -3,7 +3,7 @@ JAR.register({
     deps: [{
         System: ['.', '!']
     }, 'jar', {
-        '..lang': ['Class', 'Object!derive|info|iterate', 'Array!iterate|reduce']
+        '..lang': ['Class', 'Object!derive,info,iterate', 'Array!iterate,reduce']
     }]
 }, function(System, config, jar, Class, Obj, Arr) {
     'use strict';
