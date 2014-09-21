@@ -6,7 +6,7 @@ JAR.register({
     'use strict';
 
     var lang = this,
-        fnConverter = lang.sandbox('__SYSTEM__').add('function(f, a){function fn(){return f.apply(this,arguments)};fn.arity=a||f.arity||flength;return fn;}'),
+        fnConverter = lang.sandbox('__SYSTEM__').add('function(f, a){function fn(){return f.apply(this,arguments)};fn.arity=a||f.arity||f.length;return fn;}'),
         fromArgs = Arr.from,
         FunctionCopy, apply;
 
@@ -23,6 +23,14 @@ JAR.register({
             returnFn.prototype = new FnLink();
 
             return returnFn;
+        },
+
+        negate: function() {
+            var fn = this;
+
+            return fromFunction(function() {
+                return !fn.apply(this, arguments);
+            }, fn.arity || fn.length);
         },
         /**
          * Repeat the given function n times
