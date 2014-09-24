@@ -215,7 +215,9 @@ JAR.register({
         return allClasses;
     }
 
-    function retrieveSubclasses(subClasses, SubClass) {
+    function retrieveSubclasses(subClasses, subClassHash) {
+        var SubClass = getClass(subClassHash);
+
         subClasses.push(SubClass);
         subClasses.merge(SubClass.getSubClasses(true));
 
@@ -228,8 +230,8 @@ JAR.register({
         return instances;
     }
 
-    function retrieveSubClassInstances(instances, SubClass) {
-        return instances.merge(SubClass.getInstances(true));
+    function retrieveSubClassInstances(instances, subClassHash) {
+        return instances.merge(getClass(subClassHash).getInstances(true));
     }
 
     function destructInstance(instance) {
@@ -245,7 +247,7 @@ JAR.register({
 
         _$skipCtor: false,
 
-        _$superClass: null,
+        _$superClassHash: '',
 
         _$modBaseName: null,
 
@@ -258,7 +260,7 @@ JAR.register({
             var Class = this,
                 classHiddenProto = Class._$proto,
                 protoToOverride,
-                SuperClass = Class._$superClass,
+                SuperClass = getClass(Class._$superClassHash),
                 superClassHiddenProto,
                 superProto, superMethod, currentSuper;
 
@@ -533,13 +535,13 @@ JAR.register({
          * @return {Class} the SuperClass of this Class
          */
         $getSuperClass: function() {
-            return this._$superClass;
+            return getClass(this._$superClassHash);
         },
         /**
          * @return {Array.<Class>} an array of all SubClasses
          */
         $getSubClasses: function(includeSubclasses) {
-            return includeSubclasses ? this._$subClasses.reduce(retrieveSubclasses, Arr()) : this._$subClasses.values();
+            return includeSubclasses ? this._$subClassHashes.reduce(retrieveSubclasses, Arr()) : this._$subClassHashes.values().map(getClass);
         },
         /**
          * Method to mimick classical inheritance in JS
@@ -594,11 +596,11 @@ JAR.register({
 
                 superClassHiddenProtectedProps = getHidden(SuperClass)[protectedIdentifier];
                 // add SuperClass reference
-                Class._$superClass = SuperClass;
+                Class._$superClassHash = SuperClass.getHash();
                 // extend own private/protected prototype with that of the SuperClass
                 Class._$proto.extend(superClassHiddenProtectedProps._$proto);
                 // add SubClass reference in the SuperClass
-                superClassHiddenProtectedProps._$subClasses[Class.getHash()] = Class;
+                superClassHiddenProtectedProps._$subClassHashes[Class.getHash()] = Class.getHash();
 
                 // Prevent the default constructor and objectHash-generation to be executed
                 superClassHiddenProtectedProps._$isProto = true;
@@ -625,7 +627,7 @@ JAR.register({
             var instances = this._$instances.reduce(retrieveInstances, Arr());
 
             if (includeSubclasses) {
-                instances = this._$subClasses.reduce(retrieveSubClassInstances, instances);
+                instances = this._$subClassHashes.reduce(retrieveSubClassInstances, instances);
             }
 
             return instances;
@@ -666,7 +668,7 @@ JAR.register({
          */
         $destruct: function(instance) {
             var Class = this,
-                SuperClass = Class._$superClass,
+                SuperClass = getClass(Class._$superClassHash),
                 instances = Class._$instances,
                 destructors,
                 hash;
@@ -706,7 +708,7 @@ JAR.register({
                 Class.getSubClasses().each(destructSubClass);
 
                 if (SuperClass) {
-                    delete getHidden(SuperClass)[protectedIdentifier]._$subClasses[hash];
+                    delete getHidden(SuperClass)[protectedIdentifier]._$subClassHashes[hash];
                 }
 
                 metaClassSandbox.remove(classBluePrint.join(Class.getClassName()));
@@ -976,7 +978,7 @@ JAR.register({
 
                     _$modName: moduleName,
 
-                    _$subClasses: Obj(),
+                    _$subClassHashes: Obj(),
 
                     _$proto: fromObject({
                         $proxy: createProxyFor('class', {
