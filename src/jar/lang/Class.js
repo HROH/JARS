@@ -1,21 +1,22 @@
 JAR.register({
     MID: 'jar.lang.Class',
-    deps: ['System', '..' /* jar */ , '.Object!all', '.Array!check,find,index,iterate,manipulate', '.Function!advice'],
+    deps: [{
+        System: ['Logger', '::isA', '::isSet', '::isObject', '::isFunction']
+    }, {
+        jar: ['::getCurrentModuleName', '::use']
+    }, {
+        '.Object': ['::from', '::hasOwn', '!all']
+    }, '.Array!check,find,index,iterate,manipulate', '.Function!advice'],
     bundle: ['Abstract', 'Final', 'Singleton']
-}, function(System, jar, Obj, Arr, Fn) {
+}, function(Logger, isA, isSet, isObject, isFunction, getCurrentModuleName, useModule, fromObject, hasOwn, Obj, Arr, Fn) {
     'use strict';
 
     var lang = this,
-        isA = System.isA,
-        isFunction = System.isFunction,
-        hasOwn = Obj.hasOwn,
-        getCurrentModuleName = jar.getCurrentModuleName,
-        useModule = jar.use,
         metaClassSandbox = lang.sandbox('__SYSTEM__.Class'),
         MetaClass = metaClassSandbox.add('Function'),
         protectedIdentifier = '_$',
         //privateIdentifier = '_',
-        accessIdentifiers = Obj.from({
+        accessIdentifiers = fromObject({
             _: 'private',
             _$: 'protected'
         }),
@@ -47,7 +48,7 @@ JAR.register({
         classFactoryMessageTemplates[MSG_WRONG_CONTEXT] = proxyFailed + 'Method was called in wrong context!';
         classFactoryMessageTemplates[MSG_WRONG_MODULE] = proxyFailed + instanceMustBe + inModules + '!';
 
-        return System.Logger.forCurrentModule({
+        return Logger.forCurrentModule({
             tpl: classFactoryMessageTemplates
         });
     })();
@@ -177,7 +178,7 @@ JAR.register({
             instanceClass, failData;
 
         if (isInstance(instance)) {
-            failData = Obj.from({
+            failData = fromObject({
                 instanceHash: instance.getHash()
             });
 
@@ -239,7 +240,7 @@ JAR.register({
         SubClass.destruct(SubClass);
     }
 
-    ClassProtectedProperties = Obj.from({
+    ClassProtectedProperties = fromObject({
         _$isProto: false,
 
         _$skipCtor: false,
@@ -504,7 +505,7 @@ JAR.register({
                 moduleName = Class._$modName,
                 baseName = Class._$modBaseName;
 
-            if (!System.isSet(baseName)) {
+            if (!isSet(baseName)) {
                 Class._$modBaseName = baseName = (useModule(moduleName) === Class) ? moduleName.substring(0, moduleName.lastIndexOf('.')) || moduleName : moduleName;
             }
 
@@ -763,7 +764,7 @@ JAR.register({
     function addStatic(methodName, method) {
         var methods = {};
 
-        if (System.isObject(methodName)) {
+        if (isObject(methodName)) {
             methods = methodName;
         }
         else {
@@ -776,7 +777,7 @@ JAR.register({
     function addProxiedMetaMethod(metaProto, method, methodName) {
         var newMethod = method;
 
-        if (!Obj.hasOwn(metaProto, methodName) || methodName === 'toString') {
+        if (!hasOwn(metaProto, methodName) || methodName === 'toString') {
             if (methodName.indexOf('$') === 0) {
                 methodName = methodName.substring(1);
 
@@ -957,7 +958,7 @@ JAR.register({
                     }
                 }),
 
-                logger: new System.Logger(classHash),
+                logger: new Logger(classHash),
 
                 getHash: function() {
                     return classHash;
@@ -965,19 +966,19 @@ JAR.register({
             }, staticProperties);
 
             // Store a reference of the Class and define some protected properties
-            Classes[classHash] = Obj.from({
+            Classes[classHash] = fromObject({
                 Class: Class,
 
                 $inPrivileged: false,
 
-                _$: Obj.from({
+                _$: fromObject({
                     _$clsName: name,
 
                     _$modName: moduleName,
 
                     _$subClasses: Obj(),
 
-                    _$proto: Obj.from({
+                    _$proto: fromObject({
                         $proxy: createProxyFor('class', {
                             Class: Class
                         })
@@ -988,7 +989,7 @@ JAR.register({
                     _$destructors: Arr()
                 }).extend(ClassProtectedProperties),
                 // TODO
-                _: Obj.from({
+                _: fromObject({
                     _proto: Obj()
                 })
             });
