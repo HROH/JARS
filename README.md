@@ -157,7 +157,7 @@ Or you can provide an object with the following options:
 
  * **createDependencyURLList {Boolean}** (specify <code>true</code> to let the Loader create a list of all dependencies when they are loaded - default: <code>false</code>)  
  Maybe useful in a buildstep using something like phantomjs.
- You can get the list by calling <code>JAR.getModulesURLList(callback)</code>.
+ You can get the list by calling <code>JAR.getDependencyURLList(callback)</code>.
 
 * **main {String}** (define the main-file of your application)
 
@@ -237,7 +237,7 @@ The <code>pluginRequest</code> has the following information:
 
  * **$importAndLink(modules, callback, errback, progressback) {Function}** this is the same as calling the <code>pluginRequest.$import()</code> method.
  But it will link the modules as dependencies of the requiring module.
- It is useful if you check for dynamic circular dependencies or if you use <code>JAR.getModulesURLList()</code>, which gives you an ordered list of all loaded modules and their dependencies.
+ It is useful if you check for dynamic circular dependencies or if you use <code>JAR.getDependencyURLList()</code>, which gives you an ordered list of all loaded modules and their dependencies.
 
     ```js
     JAR.register({
@@ -299,7 +299,7 @@ If the property doesn't exist, loading is aborted and you can see an error messa
 
 ##Main entry
 
-The entry point for your program is a file, that can be loaded manual or configured as an option (see [Configuration](#Configuration)).
+The entry point for your program is a file, that can be loaded manual or configured as an option (see [Configuration](#configuration)).
 It includes several <code>JAR.$import()</code> statements and a <code>JAR.main()</code> block, that will be executed after every imported module is loaded.
 
 ```js
