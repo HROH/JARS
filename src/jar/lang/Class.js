@@ -305,7 +305,7 @@ JAR.register({
 
     function overridePrototypeMethods(protoToOverride) {
         /*jslint validthis: true */
-        protoToOverride.each(this._$overrideMethod, this);
+        Obj.each(protoToOverride, this._$overrideMethod, this);
     }
 
     addStatic({
@@ -606,7 +606,7 @@ JAR.register({
                 superClassHiddenProtectedProps._$isProto = true;
                 // Create a new instance of the SuperClass and merge it with the current prototype
                 // to override in the correct order
-                Class.prototype = new SuperClass().merge(Class.prototype);
+                Class.prototype = Obj.merge(new SuperClass(), Class.prototype);
                 // end inheriting
                 superClassHiddenProtectedProps._$isProto = false;
 
