@@ -41,8 +41,10 @@ JAR.register({
     Comparison = {};
 
     Obj.each(comparators, function(comparator, comparisonName) {
-        Comparison['is' + comparisonName] = Comparison[comparator.alias] = Comparison[comparator.op] = operations.createOperation(comparator.op);
-        Comparison['isNot' + comparisonName] = Comparison['n' + comparator.alias] = Comparison['!' + comparator.op] = operations.createOperation(comparator.op, true);
+        var operator = comparator.op;
+        
+        Comparison['is' + comparisonName] = Comparison[comparator.alias] = Comparison[operator] = operations.createOperation(operator);
+        Comparison['isNot' + comparisonName] = Comparison['n' + comparator.alias] = Comparison['!' + (operator.indexOf('=') === 0 ? operator.substring(1) : operator)] = operations.createOperation(operator, true);
     });
 
     /**
