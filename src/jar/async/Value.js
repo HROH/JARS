@@ -34,12 +34,6 @@ JAR.register({
 
 
     Value = Class('Value', {
-        construct: function(value) {
-            this._$handles = Obj();
-
-            value && this.assign(value);
-        },
-
         onUpdate: function(updateFn) {
             return this.subscribe({
                 onUpdate: updateFn
@@ -58,6 +52,16 @@ JAR.register({
             });
         },
 
+        constant: function(constantValue) {
+            return this.map(function() {
+                return constantValue;
+            });
+        },
+
+        forward: function() {
+            return this.map(identity);
+        },
+
         take: function(n) {
             var takenValue;
 
@@ -67,7 +71,7 @@ JAR.register({
                 });
             }
             else {
-                takenValue = new Value();
+                takenValue = new this.Class();
 
                 takenValue.error(new Error('Can\'t take 0 values'));
                 takenValue.freeze();
@@ -79,7 +83,7 @@ JAR.register({
         merge: function() {
             var values = Arr.from([this]).merge(Arr.from(arguments)),
                 toFreeze = values.length,
-                mergedValue = new Value();
+                mergedValue = new this.Class();
 
             values.each(function subscribeToValue(value) {
                 value.subscribe({
@@ -101,6 +105,12 @@ JAR.register({
         },
 
         $: {
+            construct: function(value) {
+                this._$handles = Obj();
+
+                value && this.assign(value);
+            },
+
             assign: assignValue,
 
             '=': assignValue,
@@ -174,17 +184,11 @@ JAR.register({
                     onFreeze = subscription.onFreeze;
 
                 async.wait(value.$proxy, 0, value, function delayInitialCall() {
-                    if (value._$isValueAssigned) {
-                        value._$attemptInvokeHandle(subscription, VALUE_UPDATE, value._$value);
-                    }
-
-                    if (value._$isError) {
-                        value._$attemptInvokeHandle(subscription, VALUE_ERROR, value._$error);
-                    }
-
-                    if (value._$isFrozen) {
-                        value._$attemptInvokeHandle(subscription, VALUE_FREEZE);
-                    }
+                    Arr.each(eventHandles, function invokeHandleInitial(handleType, valueType) {
+                        if (value['_$' + eventChecks[valueType]]) {
+                            value._$attemptInvokeHandle(subscription, handleType, value['_$' + eventKeys[valueType]]);
+                        }
+                    });
                 });
 
                 if (!value._$isFrozen) {
@@ -251,7 +255,7 @@ JAR.register({
                     transform = options.transform || identity,
                     shouldUpdate = options.guardNext || returnTrue,
                     shouldComplete = options.guardComplete || returnFalse,
-                    chainedValue = new Value(startValue);
+                    chainedValue = new this.Class(startValue);
 
                 this.subscribe({
                     onUpdate: function(newValue) {
@@ -323,12 +327,12 @@ JAR.register({
     function changeValue(eventType, newValue) {
         /*jslint validthis: true */
         var value = this,
-            handleType = eventHandles[eventType],
+            handleMethod = eventHandles[eventType],
             key = eventKeys[eventType];
 
         if (!value._$isFrozen) {
             value._$handles.each(function forwardValueToHandLe(handle) {
-                value._$attemptInvokeHandle(handle, handleType, newValue);
+                value._$attemptInvokeHandle(handle, handleMethod, newValue);
             });
 
             if (eventType === VALUE_ERROR && !value._$handlesCount) {
