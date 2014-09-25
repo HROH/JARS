@@ -19,8 +19,8 @@ JAR.register({
         };
 
     Obj.each(logicalOperators, function(logicalOperator, methodName) {
-		Logical[methodName] = Logical[logicalOperator.op] = operations.createOperator(logicalOperator.op);
-		Logical[logicalOperator.negated] = Logical['!' + logicalOperator.op] = operations.createOperator(logicalOperator.op, true);
+		Logical[methodName] = Logical[logicalOperator.op] = operations.createOperation(logicalOperator.op);
+		Logical[logicalOperator.negated] = Logical['!' + logicalOperator.op] = operations.createOperation(logicalOperator.op, true);
     });
 
     return Logical;
