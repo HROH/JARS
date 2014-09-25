@@ -3,7 +3,7 @@ JAR.register({
     deps: {
         System: ['::isSet', '::isFunction', '::isString', '!']
     },
-    bundle: ['Array.*', 'Date', 'Class.*', 'Function.*', 'I$Comparable', 'I$Iterable', 'Interface', 'M$Cloneable', 'M$Destructable', 'MixIn', 'Object.*', 'String']
+    bundle: ['Array.*', 'Date', 'Class.*', 'Function.*', 'I$Comparable', 'I$Iterable', 'Interface', 'M$Cloneable', 'M$Destructable', 'MixIn', 'Object.*', 'operations.*', 'String']
 }, function(isSet, isFunction, isString, config) {
     'use strict';
 
