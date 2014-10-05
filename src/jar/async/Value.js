@@ -1,36 +1,50 @@
 JAR.register({
     MID: 'jar.async.Value',
     deps: [{
-        System: ['::isA', '::isFunction']
+        System: ['::isSet', '::isA', '::isObject', '::isFunction']
     }, {
-        'jar.lang': ['Array!iterate', 'Object!derive,iterate', 'Class', {
-            Function: ['::identity', '::negate']
+        'jar.lang': ['Array!iterate', {
+            Object: ['!derive,iterate', '::hasOwn']
+        }, 'Class', {
+            Function: ['!modargs', '::identity', '::negate', '::noop']
         }]
-    }]
-}, function(isA, isFunction, Arr, Obj, Class, identity, negate) {
+    }],
+    bundle: ['M$Accumulator', 'M$FlowRegulator', 'M$Mergable', 'M$Skipable', 'M$Takeable']
+}, function(isSet, isA, isObject, isFunction, Arr, Obj, hasOwn, Class, Fn, identity, negate, noop) {
     'use strict';
 
     var async = this,
-        returnTrue = Boolean,
+        returnTrue = Fn.partial(identity, true),
         returnFalse = negate(returnTrue),
         VALUE_UPDATE = 0,
         VALUE_ERROR = 1,
         VALUE_FREEZE = 2,
-        eventHandles = [],
-        eventKeys = [],
-        eventChecks = [],
+        changes = [],
         Value;
 
-    eventHandles[VALUE_UPDATE] = 'onUpdate';
-    eventHandles[VALUE_ERROR] = 'onError';
-    eventHandles[VALUE_FREEZE] = 'onFreeze';
+    changes[VALUE_UPDATE] = {
+        handle: 'onUpdate',
 
-    eventKeys[VALUE_UPDATE] = 'value';
-    eventKeys[VALUE_ERROR] = 'error';
+        counter: 'updated',
 
-    eventChecks[VALUE_UPDATE] = 'isValueAssigned';
-    eventChecks[VALUE_ERROR] = 'isError';
-    eventChecks[VALUE_FREEZE] = 'isFrozen';
+        key: 'value'
+    };
+
+
+    changes[VALUE_ERROR] = {
+        handle: 'onError',
+
+        counter: 'errored',
+
+        key: 'error'
+    };
+
+
+    changes[VALUE_FREEZE] = {
+        handle: 'onFreeze',
+
+        counter: 'frozen'
+    };
 
 
     Value = Class('Value', {
@@ -53,76 +67,71 @@ JAR.register({
         },
 
         constant: function(constantValue) {
-            return this.map(function() {
-                return constantValue;
-            });
+            return this.map(Fn.partial(identity, constantValue));
         },
 
         forward: function() {
             return this.map(identity);
         },
 
-        take: function(n) {
-            var takenValue;
+        decide: function(decider, decisionTable) {
+            var decidedValue = new this.Class(),
+                decision, subscriptionID;
 
-            if (n > 0) {
-                takenValue = this.doWhile(function takeWhile() {
-                    return --n > 0;
-                });
-            }
-            else {
-                takenValue = new this.Class();
-
-                takenValue.error(new Error('Can\'t take 0 values'));
-                takenValue.freeze();
+            if (isObject(decider)) {
+                decisionTable = decider;
+                decider = identity;
             }
 
-            return takenValue;
-        },
+            this.onUpdate(function(newValue) {
+                var nextDecision = decisionTable[decider(newValue)];
 
-        merge: function() {
-            var values = Arr.from([this]).merge(Arr.from(arguments)),
-                toFreeze = values.length,
-                mergedValue = new this.Class();
+                if (nextDecision) {
+                    if (decision !== nextDecision) {
+                        decision && decision.unsubscribe(subscriptionID);
 
-            values.each(function subscribeToValue(value) {
-                value.subscribe({
-                    onUpdate: function(newValue) {
-                        mergedValue.assign(newValue);
-                    },
+                        decision = nextDecision;
 
-                    onError: function(error) {
-                        mergedValue.error(error);
-                    },
+                        subscriptionID = decision.subscribe({
+                            onUpdate: forwardUpdate(decidedValue),
 
-                    onFreeze: function() {
-                        --toFreeze && mergedValue.freeze();
+                            onError: forwardError(decidedValue)
+                        });
                     }
-                });
+                }
+                else {
+                    decidedValue.error(new Error('No decision possible'));
+                }
             });
 
-            return mergedValue;
+            return decidedValue;
         },
 
         $: {
             construct: function(value) {
                 this._$handles = Obj();
+                // TODO implement with taskqueue
+                this._$scheduledChanges = [];
 
-                value && this.assign(value);
+                arguments.length && this.assign(value);
             },
 
             assign: assignValue,
 
             '=': assignValue,
 
-            error: function(newError) {
-                isA(newError, Error) || (newError = new TypeError('Expected error to be called with Error object'));
+            update: function(updater) {
+                return this._$scheduleChange(VALUE_UPDATE, updater);
+            },
 
-                return this._$onChange(VALUE_ERROR, newError);
+            error: function(newError) {
+                isA(newError, Error) || (newError = new TypeError('Expected value.error() to be called with Error object'));
+
+                return this._$scheduleChange(VALUE_ERROR, Fn.partial(identity, newError));
             },
 
             freeze: function() {
-                return this._$onChange(VALUE_FREEZE);
+                return this._$scheduleChange(VALUE_FREEZE, noop);
             },
 
             map: function(mapFn) {
@@ -131,50 +140,9 @@ JAR.register({
                 });
             },
 
-            filter: function(filterFn) {
+            accept: function(acceptFn) {
                 return this._$chainValue({
-                    guardNext: filterFn
-                });
-            },
-
-            scan: function(scanFn, startValue) {
-                var value = this,
-                    $proxy = value.$proxy;
-
-                return this._$chainValue({
-                    start: startValue,
-
-                    transform: function(newValue) {
-                        return scanFn($proxy(value, proxiedGetValue), newValue);
-                    }
-                });
-            },
-
-            doUntil: function(untilFn) {
-                return this._$chainValue({
-                    guardComplete: untilFn
-                });
-            },
-
-            until: function(untilFn) {
-                return this._$chainValue({
-                    guardFilter: negate(untilFn),
-
-                    guardComplete: untilFn
-                });
-            },
-
-            doWhile: function(whileFn) {
-                return this._$chainValue({
-                    guardComplete: negate(whileFn)
-                });
-            },
-
-            'while': function(whileFn) {
-                return this._$chainValue({
-                    guardFilter: whileFn,
-
-                    guardComplete: negate(whileFn)
+                    guardNext: acceptFn
                 });
             },
 
@@ -184,21 +152,21 @@ JAR.register({
                     onFreeze = subscription.onFreeze;
 
                 async.wait(value.$proxy, 0, value, function delayInitialCall() {
-                    Arr.each(eventHandles, function invokeHandleInitial(handleType, valueType) {
-                        if (value['_$' + eventChecks[valueType]]) {
-                            value._$attemptInvokeHandle(subscription, handleType, value['_$' + eventKeys[valueType]]);
+                    Arr.each(changes, function invokeHandleInitial(change) {
+                        if (value['_$' + change.counter]) {
+                            value._$attemptInvokeHandle(subscription, change.handle, value['_$' + change.key]);
                         }
                     });
                 });
 
-                if (!value._$isFrozen) {
+                if (!value._$frozen) {
                     subscriptionID = value.getHash() + ' handle_id:' + value._$nextHandleID;
 
                     value._$nextHandleID++;
                     value._$handlesCount++;
 
                     subscription.onFreeze = function() {
-                        onFreeze && onFreeze();
+                        onFreeze && onFreeze.call(subscription);
                         value.unsubscribe(subscriptionID);
                     };
 
@@ -212,7 +180,7 @@ JAR.register({
                 var handles = this._$handles,
                     unsubscribed = false;
 
-                if (Obj.hasOwn(handles, subscriptionID)) {
+                if (hasOwn(handles, subscriptionID)) {
                     this._$handlesCount--;
 
                     delete handles[subscriptionID];
@@ -227,53 +195,93 @@ JAR.register({
         _$: {
             value: null,
 
-            isValueAssigned: false,
+            updated: 0,
 
             error: null,
 
-            isError: false,
+            errored: 0,
 
-            isFrozen: false,
+            frozen: 0,
 
             handles: null,
 
             handlesCount: 0,
 
             nextHandleID: 0,
+            // TODO implement with taskqueue
+            scheduledChanges: null,
+            // TODO implement with taskqueue
+            changesScheduled: false,
+            // TODO implement with taskqueue
+            scheduleChange: function(changeType, changer) {
+                this._$scheduledChanges.push({
+                    type: changeType,
 
-            onChange: function(eventType, newValue) {
-                var value = this;
+                    fn: changer
+                });
 
                 //TODO improve asynchronous handling
-                async.wait(value.$proxy, 0, value, changeValue, [eventType, newValue]);
+                if (!this._$changesScheduled) {
+                    async.wait(this.$proxy, 0, this, this._$doChanges);
 
-                return value;
+                    this._$changesScheduled = true;
+                }
+
+                return this;
+            },
+            // TODO implement with taskqueue
+            doChanges: function() {
+                var value = this,
+                    scheduledChanges = value._$scheduledChanges;
+
+                while (scheduledChanges.length && !value._$frozen) {
+                    this._$doChange(scheduledChanges.shift());
+                }
+
+                this._$changesScheduled = false;
+            },
+            // TODO implement with taskqueue
+            doChange: function(scheduledChange) {
+                var value = this,
+                    changer = scheduledChange.fn,
+                    changeType = scheduledChange.type,
+                    change = changes[changeType],
+                    handleMethod = change.handle,
+                    key = change.key,
+                    currentValue = value['_$' + key],
+                    newValue = changer(currentValue);
+
+                value._$handles.each(function forwardValueToHandle(handle) {
+                    value._$attemptInvokeHandle(handle, handleMethod, newValue);
+                });
+
+                if (changeType === VALUE_ERROR && !value._$handlesCount) {
+                    value._$onUnhandledError(newValue);
+                }
+
+                key && (value['_$' + key] = newValue);
+
+                value['_$' + change.counter]++;
             },
 
             chainValue: function(options) {
-                var startValue = options.start,
-                    transform = options.transform || identity,
+                var transform = options.transform || identity,
                     shouldUpdate = options.guardNext || returnTrue,
                     shouldComplete = options.guardComplete || returnFalse,
-                    chainedValue = new this.Class(startValue);
+                    chainedValue = new this.Class();
 
                 this.subscribe({
                     onUpdate: function(newValue) {
                         if (shouldUpdate(newValue)) {
-                            newValue = transform(newValue);
-                            chainedValue.assign(newValue);
+                            chainedValue.assign(transform(newValue));
                         }
 
                         shouldComplete(newValue) && chainedValue.freeze();
                     },
 
-                    onError: function(error) {
-                        chainedValue.error(error);
-                    },
+                    onError: forwardError(chainedValue),
 
-                    onFreeze: function() {
-                        chainedValue.freeze();
-                    }
+                    onFreeze: forwardFreeze(chainedValue)
                 });
 
                 return chainedValue;
@@ -287,7 +295,7 @@ JAR.register({
                         handle[handleType](value);
                     }
                     else {
-                        isUnHandledError = handleType === eventHandles[VALUE_ERROR];
+                        isUnHandledError = handleType === changes[VALUE_ERROR].handle;
                     }
                 }
                 catch (e) {
@@ -317,37 +325,25 @@ JAR.register({
 
     function assignValue(newValue) {
         /*jslint validthis: true */
-        if (isFunction(newValue)) {
-            newValue = newValue(this._$value);
-        }
-
-        return this._$onChange(VALUE_UPDATE, newValue);
+        return this.update(Fn.partial(identity, newValue));
     }
 
-    function changeValue(eventType, newValue) {
-        /*jslint validthis: true */
-        var value = this,
-            handleMethod = eventHandles[eventType],
-            key = eventKeys[eventType];
-
-        if (!value._$isFrozen) {
-            value._$handles.each(function forwardValueToHandLe(handle) {
-                value._$attemptInvokeHandle(handle, handleMethod, newValue);
-            });
-
-            if (eventType === VALUE_ERROR && !value._$handlesCount) {
-                value._$onUnhandledError(newValue);
-            }
-
-            key && (value['_$' + key] = newValue);
-
-            value['_$' + eventChecks[eventType]] = true;
-        }
+    function forwardUpdate(value) {
+        return function onUpdate(newValue) {
+            value.assign(newValue);
+        };
     }
 
-    function proxiedGetValue() {
-        /*jslint validthis: true */
-        return this._$value;
+    function forwardError(value) {
+        return function onError(newError) {
+            value.error(newError);
+        };
+    }
+
+    function forwardFreeze(value) {
+        return function onFreeze() {
+            value.freeze();
+        };
     }
 
     return Value;
