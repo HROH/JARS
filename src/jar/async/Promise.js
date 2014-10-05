@@ -1,11 +1,11 @@
 JAR.register({
     MID: 'jar.async.Promise',
     deps: [{
-        System: ['.', '!']
+        System: ['::isA', '::isSet', '::isObject', '::isArrayLike', '::isFunction', '!']
     }, 'jar', {
         '..lang': ['Class', 'Object!derive,info,iterate', 'Array!iterate,reduce']
     }]
-}, function(System, config, jar, Class, Obj, Arr) {
+}, function(isA, isSet, isObject, isArrayLike, isFunction, config, jar, Class, Obj, Arr) {
     'use strict';
 
     // TODO support stacktraces:
@@ -16,9 +16,6 @@ JAR.register({
     // - always throw, consume per promise or consume if configured?
 
     var async = this,
-        isFunction = System.isFunction,
-        isObject = System.isObject,
-        isA = System.isA,
         rejectionHandlers = Arr(),
         PROMISE_INIT = 1,
         PROMISE_PENDING = 2,
@@ -51,7 +48,7 @@ JAR.register({
                     resolve = handles.resolve,
                     reject = handles.reject;
 
-                if (System.isSet(resolver) && !promise.isInitialized()) {
+                if (isSet(resolver) && !promise.isInitialized()) {
                     promise._$setInitialized();
 
                     if (isFunction(resolver)) {
@@ -282,7 +279,7 @@ JAR.register({
                 count = 0,
                 results;
 
-            if (System.isArrayLike(promises)) {
+            if (isArrayLike(promises)) {
                 promises = Arr.from(promises);
                 count = promises.length;
                 results = [];
@@ -357,14 +354,17 @@ JAR.register({
     });
 
     function proxiedTransitionState(newState, value) {
+        /*jslint validthis: true */
         this._$transitionState(newState, value);
     }
 
     function proxiedGetPromiseHandles() {
+        /*jslint validthis: true */
         return this._$handles;
     }
 
     function proxiedHasPromiseInChain(valueAsPromise) {
+        /*jslint validthis: true */
         return this._$hasPromiseInChain(valueAsPromise);
     }
 
@@ -392,6 +392,7 @@ JAR.register({
      * @return {function(*):Promise}
      */
     function createHandle(state) {
+        /*jslint validthis: true */
         var promise = this,
             $proxy = promise.$proxy;
 

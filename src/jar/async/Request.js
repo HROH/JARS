@@ -1,7 +1,7 @@
 JAR.register({
     MID: 'jar.async.Request',
     deps: ['.Promise', 'System', {
-        '..lang': ['Object!reduce', 'Array!search']
+        '..lang': ['Object!reduce', 'Array!index']
     }]
 }, function(Promise, System, Obj, Arr) {
     'use strict';
@@ -157,6 +157,7 @@ JAR.register({
 
     // TODO
     function readyStateChangeHandler() {
+        /*jslint validthis: true */
         var req = this,
             readyState = req.readyState,
             handles = req.handles,
@@ -180,6 +181,7 @@ JAR.register({
     }
 
     function progressHandler(e) {
+        /*jslint validthis: true */
         if (e.lengthComputable) {
             this.handles.notify((e.loaded / e.total) * 100);
         }
