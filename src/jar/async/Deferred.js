@@ -46,11 +46,12 @@ JAR.register({
     });
 
     function proxiedGetPromiseHandles() {
+        /*jslint validthis: true */
         return this._$handles;
     }
 
     Deferred.addDestructor(function() {
-        this.reject('The Deferred: ' + this.getHash() + ' was destructed!');
+        this.reject(new Error('The Deferred: ' + this.getHash() + ' was destructed!'));
     });
 
     return Deferred;
