@@ -1,50 +1,43 @@
 JAR.register({
     MID: 'jar.async.Number',
     deps: ['.Value', {
-        'jar.lang': ['Object!iterate']
+        'jar.lang': ['Object!iterate', 'String', 'operations.Arithmetic']
     }]
-}, function(Value, Obj) {
+}, function(Value, Obj, Str, arithmeticOperations) {
     'use strict';
 
     var ASSIGN = '=',
-        PLUS = '+',
-        MINUS = '-',
-        MULTIPLY = '*',
-        DIVIDE = '/',
         asyncNumberProto = {
             construct: function(number) {
-                this.$super(number || 0);
+                this.$super(Number(number) || 0);
             }
         },
         mapOperators = {
-            add: PLUS,
+            add: '+',
 
-            subtract: MINUS,
+            subtract: '-',
 
-            multiplyWith: MULTIPLY,
+            multiplyWith: '*',
 
-            divideBy: DIVIDE
+            divideBy: '/',
+
+            modulo: '%'
         },
-        Number;
+        Nr;
 
-    Obj.each(mapOperators, function(operator, methodName) {
-        /*jslint evil: true */
-        var operation = new Function('a,b', 'return a' + operator + 'b');
+    Obj.each(arithmeticOperations, function(arithmeticOperation, methodName) {
+        var operator = mapOperators[methodName];
 
         asyncNumberProto[methodName] = asyncNumberProto[operator] = function(operand) {
-            return this.map(function(value) {
-                return operation(value, operand);
-            });
+            return this.map(arithmeticOperation(operand));
         };
 
-        asyncNumberProto[operator + ASSIGN] = function(operand) {
-            return this.assign(function(value) {
-                return operation(value, operand);
-            });
+        asyncNumberProto[Str.camelize('self', methodName)] = asyncNumberProto[operator + ASSIGN] = function(operand) {
+            return this.update(arithmeticOperation(operand));
         };
     });
 
-    Number = Value.createSubClass('Number', asyncNumberProto);
+    Nr = Value.createSubClass('Number', asyncNumberProto);
 
-    return Number;
+    return Nr;
 });
