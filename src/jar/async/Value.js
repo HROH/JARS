@@ -1,16 +1,16 @@
 JAR.register({
     MID: 'jar.async.Value',
     deps: [{
-        System: ['::isSet', '::isA', '::isObject', '::isFunction']
+        System: ['::isSet', '::isA', '::isFunction']
     }, {
         'jar.lang': ['Array!iterate,reduce', {
             Object: ['!derive,iterate', '::hasOwn']
         }, 'Class', {
-            Function: ['!modargs', '::identity', '::negate', '::noop']
+            Function: ['!modargs', '::bind', '::identity', '::negate', '::noop']
         }]
     }],
-    bundle: ['M$Accumulator', 'M$FlowRegulator', 'M$Mergable', 'M$Skipable', 'M$Takeable']
-}, function(isSet, isA, isObject, isFunction, Arr, Obj, hasOwn, Class, Fn, identity, negate, noop) {
+    bundle: ['M$Accumulator', 'M$Decidable', 'M$FlowRegulator', 'M$Mergable', 'M$Skipable', 'M$Takeable']
+}, function(isSet, isA, isFunction, Arr, Obj, hasOwn, Class, Fn, bind, identity, negate, noop) {
     'use strict';
 
     var async = this,
@@ -54,39 +54,6 @@ JAR.register({
 
         forward: function() {
             return this.map(identity);
-        },
-
-        decide: function(decider, decisionTable) {
-            var decidedValue = new this.Class(),
-                decision, subscriptionID;
-
-            if (isObject(decider)) {
-                decisionTable = decider;
-                decider = identity;
-            }
-
-            this.onUpdate(function(newValue) {
-                var nextDecision = decisionTable[decider(newValue)];
-
-                if (nextDecision) {
-                    if (decision !== nextDecision) {
-                        decision && decision.unsubscribe(subscriptionID);
-
-                        decision = nextDecision;
-
-                        subscriptionID = decision.subscribe({
-                            onUpdate: forwardUpdate(decidedValue),
-
-                            onError: forwardError(decidedValue)
-                        });
-                    }
-                }
-                else {
-                    decidedValue.error(new Error('No decision possible'));
-                }
-            });
-
-            return decidedValue;
         },
 
         $: {
@@ -261,9 +228,9 @@ JAR.register({
                         shouldComplete(newValue) && chainedValue.freeze();
                     },
 
-                    onError: forwardError(chainedValue),
+                    onError: bind(chainedValue.error, chainedValue),
 
-                    onFreeze: forwardFreeze(chainedValue)
+                    onFreeze: bind(chainedValue.freeze(), chainedValue)
                 });
 
                 return chainedValue;
@@ -304,7 +271,7 @@ JAR.register({
             }
         }
     }, Arr.reduce(changes, addHandleSubscriber, {})));
-    
+
     function addHandleSubscriber(handleSubscribers, change) {
         var handleName = change.handle;
 
@@ -312,7 +279,7 @@ JAR.register({
             var subscription = {};
 
             subscription[handleName] = handle;
-            
+
             return this.subscribe(subscription);
         };
 
@@ -322,24 +289,6 @@ JAR.register({
     function assignValue(newValue) {
         /*jslint validthis: true */
         return this.update(Fn.partial(identity, newValue));
-    }
-
-    function forwardUpdate(value) {
-        return function onUpdate(newValue) {
-            value.assign(newValue);
-        };
-    }
-
-    function forwardError(value) {
-        return function onError(newError) {
-            value.error(newError);
-        };
-    }
-
-    function forwardFreeze(value) {
-        return function onFreeze() {
-            value.freeze();
-        };
     }
 
     return Value;
