@@ -3,7 +3,7 @@ JAR.register({
     deps: [{
         System: ['::isSet', '::isA', '::isObject', '::isFunction']
     }, {
-        'jar.lang': ['Array!iterate', {
+        'jar.lang': ['Array!iterate,reduce', {
             Object: ['!derive,iterate', '::hasOwn']
         }, 'Class', {
             Function: ['!modargs', '::identity', '::negate', '::noop']
@@ -47,25 +47,7 @@ JAR.register({
     };
 
 
-    Value = Class('Value', {
-        onUpdate: function(updateFn) {
-            return this.subscribe({
-                onUpdate: updateFn
-            });
-        },
-
-        onError: function(errorFn) {
-            return this.subscribe({
-                onError: errorFn
-            });
-        },
-
-        onFreeze: function(freezeFn) {
-            return this.subscribe({
-                onFreeze: freezeFn
-            });
-        },
-
+    Value = Class('Value', Obj.extend({
         constant: function(constantValue) {
             return this.map(Fn.partial(identity, constantValue));
         },
@@ -321,7 +303,21 @@ JAR.register({
                 });
             }
         }
-    });
+    }, Arr.reduce(changes, addHandleSubscriber, {})));
+    
+    function addHandleSubscriber(handleSubscribers, change) {
+        var handleName = change.handle;
+
+        handleSubscribers[handleName] = function(handle) {
+            var subscription = {};
+
+            subscription[handleName] = handle;
+            
+            return this.subscribe(subscription);
+        };
+
+        return handleSubscribers;
+    }
 
     function assignValue(newValue) {
         /*jslint validthis: true */
