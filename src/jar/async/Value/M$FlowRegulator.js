@@ -11,6 +11,22 @@ JAR.register({
 
         debounce: function(ms) {
             return this.accept(createFlowRegulator(ms, true));
+        },
+
+        delay: function(ms) {
+            var value = this,
+                delayedValue = new value.Class(),
+                subscriptionID = value.onUpdate(function(newValue) {
+                    window.setTimeout(function() {
+                        delayedValue.assign(newValue);
+                    }, ms);
+                });
+
+            delayedValue.onFreeze(function() {
+                value.unsubscribe(subscriptionID);
+            });
+
+            return delayedValue;
         }
     }, {
         classes: [this]
