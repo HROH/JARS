@@ -1,17 +1,14 @@
 JAR.register({
     MID: 'jar.async.Value.M$Takeable',
     deps: {
-        'jar.lang': ['Class', {
+        'jar.lang': [{
             Function: ['!modargs', '::negate']
         }, 'MixIn']
     }
-}, function(Class, Fn, negate, MixIn) {
+}, function(Fn, negate, MixIn) {
     'use strict';
 
-    var $proxy = Class.createProxy(),
-        M$Takeable;
-
-    M$Takeable = new MixIn('Takeable', {
+    var M$Takeable = new MixIn('Takeable', {
         take: function(n) {
             var takenValue;
 
@@ -29,7 +26,9 @@ JAR.register({
         },
 
         takeUntil: function(untilFn) {
-            return $proxy(this, proxiedTakeUntil, [untilFn]);
+            return this.chainValue({
+                guardFreeze: untilFn
+            });
         },
 
         takeWhile: function(whileFn) {
@@ -38,13 +37,6 @@ JAR.register({
     }, {
         classes: [this]
     });
-
-    function proxiedTakeUntil(untilFn) {
-        /*jslint validthis: true */
-        return this._$chainValue({
-            guardComplete: untilFn
-        });
-    }
 
     function takeUntilZero(n) {
         return --n === 0;

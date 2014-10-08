@@ -9,7 +9,7 @@ JAR.register({
             Function: ['!modargs', '::bind', '::identity', '::negate', '::noop']
         }]
     }],
-    bundle: ['M$Accumulator', 'M$Decidable', 'M$FlowRegulator', 'M$Debuggable', 'M$Mergable', 'M$Skipable', 'M$Takeable']
+    bundle: ['M$Accumulator', 'M$Decidable', 'M$FlowRegulator', 'M$Debuggable', 'M$Memorizable', 'M$Mergable', 'M$Skipable', 'M$Takeable']
 }, function(isSet, isA, isFunction, Arr, Obj, hasOwn, Class, Fn, bind, identity, negate, noop) {
     'use strict';
 
@@ -53,7 +53,50 @@ JAR.register({
         },
 
         forward: function() {
-            return this.map(identity);
+            return this.chainValue();
+        },
+
+        forwardTo: function(value, customSubscription) {
+            this.subscribe(Obj.merge({
+                onUpdate: bind(value.assign, value),
+
+                onError: bind(value.error, value),
+
+                onFreeze: bind(value.freeze, value)
+            }, customSubscription));
+
+            return value;
+        },
+
+        chainValue: function(options) {
+            var transform = options.transform || identity,
+                shouldUpdate = options.guardUpdate || returnTrue,
+                shouldFreeze = options.guardFreeze || returnFalse,
+                chainedValue = new this.Class();
+
+            this.forwardTo(chainedValue, {
+                onUpdate: function(newValue) {
+                    if (shouldUpdate(newValue)) {
+                        chainedValue.assign(transform(newValue));
+                    }
+
+                    shouldFreeze(newValue) && chainedValue.freeze();
+                }
+            });
+
+            return chainedValue;
+        },
+
+        map: function(mapFn) {
+            return this.chainValue({
+                transform: mapFn
+            });
+        },
+
+        accept: function(acceptFn) {
+            return this.chainValue({
+                guardUpdate: acceptFn
+            });
         },
 
         $: {
@@ -81,18 +124,6 @@ JAR.register({
 
             freeze: function() {
                 return this._$scheduleChange(VALUE_FREEZE, noop);
-            },
-
-            map: function(mapFn) {
-                return this._$chainValue({
-                    transform: mapFn
-                });
-            },
-
-            accept: function(acceptFn) {
-                return this._$chainValue({
-                    guardNext: acceptFn
-                });
             },
 
             subscribe: function(subscription) {
@@ -211,29 +242,6 @@ JAR.register({
                 key && (value['_$' + key] = newValue);
 
                 value['_$' + change.counter]++;
-            },
-
-            chainValue: function(options) {
-                var transform = options.transform || identity,
-                    shouldUpdate = options.guardNext || returnTrue,
-                    shouldComplete = options.guardComplete || returnFalse,
-                    chainedValue = new this.Class();
-
-                this.subscribe({
-                    onUpdate: function(newValue) {
-                        if (shouldUpdate(newValue)) {
-                            chainedValue.assign(transform(newValue));
-                        }
-
-                        shouldComplete(newValue) && chainedValue.freeze();
-                    },
-
-                    onError: bind(chainedValue.error, chainedValue),
-
-                    onFreeze: bind(chainedValue.freeze(), chainedValue)
-                });
-
-                return chainedValue;
             },
 
             attemptInvokeHandle: function(handle, handleType, value) {

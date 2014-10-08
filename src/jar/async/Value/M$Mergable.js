@@ -15,15 +15,7 @@ JAR.register({
             values.unshift(this);
 
             values.each(function subscribeToValue(value) {
-                value.subscribe({
-                    onUpdate: function(newValue) {
-                        mergedValue.assign(newValue);
-                    },
-
-                    onError: function(error) {
-                        mergedValue.error(error);
-                    },
-
+                value.forwardTo(mergedValue, {
                     onFreeze: function() {
                         --toFreeze || mergedValue.freeze();
                     }
