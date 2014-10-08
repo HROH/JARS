@@ -20,6 +20,8 @@ JAR.register({
                 return accumulator;
             });
         }
+    }, {
+        classes: [this]
     });
 
     return M$Accumulator;

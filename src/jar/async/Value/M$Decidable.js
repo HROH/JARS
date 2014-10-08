@@ -41,6 +41,8 @@ JAR.register({
 
             return decidedValue;
         }
+    }, {
+        classes: [this]
     });
 
     return M$Decidable;
