@@ -1,16 +1,17 @@
 JAR.register({
     MID: 'jar.lang.MixIn',
-    deps: ['System', 'jar', '.Class', '.Object', '.Array!check,derive', '.Function!modargs']
-}, function(System, jar, Class, Obj, Arr, Fn) {
+    deps: [{
+        System: ['::isA', '::isArray', 'Logger']
+    }, 'jar', {
+        '.Class': ['.', '::isClass', '::isInstance']
+    }, '.Object', '.Array!check,derive,iterate', '.Function!modargs']
+}, function(isA, isArray, Logger, jar, Class, isClass, isInstance, Obj, Arr, Fn) {
     'use strict';
 
-    // TODO
-    var isClass = Class.isClass,
-        isInstance = Class.isInstance,
-        RECEIVER_MISSING = 0,
+    var RECEIVER_MISSING = 0,
         RECEIVER_NOT_ALLOWED = 1,
         mixinTemplates = [],
-        MixIn;
+        MixIn, isMixIn;
 
     mixinTemplates[RECEIVER_MISSING] = 'There is no receiver given!';
     mixinTemplates[RECEIVER_NOT_ALLOWED] = 'The given receiver "${rec}" is not part or instance of the allowed Classes!';
@@ -27,9 +28,10 @@ JAR.register({
                 this._$name = mixInName;
                 this._$toMix = Obj.from(toMix);
                 this._$allowAny = options.allowAny;
-                this._$allowedClasses = Arr.filter(System.isArray(allowedClasses) ? allowedClasses : [allowedClasses], isClass);
+                this._$allowedClasses = Arr.filter(isArray(allowedClasses) ? allowedClasses : [allowedClasses], isClass);
+                this._$neededMixIns = Arr.filter(options.depends || [], isMixIn);
                 this._$destructor = options.destructor;
-                this._$logger = new System.Logger('MixIn "#<' + jar.getCurrentModuleName() + ':' + mixInName + '>"', {
+                this._$logger = new Logger('MixIn "#<' + jar.getCurrentModuleName() + ':' + mixInName + '>"', {
                     tpl: mixinTemplates
                 });
             },
@@ -43,6 +45,10 @@ JAR.register({
                     objectToExtend;
 
                 if (receiver) {
+                    if (this._$neededMixIns.length) {
+                        this._$neededMixIns.each(mixIntoReceiver, receiver);
+                    }
+
                     if (this._$allowAny || Arr.every(allowedClasses, isReceiverAllowed)) {
                         if (isClass(receiver)) {
                             objectToExtend = receiver.prototype;
@@ -87,19 +93,21 @@ JAR.register({
 
             allowedClasses: null,
 
+            neededMixIns: null,
+
             destructor: null,
 
             isReceiverAllowed: function(receiver, allowedClass) {
-                return receiver === allowedClass || allowedClass.isSuperClassOf(receiver) || System.isA(receiver, allowedClass);
+                return receiver === allowedClass || allowedClass.isSuperClassOf(receiver) || isA(receiver, allowedClass);
             }
         }
     });
 
-    function checkAndMixInto(mixIn) {
+    isMixIn = Fn.partial(isA, null, MixIn);
+
+    function mixIntoReceiver(mixIn) {
         /*jslint validthis: true */
-        if (System.isA(mixIn, MixIn)) {
-            mixIn.mixInto(this);
-        }
+        mixIn.mixInto(this);
     }
 
     /**
@@ -107,14 +115,11 @@ JAR.register({
      * It is available for every Class created with jar.lang.Class()
      * as soon as this module is loaded
      */
-    function mixin() {
-        /*jslint validthis: true */
-        Arr.each(arguments, checkAndMixInto, this);
+    Class.addStatic('mixin', function() {
+        Arr.filter(arguments, isMixIn).each(mixIntoReceiver, this);
 
         return this;
-    }
-
-    Class.addStatic('mixin', mixin);
+    });
 
     return MixIn;
 });
