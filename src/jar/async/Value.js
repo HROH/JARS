@@ -9,7 +9,7 @@ JAR.register({
             Function: ['!modargs', '::bind', '::identity', '::negate', '::noop']
         }]
     }],
-    bundle: ['M$Accumulator', 'M$Decidable', 'M$FlowRegulator', 'M$Mergable', 'M$Skipable', 'M$Takeable']
+    bundle: ['M$Accumulator', 'M$Decidable', 'M$FlowRegulator', 'M$Debuggable', 'M$Mergable', 'M$Skipable', 'M$Takeable']
 }, function(isSet, isA, isFunction, Arr, Obj, hasOwn, Class, Fn, bind, identity, negate, noop) {
     'use strict';
 
