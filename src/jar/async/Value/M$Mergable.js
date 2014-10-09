@@ -14,11 +14,13 @@ JAR.register({
 
             values.unshift(this);
 
+            function onFreeze() {
+                --toFreeze || mergedValue.freeze();
+            }
+
             values.each(function subscribeToValue(value) {
                 value.forwardTo(mergedValue, {
-                    onFreeze: function() {
-                        --toFreeze || mergedValue.freeze();
-                    }
+                    onFreeze: onFreeze
                 });
             });
 
