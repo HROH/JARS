@@ -1,8 +1,8 @@
 JAR.register({
     MID: 'jar.lang.Array',
-    deps: 'System',
+    deps: ['System', '.assert'],
     bundle: ['Array-check', 'Array-derive', 'Array-find', 'Array-index', 'Array-iterate', 'Array-manipulate', 'Array-reduce']
-}, function(System) {
+}, function(System, assert) {
     'use strict';
 
     /**
@@ -40,26 +40,27 @@ JAR.register({
         fromArrayLike: fromArray
     });
 
-    function fromArray(array, offset) {
-        var arrLen, value;
+    function fromArray(arrayLike, mapFn, context) {
+        var index = 0,
+            newArray, len;
 
-        if (!(System.isA(array, ArrayCopy))) {
-            if (System.isArrayLike(array)) {
-                arrLen = array.length;
+        assert.isSet(arrayLike, 'Array.from requires an array-like object - not null or undefined');
 
-                if (arrLen > 1) {
-                    array = ArrayCopy.apply(ArrayCopy, array);
-                }
-                else {
-                    value = array[0];
-
-                    array = new ArrayCopy();
-                    arrLen && array.push(value);
-                }
-            }
+        if (mapFn) {
+            assert.isFunction(mapFn, 'Array.from: when provided, the second argument must be a function');
         }
 
-        return System.isNumber(offset) ? array.slice(offset) : array;
+        len = arrayLike.length >>> 0;
+
+        newArray = ArrayCopy(len);
+
+        while (index < len) {
+            newArray[index] = mapFn ? mapFn.call(context, arrayLike[index], index) : arrayLike[index];
+
+            index++;
+        }
+
+        return newArray;
     }
 
     return ArrayCopy;

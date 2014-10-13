@@ -14,7 +14,7 @@ JAR.register({
         bind: function(context) {
             var fnToBind = this,
                 FnLink = function() {},
-                boundArgs = fromArgs(arguments, 1),
+                boundArgs = fromArgs(arguments).slice(1),
                 returnFn = fromFunction(function boundFn() {
                     return apply(fnToBind, (System.isA(this, FnLink) && context) ? this : context, boundArgs.concat(fromArgs(arguments)));
                 }, fnToBind.arity || fnToBind.length);
@@ -49,7 +49,7 @@ JAR.register({
          * '5 time(s) executed'
          */
         repeat: function(times) {
-            var args = fromArgs(arguments, 1),
+            var args = fromArgs(arguments).slice(1),
                 results = Arr(),
                 idx = 0;
 
