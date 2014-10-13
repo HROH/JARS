@@ -1,44 +1,47 @@
 JAR.register({
     MID: 'jar.lang.Array.Array-derive',
-    deps: ['..', '.!iterate', '..Object!derive']
-}, function(lang, Arr, Obj) {
+    deps: ['..', '..assert', '.!iterate', '..Object!derive']
+}, function(lang, assert, Arr, Obj) {
     'use strict';
-	
-	var forEach = Arr.forEach;
-	
+
+    var forEach = Arr.forEach,
+        MSG_NO_FUNCTION = 'The callback is not a function';
+
     lang.extendNativeType('Array', {
-        filter: function(callback, context) {
-            var arr = this,
-                ret = new Arr();
+        filter: createDeriver(),
 
-            lang.throwErrorIfNotSet('Array', arr, 'filter');
+        map: createDeriver(true)
+    });
 
-            lang.throwErrorIfNoFunction(callback);
+    function createDeriver(isMapper) {
+        var assertionMessage = 'Array.prototype.' + (isMapper ? 'map' : 'filter') + ' called on null or undefined';
 
-            forEach(arr, function(item, idx) {
+        function derive(context, callback, ret) {
+            return isMapper ? function mapDeriver(item, idx, arr) {
+                ret.push(callback.call(context, item, idx, arr));
+            } : function filterDeriver(item, idx, arr) {
                 if (callback.call(context, item, idx, arr)) {
                     ret.push(item);
                 }
-            });
+            };
+        }
 
-            return ret;
-        },
-
-        map: function(callback, context) {
+        function deriver(callback, context) {
+            /*jslint validthis: true */
             var arr = this,
                 ret = new Arr();
 
-            lang.throwErrorIfNotSet('Array', arr, 'map');
+            assert.isSet(arr, assertionMessage);
 
-            lang.throwErrorIfNoFunction(callback);
+            assert.isFunction(callback, MSG_NO_FUNCTION);
 
-            forEach(arr, function(item, idx) {
-                ret.push(callback.call(context, item, idx, arr));
-            });
+            forEach(arr, derive(context, callback, ret));
 
             return ret;
         }
-    });
+
+        return deriver;
+    }
 
     return Obj.extract(Arr, ['filter', 'map']);
 });

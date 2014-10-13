@@ -3,7 +3,7 @@ JAR.register({
     deps: {
         System: ['::isSet', '::isFunction', '::isString', '!']
     },
-    bundle: ['Array.*', 'Date', 'Class.*', 'Function.*', 'I$Comparable', 'I$Iterable', 'Interface', 'M$Cloneable', 'M$Destructable', 'MixIn', 'Object.*', 'operations.*', 'String']
+    bundle: ['Array.*', 'assert', 'Date', 'Class.*', 'Function.*', 'I$Comparable', 'I$Iterable', 'Interface', 'M$Cloneable', 'M$Destructable', 'MixIn', 'Object.*', 'operations.*', 'String']
 }, function(isSet, isFunction, isString, config) {
     'use strict';
 
@@ -62,51 +62,6 @@ JAR.register({
          * 
          * @memberof jar.lang
          * 
-         * @param {String} typeName
-         * @param {*} object
-         * @param {String} methodName
-         *
-         * @throws {TypeError}
-         */
-        throwErrorIfNotSet: function(typeName, object, methodName) {
-            if (!isSet(object)) {
-                throwTypeError(typeName + '.prototype.' + methodName + ' called on null or undefined');
-            }
-        },
-        /**
-         * @access public
-         * 
-         * @memberof jar.lang
-         * 
-         * @param {Function} callback
-         *
-         * @throws {TypeError}
-         */
-        throwErrorIfNoFunction: function(callback) {
-            if (!isFunction(callback)) {
-                throwTypeError(callback + ' is not a function');
-            }
-        },
-        /**
-         * @access public
-         * 
-         * @memberof jar.lang
-         * 
-         * @param {String} typeName
-         * @param {Boolean} isValueSet
-         *
-         * @throws {TypeError}
-         */
-        throwErrorIfNoValueSet: function(typeName, isValueSet) {
-            if (!isValueSet) {
-                throwTypeError('Reduce of empty ' + typeName + ' with no initial value');
-            }
-        },
-        /**
-         * @access public
-         * 
-         * @memberof jar.lang
-         * 
          * @param {String} formatString
          * 
          * @return {String}
@@ -128,20 +83,6 @@ JAR.register({
             return sandboxes[domain] || (sandboxes[domain] = new Sandbox(domain));
         }
     };
-
-    /**
-     * @access private
-     * 
-     * @memberof jar.lang
-     * @inner
-     * 
-     * @param {String} message
-     *
-     * @throws {TypeError}
-     */
-    function throwTypeError(message) {
-        throw new TypeError(message);
-    }
 
     /**
      * @access private

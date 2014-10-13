@@ -1,10 +1,11 @@
 JAR.register({
     MID: 'jar.lang.Array.Array-check',
-    deps: ['..', '..Object!derive']
-}, function(lang, Obj) {
+    deps: ['..', '..assert', '..Object!derive']
+}, function(lang, assert, Obj) {
     'use strict';
 
-    var ArrayCopy = this;
+    var ArrayCopy = this,
+        MSG_NO_FUNCTION = 'The callback is not a function';
 
     lang.extendNativeType('Array', {
         every: createCheck(false),
@@ -13,7 +14,7 @@ JAR.register({
     });
 
     function createCheck(expectedResultForBreak) {
-        var methodName = expectedResultForBreak ? 'some' : 'every';
+        var assertionMessage = 'Array.prototype.' + expectedResultForBreak ? 'some' : 'every' + ' called on null or undefined';
 
         return function(callback, context) {
             var arr = this,
@@ -21,9 +22,9 @@ JAR.register({
                 idx = 0,
                 result;
 
-            lang.throwErrorIfNotSet('Array', arr, methodName);
+            assert.isSet(arr, assertionMessage);
 
-            lang.throwErrorIfNoFunction(callback);
+            assert.isFunction(callback, MSG_NO_FUNCTION);
 
             for (; idx < len; idx++) {
                 if (idx in arr) {

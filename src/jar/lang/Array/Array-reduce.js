@@ -1,10 +1,12 @@
 JAR.register({
     MID: 'jar.lang.Array.Array-reduce',
-    deps: '..'
-}, function(lang) {
+    deps: ['..', '..assert']
+}, function(lang, assert) {
     'use strict';
 
-    var ArrayCopy = this;
+    var ArrayCopy = this,
+        MSG_NO_FUNCTION = 'The callback is not a function',
+        MSG_REDUCE_OF_EMPTY_ARRAY = 'Reduce of empty array with no initial value';
 
     lang.extendNativeType('Array', {
         reduce: createReduce(),
@@ -13,7 +15,7 @@ JAR.register({
     });
 
     function createReduce(reduceRight) {
-        var methodName = reduceRight ? 'reduceRight' : 'reduce';
+        var assertionMessage = 'Array.prototype.reduce' + (reduceRight ? 'Right' : '') + ' called on null or undefined';
 
         return function(callback, initialValue) {
             var arr = this,
@@ -22,9 +24,9 @@ JAR.register({
                 idx = reduceRight ? len - 1 : 0,
                 ret;
 
-            lang.throwErrorIfNotSet('Array', arr, methodName);
+            assert.isSet(arr, assertionMessage);
 
-            lang.throwErrorIfNoFunction(callback);
+            assert.isFunction(callback, MSG_NO_FUNCTION);
 
             if (arguments.length > 1) {
                 ret = initialValue;
@@ -43,7 +45,7 @@ JAR.register({
                 }
             }
 
-            lang.throwErrorIfNoValueSet('array', isValueSet);
+            assert(isValueSet, MSG_REDUCE_OF_EMPTY_ARRAY);
 
             return ret;
         };

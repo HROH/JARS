@@ -1,10 +1,12 @@
 JAR.register({
     MID: 'jar.lang.Array.Array-iterate',
-    deps: '..'
-}, function(lang) {
+    deps: ['..', '..assert']
+}, function(lang, assert) {
     'use strict';
 
-    var ArrayCopy = this;
+    var ArrayCopy = this,
+        MSG_NO_FUNCTION = 'The callback is not a function',
+        assertionMessage = 'Array.prototype.forEach called on null or undefined';
 
     lang.extendNativeType('Array', {
         each: function(callback, array) {
@@ -16,9 +18,9 @@ JAR.register({
                 idx = 0,
                 len = arr.length >>> 0;
 
-            lang.throwErrorIfNotSet('Array', arr, 'forEach');
+            assert.isSet(arr, assertionMessage);
 
-            lang.throwErrorIfNoFunction(callback);
+            assert.isFunction(callback, MSG_NO_FUNCTION);
 
             while (idx < len) {
                 if (idx in arr) {
@@ -30,7 +32,7 @@ JAR.register({
 
     return {
         each: ArrayCopy.each,
-        
+
         forEach: ArrayCopy.forEach
     };
 });

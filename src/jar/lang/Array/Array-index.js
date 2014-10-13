@@ -1,7 +1,7 @@
 JAR.register({
     MID: 'jar.lang.Array.Array-index',
-    deps: ['..', '..Object!derive', '.Array-find']
-}, function(lang, Obj, arrayFind) {
+    deps: ['..', '..assert', '..Object!derive', '.Array-find']
+}, function(lang, assert, Obj, arrayFind) {
     'use strict';
 
     var ArrayCopy = lang.extendNativeType('Array', {
@@ -15,11 +15,11 @@ JAR.register({
     });
 
     function createIndexOf(last) {
-        var methodName = last ? 'lastIndexOf' : 'indexOf',
+        var assertionMessage = 'Array.prototype.' + (last ? 'lastIndexOf' : 'indexOf') + ' called on null or undefined',
             findIndexMethod = arrayFind['find' + (last ? 'Last' : '') + 'Index'];
 
         return function(searchElement, fromIndex) {
-            lang.throwErrorIfNotSet('Array', this, methodName);
+            assert.isSet(this, assertionMessage);
 
             return findIndexMethod(this, equalsSearchElement, searchElement, fromIndex);
         };

@@ -1,10 +1,13 @@
 JAR.register({
     MID: 'jar.lang.Array.Array-find',
-    deps: ['System', '..']
-}, function(System, lang) {
+    deps: ['System', '..', '..assert']
+}, function(System, lang, assert) {
     'use strict';
 
-    var ArrayCopy = lang.extendNativeType('Array', {
+    var MSG_NO_FUNCTION = 'The predicate is not a function',
+        ArrayCopy;
+        
+    ArrayCopy = lang.extendNativeType('Array', {
         find: createFinder(),
 
         findLast: createFinder(false, true),
@@ -15,7 +18,7 @@ JAR.register({
     });
 
     function createFinder(returnIndex, last) {
-        var methodName = 'find' + (last ? 'Last' : '') + (returnIndex ? 'Index' : ''),
+        var assertionMessage = 'Array.prototype.find' + (last ? 'Last' : '') + (returnIndex ? 'Index' : '') + ' called on null or undefined',
             defaultReturn = returnIndex ? -1 : undefined;
 
         return function finder(predicate, context, fromIndex) {
@@ -24,9 +27,9 @@ JAR.register({
                 ret = defaultReturn,
                 idx;
 
-            lang.throwErrorIfNotSet('Array', arr, methodName);
+            assert.isSet(arr, assertionMessage);
 
-            lang.throwErrorIfNoFunction(predicate);
+            assert.isFunction(predicate, MSG_NO_FUNCTION);
 
             if (len > 0) {
                 idx = getFromIndex(fromIndex, last ? len - 1 : 0, len);
