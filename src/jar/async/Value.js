@@ -56,16 +56,21 @@ JAR.register({
             return this.chainValue();
         },
 
-        forwardTo: function(value, customSubscription) {
-            this.subscribe(Obj.merge({
-                onUpdate: bind(value.assign, value),
+        forwardTo: function(forwardedValue, customSubscription) {
+            var value = this,
+                subscriptionID = value.subscribe(Obj.merge({
+                    onUpdate: bind(forwardedValue.assign, forwardedValue),
 
-                onError: bind(value.error, value),
+                    onError: bind(forwardedValue.error, forwardedValue),
 
-                onFreeze: bind(value.freeze, value)
-            }, customSubscription));
+                    onFreeze: bind(forwardedValue.freeze, forwardedValue)
+                }, customSubscription));
 
-            return value;
+            forwardedValue.onFreeze(function() {
+                value.unsubcribe(subscriptionID);
+            });
+
+            return forwardedValue;
         },
 
         chainValue: function(options) {
