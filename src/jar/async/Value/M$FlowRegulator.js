@@ -15,15 +15,14 @@ JAR.register({
 
         delay: function(ms) {
             var value = this,
-                delayedValue = new value.Class(),
-                subscriptionID = value.onUpdate(function(newValue) {
+                delayedValue = new value.Class();
+
+            value.forwardTo(delayedValue, {
+                onUpdate: function(newValue) {
                     window.setTimeout(function() {
                         delayedValue.assign(newValue);
                     }, ms);
-                });
-
-            delayedValue.onFreeze(function() {
-                value.unsubscribe(subscriptionID);
+                }
             });
 
             return delayedValue;
