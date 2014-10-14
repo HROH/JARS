@@ -9,7 +9,8 @@ JAR.register({
         apply = FunctionCopy.apply,
         defaultBlockedOptions = {
             leading: true,
-            tailing: true
+            
+            trailing: true
         };
 
     lang.extendNativeType('Function', {
@@ -17,12 +18,12 @@ JAR.register({
             return createBlockedFunction(this, ms, {
                 leading: immediate,
 
-                tailing: !immediate
+                trailing: !immediate
             }, true);
         },
 
         throttle: function(ms, options) {
-            return createBlockedFunction(this, ms, Obj.extend(options || {}, defaultBlockedOptions));
+            return createBlockedFunction(this, ms, options || defaultBlockedOptions);
         },
 
         memoize: function(serializer) {
@@ -83,10 +84,14 @@ JAR.register({
         var blocked = false,
             lastArgs, timeoutID, context;
 
+        if (!(options.leading || options.trailing)) {
+            options = defaultBlockedOptions;
+        }
+
         function unBlock() {
             blocked = false;
 
-            if (lastArgs && options.tailing) {
+            if (lastArgs && options.trailing) {
                 apply(fn, context, lastArgs);
                 context = lastArgs = null;
             }
@@ -109,7 +114,7 @@ JAR.register({
             }
         }, fn.arity || fn.length);
     }
-    
+
     /**
      * TODO better implementation
      * 
