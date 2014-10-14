@@ -1,16 +1,30 @@
 JAR.register({
     MID: 'jar.async.Value.M$FlowRegulator',
-    deps: 'jar.lang.MixIn'
-}, function(MixIn) {
+    deps: {
+        'jar.lang': [{
+            Function: ['::bind', '!guards']
+        }, 'MixIn']
+    }
+},
+
+function(bind, Fn, MixIn) {
     'use strict';
 
     var M$FlowRegulator = new MixIn('FlowRegulator', {
-        throttle: function(ms) {
-            return this.accept(createFlowRegulator(ms));
+        throttle: function(ms, options) {
+            var throttledValue = new this.Class();
+
+            return this.forwardTo(throttledValue, {
+                onUpdate: Fn.throttle(bind(throttledValue.assign, throttledValue), ms, options)
+            });
         },
 
-        debounce: function(ms) {
-            return this.accept(createFlowRegulator(ms, true));
+        debounce: function(ms, immediate) {
+            var debouncedValue = new this.Class();
+
+            return this.forwardTo(debouncedValue, {
+                onUpdate: Fn.debounce(bind(debouncedValue.assign, debouncedValue), ms, immediate)
+            });
         },
 
         delay: function(ms) {
@@ -30,34 +44,6 @@ JAR.register({
     }, {
         classes: [this]
     });
-
-    function createFlowRegulator(msClosed, resetOnCall) {
-        var timeoutID;
-
-        function open() {
-            timeoutID = false;
-        }
-
-        function close() {
-            if (timeoutID) {
-                window.clearTimeout(timeoutID);
-            }
-
-            timeoutID = window.setTimeout(open, msClosed);
-        }
-
-        function regulateFlow() {
-            var accept = !timeoutID;
-
-            if (resetOnCall || accept) {
-                close();
-            }
-
-            return accept;
-        }
-
-        return regulateFlow;
-    }
 
     return M$FlowRegulator;
 });
