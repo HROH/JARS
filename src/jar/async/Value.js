@@ -3,19 +3,19 @@ JAR.register({
     deps: [{
         System: ['::isSet', '::isA', '::isFunction']
     }, {
-        'jar.lang': ['Array!iterate,reduce', {
+        'jar.lang': ['Array!iterate,reduce', 'Class', {
             Object: ['!derive,iterate', '::hasOwn']
-        }, 'Class', {
-            Function: ['!modargs', '::bind', '::identity', '::negate', '::noop']
+        }, {
+            Function: ['::bind', '::identity', '::noop']
+        }, {
+            Constant: ['.', '::TRUE', '::FALSE']
         }]
     }],
     bundle: ['M$Accumulator', 'M$Decidable', 'M$FlowRegulator', 'M$Debuggable', 'M$Memorizable', 'M$Mergable', 'M$Skipable', 'M$Takeable']
-}, function(isSet, isA, isFunction, Arr, Obj, hasOwn, Class, Fn, bind, identity, negate, noop) {
+}, function(isSet, isA, isFunction, Arr, Class, Obj, hasOwn, bind, identity, noop, Constant, constantTrue, constantFalse) {
     'use strict';
 
     var async = this,
-        returnTrue = Fn.partial(identity, true),
-        returnFalse = negate(returnTrue),
         VALUE_UPDATE = 0,
         VALUE_ERROR = 1,
         VALUE_FREEZE = 2,
@@ -48,12 +48,8 @@ JAR.register({
 
 
     Value = Class('Value', Obj.extend({
-        constant: function(constantValue) {
-            return this.map(Fn.partial(identity, constantValue));
-        },
-
-        forward: function() {
-            return this.chainValue();
+        forward: function(value) {
+            return arguments.length ? this.map(Constant(value)) : this.chainValue();
         },
 
         forwardTo: function(forwardedValue, customSubscription) {
@@ -66,17 +62,15 @@ JAR.register({
                     onFreeze: bind(forwardedValue.freeze, forwardedValue)
                 }, customSubscription));
 
-            forwardedValue.onFreeze(function() {
-                value.unsubcribe(subscriptionID);
-            });
+            forwardedValue.onFreeze(bind(value.unsubscribe, value, subscriptionID));
 
             return forwardedValue;
         },
 
         chainValue: function(options) {
             var transform = options.transform || identity,
-                shouldUpdate = options.guardUpdate || returnTrue,
-                shouldFreeze = options.guardFreeze || returnFalse,
+                shouldUpdate = options.guardUpdate || constantTrue,
+                shouldFreeze = options.guardFreeze || constantFalse,
                 chainedValue = new this.Class();
 
             this.forwardTo(chainedValue, {
@@ -124,7 +118,7 @@ JAR.register({
             error: function(newError) {
                 isA(newError, Error) || (newError = new TypeError('Expected value.error() to be called with Error object'));
 
-                return this._$scheduleChange(VALUE_ERROR, Fn.partial(identity, newError));
+                return this._$scheduleChange(VALUE_ERROR, Constant(newError));
             },
 
             freeze: function() {
@@ -301,7 +295,7 @@ JAR.register({
 
     function assignValue(newValue) {
         /*jslint validthis: true */
-        return this.update(Fn.partial(identity, newValue));
+        return this.update(Constant(newValue));
     }
 
     return Value;
