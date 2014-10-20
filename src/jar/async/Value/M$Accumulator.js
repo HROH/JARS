@@ -1,7 +1,7 @@
 JAR.register({
     MID: 'jar.async.Value.M$Accumulator',
-    deps: 'jar.lang.MixIn'
-}, function(MixIn) {
+    deps: ['.M$Mappable', 'jar.lang.MixIn']
+}, function(M$Mappable, MixIn) {
     'use strict';
 
     var M$Accumulator = new MixIn('Accumulator', {
@@ -21,7 +21,9 @@ JAR.register({
             });
         }
     }, {
-        classes: [this]
+        classes: [this],
+        
+        depends: [M$Mappable]
     });
 
     return M$Accumulator;

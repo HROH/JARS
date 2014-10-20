@@ -1,11 +1,11 @@
 JAR.register({
     MID: 'jar.async.Value.M$Takeable',
-    deps: {
+    deps: ['.M$Forwardable', {
         'jar.lang': [{
             Function: ['!modargs', '::negate']
         }, 'MixIn']
-    }
-}, function(Fn, negate, MixIn) {
+    }]
+}, function(M$Forwardable, Fn, negate, MixIn) {
     'use strict';
 
     var M$Takeable = new MixIn('Takeable', {
@@ -35,7 +35,9 @@ JAR.register({
             return this.takeUntil(negate(whileFn));
         }
     }, {
-        classes: [this]
+        classes: [this],
+        
+        depends: [M$Forwardable]
     });
 
     function takeUntilZero(n) {

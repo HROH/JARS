@@ -5,14 +5,10 @@ JAR.register({
     }, {
         'jar.lang': ['Array!iterate,reduce', 'Class', {
             Object: ['!derive,iterate', '::hasOwn']
-        }, {
-            Function: ['::bind', '::identity', '::noop']
-        }, {
-            Constant: ['.', '::TRUE', '::FALSE']
-        }]
+        }, 'Function::noop', 'Constant']
     }],
-    bundle: ['M$Accumulator', 'M$Decidable', 'M$FlowRegulator', 'M$Debuggable', 'M$Memorizable', 'M$Mergable', 'M$Skipable', 'M$Takeable']
-}, function(isSet, isA, isFunction, Arr, Class, Obj, hasOwn, bind, identity, noop, Constant, constantTrue, constantFalse) {
+    bundle: ['M$Acceptable', 'M$Accumulator', 'M$Debuggable', 'M$Decidable', 'M$FlowRegulator', 'M$Forwardable', 'M$Mappable', 'M$Memorizable', 'M$Mergable', 'M$Skipable', 'M$Takeable']
+}, function(isSet, isA, isFunction, Arr, Class, Obj, hasOwn, noop, Constant) {
     'use strict';
 
     var async = this,
@@ -30,7 +26,6 @@ JAR.register({
         key: 'value'
     };
 
-
     changes[VALUE_ERROR] = {
         handle: 'onError',
 
@@ -39,65 +34,13 @@ JAR.register({
         key: 'error'
     };
 
-
     changes[VALUE_FREEZE] = {
         handle: 'onFreeze',
 
         counter: 'frozen'
     };
 
-
     Value = Class('Value', Obj.extend({
-        forward: function(value) {
-            return arguments.length ? this.map(Constant(value)) : this.chainValue();
-        },
-
-        forwardTo: function(forwardedValue, customSubscription) {
-            var value = this,
-                subscriptionID = value.subscribe(Obj.merge({
-                    onUpdate: bind(forwardedValue.assign, forwardedValue),
-
-                    onError: bind(forwardedValue.error, forwardedValue),
-
-                    onFreeze: bind(forwardedValue.freeze, forwardedValue)
-                }, customSubscription));
-
-            forwardedValue.onFreeze(bind(value.unsubscribe, value, subscriptionID));
-
-            return forwardedValue;
-        },
-
-        chainValue: function(options) {
-            var transform = options.transform || identity,
-                shouldUpdate = options.guardUpdate || constantTrue,
-                shouldFreeze = options.guardFreeze || constantFalse,
-                chainedValue = new this.Class();
-
-            this.forwardTo(chainedValue, {
-                onUpdate: function(newValue) {
-                    if (shouldUpdate(newValue)) {
-                        chainedValue.assign(transform(newValue));
-                    }
-
-                    shouldFreeze(newValue) && chainedValue.freeze();
-                }
-            });
-
-            return chainedValue;
-        },
-
-        map: function(mapFn) {
-            return this.chainValue({
-                transform: mapFn
-            });
-        },
-
-        accept: function(acceptFn) {
-            return this.chainValue({
-                guardUpdate: acceptFn
-            });
-        },
-
         $: {
             construct: function(value) {
                 this._$handles = Obj();

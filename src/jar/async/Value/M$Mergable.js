@@ -1,9 +1,9 @@
 JAR.register({
     MID: 'jar.async.Value.M$Mergable',
-    deps: {
+    deps: ['.M$Forwardable', {
         'jar.lang': ['Array!iterate', 'MixIn']
-    }
-}, function(Arr, MixIn) {
+    }]
+}, function(M$Forwardable, Arr, MixIn) {
     'use strict';
 
     var M$Mergable = new MixIn('Mergable', {
@@ -27,7 +27,9 @@ JAR.register({
             return mergedValue;
         }
     }, {
-        classes: [this]
+        classes: [this],
+        
+        depends: [M$Forwardable]
     });
 
     return M$Mergable;

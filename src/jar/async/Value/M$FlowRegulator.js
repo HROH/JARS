@@ -1,13 +1,11 @@
 JAR.register({
     MID: 'jar.async.Value.M$FlowRegulator',
-    deps: {
+    deps: ['.M$Forwardable', {
         'jar.lang': [{
             Function: ['::bind', '!guards']
         }, 'MixIn']
-    }
-},
-
-function(bind, Fn, MixIn) {
+    }]
+}, function(M$Forwardable, bind, Fn, MixIn) {
     'use strict';
 
     var M$FlowRegulator = new MixIn('FlowRegulator', {
@@ -42,7 +40,9 @@ function(bind, Fn, MixIn) {
             return delayedValue;
         }
     }, {
-        classes: [this]
+        classes: [this],
+        
+        depends: [M$Forwardable]
     });
 
     return M$FlowRegulator;
