@@ -32,7 +32,9 @@
 
                 createDependencyURLList: false
             },
-            modulesConfig = {},
+            modulesConfig = {
+                '*': {}
+            },
             ConfigurationManager, definitions;
 
         definitions = {
@@ -158,6 +160,31 @@
             }
         };
 
+        function getParentModuleConfigObject(moduleName) {
+            var Resolver = LoaderManager.Resolver,
+                parentModuleName = Resolver.getImplicitDependencyName(Resolver.isBundleRequest(moduleName) ? Resolver.extractModuleNameFromBundle(moduleName) : moduleName);
+
+            return getModuleConfigObject(parentModuleName ? Resolver.getBundleName(parentModuleName) : Resolver.getRootName());
+        }
+
+        function getModuleConfigObject(moduleName) {
+            if (!modulesConfig[moduleName]) {
+                modulesConfig[moduleName] = createConfig(getParentModuleConfigObject(moduleName));
+            }
+
+            return modulesConfig[moduleName];
+        }
+
+        function createConfig(parentConfig) {
+            function Config() {
+
+            }
+
+            Config.prototype = parentConfig;
+
+            return new Config();
+        }
+
         /**
          * @access private
          * 
@@ -185,7 +212,7 @@
          */
         function configurationManagerUpdateModuleConfig(moduleName, newConfig) {
             var System = LoaderManager.getSystem(),
-                config = modulesConfig[moduleName] = modulesConfig[moduleName] || {},
+                config = getModuleConfigObject(moduleName),
                 definition, option, value;
 
             for (option in newConfig) {
@@ -193,11 +220,12 @@
                     definition = definitions[option];
                     value = newConfig[option];
 
+                    if (System.isFunction(value)) {
+                        value = value(config[option], moduleName);
+                    }
+
                     if (System['is' + definition.check](value)) {
                         config[option] = configurationManagerTransformModuleConfig(moduleName, option, value);
-                    }
-                    else if (System.isFunction(value)) {
-                        config[option] = value;
                     }
                     else if (System.isNull(value)) {
                         delete config[option];
@@ -259,42 +287,17 @@
              * @return {*}
              */
             getModuleConfig: function(moduleName, option, defaultValue, skipUntil) {
-                var System = LoaderManager.getSystem(),
-                    origModuleName = moduleName,
-                    nextLevel = moduleName,
-                    skip = false,
-                    transformations = [],
+                var config = getModuleConfigObject(moduleName),
                     result;
 
-                do {
-                    if (!skip && modulesConfig[moduleName]) {
-                        result = modulesConfig[moduleName][option];
-
-                        if (System.isFunction(result)) {
-                            transformations.push(result);
-                            result = undef;
-                        }
-                    }
-
-                    if (nextLevel) {
-                        moduleName = LoaderManager.Resolver.getBundleName(nextLevel);
-                        nextLevel = LoaderManager.Resolver.getImplicitDependencyName(nextLevel);
-                    }
-                    else {
-                        moduleName = !LoaderManager.Resolver.isRootName(moduleName) ? LoaderManager.Resolver.getRootName() : undef;
-                    }
-
-                    if (skipUntil) {
-                        skip = skipUntil !== moduleName;
-                        skip || (skipUntil = undef);
-                    }
-
-                } while (!System.isSet(result) && moduleName);
-
-                System.isSet(result) || (result = defaultValue);
-
-                while (transformations.length) {
-                    result = configurationManagerTransformModuleConfig(origModuleName, option, transformations.pop()(result, origModuleName));
+                if (skipUntil && !hasOwnProp(config, option)) {
+                    result = ConfigurationManager.getModuleConfig(skipUntil, option, defaultValue);
+                }
+                else if (option in config) {
+                    result = config[option];
+                }
+                else {
+                    result = defaultValue;
                 }
 
                 return result;
@@ -1438,7 +1441,7 @@
                         module.enqueue(callback, errback, isBundleRequest);
                     }
                     else {
-                        callback(module.name);
+                        callback(module.getName(isBundleRequest));
                     }
                 },
                 /**
@@ -1528,14 +1531,16 @@
                     }
                     else if (module.isState(MODULE_LOADING)) {
                         if (!silent) {
-                            module.log(MSG_TIMEOUT, false, {
-                                path: SourceManager.removeScript(module.loader.context + ':' + module.name),
-                                sec: module.getConfig('timeout')
-                            });
-
                             module.setState(MODULE_WAITING);
 
-                            emptyQueue = !module.findRecover();
+                            if (!module.findRecover()) {
+                                emptyQueue = true;
+
+                                module.log(MSG_TIMEOUT, false, {
+                                    path: SourceManager.removeScript(module.loader.context + ':' + module.name),
+                                    sec: module.getConfig('timeout')
+                                });
+                            }
                         }
                     }
                     else if (module.isState(MODULE_REGISTERED) || module.isState(MODULE_LOADED_MANUAL)) {
@@ -3531,7 +3536,7 @@
                     Logger.error('No main function provided');
                 }
 
-                moduleNamesQueue.length = 0;
+                moduleNamesQueue = [];
 
                 function onImport() {
                     if (configs.supressErrors) {
@@ -3550,6 +3555,8 @@
                         main.apply(root, arguments);
                     }
                 }
+                
+                return this;
             },
             /**
              * @access public
@@ -3560,6 +3567,8 @@
              */
             $import: function(moduleData) {
                 moduleNamesQueue = moduleNamesQueue.concat(LoaderManager.Resolver.isRootName(moduleData) ? configs.bundle : moduleData);
+                
+                return this;
             },
             /**
              * @access public
@@ -3596,6 +3605,8 @@
 
                     return factory.call(this, modules);
                 });
+                
+                return this;
             },
 
             register: LoaderManager.register,
@@ -3643,6 +3654,8 @@
                         hasOwnProp(config, option) && JAR.configure(option, config[option]);
                     }
                 }
+                
+                return this;
             },
 
             getDependencyURLList: LoaderManager.getDependencyURLList,
