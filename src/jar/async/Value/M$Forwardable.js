@@ -10,14 +10,16 @@ JAR.register({
     'use strict';
 
     var M$Forwardable = new MixIn('Forwardable', {
-        forward: function() {
-            return this.forwardTo(new this.Class());
+        forward: function(customSubscription) {
+            return this.forwardTo(new this.Class(), customSubscription);
         },
 
         forwardValue: function(value) {
-            return this.forwardWithOptions({
-                transform: Constant(value)
-            });
+            return this.forwardValueTo(new this.Class(), value);
+        },
+
+        forwardWithOptions: function(options) {
+            return this.forwardWithOptionsTo(new this.Class(), options);
         },
 
         forwardTo: function(forwardedValue, customSubscription) {
@@ -36,16 +38,15 @@ JAR.register({
         },
 
         forwardValueTo: function(forwardedValue, value) {
-            return this.forwardTo(forwardedValue, {
-                onUpdate: Constant(value)
+            return this.forwardWithOptionsTo(forwardedValue, {
+                transform: Constant(value)
             });
         },
 
-        forwardWithOptions: function(options) {
+        forwardWithOptionsTo: function(forwardedValue, options) {
             var transform = options.transform || identity,
                 shouldUpdate = options.guardUpdate || constantTrue,
-                shouldFreeze = options.guardFreeze || constantFalse,
-                forwardedValue = new this.Class();
+                shouldFreeze = options.guardFreeze || constantFalse;
 
             this.forwardTo(forwardedValue, {
                 onUpdate: function(newValue) {
