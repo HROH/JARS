@@ -1,11 +1,11 @@
 JAR.register({
-    MID: 'jar.async.Value.M$Skipable',
-    deps: ['System::isNumber', {
+    MID: 'jar.async.Value.M$Skippable',
+    deps: ['.M$Acceptable', 'System::isNumber', {
         'jar.lang': [{
             Function: ['!modargs', '::negate']
         }, 'MixIn']
     }]
-}, function(isNumber, Fn, negate, MixIn) {
+}, function(M$Acceptable, isNumber, Fn, negate, MixIn) {
     'use strict';
 
     var M$Skipable = new MixIn('Skipable', {
@@ -29,7 +29,9 @@ JAR.register({
             return this.skipUntil(negate(whileFn));
         }
     }, {
-        classes: [this]
+        classes: [this],
+        
+        depends: [M$Acceptable]
     });
 
     function skipUntilZero(n) {

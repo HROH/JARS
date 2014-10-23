@@ -7,7 +7,7 @@ JAR.register({
             Object: ['!derive,iterate', '::hasOwn']
         }, 'Function::noop', 'Constant']
     }],
-    bundle: ['M$Acceptable', 'M$Accumulator', 'M$Debuggable', 'M$Decidable', 'M$FlowRegulator', 'M$Forwardable', 'M$Mappable', 'M$Memorizable', 'M$Mergable', 'M$Skipable', 'M$Takeable']
+    bundle: ['M$Acceptable', 'M$Accumulator', 'M$Debuggable', 'M$Decidable', 'M$FlowRegulator', 'M$Forwardable', 'M$Mappable', 'M$Memorizable', 'M$Mergable', 'M$Skippable', 'M$Takeable']
 }, function(TaskRunner, isSet, isA, isFunction, Arr, Class, Obj, hasOwn, noop, Constant) {
     'use strict';
 
