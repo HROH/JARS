@@ -1,7 +1,7 @@
 JAR.register({
     MID: 'jar.async',
     deps: '.lang.Array',
-    bundle: ['Deferred', 'Importer', 'Number', 'Promise', 'Request', 'Value.*']
+    bundle: ['Deferred', 'Importer', 'Number', 'Promise', 'Request', 'TaskRunner', 'Value.*']
 }, function(Arr) {
     'use strict';
 

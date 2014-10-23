@@ -1,6 +1,6 @@
 JAR.register({
     MID: 'jar.async.Value',
-    deps: [{
+    deps: ['.TaskRunner', {
         System: ['::isSet', '::isA', '::isFunction']
     }, {
         'jar.lang': ['Array!iterate,reduce', 'Class', {
@@ -8,7 +8,7 @@ JAR.register({
         }, 'Function::noop', 'Constant']
     }],
     bundle: ['M$Acceptable', 'M$Accumulator', 'M$Debuggable', 'M$Decidable', 'M$FlowRegulator', 'M$Forwardable', 'M$Mappable', 'M$Memorizable', 'M$Mergable', 'M$Skipable', 'M$Takeable']
-}, function(isSet, isA, isFunction, Arr, Class, Obj, hasOwn, noop, Constant) {
+}, function(TaskRunner, isSet, isA, isFunction, Arr, Class, Obj, hasOwn, noop, Constant) {
     'use strict';
 
     var async = this,
@@ -42,10 +42,9 @@ JAR.register({
 
     Value = Class('Value', Obj.extend({
         $: {
-            construct: function(value) {
+            construct: function(value, changeRunner) {
                 this._$handles = Obj();
-                // TODO implement with taskqueue
-                this._$scheduledChanges = [];
+                this._$changeRunner = isA(changeRunner, TaskRunner) ? changeRunner : new TaskRunner();
 
                 arguments.length && this.assign(value);
             },
@@ -73,7 +72,7 @@ JAR.register({
                     subscriptionID = false,
                     onFreeze = subscription.onFreeze;
 
-                async.wait(value.$proxy, 0, value, function delayInitialCall() {
+                value._$changeRunner.isRunning() || async.wait(value.$proxy, 0, value, function delayInitialCall() {
                     Arr.each(changes, function invokeHandleInitial(change) {
                         if (value['_$' + change.counter]) {
                             value._$attemptInvokeHandle(subscription, change.handle, value['_$' + change.key]);
@@ -130,60 +129,41 @@ JAR.register({
             handlesCount: 0,
 
             nextHandleID: 0,
-            // TODO implement with taskqueue
-            scheduledChanges: null,
-            // TODO implement with taskqueue
-            changesScheduled: false,
-            // TODO implement with taskqueue
+
+            changeRunner: null,
+
             scheduleChange: function(changeType, changer) {
-                this._$scheduledChanges.push({
-                    type: changeType,
+                var value = this,
+                    $proxy = value.$proxy;
 
-                    fn: changer
+                value._$changeRunner.schedule(function changeTask() {
+                    $proxy(value, function proxiedChange() {
+                        var value = this,
+                            change = changes[changeType],
+                            handleMethod = change.handle,
+                            key = change.key,
+                            currentValue = value['_$' + key],
+                            newValue;
+
+                        if (!this._$frozen) {
+                            newValue = changer(currentValue);
+
+                            value._$handles.each(function forwardValueToHandle(handle) {
+                                value._$attemptInvokeHandle(handle, handleMethod, newValue);
+                            });
+
+                            if (changeType === VALUE_ERROR && !value._$handlesCount) {
+                                value._$onUnhandledError(newValue);
+                            }
+
+                            key && (value['_$' + key] = newValue);
+
+                            value['_$' + change.counter]++;
+                        }
+                    });
                 });
-
-                //TODO improve asynchronous handling
-                if (!this._$changesScheduled) {
-                    async.wait(this.$proxy, 0, this, this._$doChanges);
-
-                    this._$changesScheduled = true;
-                }
 
                 return this;
-            },
-            // TODO implement with taskqueue
-            doChanges: function() {
-                var value = this,
-                    scheduledChanges = value._$scheduledChanges;
-
-                while (scheduledChanges.length && !value._$frozen) {
-                    this._$doChange(scheduledChanges.shift());
-                }
-
-                this._$changesScheduled = false;
-            },
-            // TODO implement with taskqueue
-            doChange: function(scheduledChange) {
-                var value = this,
-                    changer = scheduledChange.fn,
-                    changeType = scheduledChange.type,
-                    change = changes[changeType],
-                    handleMethod = change.handle,
-                    key = change.key,
-                    currentValue = value['_$' + key],
-                    newValue = changer(currentValue);
-
-                value._$handles.each(function forwardValueToHandle(handle) {
-                    value._$attemptInvokeHandle(handle, handleMethod, newValue);
-                });
-
-                if (changeType === VALUE_ERROR && !value._$handlesCount) {
-                    value._$onUnhandledError(newValue);
-                }
-
-                key && (value['_$' + key] = newValue);
-
-                value['_$' + change.counter]++;
             },
 
             attemptInvokeHandle: function(handle, handleType, value) {
