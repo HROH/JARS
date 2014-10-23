@@ -9,10 +9,11 @@ JAR.register({
     var M$Mergable = new MixIn('Mergable', {
         merge: function() {
             var values = Arr.from(arguments),
-                toFreeze = values.length,
-                mergedValue = new this.Class();
+                mergedValue = new this.Class(),
+                toFreeze;
 
             values.unshift(this);
+            toFreeze = values.length;
 
             function onFreeze() {
                 --toFreeze || mergedValue.freeze();
@@ -28,7 +29,7 @@ JAR.register({
         }
     }, {
         classes: [this],
-        
+
         depends: [M$Forwardable]
     });
 
