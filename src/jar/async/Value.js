@@ -1,6 +1,6 @@
 JAR.register({
     MID: 'jar.async.Value',
-    deps: ['.TaskRunner', {
+    deps: ['.Timer', {
         System: ['::isSet', '::isA', '::isFunction']
     }, {
         'jar.lang': ['Array!iterate,reduce', 'Class', {
@@ -8,11 +8,10 @@ JAR.register({
         }, 'Function::noop', 'Constant']
     }],
     bundle: ['M$Acceptable', 'M$Accumulator', 'M$Debuggable', 'M$Decidable', 'M$FlowRegulator', 'M$Forwardable', 'M$Mappable', 'M$Memorizable', 'M$Mergable', 'M$Skippable', 'M$Takeable']
-}, function(TaskRunner, isSet, isA, isFunction, Arr, Class, Obj, hasOwn, noop, Constant) {
+}, function(Timer, isSet, isA, isFunction, Arr, Class, Obj, hasOwn, noop, Constant) {
     'use strict';
 
-    var async = this,
-        VALUE_UPDATE = 0,
+    var VALUE_UPDATE = 0,
         VALUE_ERROR = 1,
         VALUE_FREEZE = 2,
         changes = [],
@@ -42,9 +41,9 @@ JAR.register({
 
     Value = Class('Value', Obj.extend({
         $: {
-            construct: function(value, changeRunner) {
+            construct: function(value, changeTimer) {
                 this._$handles = Obj();
-                this._$changeRunner = isA(changeRunner, TaskRunner) ? changeRunner : new TaskRunner();
+                this._$changeTimer = isA(changeTimer, Timer) ? changeTimer : new Timer();
 
                 arguments.length && this.assign(value);
             },
@@ -69,14 +68,18 @@ JAR.register({
 
             subscribe: function(subscription) {
                 var value = this,
+                    $proxy = value.$proxy,
                     subscriptionID = false,
-                    onFreeze = subscription.onFreeze;
+                    onFreeze = subscription.onFreeze,
+                    changeTimer = value._$changeTimer;
 
-                value._$changeRunner.isRunning() || async.wait(value.$proxy, 0, value, function delayInitialCall() {
-                    Arr.each(changes, function invokeHandleInitial(change) {
-                        if (value['_$' + change.counter]) {
-                            value._$attemptInvokeHandle(subscription, change.handle, value['_$' + change.key]);
-                        }
+                changeTimer.isRunning() || changeTimer.schedule(function scheduleInit() {
+                    $proxy(value, function proxiedInit() {
+                        Arr.each(changes, function invokeHandleInitial(change) {
+                            if (value['_$' + change.counter]) {
+                                value._$attemptInvokeHandle(subscription, change.handle, value['_$' + change.key]);
+                            }
+                        });
                     });
                 });
 
@@ -130,13 +133,13 @@ JAR.register({
 
             nextHandleID: 0,
 
-            changeRunner: null,
+            changeTimer: null,
 
             scheduleChange: function(changeType, changer) {
                 var value = this,
                     $proxy = value.$proxy;
 
-                value._$changeRunner.schedule(function changeTask() {
+                value._$changeTimer.schedule(function changeTask() {
                     $proxy(value, function proxiedChange() {
                         var value = this,
                             change = changes[changeType],
