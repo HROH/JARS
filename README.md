@@ -169,7 +169,7 @@ You can customize the following options for your modules:
 
  * **config {Object}** (options for configuring a module)  
  You can read the config using the <code>"System!"</code>-plugin-interceptor in your dependencies.
- It will give you a config-function that you can ask for the option you need.
+ It will give you a config-object that you can access for the option you need.
 
  * **dirPath {String}** (path to the module)  
  By default the dirPath will be created by using the name of the module.

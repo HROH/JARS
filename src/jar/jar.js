@@ -33,7 +33,9 @@
                 createDependencyURLList: false
             },
             modulesConfig = {
-                '*': {}
+                '*': {
+                    config: {}
+                }
             },
             ConfigurationManager, definitions;
 
@@ -67,7 +69,7 @@
                  * @return {Object}
                  */
                 transform: function configTransform(config, moduleName) {
-                    var oldConfig = modulesConfig[moduleName].config || {},
+                    var oldConfig = modulesConfig[moduleName].config,
                         option;
 
                     for (option in config) {
@@ -168,8 +170,13 @@
         }
 
         function getModuleConfigObject(moduleName) {
+            var parentModuleConfigObject, moduleConfigObject;
+
             if (!modulesConfig[moduleName]) {
-                modulesConfig[moduleName] = createConfig(getParentModuleConfigObject(moduleName));
+                parentModuleConfigObject = getParentModuleConfigObject(moduleName);
+
+                moduleConfigObject = modulesConfig[moduleName] = createConfig(parentModuleConfigObject);
+                moduleConfigObject.config = createConfig(parentModuleConfigObject.config);
             }
 
             return modulesConfig[moduleName];
@@ -2948,9 +2955,7 @@
             $plugIn: function(pluginRequest) {
                 var module = LoaderManager.loader.getModule(pluginRequest.listener);
 
-                pluginRequest.success(function configGetter(option) {
-                    return (module.getConfig('config') || {})[option];
-                });
+                pluginRequest.success(module.getConfig('config'));
             }
         };
 
@@ -3183,7 +3188,7 @@
          * @return {Boolean}
          */
         function comparePriority(level) {
-            return getPriority(level) >= getPriority(config('level'));
+            return getPriority(level) >= getPriority(config.level);
         }
 
         /**
@@ -3197,7 +3202,7 @@
          * @return {Boolean}
          */
         function compareDebugContext(context) {
-            var debugContext = config('context'),
+            var debugContext = config.context,
                 includeContext, excludeContext;
 
             if (System.isObject(debugContext)) {
@@ -3281,10 +3286,10 @@
             var logger = this,
                 context = logger.context,
                 options = logger.options,
-                currentDebugger = getActiveDebugger(options.mode || config('mode')),
+                currentDebugger = getActiveDebugger(options.mode || config.mode),
                 debuggerMethod = currentDebugger[level] ? level : 'log';
 
-            if (isDebuggingEnabled(options.debug || config('debug'), level, context) && System.isFunction(currentDebugger[debuggerMethod])) {
+            if (isDebuggingEnabled(options.debug || config.debug, level, context) && System.isFunction(currentDebugger[debuggerMethod])) {
                 message = options.tpl[message] || message;
 
                 if (System.isString(message) && (System.isObject(values) || System.isArray(values))) {
@@ -3388,7 +3393,7 @@
 
             if (!hasOwnProp(debuggers, mode) && System.isFunction(debuggerSetup)) {
                 debuggers[mode] = debuggerSetup(function debuggerConfigGetter(option) {
-                    return (config(modeConfig) || {})[option];
+                    return (config[modeConfig] || {})[option];
                 });
             }
         };
@@ -3555,7 +3560,7 @@
                         main.apply(root, arguments);
                     }
                 }
-                
+
                 return this;
             },
             /**
@@ -3567,7 +3572,7 @@
              */
             $import: function(moduleData) {
                 moduleNamesQueue = moduleNamesQueue.concat(LoaderManager.Resolver.isRootName(moduleData) ? configs.bundle : moduleData);
-                
+
                 return this;
             },
             /**
@@ -3605,7 +3610,7 @@
 
                     return factory.call(this, modules);
                 });
-                
+
                 return this;
             },
 
@@ -3654,7 +3659,7 @@
                         hasOwnProp(config, option) && JAR.configure(option, config[option]);
                     }
                 }
-                
+
                 return this;
             },
 

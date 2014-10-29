@@ -241,7 +241,7 @@ JAR.register({
      * @return {Object}
      */
     function getNativeType(typeString) {
-        var Type = nativeTypes[typeString] || (config('allowProtoOverride') ? window[typeString] : nativeTypeSandbox.add(typeString));
+        var Type = nativeTypes[typeString] || (config.allowProtoOverride ? window[typeString] : nativeTypeSandbox.add(typeString));
 
         if (!nativeTypes[typeString]) {
 
