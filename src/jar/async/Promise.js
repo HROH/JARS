@@ -409,7 +409,7 @@ JAR.register({
             if (value === promise) {
                 errorMessage = promiseHash + ' can\'t be resolved with itself!';
             }
-            else if (config('checkInfiniteRecursion') && (promise._$hasPromiseInChain(value) || promise.$proxy(value, proxiedHasPromiseInChain, [promise]))) {
+            else if (config.checkInfiniteRecursion && (promise._$hasPromiseInChain(value) || promise.$proxy(value, proxiedHasPromiseInChain, [promise]))) {
                 errorMessage = 'Infinite recursion between ' + promiseHash + ' and ' + value.getHash();
             }
         }
