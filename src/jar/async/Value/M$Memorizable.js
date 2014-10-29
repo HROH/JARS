@@ -1,7 +1,7 @@
 JAR.register({
     MID: 'jar.async.Value.M$Memorizable',
-    deps: ['.M$Accumulator', '.M$Skipable', 'jar.lang.MixIn']
-}, function(M$Accumulator, M$Skipable, MixIn) {
+    deps: ['.M$Accumulator', '.M$Skippable', 'jar.lang.MixIn']
+}, function(M$Accumulator, M$Skippable, MixIn) {
     'use strict';
 
     var M$Memorizable = new MixIn('Memorizable', {
@@ -29,7 +29,7 @@ JAR.register({
     }, {
         classes: [this],
 
-        depends: [M$Accumulator, M$Skipable]
+        depends: [M$Accumulator, M$Skippable]
     });
 
 

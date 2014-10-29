@@ -8,7 +8,7 @@ JAR.register({
 }, function(M$Acceptable, isNumber, Fn, negate, MixIn) {
     'use strict';
 
-    var M$Skipable = new MixIn('Skipable', {
+    var M$Skippable = new MixIn('Skippable', {
         skip: function(n) {
             isNumber(n) || (n = 0);
 
@@ -38,5 +38,5 @@ JAR.register({
         return n-- === 0;
     }
 
-    return M$Skipable;
+    return M$Skippable;
 });
