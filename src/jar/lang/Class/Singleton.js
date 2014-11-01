@@ -18,7 +18,7 @@ JAR.register({
         },
 
         createSingletonSubClass: function(name, proto, staticProperties, args) {
-            return Singleton(name, proto, staticProperties, args).extendz(this);
+            return toSingleton(ClassFactory(name, proto, staticProperties, args).extendz(this));
         }
     });
 
