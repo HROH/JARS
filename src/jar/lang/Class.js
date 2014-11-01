@@ -466,6 +466,10 @@ JAR.register({
             return this === Class || this.isSubClassOf(Class);
         },
 
+        isInstance: function(instance) {
+            return isA(instance, this);
+        },
+
         getModule: function() {
             return useModule(this.getModuleName());
         },
