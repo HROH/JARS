@@ -1,7 +1,9 @@
 JAR.register({
     MID: 'jar.lang.Interface',
-    deps: ['System', 'jar', '.Class', '.Array!check,derive,iterate']
-}, function(System, jar, Class, Arr) {
+    deps: [{
+        System: ['Logger', '::isFunction', '::isNumber']
+    }, 'jar::getCurrentModuleName', '.Class', '.Array!check,derive,iterate']
+}, function(Logger, isFunction, isNumber, getCurrentModuleName, Class, Arr) {
     'use strict';
 
     var interfaceTemplates = [],
@@ -33,7 +35,7 @@ JAR.register({
             construct: function(interfaceName, methods) {
                 this._$name = interfaceName;
                 this._$methods = Arr.from(methods);
-                this._$logger = new System.Logger('Interface "#<' + jar.getCurrentModuleName() + ':' + interfaceName + '>"', {
+                this._$logger = new Logger('Interface "#<' + getCurrentModuleName() + ':' + interfaceName + '>"', {
                     tpl: interfaceTemplates
                 });
             },
@@ -41,7 +43,7 @@ JAR.register({
             extendz: function(superInterface) {
                 var iface = this;
 
-                if (System.isA(superInterface, Interface)) {
+                if (Interface.isInstance(superInterface)) {
                     iface.$proxy(superInterface, proxiedGetMethods).each(iface._$addMethod, iface);
                 }
 
@@ -56,17 +58,20 @@ JAR.register({
                 var logger = this._$logger,
                     methods = this._$methods,
                     isImplemented = false,
+                    isImplementorClass = Class.isClass(implementor),
+                    isImplementorInstance = !isImplementorClass && Class.isInstance(implementor),
                     objectToCheck, notImplementedMethods;
 
                 if (implementor) {
-                    objectToCheck = Class.isClass(implementor) ? implementor.prototype : (checkAny || Class.isInstance(implementor)) ? implementor : null;
+                    objectToCheck = isImplementorClass ? implementor.prototype : (checkAny || isImplementorInstance) ? implementor : null;
 
                     if (objectToCheck) {
                         notImplementedMethods = methods.filter(isMethodNotImplemented, objectToCheck);
 
                         if (notImplementedMethods.length) {
                             logger.error(IMPLEMENTED_METHODS_MISSING, {
-                                impl: (Class.isClass(implementor) || Class.isInstance(implementor)) ? implementor.getHash() : implementor,
+                                impl: (isImplementorClass || isImplementorInstance) ? implementor.getHash() : implementor,
+                                
                                 missingMethods: notImplementedMethods.map(transformMethodData).join('", "')
                             });
                         }
@@ -89,6 +94,7 @@ JAR.register({
         isImplementedBy: function(interfaces, implementor, checkAny) {
             return Arr.every(interfaces, implementzInterface, {
                 impl: implementor,
+                
                 any: checkAny
             });
         }
@@ -109,7 +115,7 @@ JAR.register({
         var methodToCheck = this[methodData[0]],
             args = methodData[1];
 
-        return !System.isFunction(methodToCheck) || (System.isNumber(args) && !(args === methodToCheck.length || args === methodToCheck.arity));
+        return !isFunction(methodToCheck) || (isNumber(args) && !(args === methodToCheck.length || args === methodToCheck.arity));
     }
 
     function transformMethodData(methodData) {
@@ -121,10 +127,6 @@ JAR.register({
         return iface.isImplementedBy(this.impl, this.any);
     }
 
-    function isInterface(iface) {
-        return System.isA(iface, Interface);
-    }
-
     /**
      * Checks whether any method of InterFace.methods is defined in the Class
      * Returns the Class if all methods exist false otherwise
@@ -133,12 +135,12 @@ JAR.register({
      * 
      * @return Object
      */
-    function implementz() {
+    Class.addStatic('implementz', function() {
         /*jslint validthis: true */
         var isImplemented = false,
             currentClass = this,
 
-            interfaces = Arr.filter(arguments, isInterface);
+            interfaces = Arr.filter(arguments, Interface.isInstance, Interface);
 
         if (interfaces.length) {
             isImplemented = Interface.isImplementedBy(interfaces, currentClass);
@@ -147,10 +149,8 @@ JAR.register({
             currentClass.logger.warn('There is no interface given to compare with!');
         }
 
-        return isImplemented && this;
-    }
-
-    Class.addStatic('implementz', implementz);
+        return isImplemented && currentClass;
+    });
 
     return Interface;
 });

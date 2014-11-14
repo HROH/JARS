@@ -1,17 +1,17 @@
 JAR.register({
     MID: 'jar.lang.MixIn',
     deps: [{
-        System: ['::isA', '::isArray', 'Logger']
+        System: ['::isArray', 'Logger']
     }, 'jar', {
         '.Class': ['.', '::isClass', '::isInstance']
     }, '.Object', '.Array!check,derive,iterate', '.Function!modargs']
-}, function(isA, isArray, Logger, jar, Class, isClass, isInstance, Obj, Arr, Fn) {
+}, function(isArray, Logger, jar, Class, isClass, isInstance, Obj, Arr, Fn) {
     'use strict';
 
     var RECEIVER_MISSING = 0,
         RECEIVER_NOT_ALLOWED = 1,
         mixinTemplates = [],
-        MixIn, isMixIn;
+        MixIn;
 
     mixinTemplates[RECEIVER_MISSING] = 'There is no receiver given!';
     mixinTemplates[RECEIVER_NOT_ALLOWED] = 'The given receiver "${rec}" is not part or instance of the allowed Classes!';
@@ -29,7 +29,7 @@ JAR.register({
                 this._$toMix = Obj.from(toMix);
                 this._$allowAny = options.allowAny;
                 this._$allowedClasses = Arr.filter(isArray(allowedClasses) ? allowedClasses : [allowedClasses], isClass);
-                this._$neededMixIns = Arr.filter(options.depends || [], isMixIn);
+                this._$neededMixIns = Arr.filter(options.depends || [], MixIn.isInstance, MixIn);
                 this._$destructor = options.destructor;
                 this._$logger = new Logger('MixIn "#<' + jar.getCurrentModuleName() + ':' + mixInName + '>"', {
                     tpl: mixinTemplates
@@ -98,12 +98,10 @@ JAR.register({
             destructor: null,
 
             isReceiverAllowed: function(receiver, allowedClass) {
-                return receiver === allowedClass || allowedClass.isSuperClassOf(receiver) || isA(receiver, allowedClass);
+                return receiver === allowedClass || allowedClass.isSuperClassOf(receiver) || allowedClass.isInstance(receiver);
             }
         }
     });
-
-    isMixIn = Fn.partial(isA, null, MixIn);
 
     function mixIntoReceiver(mixIn) {
         /*jslint validthis: true */
@@ -116,7 +114,7 @@ JAR.register({
      * as soon as this module is loaded
      */
     Class.addStatic('mixin', function() {
-        Arr.filter(arguments, isMixIn).each(mixIntoReceiver, this);
+        Arr.filter(arguments, MixIn.isInstance, MixIn).each(mixIntoReceiver, this);
 
         return this;
     });
