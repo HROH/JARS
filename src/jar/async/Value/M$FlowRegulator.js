@@ -2,7 +2,7 @@ JAR.register({
     MID: 'jar.async.Value.M$FlowRegulator',
     deps: ['.M$Forwardable', {
         'jar.lang': [{
-            Function: ['::bind', '!guards']
+            Function: ['::bind', '!flow']
         }, 'MixIn']
     }]
 }, function(M$Forwardable, bind, Fn, MixIn) {
@@ -13,7 +13,7 @@ JAR.register({
             var throttledValue = new this.Class();
 
             return this.forwardTo(throttledValue, {
-                onUpdate: Fn.throttle(bind(throttledValue.assign, throttledValue), ms, options)
+                onUpdate: Fn.throttle(bindAssign(throttledValue), ms, options)
             });
         },
 
@@ -21,29 +21,28 @@ JAR.register({
             var debouncedValue = new this.Class();
 
             return this.forwardTo(debouncedValue, {
-                onUpdate: Fn.debounce(bind(debouncedValue.assign, debouncedValue), ms, immediate)
+                onUpdate: Fn.debounce(bindAssign(debouncedValue), ms, immediate)
             });
         },
 
         delay: function(ms) {
-            var value = this,
-                delayedValue = new value.Class();
+            var delayedValue = new this.Class();
 
-            value.forwardTo(delayedValue, {
-                onUpdate: function(newValue) {
-                    window.setTimeout(function() {
-                        delayedValue.assign(newValue);
-                    }, ms);
-                }
+            this.forwardTo(delayedValue, {
+                onUpdate: Fn.delay(bindAssign(delayedValue), ms)
             });
 
             return delayedValue;
         }
     }, {
         classes: [this],
-        
+
         depends: [M$Forwardable]
     });
+
+    function bindAssign(value) {
+        return bind(value.assign, value);
+    }
 
     return M$FlowRegulator;
 });
