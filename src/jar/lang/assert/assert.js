@@ -1,6 +1,7 @@
 JAR.register({
     MID: 'jar.lang.assert',
-    deps: 'System'
+    deps: 'System',
+    bundle: ['Type']
 }, function(System) {
     'use strict';
 
@@ -15,12 +16,6 @@ JAR.register({
             throw new ErrorClass(message);
         }
     }
-
-    assert.isFunction = function(fn, message) {
-        assert(System.isFunction(fn), message, {
-            error: TypeError
-        });
-    };
 
     assert.isSet = function(val, message) {
         assert(System.isSet(val), message, {

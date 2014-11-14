@@ -1,7 +1,9 @@
 JAR.register({
     MID: 'jar.lang.Array.Array-iterate',
-    deps: ['..', '..assert']
-}, function(lang, assert) {
+    deps: ['..', {
+        '..assert': ['::isSet', 'Type::isFunction']
+    }]
+}, function(lang, assertIsSet, assertIsFunction) {
     'use strict';
 
     var ArrayCopy = this,
@@ -18,9 +20,9 @@ JAR.register({
                 idx = 0,
                 len = arr.length >>> 0;
 
-            assert.isSet(arr, assertionMessage);
+            assertIsSet(arr, assertionMessage);
 
-            assert.isFunction(callback, MSG_NO_FUNCTION);
+            assertIsFunction(callback, MSG_NO_FUNCTION);
 
             while (idx < len) {
                 if (idx in arr) {

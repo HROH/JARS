@@ -1,7 +1,9 @@
 JAR.register({
     MID: 'jar.lang.Array.Array-check',
-    deps: ['..', '..assert', '..Object!derive']
-}, function(lang, assert, Obj) {
+    deps: ['..', {
+        '..assert': ['::isSet', 'Type::isFunction']
+    }, '..Object!derive']
+}, function(lang, assertIsSet, assertIsFunction, Obj) {
     'use strict';
 
     var ArrayCopy = this,
@@ -22,9 +24,9 @@ JAR.register({
                 idx = 0,
                 result;
 
-            assert.isSet(arr, assertionMessage);
+            assertIsSet(arr, assertionMessage);
 
-            assert.isFunction(callback, MSG_NO_FUNCTION);
+            assertIsFunction(callback, MSG_NO_FUNCTION);
 
             for (; idx < len; idx++) {
                 if (idx in arr) {

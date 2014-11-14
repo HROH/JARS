@@ -1,8 +1,10 @@
 JAR.register({
     MID: 'jar.lang.Array',
-    deps: ['System', '.assert'],
+    deps: {
+        '.assert': ['::isSet', 'Type::isFunction']
+    },
     bundle: ['Array-check', 'Array-derive', 'Array-find', 'Array-index', 'Array-iterate', 'Array-manipulate', 'Array-reduce']
-}, function(System, assert) {
+}, function(assertIsSet, assertIsFunction) {
     'use strict';
 
     /**
@@ -44,10 +46,10 @@ JAR.register({
         var index = 0,
             newArray, len;
 
-        assert.isSet(arrayLike, 'Array.from requires an array-like object - not null or undefined');
+        assertIsSet(arrayLike, 'Array.from requires an array-like object - not null or undefined');
 
         if (mapFn) {
-            assert.isFunction(mapFn, 'Array.from: when provided, the second argument must be a function');
+            assertIsFunction(mapFn, 'Array.from: when provided, the second argument must be a function');
         }
 
         len = arrayLike.length >>> 0;

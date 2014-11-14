@@ -1,7 +1,9 @@
 JAR.register({
     MID: 'jar.lang.Array.Array-reduce',
-    deps: ['..', '..assert']
-}, function(lang, assert) {
+    deps: ['..', {
+        '..assert': ['.', '::isSet', 'Type::isFunction']
+    }]
+}, function(lang, assert, assertIsSet, assertIsFunction) {
     'use strict';
 
     var ArrayCopy = this,
@@ -24,9 +26,9 @@ JAR.register({
                 idx = reduceRight ? len - 1 : 0,
                 ret;
 
-            assert.isSet(arr, assertionMessage);
+            assertIsSet(arr, assertionMessage);
 
-            assert.isFunction(callback, MSG_NO_FUNCTION);
+            assertIsFunction(callback, MSG_NO_FUNCTION);
 
             if (arguments.length > 1) {
                 ret = initialValue;

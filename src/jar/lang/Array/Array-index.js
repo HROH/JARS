@@ -1,7 +1,7 @@
 JAR.register({
     MID: 'jar.lang.Array.Array-index',
-    deps: ['..', '..assert', '..Object!derive', '.Array-find']
-}, function(lang, assert, Obj, arrayFind) {
+    deps: ['..', '..assert::isSet', '..Object!derive', '.Array-find']
+}, function(lang, assertIsSet, Obj, arrayFind) {
     'use strict';
 
     var ArrayCopy = lang.extendNativeType('Array', {
@@ -19,7 +19,7 @@ JAR.register({
             findIndexMethod = arrayFind['find' + (last ? 'Last' : '') + 'Index'];
 
         return function(searchElement, fromIndex) {
-            assert.isSet(this, assertionMessage);
+            assertIsSet(this, assertionMessage);
 
             return findIndexMethod(this, equalsSearchElement, searchElement, fromIndex);
         };

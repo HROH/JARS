@@ -1,7 +1,9 @@
 JAR.register({
     MID: 'jar.lang.Array.Array-derive',
-    deps: ['..', '..assert', '.!iterate', '..Object!derive']
-}, function(lang, assert, Arr, Obj) {
+    deps: ['..', {
+        '..assert': ['::isSet', 'Type::isFunction']
+    }, '.!iterate', '..Object!derive']
+}, function(lang, assertIsSet, assertIsFunction, Arr, Obj) {
     'use strict';
 
     var forEach = Arr.forEach,
@@ -31,9 +33,9 @@ JAR.register({
             var arr = this,
                 ret = new Arr();
 
-            assert.isSet(arr, assertionMessage);
+            assertIsSet(arr, assertionMessage);
 
-            assert.isFunction(callback, MSG_NO_FUNCTION);
+            assertIsFunction(callback, MSG_NO_FUNCTION);
 
             forEach(arr, derive(context, callback, ret));
 
