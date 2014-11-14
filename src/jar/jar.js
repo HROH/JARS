@@ -22,6 +22,37 @@
         };
     })();
 
+    function objectEach(obj, callback) {
+        var property;
+
+        for (property in obj) {
+            if (hasOwnProp(obj, property)) {
+                if (callback(obj[property], property)) {
+                    break;
+                }
+            }
+        }
+    }
+
+    function objectMerge(dest, source) {
+        objectEach(source, function mergeValue(value, key) {
+            dest[key] = value;
+        });
+
+        return dest;
+    }
+
+    function arrayEach(array, callback) {
+        var index = 0,
+            length = array.length;
+
+        for (; index < length; index++) {
+            if (callback(array[index], index)) {
+                break;
+            }
+        }
+    }
+
     ConfigurationManager = (function configurationManagerSetup() {
         var MIN_TIMEOUT = 0.5,
             STRING_CHECK = 'String',
@@ -69,16 +100,7 @@
                  * @return {Object}
                  */
                 transform: function configTransform(config, moduleName) {
-                    var oldConfig = modulesConfig[moduleName].config,
-                        option;
-
-                    for (option in config) {
-                        if (hasOwnProp(config, option)) {
-                            oldConfig[option] = config[option];
-                        }
-                    }
-
-                    return oldConfig;
+                    return objectMerge(modulesConfig[moduleName].config, config);
                 }
             },
 
@@ -119,16 +141,9 @@
                  * @return {Object}
                  */
                 transform: function recoverTransform(recoverConfig, moduleName) {
-                    var recover = {},
-                        option;
-
                     // create a copy of the recover-config
                     // because it should update for every module independendly
-                    for (option in recoverConfig) {
-                        if (hasOwnProp(recoverConfig, option)) {
-                            (recover[option] = recoverConfig[option]);
-                        }
-                    }
+                    var recover = objectMerge({}, recoverConfig);
 
                     recover.restrict = moduleName;
                     // if no next recover-config is given set it explicitly
@@ -220,12 +235,11 @@
         function configurationManagerUpdateModuleConfig(moduleName, newConfig) {
             var System = LoaderManager.getSystem(),
                 config = getModuleConfigObject(moduleName),
-                definition, option, value;
+                definition;
 
-            for (option in newConfig) {
-                if (hasOwnProp(newConfig, option) && hasOwnProp(definitions, option)) {
+            objectEach(newConfig, function updateConfig(value, option) {
+                if (hasOwnProp(definitions, option)) {
                     definition = definitions[option];
-                    value = newConfig[option];
 
                     if (System.isFunction(value)) {
                         value = value(config[option], moduleName);
@@ -238,7 +252,7 @@
                         delete config[option];
                     }
                 }
-            }
+            });
         }
 
         /**
@@ -261,23 +275,19 @@
              */
             setModuleConfig: function(newConfig) {
                 var System = LoaderManager.getSystem(),
-                    index = 0,
-                    length, modules;
+                    modules;
 
                 if (System.isArray(newConfig)) {
-                    length = newConfig.length;
-
-                    for (; index < length; index++) {
-                        ConfigurationManager.setModuleConfig(newConfig[index]);
-                    }
+                    arrayEach(newConfig, function setModuleConfig(config) {
+                        ConfigurationManager.setModuleConfig(config);
+                    });
                 }
                 else if (System.isObject(newConfig)) {
                     modules = newConfig.restrict ? LoaderManager.Resolver.resolve(newConfig.restrict) : [LoaderManager.Resolver.getRootName()];
-                    length = modules.length;
 
-                    for (; index < length; index++) {
-                        configurationManagerUpdateModuleConfig(modules[index], newConfig);
-                    }
+                    arrayEach(modules, function updateModuleConfig(moduleName) {
+                        configurationManagerUpdateModuleConfig(moduleName, newConfig);
+                    });
                 }
 
                 return modulesConfig;
@@ -320,15 +330,7 @@
              * @return {Object}
              */
             setLoaderConfig: function(config) {
-                var option;
-
-                for (option in config) {
-                    if (hasOwnProp(config, option)) {
-                        loaderConfig[option] = config[option];
-                    }
-                }
-
-                return loaderConfig;
+                return objectMerge(loaderConfig, config);
             },
             /**
              * @access public
@@ -1047,12 +1049,9 @@
                      * @param {String} logLevel
                      */
                     function setLogLevelForMessageTypes(messages, logLevel) {
-                        var messageIndex = 0,
-                            messagesLen = messages.length;
-
-                        for (; messageIndex < messagesLen; messageIndex++) {
-                            messageTypes[messages[messageIndex]] = logLevel;
-                        }
+                        arrayEach(messages, function setLogLevelForMessageType(message) {
+                            messageTypes[message] = logLevel;
+                        });
                     }
 
                     setLogLevelForMessageTypes([
@@ -1180,8 +1179,6 @@
                     var module = this,
                         moduleName = module.name,
                         dependencies = module.getAllDeps(),
-                        depLen = dependencies.length,
-                        depIndex = 0,
                         circularDependencies = [];
 
                     traversedModules = traversedModules || {};
@@ -1192,14 +1189,15 @@
                     else {
                         traversedModules[moduleName] = true;
 
-                        for (; depIndex < depLen; depIndex++) {
-                            circularDependencies = module.loader.getModule(dependencies[depIndex]).findCircularDeps(traversedModules);
+                        arrayEach(dependencies, function findCircularDeps(dependencyName) {
+                            circularDependencies = module.loader.getModule(dependencyName).findCircularDeps(traversedModules);
 
                             if (circularDependencies.length) {
                                 circularDependencies.unshift(moduleName);
-                                break;
+
+                                return true;
                             }
-                        }
+                        });
 
                         delete traversedModules[moduleName];
                     }
@@ -1545,6 +1543,7 @@
 
                                 module.log(MSG_TIMEOUT, false, {
                                     path: SourceManager.removeScript(module.loader.context + ':' + module.name),
+
                                     sec: module.getConfig('timeout')
                                 });
                             }
@@ -1700,6 +1699,7 @@
 
                             loader.register({
                                 MID: implicitDependency,
+
                                 autoRegLvl: --autoRegisterLevel
                             });
                         }
@@ -1756,17 +1756,14 @@
                     var module = this,
                         loader = module.loader,
                         dependencies = module.deps,
-                        depLen = dependencies.length,
-                        depIndex = 0,
                         depRefs = [],
                         System = loader.getSystem(),
-                        data, dependencyName;
+                        data;
 
-                    for (; depIndex < depLen; depIndex++) {
-                        dependencyName = dependencies[depIndex];
+                    arrayEach(dependencies, function getDepRef(dependencyName) {
                         data = module.interceptorData[dependencyName];
                         depRefs.push(System.isSet(data) ? data : loader.getModule(dependencyName).ref);
-                    }
+                    });
 
                     return depRefs;
                 }
@@ -1914,13 +1911,7 @@
              * @param {Function(Module)} callback
              */
             eachModules: function(callback) {
-                var loader = this,
-                    modules = loader.modules,
-                    moduleName;
-
-                for (moduleName in modules) {
-                    hasOwnProp(modules, moduleName) && callback(modules[moduleName]);
-                }
+                objectEach(this.modules, callback);
             },
             /**
              * @access public
@@ -1929,16 +1920,14 @@
              */
             registerCore: function() {
                 var loader = this,
-                    moduleName, coreModule, properties;
+                    properties;
 
-                for (moduleName in loaderCoreModules) {
-                    if (hasOwnProp(loaderCoreModules, moduleName)) {
-                        coreModule = loaderCoreModules[moduleName];
-                        properties = coreModule[0] || {};
-                        properties.MID = moduleName;
-                        loader.register(properties, coreModule[1]);
-                    }
-                }
+                objectEach(loaderCoreModules, function registerCoreModule(coreModule, moduleName) {
+                    coreModule = loaderCoreModules[moduleName];
+                    properties = coreModule[0] || {};
+                    properties.MID = moduleName;
+                    loader.register(properties, coreModule[1]);
+                });
             },
             /**
              * @access public
@@ -1982,16 +1971,11 @@
              * @param {Function(string)} errback
              */
             listenFor: function(listeningModuleName, moduleNames, callback, errback) {
-                var loader = this,
-                    moduleCount = moduleNames.length,
-                    moduleIndex = 0,
-                    moduleName;
+                var loader = this;
 
-                for (; moduleIndex < moduleCount; moduleIndex++) {
-                    moduleName = moduleNames[moduleIndex];
-
+                arrayEach(moduleNames, function listenFor(moduleName) {
                     loader.$import(moduleName).onLoad(loader.intercept(moduleName, listeningModuleName, callback, errback), errback, Resolver.isBundleRequest(moduleName));
-                }
+                });
             },
             /**
              * @access public
@@ -2116,16 +2100,11 @@
              * @param {Array} modules
              */
             pushModules: function(modules) {
-                var moduleIndex = 0,
-                    moduleCount, moduleName;
+                var loader = this;
 
-                moduleCount = modules ? modules.length : 0;
-
-                for (; moduleIndex < moduleCount; moduleIndex++) {
-                    moduleName = modules[moduleIndex];
-
-                    this.addToURLList(this.getModule(moduleName), Resolver.isBundleRequest(moduleName));
-                }
+                modules && arrayEach(modules, function addToURLList(moduleName) {
+                    loader.addToURLList(loader.getModule(moduleName), Resolver.isBundleRequest(moduleName));
+                });
             },
             /**
              * @access public
@@ -2133,17 +2112,14 @@
              * @memberof JAR~LoaderManager~Loader#
              */
             resetModulesURLList: function() {
-                var loader = this,
-                    moduleName;
+                var loader = this;
 
                 loader.list = [];
                 loader.sorted = {};
 
-                for (moduleName in loaderCoreModules) {
-                    if (hasOwnProp(loaderCoreModules, moduleName)) {
-                        loader.sorted[moduleName] = true;
-                    }
-                }
+                objectEach(loaderCoreModules, function markModuleSorted(coreModule, moduleName) {
+                    loader.sorted[moduleName] = true;
+                });
             }
         };
 
@@ -2282,7 +2258,7 @@
                         version = versionParts[1];
 
                     moduleName = versionParts[0];
-                    moduleName = moduleName.substr(0, moduleName.lastIndexOf('.'));
+                    moduleName = moduleName.substr(0, moduleName.lastIndexOf(dot));
 
                     versionParts[0] = moduleName;
 
@@ -2350,22 +2326,24 @@
                  */
                 extractInterceptorInfo: function(moduleName) {
                     var interceptorInfo = interceptorInfoCache[moduleName],
-                        moduleParts, interceptorType;
+                        moduleParts;
 
                     if (!interceptorInfo) {
-                        for (interceptorType in interceptors) {
-                            if (hasOwnProp(interceptors, interceptorType) && moduleName.indexOf(interceptorType) > -1) {
+                        objectEach(interceptors, function findInterceptor(interceptor, interceptorType) {
+                            if (moduleName.indexOf(interceptorType) > -1) {
                                 moduleParts = moduleName.split(interceptorType);
 
                                 interceptorInfo = {
                                     moduleName: moduleParts.shift(),
+
                                     type: interceptorType,
+
                                     data: moduleParts.join(interceptorType)
                                 };
 
-                                break;
+                                return true;
                             }
-                        }
+                        });
 
                         interceptorInfo = interceptorInfoCache[moduleName] = interceptorInfo || {
                             moduleName: moduleName
@@ -2386,13 +2364,11 @@
                  * @return {Array<string>}
                  */
                 resolveArray: function(modules, referenceModuleName, resolveType) {
-                    var resolvedModules = [],
-                        moduleIndex = 0,
-                        moduleCount = modules.length;
+                    var resolvedModules = [];
 
-                    for (; moduleIndex < moduleCount; moduleIndex++) {
-                        resolvedModules = resolvedModules.concat(Resolver.resolve(modules[moduleIndex], referenceModuleName, resolveType));
-                    }
+                    arrayEach(modules, function concatResolvedModules(moduleName) {
+                        resolvedModules = resolvedModules.concat(Resolver.resolve(moduleName, referenceModuleName, resolveType));
+                    });
 
                     return resolvedModules;
                 },
@@ -2408,14 +2384,11 @@
                  * @return {Array<string>}
                  */
                 resolveObject: function(modules, referenceModuleName, resolveType) {
-                    var resolvedModules = [],
-                        tmpReferenceModuleName;
+                    var resolvedModules = [];
 
-                    for (tmpReferenceModuleName in modules) {
-                        if (hasOwnProp(modules, tmpReferenceModuleName)) {
-                            resolvedModules = resolvedModules.concat(Resolver.resolve(modules[tmpReferenceModuleName], tmpReferenceModuleName, RESOLVE_NESTED));
-                        }
-                    }
+                    objectEach(modules, function concatResolvedModules(module, tmpReferenceModuleName) {
+                        resolvedModules = resolvedModules.concat(Resolver.resolve(module, tmpReferenceModuleName, RESOLVE_NESTED));
+                    });
 
                     return Resolver.resolveArray(resolvedModules, referenceModuleName, resolveType);
                 },
@@ -2486,7 +2459,7 @@
                         }
                     }
 
-                    return refParts.join('.') + interceptorData;
+                    return refParts.join(dot) + interceptorData;
                 },
                 /**
                  * @access public
@@ -2711,15 +2684,14 @@
                     System = loader.getSystem(),
                     refs = [],
                     refsIndexLookUp = {},
-                    moduleIndex = 0,
                     ref, counter, moduleCount;
 
                 moduleNames = Resolver.resolve(moduleNames, moduleName);
                 counter = moduleCount = moduleNames.length;
 
-                for (; moduleIndex < moduleCount; moduleIndex++) {
-                    refsIndexLookUp[moduleNames[moduleIndex]] = moduleIndex;
-                }
+                arrayEach(moduleNames, function addToLookUp(moduleName, moduleIndex) {
+                    refsIndexLookUp[moduleName] = moduleIndex;
+                });
 
                 System.isFunction(progressback) || (progressback = undef);
 
@@ -2745,22 +2717,23 @@
             register: function(properties, factory) {
                 var moduleName = properties.MID = Resolver.appendVersion(properties.MID, properties.version),
                     defaultContext = LoaderManager.loader.context,
-                    loaderContext, loader;
+                    currentLoader;
 
                 if (!SourceManager.findScript(defaultContext + ':' + moduleName)) {
-                    for (loaderContext in loaders) {
-                        if (hasOwnProp(loaders, loaderContext) && SourceManager.findScript(loaderContext + ':' + moduleName)) {
+                    objectEach(loaders, function findLoader(loader, loaderContext) {
+                        if (SourceManager.findScript(loaderContext + ':' + moduleName)) {
                             LoaderManager.setContext(loaderContext);
-                            break;
+
+                            return true;
                         }
-                    }
+                    });
                 }
 
-                loader = LoaderManager.loader;
+                currentLoader = LoaderManager.loader;
 
-                loader.register(properties, factory);
+                currentLoader.register(properties, factory);
 
-                if (loader !== loaders[defaultContext]) {
+                if (currentLoader !== loaders[defaultContext]) {
                     LoaderManager.setContext(defaultContext);
                 }
             }
@@ -2798,10 +2771,8 @@
     LoaderManager.addCoreModule('System', {}, function systemSetup() {
         var types = 'Null Undefined String Number Boolean Array Arguments Object Function Date RegExp'.split(' '),
             nothing = null,
-            typesLen = types.length,
             typeLookup = {},
             toString = ({}).toString,
-            typeIndex = 0,
             isArgs, System;
 
         /**
@@ -2926,24 +2897,20 @@
              * @return {Boolean}
              */
             isA: function(instance, Class) {
-                var isA = false,
-                    classIndex = 0,
-                    classLen = Class.length;
+                var isInstanceOf = false;
 
                 if (System.isArray(Class)) {
-                    for (; classIndex < classLen; classIndex++) {
-                        isA = System.isA(instance, Class[classIndex]);
+                    arrayEach(Class, function isA(OneClass) {
+                        isInstanceOf = System.isA(instance, OneClass);
 
-                        if (isA) {
-                            break;
-                        }
-                    }
+                        return isInstanceOf;
+                    });
                 }
                 else {
-                    isA = instance instanceof Class;
+                    isInstanceOf = instance instanceof Class;
                 }
 
-                return isA;
+                return isInstanceOf;
             },
             /**
              * @access public
@@ -3089,9 +3056,9 @@
             };
         }
 
-        for (; typeIndex < typesLen; typeIndex++) {
-            System['is' + types[typeIndex]] = typeValidatorSetup(types[typeIndex]);
-        }
+        arrayEach(types, function createTypeValidator(type) {
+            System['is' + type] = typeValidatorSetup(type);
+        });
 
         isArgs = System.isArguments;
 
@@ -3112,13 +3079,10 @@
     });
 
     LoaderManager.addCoreModule('System.Logger', {
-        deps: '.!'
-    }, function systemLoggerSetup(config) {
-        var System = this,
-            debuggers = {},
+        deps: ['.!', '.::isArray', '.::isFunction', '.::isNumber', '.::isObject', '.::isString']
+    }, function systemLoggerSetup(config, isArray, isFunction, isNumber, isObject, isString) {
+        var debuggers = {},
             stdLevels = 'log info debug warn error'.split(' '),
-            stdLevelsLen = stdLevels.length,
-            levelIndex = 0,
             rTemplateKey = /\$\{(.*?)\}/g,
             loggerCache = {};
 
@@ -3134,7 +3098,18 @@
          * @return {String}
          */
         function formatLog(match, key) {
-            return formatLog.values[key] || 'UNKNOWN';
+            var values = formatLog.values,
+                value;
+
+            if (hasOwnProp(values, key)) {
+                value = values[key];
+                delete values[key];
+            }
+            else {
+                value = 'UNKNOWN';
+            }
+
+            return value;
         }
 
         /**
@@ -3151,10 +3126,10 @@
             var logLevels = Logger.logLevels,
                 priority = logLevels.ALL;
 
-            if (System.isString(levelOrPriority) && hasOwnProp(logLevels, (levelOrPriority = levelOrPriority.toUpperCase()))) {
+            if (isString(levelOrPriority) && hasOwnProp(logLevels, (levelOrPriority = levelOrPriority.toUpperCase()))) {
                 priority = logLevels[levelOrPriority];
             }
-            else if (System.isNumber(levelOrPriority)) {
+            else if (isNumber(levelOrPriority)) {
                 priority = levelOrPriority;
             }
 
@@ -3205,7 +3180,7 @@
             var debugContext = config.context,
                 includeContext, excludeContext;
 
-            if (System.isObject(debugContext)) {
+            if (isObject(debugContext)) {
                 includeContext = debugContext.include;
                 excludeContext = debugContext.exclude;
             }
@@ -3230,7 +3205,7 @@
         function inContextList(context, contextList) {
             var contextDelimiter = ',';
 
-            if (System.isArray(contextList)) {
+            if (isArray(contextList)) {
                 contextList = contextList.join(contextDelimiter);
             }
 
@@ -3289,10 +3264,10 @@
                 currentDebugger = getActiveDebugger(options.mode || config.mode),
                 debuggerMethod = currentDebugger[level] ? level : 'log';
 
-            if (isDebuggingEnabled(options.debug || config.debug, level, context) && System.isFunction(currentDebugger[debuggerMethod])) {
+            if (isDebuggingEnabled(options.debug || config.debug, level, context) && isFunction(currentDebugger[debuggerMethod])) {
                 message = options.tpl[message] || message;
 
-                if (System.isString(message) && (System.isObject(values) || System.isArray(values))) {
+                if (isString(message) && (isObject(values) || isArray(values))) {
                     formatLog.values = values;
 
                     message = message.replace(rTemplateKey, formatLog);
@@ -3303,7 +3278,9 @@
                 currentDebugger[debuggerMethod](context, {
                     timestamp: new Date().toUTCString(),
 
-                    message: message
+                    message: message,
+
+                    meta: values
                 });
             }
         };
@@ -3330,7 +3307,7 @@
             var levelConst = level.toUpperCase();
 
             if (!hasOwnProp(Logger.logLevels, levelConst)) {
-                Logger.logLevels[levelConst] = System.isNumber(priority) ? priority : Logger.logLevels.ALL;
+                Logger.logLevels[levelConst] = isNumber(priority) ? priority : Logger.logLevels.ALL;
 
                 Logger.prototype[level] = function loggerFn(data, values) {
                     this._out(level, data, values);
@@ -3391,29 +3368,28 @@
         Logger.addDebugger = function(mode, debuggerSetup) {
             var modeConfig = mode + 'Config';
 
-            if (!hasOwnProp(debuggers, mode) && System.isFunction(debuggerSetup)) {
+            if (!hasOwnProp(debuggers, mode) && isFunction(debuggerSetup)) {
                 debuggers[mode] = debuggerSetup(function debuggerConfigGetter(option) {
                     return (config[modeConfig] || {})[option];
                 });
             }
         };
 
-        for (; levelIndex < stdLevelsLen; levelIndex++) {
-            Logger.addLogLevel(stdLevels[levelIndex], (levelIndex + 1) * 10);
-        }
+        arrayEach(stdLevels, function addLogLevel(stdLevel, levelIndex) {
+            Logger.addLogLevel(stdLevel, (levelIndex + 1) * 10);
+        });
 
         Logger.addDebugger('console', function consoleDebuggerSetup(config) {
             var console = global.console,
                 canUseGroups = console && console.group && console.groupEnd,
                 pseudoConsole = {},
-                levelIndex = 0,
                 method,
                 lastLogContext;
 
-            for (; levelIndex < stdLevelsLen; levelIndex++) {
-                method = stdLevels[levelIndex];
+            arrayEach(stdLevels, function createConsoleForward(stdLevel) {
+                method = stdLevel;
                 pseudoConsole[method] = console ? forwardConsole(console[method] ? method : stdLevels[0]) : noop;
-            }
+            });
 
             function noop() {}
 
@@ -3470,16 +3446,13 @@
              * @return {Array}
              */
             useAll: function(moduleNames) {
-                var moduleIndex = 0,
-                    refs = [],
-                    moduleCount;
+                var refs = [];
 
                 moduleNames = LoaderManager.Resolver.resolve(moduleNames);
-                moduleCount = moduleNames.length;
 
-                for (; moduleIndex < moduleCount; moduleIndex++) {
-                    refs.push(jar.use(moduleNames[moduleIndex]));
-                }
+                arrayEach(moduleNames, function use(moduleName) {
+                    refs.push(jar.use(moduleName));
+                });
 
                 return refs;
             },
@@ -3502,9 +3475,13 @@
             configurators = {},
             configs = {
                 bundle: [],
+
                 environment: undef,
+
                 environments: {},
+
                 globalAccess: false,
+
                 supressErrors: false
             },
             JAR;
@@ -3597,16 +3574,16 @@
 
                 LoaderManager.register({
                     MID: moduleName,
+
                     deps: resolvedModules,
+
                     bundle: bundle
                 }, function() {
-                    var modules = {},
-                        index = 0,
-                        modulesCount = resolvedModules.length;
+                    var modules = {};
 
-                    for (; index < modulesCount; index++) {
-                        modules[index] = modules[resolvedModules[index]] = arguments[index];
-                    }
+                    arrayEach(arguments, function mapModule(module, index) {
+                        modules[index] = modules[resolvedModules[index]] = module;
+                    });
 
                     return factory.call(this, modules);
                 });
@@ -3625,16 +3602,15 @@
              * @param {(Function)} configurator
              */
             addConfigurator: function(config, configurator) {
-                var System = LoaderManager.getSystem(),
-                    option;
+                var System = LoaderManager.getSystem();
 
                 if (System.isString(config) && !hasOwnProp(configurators, config) && System.isFunction(configurator)) {
                     configurators[config] = configurator;
                 }
                 else if (System.isObject(config)) {
-                    for (option in config) {
-                        hasOwnProp(config, option) && JAR.addConfigurator(option, config[option]);
-                    }
+                    objectEach(config, function addConfigurator(value, option) {
+                        JAR.addConfigurator(option, value);
+                    });
                 }
             },
             /**
@@ -3647,7 +3623,7 @@
              */
             configure: function(config, value) {
                 var System = LoaderManager.getSystem(),
-                    option, configurator;
+                    configurator;
 
                 if (System.isString(config)) {
                     configurator = configurators[config];
@@ -3655,9 +3631,9 @@
                     configs[config] = System.isFunction(configurator) ? configurator(value, configs[config], System) : value;
                 }
                 else if (System.isObject(config)) {
-                    for (option in config) {
-                        hasOwnProp(config, option) && JAR.configure(option, config[option]);
-                    }
+                    objectEach(config, function configure(value, option) {
+                        JAR.configure(option, value);
+                    });
                 }
 
                 return this;
@@ -3737,19 +3713,19 @@
         function bootstrapJAR() {
             var baseUrl = './',
                 scripts = SourceManager.getScripts(),
-                scriptCount = scripts.length - 1,
                 bootstrapConfig = global.jarconfig || {},
                 bootstrapModules = bootstrapConfig.modules,
                 mainScript;
 
-            for (; scriptCount > -1; scriptCount--) {
-                mainScript = scripts[scriptCount].getAttribute('data-main');
+            arrayEach(scripts, function findMainScript(script) {
+                mainScript = script.getAttribute('data-main');
 
                 if (mainScript) {
                     baseUrl = mainScript.substring(0, mainScript.lastIndexOf('/')) || baseUrl;
-                    break;
+
+                    return true;
                 }
-            }
+            });
 
             if (mainScript && !bootstrapConfig.main) {
                 bootstrapConfig.main = mainScript;
@@ -3820,15 +3796,7 @@
              * @return {Object<string, function>}
              */
             environments: function(newEnvironments, oldEnvironments) {
-                var environment;
-
-                for (environment in newEnvironments) {
-                    if (hasOwnProp(newEnvironments, environment)) {
-                        oldEnvironments[environment] = newEnvironments[environment];
-                    }
-                }
-
-                return oldEnvironments;
+                return objectMerge(oldEnvironments, newEnvironments);
             },
             /**
              * @param {String} environment
@@ -3879,14 +3847,10 @@
              * @return {Object}
              */
             interceptors: function(newInterceptors, oldInterceptors, System) {
-                var interceptorType;
-
                 if (System.isObject(newInterceptors)) {
-                    for (interceptorType in newInterceptors) {
-                        if (hasOwnProp(newInterceptors, interceptorType)) {
-                            oldInterceptors = LoaderManager.addInterceptor(interceptorType, newInterceptors[interceptorType]);
-                        }
-                    }
+                    objectEach(newInterceptors, function addInterceptor(newInterceptor, interceptorType) {
+                        oldInterceptors = LoaderManager.addInterceptor(interceptorType, newInterceptor);
+                    });
                 }
 
                 return oldInterceptors;
