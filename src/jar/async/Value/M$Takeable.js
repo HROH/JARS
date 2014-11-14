@@ -26,7 +26,7 @@ JAR.register({
         },
 
         takeUntil: function(untilFn) {
-            return this.chainValue({
+            return this.forwardWithOptions({
                 guardFreeze: untilFn
             });
         },
