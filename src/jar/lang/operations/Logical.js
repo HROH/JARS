@@ -1,11 +1,10 @@
 JAR.register({
     MID: 'jar.lang.operations.Logical',
-    deps: '..Object!iterate'
-}, function(Obj) {
+    deps: ['.::createOperation', '..Object!iterate']
+}, function(createOperation, Obj) {
     'use strict';
 
-    var operations = this,
-        Logical = {},
+    var Logical = {},
         logicalOperators = {
             and: '&&',
 
@@ -13,26 +12,11 @@ JAR.register({
         };
 
     Obj.each(logicalOperators, function(logicalOperator, methodName) {
-        Logical[methodName] = Logical[logicalOperator] = operations.createOperation(logicalOperator);
-        Logical['n' + methodName] = Logical['!' + logicalOperator] = operations.createOperation(logicalOperator, true);
+        Logical[methodName] = Logical[logicalOperator] = createOperation(logicalOperator);
+        Logical['n' + methodName] = Logical['!' + logicalOperator] = createOperation(logicalOperator, true);
     });
-
-    Logical.xor = function(a, b) {
-        var xor;
-
-        if (arguments.length === 2) {
-            xor = a ? !b : !! b;
-        }
-        else {
-            b = a;
-
-            xor = function(a) {
-                return a ? !b : !! b;
-            };
-        }
-
-        return xor;
-    };
+    
+    Logical.xor = createOperation('?!b:!!');
 
     return Logical;
 });

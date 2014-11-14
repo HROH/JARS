@@ -1,11 +1,10 @@
 JAR.register({
     MID: 'jar.lang.operations.Bitwise',
-    deps: '..Object!iterate'
-}, function(Obj) {
+    deps: ['.::createOperation', '..Object!iterate']
+}, function(createOperation, Obj) {
     'use strict';
 
-    var operations = this,
-        Bitwise = {},
+    var Bitwise = {},
         bitwiseOperators = {
             and: '&',
 
@@ -21,7 +20,7 @@ JAR.register({
         };
 
     Obj.each(bitwiseOperators, function(bitwiseOperator, methodName) {
-		Bitwise[bitwiseOperator] = Bitwise[methodName] = operations.createOperation(bitwiseOperator);
+		Bitwise[bitwiseOperator] = Bitwise[methodName] = createOperation(bitwiseOperator);
     });
 
     return Bitwise;

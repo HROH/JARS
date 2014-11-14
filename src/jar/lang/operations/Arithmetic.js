@@ -1,11 +1,10 @@
 JAR.register({
     MID: 'jar.lang.operations.Arithmetic',
-    deps: '..Object!iterate'
-}, function(Obj) {
+    deps: ['.::createOperation', '..Object!iterate']
+}, function(createOperation, Obj) {
     'use strict';
 
-    var operations = this,
-        Arithmetic = {},
+    var Arithmetic = {},
         arithmeticOperators = {
             add: '+',
 
@@ -19,7 +18,7 @@ JAR.register({
         };
 
     Obj.each(arithmeticOperators, function(arithmeticOperator, arithmeticOperationName) {
-        Arithmetic[arithmeticOperationName] = Arithmetic[arithmeticOperator] = operations.createOperation(arithmeticOperator);
+        Arithmetic[arithmeticOperationName] = Arithmetic[arithmeticOperator] = createOperation(arithmeticOperator);
     });
 
     return Arithmetic;

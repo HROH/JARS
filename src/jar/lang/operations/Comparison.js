@@ -1,36 +1,8 @@
 JAR.register({
     MID: 'jar.lang.operations.Comparison',
-    deps: '..Object!iterate'
-}, function(Obj) {
+    deps: ['.::createOperation', '..Object!iterate']
+}, function(createOperation, Obj) {
     'use strict';
-    var operations = this,
-        comparators = {
-            Equal: {
-                op: '==',
-                alias: 'eq'
-            },
-            StrictEqual: {
-                op: '===',
-                alias: 'seq'
-            },
-            LowerThan: {
-                op: '<',
-                alias: 'lt'
-            },
-            LowerThanOrEqual: {
-                op: '<=',
-                alias: 'lte'
-            },
-            GreaterThan: {
-                op: '>',
-                alias: 'gt'
-            },
-            GreaterThanOrEqual: {
-                op: '>=',
-                alias: 'gte'
-            }
-        },
-        Comparison;
 
     /**
      * @access public
@@ -38,13 +10,47 @@ JAR.register({
      * @namespace Comparison
      * @memberof jar.lang.operations
      */
-    Comparison = {};
+    var Comparison = {},
+        comparators = {
+            Equal: {
+                op: '==',
+
+                alias: 'eq'
+            },
+            StrictEqual: {
+                op: '===',
+
+                alias: 'seq'
+            },
+            LowerThan: {
+                op: '<',
+
+                alias: 'lt'
+            },
+            LowerThanOrEqual: {
+                op: '<=',
+
+                alias: 'lte'
+            },
+            GreaterThan: {
+                op: '>',
+
+                alias: 'gt'
+            },
+            GreaterThanOrEqual: {
+                op: '>=',
+
+                alias: 'gte'
+            }
+        };
 
     Obj.each(comparators, function(comparator, comparisonName) {
-        var operator = comparator.op;
-        
-        Comparison['is' + comparisonName] = Comparison[comparator.alias] = Comparison[operator] = operations.createOperation(operator);
-        Comparison['isNot' + comparisonName] = Comparison['n' + comparator.alias] = Comparison['!' + (operator.indexOf('=') === 0 ? operator.substring(1) : operator)] = operations.createOperation(operator, true);
+        var operator = comparator.op,
+            alias = comparator.alias,
+            negatedOperator = '!' + (operator.indexOf('=') === 0 ? operator.substring(1) : operator);
+
+        Comparison['is' + comparisonName] = Comparison[alias] = Comparison[operator] = createOperation(operator);
+        Comparison['isNot' + comparisonName] = Comparison['n' + alias] = Comparison[negatedOperator] = createOperation(operator, true);
     });
 
     /**
