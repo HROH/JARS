@@ -1,8 +1,10 @@
 JAR.register({
     MID: 'jar.lang.Function',
-    deps: ['System', '.Array'],
-    bundle: ['Function-advice', 'Function-combined', 'Function-guards', 'Function-modargs']
-}, function(System, Arr) {
+    deps: [{
+        System: ['::isA', '::isFunction']
+    }, '.Array'],
+    bundle: ['Function-advice', 'Function-combined', 'Function-flow', 'Function-guards', 'Function-modargs']
+}, function(isA, isFunction, Arr) {
     'use strict';
 
     var lang = this,
@@ -16,7 +18,7 @@ JAR.register({
                 FnLink = function() {},
                 boundArgs = fromArgs(arguments).slice(1),
                 returnFn = fromFunction(function boundFn() {
-                    return apply(fnToBind, (System.isA(this, FnLink) && context) ? this : context, boundArgs.concat(fromArgs(arguments)));
+                    return apply(fnToBind, (isA(this, FnLink) && context) ? this : context, boundArgs.concat(fromArgs(arguments)));
                 }, fnToBind.arity || fnToBind.length);
 
             FnLink.prototype = fnToBind.prototype;
@@ -60,10 +62,6 @@ JAR.register({
             return results;
         },
 
-        delay: function(ms) {
-            return window.setTimeout(this, ms);
-        },
-
         call: true,
 
         apply: true
@@ -88,7 +86,7 @@ JAR.register({
      * @return {Function}
      */
     function fromFunction(fn, arity) {
-        return (System.isA(fn, FunctionCopy) || !System.isFunction(fn)) ? fn : fnConverter(fn, arity);
+        return (isA(fn, FunctionCopy) || !isFunction(fn)) ? fn : fnConverter(fn, arity);
     }
 
     return FunctionCopy;

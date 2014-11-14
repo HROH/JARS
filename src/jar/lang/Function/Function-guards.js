@@ -6,26 +6,9 @@ JAR.register({
 
     var FunctionCopy = this,
         fromFunction = FunctionCopy.from,
-        apply = FunctionCopy.apply,
-        defaultBlockedOptions = {
-            leading: true,
-            
-            trailing: true
-        };
+        apply = FunctionCopy.apply;
 
     lang.extendNativeType('Function', {
-        debounce: function(ms, immediate) {
-            return createBlockedFunction(this, ms, {
-                leading: immediate,
-
-                trailing: !immediate
-            }, true);
-        },
-
-        throttle: function(ms, options) {
-            return createBlockedFunction(this, ms, options || defaultBlockedOptions);
-        },
-
         memoize: function(serializer) {
             var fn = this,
                 cache = {};
@@ -72,50 +55,6 @@ JAR.register({
     }
 
     /**
-     *
-     * @param {Function} fn
-     * @param {Number} msBlocked
-     * @param {Object} options
-     * @param {Boolean} blockOnCall
-     * 
-     * @return {Function}
-     */
-    function createBlockedFunction(fn, msBlocked, options, blockOnCall) {
-        var blocked = false,
-            lastArgs, timeoutID, context;
-
-        if (!(options.leading || options.trailing)) {
-            options = defaultBlockedOptions;
-        }
-
-        function unBlock() {
-            blocked = false;
-
-            if (lastArgs && options.trailing) {
-                apply(fn, context, lastArgs);
-                context = lastArgs = null;
-            }
-        }
-
-        return fromFunction(function blockedFn() {
-            context = this;
-            timeoutID = blocked;
-
-            if (blockOnCall || !blocked) {
-                blocked = window.setTimeout(unBlock, msBlocked);
-            }
-
-            if (timeoutID || !options.leading) {
-                blockOnCall && window.clearTimeout(timeoutID);
-                lastArgs = arguments;
-            }
-            else {
-                apply(fn, context, arguments);
-            }
-        }, fn.arity || fn.length);
-    }
-
-    /**
      * TODO better implementation
      * 
      * @param {Arguments} args
@@ -126,5 +65,5 @@ JAR.register({
         return JSON.stringify(args[0]);
     }
 
-    return Obj.extract(FunctionCopy, ['debounce', 'throttle', 'memoize', 'once', 'callN', 'blockN']);
+    return Obj.extract(FunctionCopy, ['memoize', 'once', 'callN', 'blockN']);
 });
