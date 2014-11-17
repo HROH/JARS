@@ -23,7 +23,7 @@ JAR.register({
         excludeOverride = Arr('Class', 'constructor', 'getHash', '$proxy'),
         rClass = /^[A-Z]\w+$/,
         Classes = Obj(),
-        classBluePrint = ['(function(){function ', '(){return this instanceof ', '?', '.New(this,arguments):', '.New.apply(', ',arguments)};return ', '})()'],
+        classBluePrint = ['(function(){function ', '(){return this instanceof ', '?', '.New(this,arguments):', '.New(arguments)};return ', '})()'],
         MSG_ALREADY_DESTRUCTED = 0,
         MSG_INVALID_OR_EXISTING_CLASS = 1,
         MSG_WRONG_CLASS = 2,
@@ -375,34 +375,11 @@ JAR.register({
                     }
                     else {
                         // We came here because Class.New was called directly
-                        // [ Class.New(arg1, arg2, ...) <--> new Class(arg1, arg2, ...) ]
+                        // [ Class.New([arg1, arg2, ...]) <--> new Class(arg1, arg2, ...) ]
                         // So we have to create a new instance and return it
+                        args = instance;
 
-                        // Copy values from arguments into an array. Just using arguments seems to be a problem
-                        // (at least in chrome 31.0.1650.57 m, but it seems to be the normal case in all browsers),
-                        // because when we reassign instance, which is arguments[0], arguments is reflecting the change and so does args
-                        // resulting in a wrong value being passed to instance.construct()
-                        //
-                        // Example: SomeClass.New(arg1, arg2)
-                        //
-                        // arguments would first be:
-                        //	{0: arg1 (instance), 1: arg2 (args)}
-                        //
-                        // after reassinging instance, arguments is:
-                        //	{0: instanceOfSomeClass (instance), 1: arg2 (args)}
-                        //
-                        // resulting in:
-                        //	instanceOfSomeClass.construct(instanceOfSomeClass, arg2)
-                        //
-                        // instead of:
-                        //	instanceOfSomeClass.construct(arg1, arg2)
-                        args = Arr.fromArrayLike(arguments);
-
-                        classProtectedProps._$skipCtor = true;
-                        instance = new Class();
-                        classProtectedProps._$skipCtor = false;
-
-                        returnValue = instance;
+                        returnValue = instance = Class.NewBare();
                     }
 
                     construct = instance.construct;
@@ -414,6 +391,17 @@ JAR.register({
             }
 
             return returnValue;
+        },
+
+        NewBare: function(instance) {
+            var Class = this,
+                classProtectedProps = getHidden(Class)[protectedIdentifier];
+
+            classProtectedProps._$skipCtor = true;
+            instance = Class.isInstance(instance) ? Class.New(instance) : new Class();
+            classProtectedProps._$skipCtor = false;
+
+            return instance;
         },
 
         toString: function() {
