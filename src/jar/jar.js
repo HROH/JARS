@@ -1830,10 +1830,17 @@
              * 
              * @memberof JAR~LoaderManager~Loader#
              * 
-             * @return {String}
+             * @return {Object}
              */
-            getCurrentModuleName: function() {
-                return this.currentModuleName;
+            getCurrentModuleData: function() {
+                var loader = this,
+                    moduleName = loader.currentModuleName;
+
+                return {
+                    moduleName: moduleName,
+
+                    url: loader.getModule(moduleName).getFullPath()
+                };
             },
             /**
              * @access public
@@ -2573,10 +2580,10 @@
              * 
              * @memberof JAR~LoaderManager
              * 
-             * @return {String}
+             * @return {Object}
              */
-            getCurrentModuleName: function() {
-                return LoaderManager.loader.getCurrentModuleName();
+            getCurrentModuleData: function() {
+                return LoaderManager.loader.getCurrentModuleData();
             },
             /**
              * <p>Computes an array of all the loaded modules
@@ -2668,7 +2675,7 @@
              */
             $importLazy: function(moduleNames, callback, errback, progressback) {
                 var loader = LoaderManager.loader,
-                    moduleName = loader.getCurrentModuleName(),
+                    moduleName = loader.currentModuleName,
                     System = loader.getSystem(),
                     refs = [],
                     refsIndexLookUp = {},
@@ -3321,7 +3328,7 @@
          * @return {System.Logger}
          */
         Logger.forCurrentModule = function(options) {
-            var logContext = LoaderManager.getCurrentModuleName();
+            var logContext = LoaderManager.getCurrentModuleData().moduleName;
 
             LoaderManager.Resolver.isRootName(logContext) && (logContext = 'JAR');
 
@@ -3421,7 +3428,7 @@
          * 
          * @borrows LoaderManager.getModuleRef as use
          * @borrows LoaderManager.$importLazy as $importLazy
-         * @borrows LoaderManager.getCurrentModuleName as getCurrentModuleName
+         * @borrows LoaderManager.getCurrentModuleData as getCurrentModuleData
          */
         var jar = {
             /**
@@ -3449,7 +3456,7 @@
 
             $importLazy: LoaderManager.$importLazy,
 
-            getCurrentModuleName: LoaderManager.getCurrentModuleName
+            getCurrentModuleData: LoaderManager.getCurrentModuleData
         };
 
         return jar;

@@ -2,8 +2,8 @@ JAR.register({
     MID: 'jar.lang.Interface',
     deps: [{
         System: ['Logger', '::isFunction', '::isNumber']
-    }, 'jar::getCurrentModuleName', '.Class', '.Array!check,derive,iterate']
-}, function(Logger, isFunction, isNumber, getCurrentModuleName, Class, Arr) {
+    }, 'jar::getCurrentModuleData', '.Class', '.Array!check,derive,iterate']
+}, function(Logger, isFunction, isNumber, getCurrentModuleData, Class, Arr) {
     'use strict';
 
     var interfaceTemplates = [],
@@ -35,7 +35,7 @@ JAR.register({
             construct: function(interfaceName, methods) {
                 this._$name = interfaceName;
                 this._$methods = Arr.from(methods);
-                this._$logger = new Logger('Interface "#<' + getCurrentModuleName() + ':' + interfaceName + '>"', {
+                this._$logger = new Logger('Interface "#<' + getCurrentModuleData().moduleName + ':' + interfaceName + '>"', {
                     tpl: interfaceTemplates
                 });
             },

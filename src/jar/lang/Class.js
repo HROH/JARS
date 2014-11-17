@@ -3,12 +3,12 @@ JAR.register({
     deps: [{
         System: ['Logger', '::isA', '::isSet', '::isObject', '::isFunction']
     }, {
-        jar: ['::getCurrentModuleName', '::use']
+        jar: ['::getCurrentModuleData', '::use']
     }, {
         '.Object': ['::from', '::hasOwn', '!all']
     }, '.Array!check,find,index,iterate,manipulate', '.Function!advice'],
     bundle: ['Abstract', 'Final', 'Singleton']
-}, function(Logger, isA, isSet, isObject, isFunction, getCurrentModuleName, useModule, fromObject, hasOwn, Obj, Arr, Fn) {
+}, function(Logger, isA, isSet, isObject, isFunction, getCurrentModuleData, useModule, fromObject, hasOwn, Obj, Arr, Fn) {
     'use strict';
 
     var lang = this,
@@ -154,7 +154,7 @@ JAR.register({
 
     function createProxy() {
         return createProxyFor('module', {
-            module: getCurrentModuleName()
+            module: getCurrentModuleData().moduleName
         });
     }
 
@@ -840,7 +840,7 @@ JAR.register({
      * @return {Class}
      */
     function getClass(classHashOrName, moduleName) {
-        return (Classes[classHashOrName] || Classes[createClassHash(classHashOrName, moduleName || getCurrentModuleName())] || {}).Class;
+        return (Classes[classHashOrName] || Classes[createClassHash(classHashOrName, moduleName || getCurrentModuleData().moduleName)] || {}).Class;
     }
 
     /**
@@ -933,7 +933,7 @@ JAR.register({
      * @return {Class}
      */
     function ClassFactory(name, proto, staticProperties) {
-        var moduleName = getCurrentModuleName(),
+        var moduleName = getCurrentModuleData().moduleName,
             classHash = createClassHash(name, moduleName),
             Class;
 

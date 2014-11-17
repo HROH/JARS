@@ -1,10 +1,10 @@
 JAR.register({
     MID: 'jar.lang',
-    deps: {
+    deps: ['.::getCurrentModuleData', {
         System: ['::isSet', '::isFunction', '::isString', '!']
-    },
+    }],
     bundle: ['Array.*', 'assert.*', 'Date', 'Class.*', 'Constant', 'Function.*', 'I$Comparable', 'I$Iterable', 'Interface', 'M$Cloneable', 'M$Destructable', 'MixIn', 'Object.*', 'operations.*', 'String']
-}, function(isSet, isFunction, isString, config) {
+}, function(getCurrentModuleData, isSet, isFunction, isString, config) {
     'use strict';
 
     var jar = this,
@@ -263,7 +263,7 @@ JAR.register({
      * @param {Object} Type
      */
     function makePluggable(typeString, Type) {
-        var moduleName = jar.getCurrentModuleName(),
+        var moduleName = getCurrentModuleData().moduleName,
             subModuleName = moduleName + '.' + typeString + '-';
 
         Type.$plugIn = function(pluginRequest) {

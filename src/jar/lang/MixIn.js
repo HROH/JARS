@@ -2,10 +2,10 @@ JAR.register({
     MID: 'jar.lang.MixIn',
     deps: [{
         System: ['::isArray', 'Logger']
-    }, 'jar', {
+    }, 'jar::getCurrentModuleData', {
         '.Class': ['.', '::isClass', '::isInstance']
     }, '.Object', '.Array!check,derive,iterate', '.Function!modargs']
-}, function(isArray, Logger, jar, Class, isClass, isInstance, Obj, Arr, Fn) {
+}, function(isArray, Logger, getCurrentModuleData, Class, isClass, isInstance, Obj, Arr, Fn) {
     'use strict';
 
     var RECEIVER_MISSING = 0,
@@ -31,7 +31,7 @@ JAR.register({
                 this._$allowedClasses = Arr.filter(isArray(allowedClasses) ? allowedClasses : [allowedClasses], isClass);
                 this._$neededMixIns = Arr.filter(options.depends || [], MixIn.isInstance, MixIn);
                 this._$destructor = options.destructor;
-                this._$logger = new Logger('MixIn "#<' + jar.getCurrentModuleName() + ':' + mixInName + '>"', {
+                this._$logger = new Logger('MixIn "#<' + getCurrentModuleData().moduleName + ':' + mixInName + '>"', {
                     tpl: mixinTemplates
                 });
             },
