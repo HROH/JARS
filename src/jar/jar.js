@@ -116,10 +116,6 @@
                 check: STRING_CHECK
             },
 
-            fileType: {
-                check: STRING_CHECK
-            },
-
             minified: {
                 check: BOOLEAN_CHECK,
                 /**
@@ -275,6 +271,7 @@
              */
             setModuleConfig: function(newConfig) {
                 var System = LoaderManager.getSystem(),
+                    Resolver = LoaderManager.Resolver,
                     modules;
 
                 if (System.isArray(newConfig)) {
@@ -283,7 +280,7 @@
                     });
                 }
                 else if (System.isObject(newConfig)) {
-                    modules = newConfig.restrict ? LoaderManager.Resolver.resolve(newConfig.restrict) : [LoaderManager.Resolver.getRootName()];
+                    modules = newConfig.restrict ? Resolver.resolve(newConfig.restrict) : [Resolver.getRootName()];
 
                     arrayEach(modules, function updateModuleConfig(moduleName) {
                         configurationManagerUpdateModuleConfig(moduleName, newConfig);
@@ -360,25 +357,7 @@
     SourceManager = (function sourceManagerSetup() {
         var doc = global.document,
             head = doc.getElementsByTagName('head')[0],
-            scripts = {},
-            styleSheets = {},
-            createStyleSheet;
-
-        /**
-         * @access private
-         * 
-         * @memberof JAR~SourceManager
-         * @inner
-         * 
-         * @param {String} path
-         * 
-         * @return {HTMLLinkElement}
-         */
-        createStyleSheet = (doc.createStyleSheet ? function(path) {
-            return doc.createStyleSheet(path).owningElement;
-        } : function() {
-            return doc.createElement('link');
-        });
+            scripts = {};
 
         return {
             /**
@@ -399,7 +378,7 @@
              * @param {String} moduleName
              * @param {String} path
              */
-            addScript: function(moduleName, path) {
+            loadScript: function(moduleName, path) {
                 var script = doc.createElement('script');
 
                 head.appendChild(script);
@@ -446,46 +425,6 @@
                 head.removeChild(script);
 
                 delete scripts[moduleName];
-
-                return path;
-            },
-            /**
-             * @access public
-             * 
-             * @memberof JAR~SourceManager
-             * 
-             * @param {String} moduleName
-             * @param {String} path
-             */
-            addStyleSheet: function(moduleName, path) {
-                var styleSheet;
-
-                path = path;
-                styleSheet = createStyleSheet(path);
-
-                head.insertBefore(styleSheet, head.firstChild);
-
-                styleSheet.id = 'css:' + moduleName;
-                styleSheet.setAttribute('type', 'text/css');
-                styleSheet.setAttribute('rel', 'stylesheet');
-                styleSheet.setAttribute('href', path);
-                styleSheets[moduleName] = styleSheet;
-            },
-            /**
-             * @access public
-             * 
-             * @memberof JAR~SourceManager
-             * 
-             * @param {String} moduleName
-             * 
-             * @return {String}
-             */
-            removeStyleSheet: function(moduleName) {
-                var styleSheet = styleSheets[moduleName],
-                    path = styleSheet.href;
-
-                head.removeChild(styleSheet);
-                delete styleSheets[moduleName];
 
                 return path;
             }
@@ -824,7 +763,6 @@
                 module.loader = loader;
                 module.bundleName = Resolver.getBundleName(moduleName);
                 module.options = Resolver.getPathOptions(moduleName);
-                module.options.fileType = 'js';
 
                 module.dep = Resolver.getImplicitDependencyName(moduleName);
                 module.deps = [];
@@ -1229,19 +1167,33 @@
                  * 
                  * @return {String}
                  */
-                getFullPath: function(fileType) {
+                getFileName: function(fileType) {
                     var module = this,
-                        fullPath = [module.getConfig('baseUrl'), module.getConfig('dirPath'), module.getConfig('fileName')];
+                        cache = module.getConfig('cache') ? '' : '?_=' + new Date().getTime();
 
-                    fileType = fileType || module.getConfig('fileType');
-
-                    if (fileType !== 'css') {
-                        fullPath.push(module.getConfig('versionSuffix'), module.getConfig('minified'));
-                    }
-
-                    fullPath.push('.', fileType, module.getConfig('cache') ? '' : '?_=' + new Date().getTime());
-
-                    return fullPath.join('');
+                    return [module.getConfig('fileName'), module.getConfig('versionSuffix'), module.getConfig('minified'), '.', fileType, cache].join('');
+                },
+                /**
+                 * @access public
+                 * 
+                 * @memberof JAR~LoaderManager~Module#
+                 * 
+                 * @return {String}
+                 */
+                getPath: function() {
+                    return this.getConfig('baseUrl') + this.getConfig('dirPath');
+                },
+                /**
+                 * @access public
+                 * 
+                 * @memberof JAR~LoaderManager~Module#
+                 * 
+                 * @param {String} fileType
+                 * 
+                 * @return {String}
+                 */
+                getFullPath: function(fileType) {
+                    return this.getPath() + this.getFileName(fileType || 'js');
                 },
                 /**
                  * @access public
@@ -1468,7 +1420,7 @@
                         module.abort();
                     }, module.getConfig('timeout') * 1000);
 
-                    SourceManager.addScript(module.loader.context + ':' + module.name, path);
+                    SourceManager.loadScript(module.loader.context + ':' + module.name, path);
                 },
                 /**
                  * @access public
@@ -1834,12 +1786,13 @@
              */
             getCurrentModuleData: function() {
                 var loader = this,
-                    moduleName = loader.currentModuleName;
+                    moduleName = loader.currentModuleName,
+                    module = loader.getModule(moduleName);
 
                 return {
                     moduleName: moduleName,
 
-                    url: loader.getModule(moduleName).getFullPath()
+                    url: module.getFullPath()
                 };
             },
             /**
@@ -1942,10 +1895,6 @@
                 if (!module.isRegistered(true)) {
                     module.register(factory);
 
-                    if (properties.styles) {
-                        SourceManager.addStyleSheet(moduleName, module.getFullPath('css'));
-                    }
-
                     module.linkBundle(properties.bundle);
 
                     module.linkDeps(properties.deps, properties.autoRegLvl);
@@ -1986,11 +1935,16 @@
              */
             intercept: function(interceptedModuleName, listeningModuleName, callback, errback) {
                 var loader = this,
+                    listeningModule = !Resolver.isRootName(listeningModuleName) && loader.getModule(listeningModuleName),
                     interceptorInfo = Resolver.extractInterceptorInfo(interceptedModuleName);
 
                 return interceptorInfo.type ? function interceptionListener(moduleName) {
                     interceptors[interceptorInfo.type]({
                         listener: listeningModuleName,
+
+                        getFilePath: function(fileType) {
+                            return listeningModule && listeningModule.getFullPath(fileType);
+                        },
 
                         module: loader.getModuleRef(moduleName),
 
@@ -1999,12 +1953,11 @@
                         $import: LoaderManager.$importLazy,
 
                         $importAndLink: function(moduleNames, callback, errback, progressback) {
-                            var listeningModule, interceptorDeps;
+                            var interceptorDeps;
 
                             moduleNames = Resolver.resolve(moduleNames, interceptedModuleName);
 
-                            if (!Resolver.isRootName(listeningModuleName)) {
-                                listeningModule = loader.getModule(listeningModuleName),
+                            if (listeningModule) {
                                 interceptorDeps = listeningModule.interceptorDeps;
                                 interceptorDeps.push.apply(interceptorDeps, moduleNames);
                             }
@@ -3782,7 +3735,7 @@
              * @return {String}
              */
             main: function(mainScript, oldMainScript) {
-                return oldMainScript || (mainScript && SourceManager.addScript('main', mainScript + '.js'));
+                return oldMainScript || (mainScript && SourceManager.loadScript('main', mainScript + '.js'));
             },
             /**
              * @param {Object} environments
