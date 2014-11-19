@@ -1458,8 +1458,6 @@
                     var module = this,
                         path = module.getFullPath();
 
-                    module.manageImplicitDep();
-
                     module.log(MSG_MODULE_LOADING, false, {
                         path: path
                     });
@@ -1667,9 +1665,12 @@
                  * @memberof JAR~LoaderManager~Module#
                  * 
                  * @param {Array} dependencies
+                 * @param {Number} autoRegisterLevel
                  */
-                linkDeps: function(dependencies) {
-                    var module = this;
+                linkDeps: function(dependencies, autoRegisterLevel) {
+                    var module = this,
+                        loader = module.loader,
+                        implicitDependency = module.dep;
 
                     module.deps = dependencies = Resolver.resolve(dependencies, module.name);
 
@@ -1678,20 +1679,6 @@
                             deps: dependencies.join(separator)
                         });
                     }
-
-                    module.listenFor(dependencies);
-                },
-                /**
-                 * @access public
-                 * 
-                 * @memberof JAR~LoaderManager~Module#
-                 * 
-                 * @param {Number} autoRegisterLevel
-                 */
-                manageImplicitDep: function(autoRegisterLevel) {
-                    var module = this,
-                        loader = module.loader,
-                        implicitDependency = module.dep;
 
                     if (implicitDependency) {
                         if (autoRegisterLevel > 0) {
@@ -1703,14 +1690,17 @@
                                 autoRegLvl: --autoRegisterLevel
                             });
                         }
-                        else if (module.isState(MODULE_LOADED_MANUAL) || module.isState(MODULE_WAITING)) {
+                        else {
                             module.log(MSG_DEPENDENCY_FOUND, false, {
                                 dep: implicitDependency
                             });
 
-                            module.listenFor([implicitDependency]);
+                            dependencies = module.getAllDeps();
                         }
                     }
+
+
+                    module.listenFor(dependencies);
                 },
                 /**
                  * @access public
@@ -1951,9 +1941,7 @@
 
                     module.linkBundle(properties.bundle);
 
-                    module.linkDeps(properties.deps);
-
-                    module.manageImplicitDep(properties.autoRegLvl);
+                    module.linkDeps(properties.deps, properties.autoRegLvl);
 
                     if (module.checkForCircularDeps()) {
                         module.abort();
