@@ -3,12 +3,11 @@ JAR.register({
     deps: ['.::getCurrentModuleData', {
         System: ['::isSet', '::isFunction', '::isString', '!']
     }],
-    bundle: ['Array.*', 'assert.*', 'Date', 'Class.*', 'Constant', 'Function.*', 'I$Comparable', 'I$Iterable', 'Interface', 'M$Cloneable', 'M$Destructable', 'MixIn', 'Object.*', 'operations.*', 'String']
+    bundle: ['Array.*', 'assert.*', 'Class.*', 'Constant', 'Date', 'Enum', 'Function.*', 'I$Comparable', 'I$Iterable', 'Interface', 'M$Cloneable', 'M$Destructable', 'MixIn', 'Object.*', 'operations.*', 'String']
 }, function(getCurrentModuleData, isSet, isFunction, isString, config) {
     'use strict';
 
-    var jar = this,
-        sandboxes = {},
+    var sandboxes = {},
         container = document.documentElement,
         __SANDBOX__ = '__SANDBOX__',
         hasOwn = {}.hasOwnProperty,

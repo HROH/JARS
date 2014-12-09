@@ -1,22 +1,23 @@
 JAR.register({
     MID: 'jar.lang.operations.Logical',
-    deps: ['.::createOperation', '..Object!iterate']
-}, function(createOperation, Obj) {
+    deps: ['.::createOperation', '.::operands', '..Object!iterate', '.Enum']
+}, function(createOperation, operands, Obj, Enum) {
     'use strict';
 
-    var Logical = {},
-        logicalOperators = {
+    var Logical = {
+        operators: new Enum({
             and: '&&',
 
-            or: '||'
-        };
+            or: '||',
 
-    Obj.each(logicalOperators, function(logicalOperator, methodName) {
+            xor: '?!' + operands.second + ':!!'
+        })
+    };
+
+    Obj.each(Logical.operators.values(), function(logicalOperator, methodName) {
         Logical[methodName] = Logical[logicalOperator] = createOperation(logicalOperator);
         Logical['n' + methodName] = Logical['!' + logicalOperator] = createOperation(logicalOperator, true);
     });
-    
-    Logical.xor = createOperation('?!b:!!');
 
     return Logical;
 });

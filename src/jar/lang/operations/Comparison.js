@@ -1,7 +1,7 @@
 JAR.register({
     MID: 'jar.lang.operations.Comparison',
-    deps: ['.::createOperation', '..Object!iterate']
-}, function(createOperation, Obj) {
+    deps: ['.::createOperation', '..Object!iterate', '..Enum']
+}, function(createOperation, Obj, Enum) {
     'use strict';
 
     /**
@@ -10,41 +10,47 @@ JAR.register({
      * @namespace Comparison
      * @memberof jar.lang.operations
      */
-    var Comparison = {},
-        comparators = {
+    var Comparison = {
+        operators: new Enum({
             Equal: {
                 op: '==',
 
                 alias: 'eq'
             },
+
             StrictEqual: {
                 op: '===',
 
                 alias: 'seq'
             },
+
             LowerThan: {
                 op: '<',
 
                 alias: 'lt'
             },
+
             LowerThanOrEqual: {
                 op: '<=',
 
                 alias: 'lte'
             },
+
             GreaterThan: {
                 op: '>',
 
                 alias: 'gt'
             },
+
             GreaterThanOrEqual: {
                 op: '>=',
 
                 alias: 'gte'
             }
-        };
+        })
+    };
 
-    Obj.each(comparators, function(comparator, comparisonName) {
+    Obj.each(Comparison.operators.values(), function(comparator, comparisonName) {
         var operator = comparator.op,
             alias = comparator.alias,
             negatedOperator = '!' + (operator.indexOf('=') === 0 ? operator.substring(1) : operator);

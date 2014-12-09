@@ -1,11 +1,11 @@
 JAR.register({
     MID: 'jar.lang.operations.Arithmetic',
-    deps: ['.::createOperation', '..Object!iterate']
-}, function(createOperation, Obj) {
+    deps: ['.::createOperation', '..Object!iterate', '..Enum']
+}, function(createOperation, Obj, Enum) {
     'use strict';
 
-    var Arithmetic = {},
-        arithmeticOperators = {
+    var Arithmetic = {
+        operators: new Enum({
             add: '+',
 
             subtract: '-',
@@ -15,9 +15,10 @@ JAR.register({
             divideBy: '/',
 
             modulo: '%'
-        };
+        })
+    };
 
-    Obj.each(arithmeticOperators, function(arithmeticOperator, arithmeticOperationName) {
+    Obj.each(Arithmetic.operators.values(), function(arithmeticOperator, arithmeticOperationName) {
         Arithmetic[arithmeticOperationName] = Arithmetic[arithmeticOperator] = createOperation(arithmeticOperator);
     });
 
