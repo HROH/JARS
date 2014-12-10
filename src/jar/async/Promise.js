@@ -3,12 +3,13 @@ JAR.register({
     deps: [{
         System: ['::isA', '::isSet', '::isObject', '::isArrayLike', '::isFunction', '!']
     }, 'jar', {
-        '..lang': ['Class', 'Object!derive,info,iterate', 'Array!iterate,reduce']
+        '..lang': ['Class', 'Object!derive,info,iterate', 'Array!iterate,reduce', '.Enum']
     }]
-}, function(isA, isSet, isObject, isArrayLike, isFunction, config, jar, Class, Obj, Arr) {
+}, function(isA, isSet, isObject, isArrayLike, isFunction, config, jar, Class, Obj, Arr, Enum) {
     'use strict';
 
     // TODO support stacktraces:
+    // - formating error messages
     // - combine stacks of previous and current error
     // - filter unwanted information
     // - resources: https://github.com/kriskowal/q/blob/v2/q.js
@@ -17,16 +18,19 @@ JAR.register({
 
     var async = this,
         rejectionHandlers = Arr(),
-        PROMISE_INIT = 1,
-        PROMISE_PENDING = 2,
-        PROMISE_REJECTED = 4,
-        PROMISE_RESOLVED = 8,
+        promiseState = new Enum(['INIT', 'PENDING', 'REJECTED', 'RESOLVED']),
         handleMap = Obj.from({
-            resolve: PROMISE_RESOLVED,
-            reject: PROMISE_REJECTED,
-            notify: PROMISE_PENDING
+            resolve: promiseState.RESOLVED,
+            reject: promiseState.REJECTED,
+            notify: promiseState.PENDING
         }),
         stateMap = handleMap.invert(),
+        ERROR_PROMISE_DESTRUCTED_REJECTION = 'The connected promise was destructed',
+        ERROR_PROMISE_SELF_RESOLUTION = '${promiseHash} can\'t be resolved with itself!',
+        ERROR_PROMISE_TIMEOUT_REJECTION = 'Timed out after ${ms} ms',
+        ERROR_PROMISE_INCORRECT_REJECTION = '${promiseHash} must be rejected with an error!',
+        ERROR_PROMISE_INFINITE_RECURSION = 'Infinite recursion between ${firstPromiseHash} and ${secondPromiseHash}',
+        ERROR_PROMISE_UNHANDLED_REJECTION = 'Unhandled rejection of "${promiseHash}" with reason: ${reason}',
         Promise;
 
     Promise = Class('Promise', {
@@ -66,9 +70,12 @@ JAR.register({
                 var promise = this,
                     linkedPromiseData = {
                         promise: new promise._$ChainClass(null, true),
+
                         callbacks: {
                             resolve: doneCallback,
+
                             reject: failCallback,
+
                             notify: progressCallback
                         }
                     };
@@ -83,15 +90,35 @@ JAR.register({
             },
 
             isResolved: function() {
-                return this._$state === PROMISE_RESOLVED;
+                return this._$state === promiseState.RESOLVED;
             },
 
             isRejected: function() {
-                return this._$state === PROMISE_REJECTED;
+                return this._$state === promiseState.REJECTED;
             },
 
             isInitialized: function() {
-                return this._$state !== PROMISE_INIT;
+                return this._$state !== promiseState.INIT;
+            },
+
+            delay: function(ms) {
+                var promise = this;
+
+                return new promise._$ChainClass(function(resolve, reject, notify) {
+                    promise.then(function promiseDelay(value) {
+                        async.wait(resolve, ms, value);
+                    }, reject, notify);
+                });
+            },
+
+            timeout: function(ms, reason) {
+                var promise = this;
+
+                return new promise._$ChainClass(function promiseTimeout(resolve, reject, notify) {
+                    async.wait(reject, ms, new Error(reason || ERROR_PROMISE_TIMEOUT_REJECTION.replace('${ms}', ms)));
+
+                    promise.then(resolve, reject, notify);
+                });
             }
         },
 
@@ -125,26 +152,6 @@ JAR.register({
             return this.isResolved() || this.isRejected();
         },
 
-        delay: function(ms) {
-            var promise = this;
-
-            return new promise._$ChainClass(function(resolve, reject, notify) {
-                promise.then(function promiseDelay(value) {
-                    async.wait(resolve, ms, value);
-                }, reject, notify);
-            });
-        },
-
-        timeout: function(ms, reason) {
-            var promise = this;
-
-            return new promise._$ChainClass(function promiseTimeout(resolve, reject, notify) {
-                async.wait(reject, ms, new Error(reason || 'Timed out after ' + ms + ' ms'));
-
-                promise.then(resolve, reject, notify);
-            });
-        },
-
         catchError: function(ErrorClass, catchCallback) {
             return this.fail(function promiseFilterError(reason) {
                 if (isA(reason, ErrorClass)) {
@@ -157,7 +164,7 @@ JAR.register({
         },
 
         _$: {
-            state: PROMISE_INIT,
+            state: promiseState.INIT,
 
             handles: null,
 
@@ -168,7 +175,7 @@ JAR.register({
             ChainClass: null,
 
             setInitialized: function() {
-                this._$state = PROMISE_PENDING;
+                this._$state = promiseState.PENDING;
             },
 
             hasPromiseInChain: function(valueAsPromise) {
@@ -189,7 +196,7 @@ JAR.register({
 
                     if (errorMessage) {
                         value = new Error(errorMessage);
-                        newState = PROMISE_REJECTED;
+                        newState = promiseState.REJECTED;
                     }
 
                     if (isA(value, Promise) || isThenable(value)) {
@@ -212,9 +219,9 @@ JAR.register({
                 if (linkedPromises.length) {
                     linkedPromises.each(this._$invokeCallback, promise);
 
-                    state !== PROMISE_PENDING && (linkedPromises.length = 0);
+                    state !== promiseState.PENDING && (linkedPromises.length = 0);
                 }
-                else if (state === PROMISE_REJECTED) {
+                else if (state === promiseState.REJECTED) {
                     handleUnhandledRejection(promise, promise._$value);
                 }
             },
@@ -230,7 +237,7 @@ JAR.register({
                 if (isFunction(callback)) {
                     value = tryCatch(callback, [value], handles.reject);
 
-                    state === PROMISE_REJECTED && (state = PROMISE_RESOLVED);
+                    state === promiseState.REJECTED && (state = promiseState.RESOLVED);
                 }
 
                 handles[stateMap[state]](value);
@@ -350,7 +357,7 @@ JAR.register({
     });
 
     Promise.addDestructor(function promiseDestructor() {
-        this._$handles.reject(new Error('The connected promise was destructed'));
+        this._$handles.reject(new Error(ERROR_PROMISE_DESTRUCTED_REJECTION));
     });
 
     function proxiedTransitionState(newState, value) {
@@ -405,16 +412,16 @@ JAR.register({
         var promiseHash = promise.getHash(),
             errorMessage;
 
-        if (newState === PROMISE_RESOLVED && isA(value, Promise)) {
+        if (newState === promiseState.RESOLVED && isA(value, Promise)) {
             if (value === promise) {
-                errorMessage = promiseHash + ' can\'t be resolved with itself!';
+                errorMessage = ERROR_PROMISE_SELF_RESOLUTION.replace('${promiseHash}', promiseHash);
             }
             else if (config.checkInfiniteRecursion && (promise._$hasPromiseInChain(value) || promise.$proxy(value, proxiedHasPromiseInChain, [promise]))) {
-                errorMessage = 'Infinite recursion between ' + promiseHash + ' and ' + value.getHash();
+                errorMessage = ERROR_PROMISE_INFINITE_RECURSION.replace('${firstPromiseHash}', promiseHash).replace('${secondPromiseHash}', value.getHash());
             }
         }
-        else if (newState === PROMISE_REJECTED && !isA(value, Error)) {
-            errorMessage = promiseHash + ' must be rejected with an error!';
+        else if (newState === promiseState.REJECTED && !isA(value, Error)) {
+            errorMessage = ERROR_PROMISE_INCORRECT_REJECTION.replace('${promiseHash}', promiseHash);
         }
 
         return errorMessage;
@@ -427,7 +434,7 @@ JAR.register({
             });
         }
         else {
-            throw new UnhandledRejectionError('Unhandled rejection of "' + promise.getHash() + '" with reason: ' + reason);
+            throw new UnhandledRejectionError(ERROR_PROMISE_UNHANDLED_REJECTION.replace('', promise.getHash()).replace('${reason}', reason));
         }
     }
 
@@ -445,6 +452,7 @@ JAR.register({
 
     UnhandledRejectionError.prototype = Obj.extend(new Error(), {
         constructor: UnhandledRejectionError,
+
         name: 'UnhandledRejectionError'
     });
 
