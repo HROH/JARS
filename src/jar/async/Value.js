@@ -1,6 +1,6 @@
 JAR.register({
     MID: 'jar.async.Value',
-    deps: ['.Timer', {
+    deps: ['.Scheduler', {
         System: ['::isSet', '::isA', '::isFunction']
     }, {
         'jar.lang': ['Array!iterate,reduce', 'Class', {
@@ -8,7 +8,7 @@ JAR.register({
         }, 'Function::noop', 'Constant']
     }],
     bundle: ['M$Acceptable', 'M$Accumulator', 'M$Debuggable', 'M$Decidable', 'M$FlowRegulator', 'M$Forwardable', 'M$Mappable', 'M$Memorizable', 'M$Mergable', 'M$Skippable', 'M$Takeable']
-}, function(Timer, isSet, isA, isFunction, Arr, Class, Obj, hasOwn, noop, Constant) {
+}, function(Scheduler, isSet, isA, isFunction, Arr, Class, Obj, hasOwn, noop, Constant) {
     'use strict';
 
     var VALUE_UPDATE = 0,
@@ -41,9 +41,9 @@ JAR.register({
 
     Value = Class('Value', Obj.extend({
         $: {
-            construct: function(value, changeTimer) {
+            construct: function(value, changeScheduler) {
                 this._$handles = Obj();
-                this._$changeTimer = isA(changeTimer, Timer) ? changeTimer : new Timer();
+                this._$changeScheduler = isA(changeScheduler, Scheduler) ? changeScheduler : new Scheduler();
 
                 arguments.length && this.assign(value);
             },
@@ -71,9 +71,9 @@ JAR.register({
                     $proxy = value.$proxy,
                     subscriptionID = false,
                     onFreeze = subscription.onFreeze,
-                    changeTimer = value._$changeTimer;
+                    changeScheduler = value._$changeScheduler;
 
-                changeTimer.isRunning() || changeTimer.schedule(function scheduleInit() {
+                changeScheduler.isRunning() || changeScheduler.schedule(function scheduleInit() {
                     $proxy(value, function proxiedInit() {
                         Arr.each(changes, function invokeHandleInitial(change) {
                             if (value['_$' + change.counter]) {
@@ -133,13 +133,13 @@ JAR.register({
 
             nextHandleID: 0,
 
-            changeTimer: null,
+            changeScheduler: null,
 
             scheduleChange: function(changeType, changer) {
                 var value = this,
                     $proxy = value.$proxy;
 
-                value._$changeTimer.schedule(function changeTask() {
+                value._$changeScheduler.schedule(function changeTask() {
                     $proxy(value, function proxiedChange() {
                         var value = this,
                             change = changes[changeType],
