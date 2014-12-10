@@ -11,7 +11,11 @@ JAR.register({
      * Extend jar.lang.Array with some useful methods
      * If a native implementation exists it will be used instead
      */
-    var ArrayCopy = this.extendNativeType('Array', {
+    var MSG_REQUIRES_ARRAYLIKE = 'Array.from requires an array-like object - not null or undefined',
+        MSG_NO_FUNCTION = 'Array.from: when provided, the second argument must be a function',
+        ArrayCopy;
+
+    ArrayCopy = this.extendNativeType('Array', {
         // add some sugar (example: jar.lang.Array.push(arrayLike, value1, value2, ...) )
         concat: true,
 
@@ -46,11 +50,9 @@ JAR.register({
         var index = 0,
             newArray, len;
 
-        assertIsSet(arrayLike, 'Array.from requires an array-like object - not null or undefined');
+        assertIsSet(arrayLike, MSG_REQUIRES_ARRAYLIKE);
 
-        if (mapFn) {
-            assertIsFunction(mapFn, 'Array.from: when provided, the second argument must be a function');
-        }
+        mapFn && assertIsFunction(mapFn, MSG_NO_FUNCTION);
 
         len = arrayLike.length >>> 0;
 
