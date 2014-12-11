@@ -1,17 +1,17 @@
 JAR.register({
     MID: 'jar.async.Importer',
-    deps: ['..', '..lang.Array', '.Deferred']
-}, function(jar, Arr, Deferred) {
+    deps: ['..', '..lang.Array', '.Deferred', '.TimeoutExecutor']
+}, function(jar, Arr, Deferred, TimeoutExecutor) {
     'use strict';
 
-    var async = this,
+    var delayedExecutor = new TimeoutExecutor(10),
         Importer;
 
     Importer = Deferred.createSubClass('Importer', {
         $import: function(moduleNames) {
             var deferred = this;
 
-            async.wait(function() {
+            delayedExecutor.request(function() {
                 jar.$importLazy(moduleNames, function() {
                     deferred.resolve(Arr.from(arguments));
                 }, function(abortedModuleName) {
@@ -22,7 +22,7 @@ JAR.register({
                         percentage: percentageLoaded
                     });
                 });
-            }, 10);
+            });
 
             return deferred.getPromise();
         }

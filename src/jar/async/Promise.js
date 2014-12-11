@@ -1,11 +1,11 @@
 JAR.register({
     MID: 'jar.async.Promise',
     deps: [{
-        System: ['::isA', '::isSet', '::isObject', '::isArrayLike', '::isFunction', '!']
-    }, 'jar', {
-        '..lang': ['Class', 'Object!derive,info,iterate', 'Array!iterate,reduce', '.Enum']
-    }]
-}, function(isA, isSet, isObject, isArrayLike, isFunction, config, jar, Class, Obj, Arr, Enum) {
+        System: ['::isA', '::isObject', '::isArrayLike', '::isFunction', '!']
+    }, {
+        '..lang': ['Class', 'Object!derive,info,iterate', 'Array!iterate,reduce', '.Enum', '.Function!modargs']
+    }, '.Scheduler', '.TimeputExecutor']
+}, function(isA, isObject, isArrayLike, isFunction, config, Class, Obj, Arr, Enum, Fn, Scheduler, TimeoutExecutor) {
     'use strict';
 
     // TODO support stacktraces:
@@ -16,7 +16,7 @@ JAR.register({
     // Unhandled rejection:
     // - always throw, consume per promise or consume if configured?
 
-    var async = this,
+    var scheduler = new Scheduler(),
         rejectionHandlers = Arr(),
         promiseState = new Enum(['INIT', 'PENDING', 'REJECTED', 'RESOLVED']),
         handleMap = Obj.from({
@@ -52,15 +52,10 @@ JAR.register({
                     resolve = handles.resolve,
                     reject = handles.reject;
 
-                if (isSet(resolver) && !promise.isInitialized()) {
+                if (isFunction(resolver) && !promise.isInitialized()) {
                     promise._$setInitialized();
 
-                    if (isFunction(resolver)) {
-                        async.wait(tryCatch, 0, resolver, [resolve, reject, handles.notify], reject);
-                    }
-                    else {
-                        async.wait(resolve, 0, resolver);
-                    }
+                    scheduler.schedule(Fn.partial(tryCatch, resolver, [resolve, reject, handles.notify], reject));
                 }
 
                 return this;
@@ -83,7 +78,7 @@ JAR.register({
                 promise._$promises.push(linkedPromiseData);
 
                 if (promise.isFinished()) {
-                    async.wait(promise.$proxy, 0, promise, promise._$invokeAll);
+                    scheduler.schedule(Fn.partial(promise.$proxy, promise, promise._$invokeAll));
                 }
 
                 return linkedPromiseData.promise;
@@ -106,16 +101,18 @@ JAR.register({
 
                 return new promise._$ChainClass(function(resolve, reject, notify) {
                     promise.then(function promiseDelay(value) {
-                        async.wait(resolve, ms, value);
+                        new TimeoutExecutor(ms).request(Fn.partial(resolve, value));
                     }, reject, notify);
                 });
             },
 
             timeout: function(ms, reason) {
                 var promise = this;
+                
+                reason = reason || ERROR_PROMISE_TIMEOUT_REJECTION.replace('${ms}', ms);
 
                 return new promise._$ChainClass(function promiseTimeout(resolve, reject, notify) {
-                    async.wait(reject, ms, new Error(reason || ERROR_PROMISE_TIMEOUT_REJECTION.replace('${ms}', ms)));
+                    new TimeoutExecutor(ms).request(Fn.partial(reject, new Error(reason)));
 
                     promise.then(resolve, reject, notify);
                 });
@@ -139,7 +136,7 @@ JAR.register({
         },
 
         all: function() {
-            return this.then(this.Class.all);
+            return this.then(Fn.bind(this.Class.all, this.Class));
         },
 
         spread: function(spreadCallback, failCallback, progressCallback) {
@@ -199,7 +196,7 @@ JAR.register({
                         newState = promiseState.REJECTED;
                     }
 
-                    if (isA(value, Promise) || isThenable(value)) {
+                    if (Promise.isInstance(value) || isThenable(value)) {
                         value.then(handles.resolve, handles.reject, handles.notify);
                     }
                     else {
@@ -252,7 +249,7 @@ JAR.register({
             var PromiseClass = this,
                 promise;
 
-            if (isA(value, PromiseClass)) {
+            if (PromiseClass.isInstance(value)) {
                 promise = value;
             }
             else if (isThenable(value)) {
@@ -260,8 +257,11 @@ JAR.register({
                     value.then(resolve, reject, notify);
                 });
             }
-            else {
+            else if (isFunction(value)) {
                 promise = new PromiseClass(value);
+            }
+            else {
+                promise = PromiseClass.resolved(value);
             }
 
             return promise;
@@ -412,7 +412,7 @@ JAR.register({
         var promiseHash = promise.getHash(),
             errorMessage;
 
-        if (newState === promiseState.RESOLVED && isA(value, Promise)) {
+        if (newState === promiseState.RESOLVED && Promise.isInstance(value)) {
             if (value === promise) {
                 errorMessage = ERROR_PROMISE_SELF_RESOLUTION.replace('${promiseHash}', promiseHash);
             }
