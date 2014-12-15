@@ -1,51 +1,33 @@
 JAR.register({
     MID: 'jar.async.Value',
     deps: ['.Scheduler', {
-        System: ['::isSet', '::isA', '::isFunction']
-    }, {
-        'jar.lang': ['Array!iterate,reduce', 'Class', {
+        System: ['::isSet', '::isA', '::isFunction'],
+        'jar.lang': ['Class', {
             Object: ['!derive,iterate', '::hasOwn']
-        }, 'Function::noop', 'Constant']
+        }, 'Function::noop', 'Constant', 'Enum']
     }],
     bundle: ['M$Acceptable', 'M$Accumulator', 'M$Debuggable', 'M$Decidable', 'M$FlowRegulator', 'M$Forwardable', 'M$Mappable', 'M$Memorizable', 'M$Mergable', 'M$Skippable', 'M$Takeable']
-}, function(Scheduler, isSet, isA, isFunction, Arr, Class, Obj, hasOwn, noop, Constant) {
+}, function(Scheduler, isSet, isA, isFunction, Class, Obj, hasOwn, noop, Constant, Enum) {
     'use strict';
 
-    var VALUE_UPDATE = 0,
-        VALUE_ERROR = 1,
-        VALUE_FREEZE = 2,
-        changes = [],
+    var setZero = Constant(0),
+        events = new Enum(['UPDATE', 'ERROR', 'FREEZE'], {
+            mirror: true
+        }),
+        handleNames = Obj.map(events.values(), function(event) {
+            return 'on' + event.charAt(0) + event.substr(1).toLowerCase();
+        }),
         Value;
-
-    changes[VALUE_UPDATE] = {
-        handle: 'onUpdate',
-
-        counter: 'updated',
-
-        key: 'value'
-    };
-
-    changes[VALUE_ERROR] = {
-        handle: 'onError',
-
-        counter: 'errored',
-
-        key: 'error'
-    };
-
-    changes[VALUE_FREEZE] = {
-        handle: 'onFreeze',
-
-        counter: 'frozen'
-    };
 
     Value = Class('Value', Obj.extend({
         $: {
             construct: function(value, changeScheduler) {
-                this._$handles = Obj();
+                this._$counters = Obj.map(events.values(), setZero);
+                this._$valueRefs = {};
+                this._$subscribers = Obj();
                 this._$changeScheduler = isA(changeScheduler, Scheduler) ? changeScheduler : new Scheduler();
 
-                arguments.length && this.assign(value);
+                isSet(value) && this.assign(value);
             },
 
             assign: assignValue,
@@ -53,17 +35,17 @@ JAR.register({
             '=': assignValue,
 
             update: function(updater) {
-                return this._$scheduleChange(VALUE_UPDATE, updater);
+                return this._$scheduleChange(events.UPDATE, updater);
             },
 
             error: function(newError) {
                 isA(newError, Error) || (newError = new TypeError('Expected value.error() to be called with Error object'));
 
-                return this._$scheduleChange(VALUE_ERROR, Constant(newError));
+                return this._$scheduleChange(events.ERROR, Constant(newError));
             },
 
             freeze: function() {
-                return this._$scheduleChange(VALUE_FREEZE, noop);
+                return this._$scheduleChange(events.FREEZE, noop);
             },
 
             subscribe: function(subscription) {
@@ -73,95 +55,84 @@ JAR.register({
                     onFreeze = subscription.onFreeze,
                     changeScheduler = value._$changeScheduler;
 
-                changeScheduler.isRunning() || changeScheduler.schedule(function scheduleInit() {
+                changeScheduler.isScheduled() || changeScheduler.schedule(function scheduleInit() {
                     $proxy(value, function proxiedInit() {
-                        Arr.each(changes, function invokeHandleInitial(change) {
-                            if (value['_$' + change.counter]) {
-                                value._$attemptInvokeHandle(subscription, change.handle, value['_$' + change.key]);
+                        Obj.each(events.values(), function invokeSubscriberInitial(event) {
+                            if (value._$counters[event]) {
+                                value._$invokeSubscriber(subscription, handleNames[event], value._$valueRefs[event]);
                             }
                         });
                     });
                 });
 
-                if (!value._$frozen) {
-                    subscriptionID = value.getHash() + ' handle_id:' + value._$nextHandleID;
+                if (!value._$counters[events.FREEZE]) {
+                    subscriptionID = value.getHash() + ' subscriber_id:' + value._$nextSubscriberID;
 
-                    value._$nextHandleID++;
-                    value._$handlesCount++;
+                    value._$nextSubscriberID++;
 
                     subscription.onFreeze = function() {
                         onFreeze && onFreeze.call(subscription);
                         value.unsubscribe(subscriptionID);
                     };
 
-                    value._$handles[subscriptionID] = subscription;
+                    value._$subscribers[subscriptionID] = subscription;
                 }
 
                 return subscriptionID;
             },
 
             unsubscribe: function(subscriptionID) {
-                var handles = this._$handles,
+                var subscribers = this._$subscribers,
                     unsubscribed = false;
 
-                if (hasOwn(handles, subscriptionID)) {
-                    this._$handlesCount--;
-
-                    delete handles[subscriptionID];
+                if (hasOwn(subscribers, subscriptionID)) {
+                    delete subscribers[subscriptionID];
 
                     unsubscribed = true;
                 }
 
                 return unsubscribed;
+            },
+
+            countSubscribers: function() {
+                return this._$subscribers.size();
             }
         },
 
         _$: {
-            value: null,
+            valueRefs: null,
 
-            updated: 0,
+            counters: null,
 
-            error: null,
+            subscribers: null,
 
-            errored: 0,
-
-            frozen: 0,
-
-            handles: null,
-
-            handlesCount: 0,
-
-            nextHandleID: 0,
+            nextSubscriberID: 0,
 
             changeScheduler: null,
 
-            scheduleChange: function(changeType, changer) {
+            scheduleChange: function(event, changer) {
                 var value = this,
                     $proxy = value.$proxy;
 
                 value._$changeScheduler.schedule(function changeTask() {
                     $proxy(value, function proxiedChange() {
                         var value = this,
-                            change = changes[changeType],
-                            handleMethod = change.handle,
-                            key = change.key,
-                            currentValue = value['_$' + key],
+                            currentValue = value._$valueRefs[event],
                             newValue;
 
-                        if (!this._$frozen) {
+                        if (!this._$counters[events.FREEZE]) {
                             newValue = changer(currentValue);
 
-                            value._$handles.each(function forwardValueToHandle(handle) {
-                                value._$attemptInvokeHandle(handle, handleMethod, newValue);
+                            value._$counters[event]++;
+                            value._$valueRefs[event] = newValue;
+
+                            value._$subscribers.each(function forwardValueToSubscriber(subscriber) {
+                                value._$invokeSubscriber(subscriber, handleNames[event], newValue);
                             });
 
-                            if (changeType === VALUE_ERROR && !value._$handlesCount) {
-                                value._$onUnhandledError(newValue);
+                            if (event === events.ERROR && !value.countSubscribers()) {
+                                throw new Error(newValue.message);
                             }
-
-                            key && (value['_$' + key] = newValue);
-
-                            value['_$' + change.counter]++;
                         }
                     });
                 });
@@ -169,54 +140,27 @@ JAR.register({
                 return this;
             },
 
-            attemptInvokeHandle: function(handle, handleType, value) {
-                var isUnHandledError = false;
-
-                try {
-                    if (handle[handleType]) {
-                        handle[handleType](value);
-                    }
-                    else {
-                        isUnHandledError = handleType === changes[VALUE_ERROR].handle;
-                    }
+            invokeSubscriber: function(subscriber, handleName, value) {
+                if (isFunction(subscriber[handleName])) {
+                    subscriber[handleName](value);
                 }
-                catch (e) {
-                    if (handle.error) {
-                        handle.error(e);
-                    }
-                    else {
-                        value = e;
-                        isUnHandledError = true;
-                    }
+                else if (handleName === handleNames[events.ERROR]) {
+                    throw new Error(value.message);
                 }
-
-                isUnHandledError && this._$onUnhandledError(value);
-            },
-
-            onUnhandledError: function(error) {
-                this.Class.logger.error('Unhandled ${name}: ${message} for ${hash}', {
-                    name: error.name,
-
-                    message: error.message,
-
-                    hash: this.getHash()
-                });
             }
         }
-    }, Arr.reduce(changes, addHandleSubscriber, {})));
+    }, Obj.invert(handleNames).map(addSubscriberHandle)), {
+        events: events
+    });
 
-    function addHandleSubscriber(handleSubscribers, change) {
-        var handleName = change.handle;
-
-        handleSubscribers[handleName] = function(handle) {
+    function addSubscriberHandle(event, handleName) {
+        return function(handle) {
             var subscription = {};
 
             subscription[handleName] = handle;
 
             return this.subscribe(subscription);
         };
-
-        return handleSubscribers;
     }
 
     function assignValue(newValue) {
