@@ -16,7 +16,7 @@ JAR.register({
 
                 if (isArray(enums)) {
                     enums = Arr.reduce(enums, function aggregateEnums(enumsObject, key, index) {
-                        enumsObject[key.toUpperCase()] = options.bitSteps ? Math.pow(BASE_TWO, index) : index;
+                        enumsObject[key] = options.bitSteps ? Math.pow(BASE_TWO, index) : options.mirror ? key : index;
 
                         return enumsObject;
                     }, {});
