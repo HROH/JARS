@@ -1,18 +1,24 @@
 JAR.register({
     MID: 'jar.async.Deferred',
-    deps: ['.Promise', '..lang.Class']
-}, function(Promise, Class) {
+    deps: ['.Promise', '.Value', '..lang.Class']
+}, function(Promise, Value, Class) {
     'use strict';
-	
-	var Deferred = Class('Deferred', {
+
+    var Deferred = Class('Deferred', {
         $: {
             construct: function() {
                 var deferred = this,
-                    promise;
+                    value = deferred._$value = new Value();
 
-                promise = deferred._$promise = new Promise(null, true);
-
-                deferred._$handles = this.$proxy(promise, proxiedGetPromiseHandles);
+                deferred._$promise = new Promise(function(resolve, reject, notify) {
+                    value.subscribe({
+                        onUpdate: function(data) {
+                            (data.resolve ? resolve : notify)(data.value);
+                        },
+                        
+                        onError: reject
+                    });
+                });
             },
 
             getPromise: function() {
@@ -20,38 +26,39 @@ JAR.register({
             },
 
             resolve: function(value) {
-                this._$handles.resolve(value);
+                this._$value.assign({
+                    resolve: true,
+                    
+                    value: value
+                });
 
                 return this;
             },
 
             reject: function(reason) {
-                this._$handles.reject(reason);
+                this._$value.error(reason);
 
                 return this;
             },
 
             notify: function(info) {
-                this._$handles.notify(info);
+                this._$value.assign({
+                    value: info
+                });
 
                 return this;
             }
         },
 
         _$: {
-            handles: null,
+            value: null,
 
             promise: null
         }
     });
 
-    function proxiedGetPromiseHandles() {
-        /*jslint validthis: true */
-        return this._$handles;
-    }
-
     Deferred.addDestructor(function() {
-        this.reject(new Error('The Deferred: ' + this.getHash() + ' was destructed!'));
+        this.reject(new Error('The connected deferred ' + this.getHash() + ' was destructed!'));
     });
 
     return Deferred;
