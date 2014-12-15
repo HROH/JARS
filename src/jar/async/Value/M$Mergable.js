@@ -9,20 +9,10 @@ JAR.register({
     var M$Mergable = new MixIn('Mergable', {
         merge: function() {
             var values = Arr.from(arguments),
-                mergedValue = new this.Class(),
-                toFreeze;
-
-            values.unshift(this);
-            toFreeze = values.length;
-
-            function onFreeze() {
-                --toFreeze || mergedValue.freeze();
-            }
+                mergedValue = this.forward();
 
             values.each(function subscribeToValue(value) {
-                value.forwardTo(mergedValue, {
-                    onFreeze: onFreeze
-                });
+                value.forwardTo(mergedValue);
             });
 
             return mergedValue;

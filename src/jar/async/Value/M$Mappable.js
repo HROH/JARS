@@ -6,13 +6,15 @@ JAR.register({
 
     var M$Mappable = new MixIn('Mappable', {
         map: function(mapFn) {
-            return this.forwardWithOptions({
-                transform: mapFn
+            return this.forward({
+                onUpdate: function(forwardedValue, newValue) {
+                    forwardedValue.assign(mapFn(newValue));
+                }
             });
         }
     }, {
         classes: [this],
-        
+
         depends: [M$Forwardable]
     });
 

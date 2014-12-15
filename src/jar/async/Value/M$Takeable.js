@@ -13,12 +13,14 @@ JAR.register({
             var takenValue;
 
             if (n > 0) {
-                takenValue = this.takeUntil(Fn.partial(takeUntilZero, n));
+                takenValue = this.takeUntil(Fn.partial(takeUntilZero, {
+                    n: n
+                }));
             }
             else {
                 takenValue = new this.Class();
 
-                takenValue.error(new Error('Can\'t take 0 values'));
+                takenValue.error(new Error('Can\'t take 0 or less values'));
                 takenValue.freeze();
             }
 
@@ -26,8 +28,15 @@ JAR.register({
         },
 
         takeUntil: function(untilFn) {
-            return this.forwardWithOptions({
-                guardFreeze: untilFn
+            return this.forward({
+                onUpdate: function(forwardedValue, newValue) {
+                    if (untilFn(newValue)) {
+                        forwardedValue.freeze();
+                    }
+                    else {
+                        forwardedValue.assign(newValue);
+                    }
+                }
             });
         },
 
@@ -36,12 +45,12 @@ JAR.register({
         }
     }, {
         classes: [this],
-        
+
         depends: [M$Forwardable]
     });
 
     function takeUntilZero(n) {
-        return --n === 0;
+        return n.n-- === 0;
     }
 
     return M$Takeable;

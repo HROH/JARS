@@ -6,13 +6,17 @@ JAR.register({
 
     var M$Acceptable = new MixIn('Acceptable', {
         accept: function(acceptFn) {
-            return this.forwardWithOptions({
-                guardUpdate: acceptFn
+            return this.forward({
+                onUpdate: function(forwardedValue, newValue) {
+                    if (acceptFn(newValue)) {
+                        forwardedValue.assign(newValue);
+                    }
+                }
             });
         }
     }, {
         classes: [this],
-        
+
         depends: [M$Forwardable]
     });
 

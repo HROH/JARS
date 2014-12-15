@@ -1,48 +1,48 @@
 JAR.register({
     MID: 'jar.async.Value.M$Decidable',
     deps: ['System::isObject', {
-        'jar.lang': [{
-            Function: ['::bind', '::identity']
-        }, 'MixIn']
-    }]
-}, function(isObject, bind, identity, MixIn) {
+        'jar.lang': ['Function::identity', 'Object!iterate', 'MixIn']
+    }, '.M$Forwardable']
+}, function(isObject, identity, Obj, MixIn, M$Forwardable) {
     'use strict';
 
     var M$Decidable = new MixIn('Decidable', {
         decide: function(decider, decisionTable) {
-            var decidedValue = new this.Class(),
-                decision, subscriptionID;
+            var decision;
 
             if (isObject(decider)) {
                 decisionTable = decider;
                 decider = identity;
             }
 
-            this.onUpdate(function makeDecision(newValue) {
-                var nextDecision = decisionTable[decider(newValue)];
-
-                if (nextDecision) {
-                    if (decision !== nextDecision) {
-                        decision && decision.unsubscribe(subscriptionID);
-
-                        decision = nextDecision;
-
-                        subscriptionID = decision.subscribe({
-                            onUpdate: bind(decidedValue.assign, decidedValue),
-
-                            onError: bind(decidedValue.error, decidedValue)
-                        });
-                    }
-                }
-                else {
-                    decidedValue.error(new Error('No decision possible'));
-                }
+            Obj.each(decisionTable, function(decision) {
+                // TODO check if already mixed in
+                M$Forwardable.mixInto(decision);
             });
 
-            return decidedValue;
+            return this.forward({
+                onUpdate: function makeDecision(forwardedValue, newValue) {
+                    var nextDecision = decisionTable[decider(newValue)];
+
+                    if (nextDecision) {
+                        if (decision !== nextDecision) {
+                            decision && decision.stopForwardingTo(forwardedValue);
+
+                            decision = nextDecision;
+
+                            decision.forwardTo(forwardedValue);
+                        }
+                    }
+                    else {
+                        forwardedValue.error(new Error('No decision possible'));
+                    }
+                }
+            });
         }
     }, {
-        classes: [this]
+        classes: [this],
+
+        depends: [M$Forwardable]
     });
 
     return M$Decidable;

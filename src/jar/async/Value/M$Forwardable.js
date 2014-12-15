@@ -1,15 +1,15 @@
 JAR.register({
     MID: 'jar.async.Value.M$Forwardable',
     deps: {
-        'jar.lang': [{
-            Constant: ['.', '::TRUE', '::FALSE'],
-            Function: ['::bind', '::identity']
-        }, 'MixIn', 'Object']
+        'jar.lang': ['Function::bind', 'MixIn']
     }
-}, function(Constant, constantTrue, constantFalse, bind, identity, MixIn, Obj) {
+}, function(bind, MixIn) {
     'use strict';
 
-    var M$Forwardable = new MixIn('Forwardable', {
+    var forwardingSubscriptions = {},
+        M$Forwardable;
+
+    M$Forwardable = new MixIn('Forwardable', {
         forward: function(customSubscription) {
             return this.forwardTo(new this.Class(), customSubscription);
         },
@@ -18,51 +18,49 @@ JAR.register({
             return this.forwardValueTo(new this.Class(), value);
         },
 
-        forwardWithOptions: function(options) {
-            return this.forwardWithOptionsTo(new this.Class(), options);
-        },
-
         forwardTo: function(forwardedValue, customSubscription) {
             var value = this,
-                subscriptionID = value.subscribe(Obj.merge({
-                    onUpdate: bind(forwardedValue.assign, forwardedValue),
+                subscriptions = forwardingSubscriptions[forwardedValue.getHash()] = forwardingSubscriptions[forwardedValue.getHash()] || [],
+                subscriptionID = value.subscribe({
+                    onUpdate: attemptCustomForward(customSubscription.onUpdate, forwardedValue) || bind(forwardedValue.assign, forwardedValue),
 
-                    onError: bind(forwardedValue.error, forwardedValue),
+                    onError: attemptCustomForward(customSubscription.onError, forwardedValue) || bind(forwardedValue.error, forwardedValue),
 
-                    onFreeze: bind(forwardedValue.freeze, forwardedValue)
-                }, customSubscription));
+                    onFreeze: attemptCustomForward(customSubscription.onFreeze, forwardedValue)
+                });
 
-            forwardedValue.onFreeze(bind(value.unsubscribe, value, subscriptionID));
+            subscriptions.push(subscriptionID);
 
             return forwardedValue;
         },
 
         forwardValueTo: function(forwardedValue, value) {
-            return this.forwardWithOptionsTo(forwardedValue, {
-                transform: Constant(value)
+            return this.forwardTo(forwardedValue, {
+                onUpdate: bind(forwardedValue.assign, forwardedValue, value)
             });
         },
 
-        forwardWithOptionsTo: function(forwardedValue, options) {
-            var transform = options.transform || identity,
-                shouldUpdate = options.guardUpdate || constantTrue,
-                shouldFreeze = options.guardFreeze || constantFalse;
-
-            this.forwardTo(forwardedValue, {
-                onUpdate: function(newValue) {
-                    if (shouldUpdate(newValue)) {
-                        forwardedValue.assign(transform(newValue));
-                    }
-
-                    shouldFreeze(newValue) && forwardedValue.freeze();
-                }
-            });
-
-            return forwardedValue;
+        stopForwardingTo: function(forwardedValue) {
+            var subscriptions = forwardingSubscriptions[forwardedValue.getHash()] || [];
+			
+			while(subscriptions.length) {
+                this.unsubscribe(subscriptions.pop());
+            }
         }
     }, {
         classes: [this]
     });
+
+    function attemptCustomForward(customForwardMethod, forwardedValue) {
+        return customForwardMethod && function(newValue) {
+            try {
+                customForwardMethod(forwardedValue, newValue);
+            }
+            catch (e) {
+                forwardedValue.error(e);
+            }
+        };
+    }
 
     return M$Forwardable;
 });
