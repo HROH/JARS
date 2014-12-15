@@ -1,9 +1,10 @@
 JAR.register({
     MID: 'jar.async.Scheduler',
-    deps: ['System::isFunction', {
+    deps: [{
+        System: ['::isFunction', '::isNumber'],
         'jar.lang': ['Class', 'Constant::TRUE', 'Object']
     }, '.TimeoutExecutor', '.I$Executor']
-}, function(isFunction, Class, constantTrue, Obj, TimeoutExecutor, I$Executor) {
+}, function(isFunction, isNumber, Class, constantTrue, Obj, TimeoutExecutor, I$Executor) {
     'use strict';
 
     var Scheduler = Class('Scheduler', {
@@ -39,8 +40,8 @@ JAR.register({
 
                 if (!scheduler._$requestID) {
                     scheduler._$requestID = scheduler._$options.executor.request(function requestRun() {
-                        $proxy(scheduler, runTasks);
                         scheduler.cancelRun();
+                        $proxy(scheduler, runTasks);
                     });
                 }
 
@@ -55,8 +56,8 @@ JAR.register({
                 return this;
             },
 
-            isRunning: function() {
-                return !!this._$requestID;
+            isScheduled: function() {
+                return isNumber(this._$requestID);
             }
         },
 
