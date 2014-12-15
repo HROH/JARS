@@ -1,11 +1,13 @@
 JAR.register({
     MID: 'jar.async.Promise',
     deps: [{
-        System: ['::isA', '::isObject', '::isArrayLike', '::isFunction', '!']
-    }, {
-        '..lang': ['Class', 'Object!derive,info,iterate', 'Array!iterate,reduce', '.Enum', '.Function!modargs']
-    }, '.Scheduler', '.TimeputExecutor']
-}, function(isA, isObject, isArrayLike, isFunction, config, Class, Obj, Arr, Enum, Fn, Scheduler, TimeoutExecutor) {
+        System: ['::isA', '::isObject', '::isArrayLike', '::isFunction', '!'],
+        '..lang': ['Class', 'Object!info,iterate', 'Array!iterate,reduce', 'Enum', {
+            Function: ['::identity', '::bind', '!flow,modargs']
+        }],
+        '.Value': ['.', 'M$Forwardable']
+    }, '.Scheduler', '.TimeoutExecutor']
+}, function(isA, isObject, isArrayLike, isFunction, config, Class, Obj, Arr, Enum, identity, bind, Fn, Value, M$Forwardable, Scheduler, TimeoutExecutor) {
     'use strict';
 
     // TODO support stacktraces:
@@ -16,72 +18,108 @@ JAR.register({
     // Unhandled rejection:
     // - always throw, consume per promise or consume if configured?
 
-    var scheduler = new Scheduler(),
-        rejectionHandlers = Arr(),
-        promiseState = new Enum(['INIT', 'PENDING', 'REJECTED', 'RESOLVED']),
-        handleMap = Obj.from({
-            resolve: promiseState.RESOLVED,
-            reject: promiseState.REJECTED,
-            notify: promiseState.PENDING
-        }),
-        stateMap = handleMap.invert(),
+    var ERROR_PROMISE_SELF_RESOLUTION = '${promiseHash} can\'t be resolved with itself!',
         ERROR_PROMISE_DESTRUCTED_REJECTION = 'The connected promise was destructed',
-        ERROR_PROMISE_SELF_RESOLUTION = '${promiseHash} can\'t be resolved with itself!',
         ERROR_PROMISE_TIMEOUT_REJECTION = 'Timed out after ${ms} ms',
-        ERROR_PROMISE_INCORRECT_REJECTION = '${promiseHash} must be rejected with an error!',
-        ERROR_PROMISE_INFINITE_RECURSION = 'Infinite recursion between ${firstPromiseHash} and ${secondPromiseHash}',
-        ERROR_PROMISE_UNHANDLED_REJECTION = 'Unhandled rejection of "${promiseHash}" with reason: ${reason}',
+        ERROR_PROMISE_UNHANDLED_REJECTION = 'Possibly unhandled rejection of ${promiseHash} with reason: ${reason}',
+        //ERROR_PROMISE_INFINITE_RECURSION = 'Infinite recursion between ${firstPromiseHash} and ${secondPromiseHash}',
+        promiseState = new Enum(['INIT', 'PENDING', 'REJECTED', 'RESOLVED']),
+        rejectionHandlers = Arr(),
+        promiseScheduler = new Scheduler(),
         Promise;
+
+    Value.mixin(M$Forwardable);
 
     Promise = Class('Promise', {
         $: {
-            construct: function(resolver, resolveInternal) {
-                var promise = this;
+            construct: function(handler) {
+                var promise = this,
+                    resolveTransition = createStateTransition(promise, promiseState.RESOLVED),
+                    rejectTransition = createStateTransition(promise, promiseState.REJECTED),
+                    notifyTransition = createStateTransition(promise, promiseState.PENDING);
 
                 promise._$ChainClass = Promise;
 
-                promise._$promises = Arr();
-                promise._$handles = handleMap.map(createHandle, promise);
+                promise._$value = new Value(null, promiseScheduler);
 
-                resolveInternal ? promise._$setInitialized() : promise.when(resolver);
+                promise.when(handler);
+                promise.done(resolveTransition, rejectTransition, notifyTransition);
+
+                promise.Class.addDestructor(rejectWithPromiseDestructed, promise);
             },
 
-            when: function(resolver) {
+            when: function(handler) {
                 var promise = this,
-                    handles = promise._$handles,
-                    resolve = handles.resolve,
-                    reject = handles.reject;
+                    value = promise._$value,
+                    resolve, reject, notify;
 
-                if (isFunction(resolver) && !promise.isInitialized()) {
-                    promise._$setInitialized();
+                if (isFunction(handler) && !promise.isInitialized()) {
+                    promise._$transitionState(promiseState.PENDING);
 
-                    scheduler.schedule(Fn.partial(tryCatch, resolver, [resolve, reject, handles.notify], reject));
+                    resolve = function(valueToAssign) {
+                        var valueIsPromise = Promise.isInstance(valueToAssign);
+
+                        if (valueToAssign === promise) {
+                            value.error(new TypeError(ERROR_PROMISE_SELF_RESOLUTION.replace('${promiseHash}', promise.getHash())));
+                        }
+                        else if (valueIsPromise || isThenable(valueToAssign)) {
+                            valueToAssign.then(resolve, reject, notify);
+                        }
+                        else {
+                            assignWithState(value, promiseState.RESOLVED, valueToAssign);
+                        }
+                    };
+                    reject = bind(value.error, value);
+                    notify = Fn.partial(assignWithState, value, promiseState.PENDING);
+
+                    try {
+                        handler(resolve, reject, notify);
+                    }
+                    catch (e) {
+                        reject(e);
+                    }
                 }
 
                 return this;
             },
 
-            then: function(doneCallback, failCallback, progressCallback) {
+            then: function(thenCallback, failCallback, progressCallback) {
                 var promise = this,
-                    linkedPromiseData = {
-                        promise: new promise._$ChainClass(null, true),
+                    handledValue = new Value(null, promiseScheduler);
 
-                        callbacks: {
-                            resolve: doneCallback,
+                this._$value.forwardTo(handledValue, {
+                    onUpdate: function(forwardedValue, data) {
+                        var updateCallback = (data.state === promiseState.RESOLVED ? thenCallback : progressCallback) || identity;
 
-                            reject: failCallback,
+                        assignWithState(forwardedValue, data.state, updateCallback(data.value));
+                    },
 
-                            notify: progressCallback
-                        }
-                    };
+                    onError: failCallback && function(forwardedValue, error) {
+                        assignWithState(forwardedValue, promiseState.RESOLVED, failCallback(error));
+                    }
+                });
 
-                promise._$promises.push(linkedPromiseData);
+                return new promise._$ChainClass(function(resolve, reject, notify) {
+                    handledValue.subscribe({
+                        onUpdate: function(data) {
+                            (data.state === promiseState.RESOLVED ? resolve : notify)(data.value);
+                        },
 
-                if (promise.isFinished()) {
-                    scheduler.schedule(Fn.partial(promise.$proxy, promise, promise._$invokeAll));
-                }
+                        onError: reject
+                    });
+                });
+            },
 
-                return linkedPromiseData.promise;
+            done: function(doneCallback, failCallback, progressCallback) {
+                this._$value.subscribe({
+                    onUpdate: function(data) {
+                        var updateCallback = (data.state === promiseState.RESOLVED ? doneCallback : progressCallback) || identity;
+
+                        updateCallback(data.value);
+                    },
+
+                    onError: failCallback
+                });
             },
 
             isResolved: function() {
@@ -100,15 +138,13 @@ JAR.register({
                 var promise = this;
 
                 return new promise._$ChainClass(function(resolve, reject, notify) {
-                    promise.then(function promiseDelay(value) {
-                        new TimeoutExecutor(ms).request(Fn.partial(resolve, value));
-                    }, reject, notify);
+                    promise.then(Fn.delay(resolve, ms), reject, notify);
                 });
             },
 
             timeout: function(ms, reason) {
                 var promise = this;
-                
+
                 reason = reason || ERROR_PROMISE_TIMEOUT_REJECTION.replace('${ms}', ms);
 
                 return new promise._$ChainClass(function promiseTimeout(resolve, reject, notify) {
@@ -117,10 +153,6 @@ JAR.register({
                     promise.then(resolve, reject, notify);
                 });
             }
-        },
-
-        done: function(doneCallback, failCallback, progressCallback) {
-            this.then(doneCallback, failCallback, progressCallback);
         },
 
         fail: function(failCallback) {
@@ -133,16 +165,6 @@ JAR.register({
 
         finish: function(finCallback) {
             return this.then(finCallback, finCallback);
-        },
-
-        all: function() {
-            return this.then(Fn.bind(this.Class.all, this.Class));
-        },
-
-        spread: function(spreadCallback, failCallback, progressCallback) {
-            return this.all().then(function promiseSpread(valueArray) {
-                return spreadCallback.apply(null, valueArray);
-            }, failCallback, progressCallback);
         },
 
         isFinished: function() {
@@ -160,90 +182,44 @@ JAR.register({
             });
         },
 
+        all: function() {
+            return this.then(bind(this.Class.all, this.Class));
+        },
+
+        spread: function(spreadCallback, failCallback, progressCallback) {
+            return this.all().then(Fn.partial(Fn.apply, spreadCallback, null), failCallback, progressCallback);
+        },
+
         _$: {
             state: promiseState.INIT,
 
             handles: null,
 
-            promises: null,
-
-            value: '',
+            value: null,
 
             ChainClass: null,
 
-            setInitialized: function() {
-                this._$state = promiseState.PENDING;
-            },
+            transitionState: function(nextState, reason) {
+                var isUnhandledRejection = false;
 
-            hasPromiseInChain: function(valueAsPromise) {
-                var promise = this;
+                this._$state = nextState;
 
-                return promise._$promises.some(function hasPromiseInChain(linkedPromiseData) {
-                    return linkedPromiseData.promise === valueAsPromise || promise.$proxy(linkedPromiseData.promise, proxiedHasPromiseInChain, [valueAsPromise]);
-                });
-            },
+                if (nextState !== promiseState.PENDING) {
+                    isUnhandledRejection = nextState === promiseState.REJECTED && this._$value.countSubscribers() === 1;
 
-            transitionState: function(newState, value) {
-                var promise = this,
-                    handles = promise._$handles,
-                    errorMessage;
+                    this._$value.freeze();
 
-                if (!promise.isFinished()) {
-                    errorMessage = getPromiseTransitionError(promise, newState, value);
-
-                    if (errorMessage) {
-                        value = new Error(errorMessage);
-                        newState = promiseState.REJECTED;
-                    }
-
-                    if (Promise.isInstance(value) || isThenable(value)) {
-                        value.then(handles.resolve, handles.reject, handles.notify);
-                    }
-                    else {
-                        promise._$state = newState;
-                        promise._$value = value;
-
-                        promise._$invokeAll();
+                    if (isUnhandledRejection) {
+                        handleUnhandledRejection(this, reason);
                     }
                 }
-            },
-
-            invokeAll: function() {
-                var promise = this,
-                    state = promise._$state,
-                    linkedPromises = promise._$promises;
-
-                if (linkedPromises.length) {
-                    linkedPromises.each(this._$invokeCallback, promise);
-
-                    state !== promiseState.PENDING && (linkedPromises.length = 0);
-                }
-                else if (state === promiseState.REJECTED) {
-                    handleUnhandledRejection(promise, promise._$value);
-                }
-            },
-
-            invokeCallback: function(linkedPromiseData) {
-                var promise = this,
-                    linkedPromise = linkedPromiseData.promise,
-                    state = promise._$state,
-                    value = promise._$value,
-                    callback = linkedPromiseData.callbacks[stateMap[state]],
-                    handles = promise.$proxy(linkedPromise, proxiedGetPromiseHandles);
-
-                if (isFunction(callback)) {
-                    value = tryCatch(callback, [value], handles.reject);
-
-                    state === promiseState.REJECTED && (state = promiseState.RESOLVED);
-                }
-
-                handles[stateMap[state]](value);
             }
         }
     }, {
-        handleRejection: function(rejectionHandler) {
+        onUnhandledRejection: function(rejectionHandler) {
             isFunction(rejectionHandler) && rejectionHandlers.push(rejectionHandler);
         },
+
 
         cast: function(value) {
             var PromiseClass = this,
@@ -253,9 +229,7 @@ JAR.register({
                 promise = value;
             }
             else if (isThenable(value)) {
-                promise = new PromiseClass(function promiseCast(resolve, reject, notify) {
-                    value.then(resolve, reject, notify);
-                });
+                promise = new PromiseClass(bind(value.then, value));
             }
             else if (isFunction(value)) {
                 promise = new PromiseClass(value);
@@ -306,6 +280,7 @@ JAR.register({
 
                             notify({
                                 indexKey: idx,
+
                                 value: value
                             });
 
@@ -356,75 +331,29 @@ JAR.register({
         }
     });
 
-    Promise.addDestructor(function promiseDestructor() {
-        this._$handles.reject(new Error(ERROR_PROMISE_DESTRUCTED_REJECTION));
-    });
-
-    function proxiedTransitionState(newState, value) {
-        /*jslint validthis: true */
-        this._$transitionState(newState, value);
+    function isThenable(value) {
+        return isObject(value) && isFunction(value.then);
     }
 
-    function proxiedGetPromiseHandles() {
-        /*jslint validthis: true */
-        return this._$handles;
-    }
+    function createStateTransition(promise, nextState) {
+        var $proxy = promise.$proxy;
 
-    function proxiedHasPromiseInChain(valueAsPromise) {
-        /*jslint validthis: true */
-        return this._$hasPromiseInChain(valueAsPromise);
-    }
-
-    function tryCatch(fn, args, reject) {
-        var result;
-
-        try {
-            result = fn.apply(null, args);
-        }
-        catch (e) {
-            if (isA(e, UnhandledRejectionError)) {
-                throw e;
-            }
-            else {
-                reject(e);
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * @param {string} state
-     * 
-     * @return {function(*):Promise}
-     */
-    function createHandle(state) {
-        /*jslint validthis: true */
-        var promise = this,
-            $proxy = promise.$proxy;
-
-        return function promiseHandle(value) {
-            $proxy(promise, proxiedTransitionState, [state, value]);
+        return function(data) {
+            $proxy(promise, proxiedTransitionState, [nextState, data]);
         };
     }
 
-    function getPromiseTransitionError(promise, newState, value) {
-        var promiseHash = promise.getHash(),
-            errorMessage;
+    function proxiedTransitionState(nextState, data) {
+        /*jslint validthis: true */
+        this._$transitionState(nextState, data);
+    }
 
-        if (newState === promiseState.RESOLVED && Promise.isInstance(value)) {
-            if (value === promise) {
-                errorMessage = ERROR_PROMISE_SELF_RESOLUTION.replace('${promiseHash}', promiseHash);
-            }
-            else if (config.checkInfiniteRecursion && (promise._$hasPromiseInChain(value) || promise.$proxy(value, proxiedHasPromiseInChain, [promise]))) {
-                errorMessage = ERROR_PROMISE_INFINITE_RECURSION.replace('${firstPromiseHash}', promiseHash).replace('${secondPromiseHash}', value.getHash());
-            }
-        }
-        else if (newState === promiseState.REJECTED && !isA(value, Error)) {
-            errorMessage = ERROR_PROMISE_INCORRECT_REJECTION.replace('${promiseHash}', promiseHash);
-        }
+    function assignWithState(value, nextState, valueToAssign) {
+        value.assign({
+            state: nextState,
 
-        return errorMessage;
+            value: valueToAssign
+        });
     }
 
     function handleUnhandledRejection(promise, reason) {
@@ -434,27 +363,14 @@ JAR.register({
             });
         }
         else {
-            throw new UnhandledRejectionError(ERROR_PROMISE_UNHANDLED_REJECTION.replace('', promise.getHash()).replace('${reason}', reason));
+            throw new Error(ERROR_PROMISE_UNHANDLED_REJECTION.replace('${promiseHash}', promise.getHash()).replace('${reason}', reason));
         }
     }
 
-    function isThenable(value) {
-        return isObject(value) && isFunction(value.then);
+    function rejectWithPromiseDestructed() {
+        /*jslint validthis: true */
+        this._$value.error(new Error(ERROR_PROMISE_DESTRUCTED_REJECTION));
     }
-
-    function UnhandledRejectionError(message) {
-        this.message = message;
-
-        if (Error.captureStackTrace) {
-            Error.captureStackTrace(this, UnhandledRejectionError);
-        }
-    }
-
-    UnhandledRejectionError.prototype = Obj.extend(new Error(), {
-        constructor: UnhandledRejectionError,
-
-        name: 'UnhandledRejectionError'
-    });
 
     return Promise;
 });
