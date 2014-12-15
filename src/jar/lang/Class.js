@@ -68,20 +68,29 @@ JAR.register({
     }
 
     function proxy(instanceOrClass, method, args, forInstance) {
-        var instanceOrClassHidden, inPrivileged, result;
+        var result;
 
         if (instanceOrClassExists(instanceOrClass, forInstance)) {
-            instanceOrClassHidden = getHidden(instanceOrClass, forInstance);
-            inPrivileged = instanceOrClassHidden.$inPrivileged;
-
-            inPrivileged || prepareBeforeProxy(instanceOrClass, instanceOrClassHidden, protectedIdentifier);
-
-            result = method.apply(instanceOrClass, args || []);
-
-            inPrivileged || cleanupAfterProxy(instanceOrClass, instanceOrClassHidden, protectedIdentifier);
+            result = getHidden(instanceOrClass, forInstance).$inPrivileged ? method.apply(instanceOrClass, args) : safeProxy(instanceOrClass, method, args, forInstance);
         }
 
         return result;
+    }
+
+    function safeProxy(instanceOrClass, method, args, forInstance) {
+        var instanceOrClassHidden = getHidden(instanceOrClass, forInstance);
+
+        prepareBeforeProxy(instanceOrClass, instanceOrClassHidden, protectedIdentifier);
+
+        try {
+            return method.apply(instanceOrClass, args);
+        }
+        catch (e) {
+            throw new Error(e.message);
+        }
+        finally {
+            cleanupAfterProxy(instanceOrClass, instanceOrClassHidden, protectedIdentifier);
+        }
     }
 
     function prepareBeforeProxy(instanceOrClass, instanceOrClassHidden, accessIdentifier) {
@@ -143,7 +152,7 @@ JAR.register({
             }
 
             if (isProxyAllowed(instance, Class, moduleName)) {
-                result = proxy(instance, method, args, true);
+                result = proxy(instance, method, args || [], true);
             }
 
             return result;
