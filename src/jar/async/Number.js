@@ -1,43 +1,34 @@
 JAR.register({
     MID: 'jar.async.Number',
-    deps: ['.Value', {
-        'jar.lang': ['Object!iterate', 'String', 'operations.Arithmetic']
+    deps: ['System::isSet', '.Value', {
+        'jar.lang': ['Object!reduce', 'String', {
+            'operations.Arithmetic': ['.', '::operators']
+        }]
     }]
-}, function(Value, Obj, Str, arithmeticOperations) {
+}, function(isSet, Value, Obj, Str, arithmeticOperations, arithmeticOperators) {
     'use strict';
 
-    var ASSIGN = '=',
-        asyncNumberProto = {
-            construct: function(number) {
-                this.$super(Number(number) || 0);
-            }
-        },
-        mapOperators = {
-            add: '+',
+    var Nr = Value.createSubClass('Number', Obj.reduce(arithmeticOperators.values(), function(asyncNumberProto, arithmeticOperator, arithmeticOperationName) {
+        var arithmeticOperation = arithmeticOperations[arithmeticOperationName];
 
-            subtract: '-',
-
-            multiplyWith: '*',
-
-            divideBy: '/',
-
-            modulo: '%'
-        },
-        Nr;
-
-    Obj.each(arithmeticOperations, function(arithmeticOperation, methodName) {
-        var operator = mapOperators[methodName];
-
-        asyncNumberProto[methodName] = asyncNumberProto[operator] = function(operand) {
+        asyncNumberProto[arithmeticOperationName] = asyncNumberProto[arithmeticOperator] = function(operand) {
             return this.map(arithmeticOperation(operand));
         };
 
-        asyncNumberProto[Str.camelize('self', methodName)] = asyncNumberProto[operator + ASSIGN] = function(operand) {
+        asyncNumberProto[Str.camelize('self', arithmeticOperationName)] = asyncNumberProto[arithmeticOperator + '='] = function(operand) {
             return this.update(arithmeticOperation(operand));
         };
-    });
 
-    Nr = Value.createSubClass('Number', asyncNumberProto);
+        if (arithmeticOperator === arithmeticOperators.add || arithmeticOperator === arithmeticOperators.subtract) {
+            asyncNumberProto[Str.camelize('self', arithmeticOperationName + 'One')] = asyncNumberProto[arithmeticOperator + arithmeticOperator] = function() {
+                return this[arithmeticOperator + '='](1);
+            };
+        }
+    }, {
+        construct: function(number) {
+            this.$super(isSet(number) ? Number(number) || 0 : null);
+        }
+    }));
 
     return Nr;
 });
