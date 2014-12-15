@@ -12,7 +12,9 @@ JAR.register({
         skip: function(n) {
             isNumber(n) || (n = 0);
 
-            return this.skipUntil(Fn.partial(skipUntilZero, n));
+            return this.skipUntil(Fn.partial(skipUntilZero, {
+                n: n
+            }));
         },
 
         skipUntil: function(untilFn) {
@@ -30,12 +32,12 @@ JAR.register({
         }
     }, {
         classes: [this],
-        
+
         depends: [M$Acceptable]
     });
 
     function skipUntilZero(n) {
-        return n-- === 0;
+        return n.n-- === 0;
     }
 
     return M$Skippable;
