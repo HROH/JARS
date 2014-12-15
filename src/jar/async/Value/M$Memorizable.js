@@ -18,8 +18,8 @@ JAR.register({
                 return memory;
             }, []);
 
-            return memorizedValue.skipUntil(function(memory) {
-                return !fillMemory || memory.length === count;
+            return memorizedValue.skipWhile(function(memory) {
+                return fillMemory && memory.length < count;
             });
         },
 
