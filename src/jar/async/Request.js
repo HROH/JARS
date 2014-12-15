@@ -1,27 +1,23 @@
 JAR.register({
     MID: 'jar.async.Request',
-    deps: ['.Promise', 'System', {
-        '..lang': ['Object!reduce', 'Array!index']
+    deps: ['.Deferred', 'System', {
+        '..lang': ['Class', 'Object!reduce', 'Array!index', 'Enum', 'Function!modargs']
     }]
-}, function(Promise, System, Obj, Arr) {
+}, function(Deferred, System, Class, Obj, Arr, Enum, Fn) {
     'use strict';
 
     var activeXObjects = Arr('Msxml2.XMLHTTP.6.0', 'Msxml2.XMLHTTP.3.0', 'Microsoft.XMLHTTP'),
-        acceptedRequestMethods = Arr('GET', 'POST'),
+        acceptedRequestMethods = Arr('GET', 'PUT', 'POST', 'DELETE'),
         supportedXhrIsDefined = false,
-        READYSTATE_UNSENT = 0,
-        READYSTATE_OPENED = 1,
-        //READYSTATE_HEADERS_RECEIVED = 2,
-        //READYSTATE_LOADING = 3,
-        READYSTATE_DONE = 4,
+        requestState = new Enum(['UNSENT', 'OPENED', 'HEADERS_RECEIVED', 'LOADING', 'DONE']),
         Request, SupportedXhr, supportedActiveXObject;
 
-    Request = Promise.createSubClass('Request', {
+    Request = Class('Request', {
         $: {
             construct: function(options) {
                 var request = this;
 
-                request.$super(null, true);
+                request._$deferred = new Deferred();
 
                 options = options || {};
 
@@ -37,7 +33,15 @@ JAR.register({
             send: function(data) {
                 this._$req.send(data);
 
-                return this;
+                return this.getResponsePromise();
+            },
+
+            abort: function() {
+                this._$req.abort();
+            },
+
+            getResponsePromise: function() {
+                return this._$deferrred.getPromise();
             }
         },
 
@@ -46,7 +50,7 @@ JAR.register({
 
             createRequest: function(url, method) {
                 var request = this,
-                    handles = request._$handles,
+                    deferred = request._$deferred,
                     req;
 
                 if (!(method && acceptedRequestMethods.contains(method = method.toUpperCase()))) {
@@ -61,31 +65,19 @@ JAR.register({
                     req = request._$req = new SupportedXhr(supportedActiveXObject);
 
                     Obj.merge(req, {
-                        handles: handles,
-                        onreadystatechange: readyStateChangeHandler,
-                        onprogress: progressHandler
+                        onreadystatechange: Fn.partial(readyStateChangeHandler, deferred),
+
+                        onprogress: Fn.partial(progressHandler, deferred)
                     });
 
                     req.open(method, url);
                 }
                 else {
-                    handles.reject(new Error('XMLHttpRequests are not supported by this environment'));
+                    deferred.reject(new Error('XMLHttpRequests are not supported by this environment'));
                 }
             }
         }
     }, {
-        cast: function(value) {
-            return Promise.cast(value);
-        },
-
-        race: function(requests) {
-            return Promise.race(requests);
-        },
-
-        all: function(requests) {
-            return Promise.all(requests);
-        },
-
         get: function(url) {
             return new Request({
                 url: url
@@ -95,6 +87,7 @@ JAR.register({
         post: function(url, data) {
             return new Request({
                 url: url,
+
                 method: 'POST'
             }).send(data);
         },
@@ -103,21 +96,19 @@ JAR.register({
             return Request.get(url).then(JSON.parse);
         },
 
-        plugIn: function(pluginRequest) {
+        $plugIn: function(pluginRequest) {
             var data = pluginRequest.data.split('|'),
                 url = data[data.length - 1],
-                method, request;
+                method;
 
             if (data.length > 1) {
                 method = data[0];
             }
 
-            request = System.isFunction(Request[method]) ? Request[method](url) : (new Request({
+            System.isFunction(Request[method]) ? Request[method](url) : (new Request({
                 url: url,
                 method: method
-            })).send();
-
-            request.then(pluginRequest.onSuccess, pluginRequest.onError);
+            })).send().then(pluginRequest.onSuccess, pluginRequest.onError);
         }
     });
 
@@ -156,34 +147,33 @@ JAR.register({
     }
 
     // TODO
-    function readyStateChangeHandler() {
+    function readyStateChangeHandler(deferred) {
         /*jslint validthis: true */
         var req = this,
             readyState = req.readyState,
-            handles = req.handles,
             status;
 
-        if (readyState !== READYSTATE_OPENED) {
+        if (readyState !== requestState.OPENED) {
             status = req.status;
 
-            if (readyState == READYSTATE_DONE) {
+            if (readyState == requestState.DONE) {
                 if (isSuccessStatus(status)) {
-                    handles.resolve(req.response || req.responseText);
+                    deferred.resolve(req.response || req.responseText);
                 }
                 else {
-                    handles.reject(new Error(status + ': ' + req.statusText));
+                    deferred.reject(new Error(status + ': ' + req.statusText));
                 }
             }
-            else if (readyState === READYSTATE_UNSENT) {
-                handles.reject(new Error('aborted request'));
+            else if (readyState === requestState.UNSENT) {
+                deferred.reject(new Error('aborted request'));
             }
         }
     }
 
-    function progressHandler(e) {
+    function progressHandler(deferred, e) {
         /*jslint validthis: true */
         if (e.lengthComputable) {
-            this.handles.notify((e.loaded / e.total) * 100);
+            deferred.notify((e.loaded / e.total) * 100);
         }
     }
 
