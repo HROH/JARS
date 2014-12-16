@@ -1,25 +1,25 @@
 JAR.register({
     MID: 'jar.lang.Function.Function-modargs',
-    deps: ['System', '..', '..Array', '..Object!derive']
-}, function(System, lang, Arr, Obj) {
+    deps: [{
+        '.': ['::from', '::apply'],
+        '..Array': ['::from', '::reverse']
+    }, 'System!', '..Object!derive']
+}, function(fromFunction, applyFunction, fromArgs, reverseArray, config, Obj) {
     'use strict';
 
-    var FunctionCopy = this,
-        fromFunction = FunctionCopy.from,
-        apply = FunctionCopy.apply,
-        fromArgs = Arr.from;
+    var Fn = this;
 
-    lang.extendNativeType('Function', {
+    Fn.enhance({
         flip: function() {
             var fn = this;
 
             return fromFunction(function flippedFn() {
-                return apply(fn, this, Arr.reverse(arguments));
+                return applyFunction(fn, this, reverseArray(arguments));
             }, fn.arity || fn.length);
         },
 
         functional: function(arity) {
-            return FunctionCopy.curry(FunctionCopy.flip(this), arity);
+            return Fn.curry(Fn.flip(this), arity);
         },
 
         curry: function(arity) {
@@ -32,11 +32,11 @@ JAR.register({
                     result;
 
                 if (args.length >= arity) {
-                    result = apply(fn, this, args);
+                    result = applyFunction(fn, this, args);
                 }
                 else {
                     result = fromFunction(function curriedFn() {
-                        return apply(curryFn, this, args.concat(fromArgs(arguments)));
+                        return applyFunction(curryFn, this, args.concat(fromArgs(arguments)));
                     }, arity - args.length);
                 }
 
@@ -71,8 +71,13 @@ JAR.register({
             return createArgumentsMapper(this, arguments, applyPlaceholderArg);
         }
     }, {
-        isPlaceholderArg: System.isNull
+        placeholderArg: config.placeholderArg || null
     });
+
+
+    function isPlaceholderArg(arg) {
+        return arg === Fn.placeholderArg;
+    }
 
     /**
      *
@@ -89,7 +94,7 @@ JAR.register({
             var newArgs = fromArgs(arguments),
                 mappedArgs = args.map(mapFn, newArgs);
 
-            return apply(fn, this, mappedArgs.concat(newArgs));
+            return applyFunction(fn, this, mappedArgs.concat(newArgs));
         }, fn.arity || fn.length);
     }
 
@@ -101,7 +106,7 @@ JAR.register({
      */
     function applyPartialArg(partialArg) {
         /*jslint validthis: true */
-        return FunctionCopy.isPlaceholderArg(partialArg) ? this.shift() : partialArg;
+        return isPlaceholderArg(partialArg) ? this.shift() : partialArg;
     }
 
     /**
@@ -118,11 +123,11 @@ JAR.register({
         if (newArgs.length) {
             newArg = newArgs.shift();
 
-            FunctionCopy.isPlaceholderArg(newArg) || (placeholderArg = newArg);
+            isPlaceholderArg(newArg) || (placeholderArg = newArg);
         }
 
         return placeholderArg;
     }
 
-    return Obj.extract(FunctionCopy, ['curry', 'defaults', 'flip', 'functional', 'partial']);
+    return Obj.extract(Fn, ['curry', 'defaults', 'flip', 'functional', 'partial']);
 });

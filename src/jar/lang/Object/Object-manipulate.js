@@ -1,10 +1,10 @@
 JAR.register({
     MID: 'jar.lang.Object.Object-manipulate',
-    deps: ['..', '.!derive,iterate', '..Array!reduce']
-}, function(lang, Obj, Arr) {
+    deps: ['.!derive,iterate', '..Array!reduce']
+}, function(Obj, Arr) {
     'use strict';
 
-    lang.extendNativeType('Object', {
+    Obj.enhance({
         update: function(callback, context) {
             Obj.each(this, function updateProperty(value, property, object) {
                 object[property] = callback.call(context, value, property, object);

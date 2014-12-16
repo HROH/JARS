@@ -1,18 +1,20 @@
 JAR.register({
     MID: 'jar.lang.String',
-    deps: ['System', '.Array!manipulate,reduce']
-}, function(System, Arr) {
+    deps: [{
+        System: ['::isA', '::isString']
+    }, '.Array!manipulate,reduce']
+}, function(isA, isString, Arr) {
     'use strict';
 
     var lang = this,
         rCapitalLetter = /([A-Z])/g,
-        StringCopy;
+        Str = lang.sandboxNativeType('String');
 
     /**
      * Extend jar.lang.String with some useful methods
      * If a native implementation exists it will be used instead
      */
-    StringCopy = lang.extendNativeType('String', {
+    Str.enhance({
         camelize: function() {
             var toCapitalize = this.split('-'),
                 camelized = '';
@@ -54,9 +56,9 @@ JAR.register({
     function fromString(string) {
         string = string || '';
 
-        if (System.isString(string)) {
-            while (!(System.isA(string, StringCopy))) {
-                string = new StringCopy(string);
+        if (isString(string)) {
+            while (!(isA(string, Str))) {
+                string = new Str(string);
             }
         }
 
@@ -64,12 +66,12 @@ JAR.register({
     }
 
     function buildCamelized(startString, nextString) {
-        return startString + (nextString ? StringCopy.capitalize(nextString) : '');
+        return startString + (nextString ? Str.capitalize(nextString) : '');
     }
 
     function dashifier(match) {
         return '-' + match.toLowerCase();
     }
 
-    return StringCopy;
+    return Str;
 });

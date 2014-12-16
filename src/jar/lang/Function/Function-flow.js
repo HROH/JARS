@@ -1,19 +1,19 @@
 JAR.register({
     MID: 'jar.lang.Function.Function-flow',
-    deps: ['..', '..Array::from', '..Object!derive']
-}, function(lang, fromArgs, Obj) {
+    deps: [{
+        '.': ['::from', '::apply']
+    }, '..Array::from', '..Object!derive']
+}, function(fromFunction, applyFunction, fromArgs, Obj) {
     'use strict';
 
-    var FunctionCopy = this,
-        fromFunction = FunctionCopy.from,
-        apply = FunctionCopy.apply,
+    var Fn = this,
         defaultRegulatorOptions = {
             leading: true,
-            
+
             trailing: true
         };
 
-    lang.extendNativeType('Function', {
+    Fn.enhance({
         debounce: function(ms, immediate) {
             return createRegulatorFunction(this, ms, {
                 leading: immediate,
@@ -61,7 +61,7 @@ JAR.register({
             closed = false;
 
             if (lastArgs && options.trailing) {
-                apply(fn, context, lastArgs);
+                applyFunction(fn, context, lastArgs);
                 context = lastArgs = null;
             }
         }
@@ -79,10 +79,10 @@ JAR.register({
                 lastArgs = arguments;
             }
             else {
-                apply(fn, context, arguments);
+                applyFunction(fn, context, arguments);
             }
         }, fn.arity || fn.length);
     }
 
-    return Obj.extract(FunctionCopy, ['debounce', 'throttle', 'delay']);
+    return Obj.extract(Fn, ['debounce', 'throttle', 'delay']);
 });

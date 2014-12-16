@@ -1,12 +1,12 @@
 JAR.register({
     MID: 'jar.lang.Array.Array-index',
-    deps: ['..', '..assert::isSet', '..Object!derive', '.Array-find']
-}, function(lang, assertIsSet, Obj, arrayFind) {
+    deps: ['..assert::isSet', '..Object!derive', '.!find']
+}, function(assertIsSet, Obj, Arr) {
     'use strict';
 
-    var ArrayCopy = lang.extendNativeType('Array', {
+    Arr.enhance({
         contains: function(searchElement, fromIndex) {
-            return ArrayCopy.indexOf(this, searchElement, fromIndex) !== -1;
+            return Arr.indexOf(this, searchElement, fromIndex) !== -1;
         },
 
         indexOf: createIndexOf(),
@@ -16,7 +16,7 @@ JAR.register({
 
     function createIndexOf(last) {
         var assertionMessage = 'Array.prototype.' + (last ? 'lastIndexOf' : 'indexOf') + ' called on null or undefined',
-            findIndexMethod = arrayFind['find' + (last ? 'Last' : '') + 'Index'];
+            findIndexMethod = Arr['find' + (last ? 'Last' : '') + 'Index'];
 
         return function(searchElement, fromIndex) {
             assertIsSet(this, assertionMessage);
@@ -30,5 +30,5 @@ JAR.register({
         return value === this.valueOf(); // use valueOf() to compare numbers correctly
     }
 
-    return Obj.extract(ArrayCopy, ['contains', 'indexOf', 'lastIndexOf']);
+    return Obj.extract(Arr, ['contains', 'indexOf', 'lastIndexOf']);
 });

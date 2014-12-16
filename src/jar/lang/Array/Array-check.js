@@ -1,15 +1,15 @@
 JAR.register({
     MID: 'jar.lang.Array.Array-check',
-    deps: ['..', {
+    deps: [{
         '..assert': ['::isSet', 'Type::isFunction']
     }, '..Object!derive']
-}, function(lang, assertIsSet, assertIsFunction, Obj) {
+}, function(assertIsSet, assertIsFunction, Obj) {
     'use strict';
 
-    var ArrayCopy = this,
+    var Arr = this,
         MSG_NO_FUNCTION = 'The callback is not a function';
 
-    lang.extendNativeType('Array', {
+    Arr.enhance({
         every: createCheck(false),
 
         some: createCheck(true)
@@ -42,5 +42,5 @@ JAR.register({
         };
     }
 
-    return Obj.extract(ArrayCopy, ['every', 'some']);
+    return Obj.extract(Arr, ['every', 'some']);
 });

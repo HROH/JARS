@@ -1,13 +1,12 @@
 JAR.register({
     MID: 'jar.lang.Object.Object-derive',
-    deps: ['..', '..Array!reduce', '.!reduce']
-}, function(lang, Arr) {
+    deps: ['..Array!reduce', '.!reduce']
+}, function(Arr, Obj) {
     'use strict';
 
-    var ObjectCopy = this,
-        reduce = ObjectCopy.reduce;
+    var reduce = Obj.reduce;
 
-    lang.extendNativeType('Object', {
+    Obj.enhance({
         /**
          * @param {Array} keys
          * 
@@ -17,10 +16,10 @@ JAR.register({
             var object = this;
 
             return Arr.reduce(keys, function(extractedObject, key) {
-                extractedObject[key] = ObjectCopy.hasOwn(object, key) ? object[key] : undefined;
+                extractedObject[key] = Obj.hasOwn(object, key) ? object[key] : undefined;
 
                 return extractedObject;
-            }, new ObjectCopy());
+            }, new Obj());
         },
         /**
          * @param {Function} callback
@@ -37,7 +36,7 @@ JAR.register({
                 }
 
                 return filteredObject;
-            }, new ObjectCopy());
+            }, new Obj());
         },
         /**
          * @param {Function} callback
@@ -52,13 +51,13 @@ JAR.register({
                 mappedObject[prop] = callback.call(context, value, prop, object);
 
                 return mappedObject;
-            }, new ObjectCopy());
+            }, new Obj());
         },
         /**
          * @return {Object}
          */
         invert: function() {
-            return reduce(this, invert, new ObjectCopy());
+            return reduce(this, invert, new Obj());
         }
     });
 
@@ -68,5 +67,5 @@ JAR.register({
         return invertedObject;
     }
 
-    return ObjectCopy.extract(ObjectCopy, ['extract', 'filter', 'map', 'invert']);
+    return Obj.extract(Obj, ['extract', 'filter', 'map', 'invert']);
 });

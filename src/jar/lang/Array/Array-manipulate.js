@@ -1,12 +1,12 @@
 JAR.register({
     MID: 'jar.lang.Array.Array-manipulate',
-    deps: ['System::isArrayLike', '..', '.!index,iterate', '..Object!derive']
-}, function(isArrayLike, lang, Arr, Obj) {
+    deps: ['System::isArrayLike', '.!index,iterate', '..Object!derive']
+}, function(isArrayLike, Arr, Obj) {
     'use strict';
 
     var forEach = Arr.forEach;
 
-    lang.extendNativeType('Array', {
+    Arr.enhance({
         merge: function(array) {
             if (isArrayLike(array)) {
                 this.push.apply(this, array);

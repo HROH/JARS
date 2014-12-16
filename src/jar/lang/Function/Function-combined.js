@@ -1,14 +1,14 @@
 JAR.register({
     MID: 'jar.lang.Function.Function-combined',
-    deps: ['System', '..', '..Array!reduce', '..Object!derive']
-}, function(System, lang, Arr, Obj) {
+    deps: [{
+        '.': ['::from', '::apply']
+    }, 'System::isFunction', '..Array!reduce', '..Object!derive']
+}, function(fromFunction, applyFunction, isFunction, Arr, Obj) {
     'use strict';
 
-    var FunctionCopy = this,
-        fromFunction = FunctionCopy.from,
-        apply = FunctionCopy.apply;
+    var Fn = this;
 
-    lang.extendNativeType('Function', {
+    Fn.enhance({
         compose: function() {
             return createFunctionPipe(this, arguments, true);
         },
@@ -22,17 +22,17 @@ JAR.register({
                 context;
 
             function proceed() {
-                var result = apply(fn, context, arguments);
-                
+                var result = applyFunction(fn, context, arguments);
+
                 context = null;
-                
+
                 return result;
             }
 
             return fromFunction(function wrappedFn() {
                 context = this;
 
-                return apply(wrapperFn, context, [proceed, arguments]);
+                return applyFunction(wrapperFn, context, [proceed, arguments]);
             }, wrapperFn.arity || wrapperFn.length);
         }
     });
@@ -46,7 +46,7 @@ JAR.register({
      * @return {Function}
      */
     function createFunctionPipe(fn, functions, reversed) {
-        functions = Arr.filter(functions, System.isFunction);
+        functions = Arr.filter(functions, isFunction);
         functions.unshift(fn);
 
         reversed && (functions = functions.reverse());
@@ -60,5 +60,5 @@ JAR.register({
         return next(result);
     }
 
-    return Obj.extract(FunctionCopy, ['compose', 'pipeline', 'wrap']);
+    return Obj.extract(Fn, ['compose', 'pipeline', 'wrap']);
 });

@@ -1,12 +1,11 @@
 JAR.register({
-    MID: 'jar.lang.Object.Object-reduce',
-    deps: '..'
-}, function(lang) {
+    MID: 'jar.lang.Object.Object-reduce'
+}, function() {
     'use strict';
 
-    var ObjectCopy = this;
+    var Obj = this;
 
-    lang.extendNativeType('Object', {
+    Obj.enhance({
         reduce: function(callback, initialValue) {
             var object = this,
                 isValueSet = false,
@@ -19,7 +18,7 @@ JAR.register({
             }
 
             for (prop in object) {
-                if (ObjectCopy.hasOwn(object, prop)) {
+                if (Obj.hasOwn(object, prop)) {
                     if (isValueSet) {
                         ret = callback(ret, object[prop], prop, object);
                     }
@@ -35,6 +34,6 @@ JAR.register({
     });
 
     return {
-        reduce: ObjectCopy.reduce
+        reduce: Obj.reduce
     };
 });

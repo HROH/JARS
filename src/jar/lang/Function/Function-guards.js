@@ -1,14 +1,14 @@
 JAR.register({
     MID: 'jar.lang.Function.Function-guards',
-    deps: ['..', '..Object!derive']
-}, function(lang, Obj) {
+    deps: [{
+        '.': ['::from', '::apply']
+    }, '..Object!derive']
+}, function(fromFunction, applyFunction, Obj) {
     'use strict';
 
-    var FunctionCopy = this,
-        fromFunction = FunctionCopy.from,
-        apply = FunctionCopy.apply;
+    var Fn = this;
 
-    lang.extendNativeType('Function', {
+    Fn.enhance({
         memoize: function(serializer) {
             var fn = this,
                 cache = {};
@@ -16,12 +16,12 @@ JAR.register({
             return fromFunction(function memoizedFn() {
                 var hash = (serializer || internalSerializer)(arguments);
 
-                return hash in cache ? cache[hash] : (cache[hash] = apply(fn, this, arguments));
+                return hash in cache ? cache[hash] : (cache[hash] = applyFunction(fn, this, arguments));
             });
         },
 
         once: function() {
-            return FunctionCopy.callN(this, 1);
+            return Fn.callN(this, 1);
         },
 
         callN: function(count) {
@@ -43,7 +43,7 @@ JAR.register({
                 result;
 
             if (unguarded) {
-                result = apply(fn, this, arguments);
+                result = applyFunction(fn, this, arguments);
             }
 
             if (unguarded !== guardBefore) {
@@ -65,5 +65,5 @@ JAR.register({
         return JSON.stringify(args[0]);
     }
 
-    return Obj.extract(FunctionCopy, ['memoize', 'once', 'callN', 'blockN']);
+    return Obj.extract(Fn, ['memoize', 'once', 'callN', 'blockN']);
 });

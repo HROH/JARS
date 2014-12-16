@@ -1,15 +1,15 @@
 JAR.register({
     MID: 'jar.lang.Array.Array-derive',
-    deps: ['..', {
+    deps: [{
         '..assert': ['::isSet', 'Type::isFunction']
     }, '.!iterate', '..Object!derive']
-}, function(lang, assertIsSet, assertIsFunction, Arr, Obj) {
+}, function(assertIsSet, assertIsFunction, Arr, Obj) {
     'use strict';
 
     var forEach = Arr.forEach,
         MSG_NO_FUNCTION = 'The callback is not a function';
 
-    lang.extendNativeType('Array', {
+    Arr.enhance({
         filter: createDeriver(),
 
         map: createDeriver(true)

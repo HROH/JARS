@@ -1,15 +1,15 @@
 JAR.register({
     MID: 'jar.lang.Array.Array-find',
-    deps: ['System', '..', {
+    deps: ['System::isNumber', {
         '..assert': ['::isSet', 'Type::isFunction']
     }]
-}, function(System, lang, assertIsSet, assertIsFunction) {
+}, function(isNumber, assertIsSet, assertIsFunction) {
     'use strict';
 
     var MSG_NO_FUNCTION = 'The predicate is not a function',
-        ArrayCopy;
+        Arr;
 
-    ArrayCopy = lang.extendNativeType('Array', {
+    Arr.enhance({
         find: createFinder(),
 
         findLast: createFinder(false, true),
@@ -55,7 +55,7 @@ JAR.register({
         var idx = Number(fromIndex),
             absIdx;
 
-        if (!System.isNumber(idx)) {
+        if (!isNumber(idx)) {
             idx = defaultIndex;
         }
         else if (idx !== 0) {
@@ -67,12 +67,12 @@ JAR.register({
     }
 
     return {
-        find: ArrayCopy.find,
+        find: Arr.find,
 
-        findLast: ArrayCopy.findLast,
+        findLast: Arr.findLast,
 
-        findIndex: ArrayCopy.findIndex,
+        findIndex: Arr.findIndex,
 
-        findLastIndex: ArrayCopy.findLastIndex
+        findLastIndex: Arr.findLastIndex
     };
 });

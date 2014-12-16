@@ -1,18 +1,18 @@
 JAR.register({
     MID: 'jar.lang.Function',
-    deps: [{
-        System: ['::isA', '::isFunction']
-    }, '.Array'],
+    deps: {
+        System: ['::isA', '::isFunction'],
+        '.Array': ['.', '::from']
+    },
     bundle: ['Function-advice', 'Function-combined', 'Function-flow', 'Function-guards', 'Function-modargs']
-}, function(isA, isFunction, Arr) {
+}, function(isA, isFunction, Arr, fromArgs) {
     'use strict';
 
     var lang = this,
         fnConverter = lang.sandbox('__SYSTEM__').add('function(f, a){function fn(){return f.apply(this,arguments)};fn.arity=a||f.arity||f.length;return fn;}'),
-        fromArgs = Arr.from,
-        FunctionCopy, apply;
+        Fn = lang.sandboxNativeType('Function'), apply;
 
-    FunctionCopy = lang.extendNativeType('Function', {
+    Fn.enhance({
         bind: function(context) {
             var fnToBind = this,
                 FnLink = function() {},
@@ -77,7 +77,7 @@ JAR.register({
         }
     });
 
-    apply = FunctionCopy.apply;
+    apply = Fn.apply;
 
     /**
      *
@@ -86,8 +86,8 @@ JAR.register({
      * @return {Function}
      */
     function fromFunction(fn, arity) {
-        return (isA(fn, FunctionCopy) || !isFunction(fn)) ? fn : fnConverter(fn, arity);
+        return (isA(fn, Fn) || !isFunction(fn)) ? fn : fnConverter(fn, arity);
     }
 
-    return FunctionCopy;
+    return Fn;
 });

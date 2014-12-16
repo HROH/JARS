@@ -1,12 +1,12 @@
 JAR.register({
     MID: 'jar.lang.Object.Object-info',
-    deps: ['..', '.!reduce,derive', '..Array!reduce']
-}, function(lang, Obj, Arr) {
+    deps: ['.!reduce,derive', '..Array!reduce']
+}, function(Obj, Arr) {
     'use strict';
 
     var reduce = Obj.reduce;
 
-    lang.extendNativeType('Object', {
+    Obj.enhance({
         keys: function() {
             return reduce(this, pushKey, Arr());
         },

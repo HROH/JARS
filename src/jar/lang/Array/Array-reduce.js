@@ -1,16 +1,16 @@
 JAR.register({
     MID: 'jar.lang.Array.Array-reduce',
-    deps: ['..', {
+    deps: {
         '..assert': ['.', '::isSet', 'Type::isFunction']
-    }]
-}, function(lang, assert, assertIsSet, assertIsFunction) {
+    }
+}, function(assert, assertIsSet, assertIsFunction) {
     'use strict';
 
-    var ArrayCopy = this,
+    var Arr = this,
         MSG_NO_FUNCTION = 'The callback is not a function',
         MSG_REDUCE_OF_EMPTY_ARRAY = 'Reduce of empty array with no initial value';
 
-    lang.extendNativeType('Array', {
+    Arr.enhance({
         reduce: createReduce(),
 
         reduceRight: createReduce(true)
@@ -54,8 +54,8 @@ JAR.register({
     }
 
     return {
-        reduce: ArrayCopy.reduce,
+        reduce: Arr.reduce,
 
-        reduceRight: ArrayCopy.reduceRight
+        reduceRight: Arr.reduceRight
     };
 });

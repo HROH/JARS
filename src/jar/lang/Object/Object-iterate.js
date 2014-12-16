@@ -1,7 +1,7 @@
 JAR.register({
     MID: 'jar.lang.Object.Object-iterate',
-    deps: ['..', '.!derive']
-}, function(lang, Obj) {
+    deps: '.!derive'
+}, function(Obj) {
     'use strict';
 
     var forOwn = createForIn(true),
@@ -21,7 +21,7 @@ JAR.register({
         };
     }
 
-    lang.extendNativeType('Object', {
+    Obj.enhance({
         each: forOwn,
 
         forEach: forOwn,

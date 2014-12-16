@@ -28,31 +28,15 @@ JAR.register({
          * @memberof jar.lang
          * 
          * @param {string} typeString
-         * @param {Object} prototypeMethods
-         * @param {Object} staticMethods
          *
          * @return {Object}
          */
-        extendNativeType: function(typeString, prototypeMethods, staticMethods) {
-            var Type = getNativeType(typeString),
-                typePrototype = Type.prototype,
-                methodName;
+        sandboxNativeType: function(typeString) {
+            var Type = getNativeType(typeString);
 
-            for (methodName in prototypeMethods) {
-                if (hasOwnProp(prototypeMethods, methodName)) {
-                    if (!hasOwnProp(typePrototype, methodName)) {
-                        typePrototype[methodName] = prototypeMethods[methodName];
-                    }
-
-                    hasOwnProp(Type, methodName) || (Type[methodName] = createDelegate(typePrototype[methodName]));
-                }
-            }
-
-            for (methodName in staticMethods) {
-                if (hasOwnProp(staticMethods, methodName) && !hasOwnProp(Type, methodName)) {
-                    Type[methodName] = staticMethods[methodName];
-                }
-            }
+            Type.enhance || (Type.enhance = function(prototypeMethods, staticMethods) {
+                return enhanceNativeType(Type, prototypeMethods, staticMethods);
+            });
 
             return Type;
         },
@@ -247,6 +231,29 @@ JAR.register({
             makePluggable(typeString, Type);
 
             nativeTypes[typeString] = Type;
+        }
+
+        return Type;
+    }
+
+    function enhanceNativeType(Type, prototypeMethods, staticMethods) {
+        var typePrototype = Type.prototype,
+            methodName;
+
+        for (methodName in prototypeMethods) {
+            if (hasOwnProp(prototypeMethods, methodName)) {
+                if (!hasOwnProp(typePrototype, methodName)) {
+                    typePrototype[methodName] = prototypeMethods[methodName];
+                }
+
+                hasOwnProp(Type, methodName) || (Type[methodName] = createDelegate(typePrototype[methodName]));
+            }
+        }
+
+        for (methodName in staticMethods) {
+            if (hasOwnProp(staticMethods, methodName) && !hasOwnProp(Type, methodName)) {
+                Type[methodName] = staticMethods[methodName];
+            }
         }
 
         return Type;

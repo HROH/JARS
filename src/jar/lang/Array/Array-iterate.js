@@ -1,18 +1,18 @@
 JAR.register({
     MID: 'jar.lang.Array.Array-iterate',
-    deps: ['..', {
+    deps: {
         '..assert': ['::isSet', 'Type::isFunction']
-    }]
-}, function(lang, assertIsSet, assertIsFunction) {
+    }
+}, function(assertIsSet, assertIsFunction) {
     'use strict';
 
-    var ArrayCopy = this,
+    var Arr = this,
         MSG_NO_FUNCTION = 'The callback is not a function',
         assertionMessage = 'Array.prototype.forEach called on null or undefined';
 
-    lang.extendNativeType('Array', {
+    Arr.enhance({
         each: function(callback, array) {
-            ArrayCopy.forEach(this, callback, array);
+            Arr.forEach(this, callback, array);
         },
 
         forEach: function(callback, context) {
@@ -33,8 +33,8 @@ JAR.register({
     });
 
     return {
-        each: ArrayCopy.each,
+        each: Arr.each,
 
-        forEach: ArrayCopy.forEach
+        forEach: Arr.forEach
     };
 });

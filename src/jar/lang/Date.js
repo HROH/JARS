@@ -3,7 +3,7 @@ JAR.register({
 }, function() {
     'use strict';
 
-    var DateCopy = this.extendNativeType('Date', {
+    var DateCopy = this.sandboxNativeType('Date').enhance({
         toISOString: function() {
             return getISODateString(this) + 'T' + getISOTimeString(this) + 'Z';
         }

@@ -1,13 +1,12 @@
 JAR.register({
     MID: 'jar.lang.Function.Function-advice',
-    deps: ['..', '..Object!derive']
-}, function(lang, Obj) {
+    deps: ['.::apply', '..Object!derive']
+}, function(applyFunction, Obj) {
     'use strict';
 
-    var FunctionCopy = this,
-        apply = FunctionCopy.apply;
+    var Fn = this;
 
-    lang.extendNativeType('Function', {
+    Fn.enhance({
         after: function(executeAfterwards) {
             return createAdvice(this, null, executeAfterwards);
         },
@@ -22,17 +21,17 @@ JAR.register({
     });
 
     function createAdvice(fn, executeBefore, executeAfterwards) {
-        return FunctionCopy.from(function adviceFn() {
+        return Fn.from(function adviceFn() {
             var context = this,
                 result;
 
-            executeBefore && apply(executeBefore, context, arguments);
-            result = apply(fn, context, arguments);
-            executeAfterwards && apply(executeAfterwards, context, arguments);
+            executeBefore && applyFunction(executeBefore, context, arguments);
+            result = applyFunction(fn, context, arguments);
+            executeAfterwards && applyFunction(executeAfterwards, context, arguments);
 
             return result;
         }, fn.arity || fn.length);
     }
 
-    return Obj.extract(FunctionCopy, ['before', 'after', 'around']);
+    return Obj.extract(Fn, ['before', 'after', 'around']);
 });

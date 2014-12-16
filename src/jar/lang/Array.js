@@ -13,9 +13,9 @@ JAR.register({
      */
     var MSG_REQUIRES_ARRAYLIKE = 'Array.from requires an array-like object - not null or undefined',
         MSG_NO_FUNCTION = 'Array.from: when provided, the second argument must be a function',
-        ArrayCopy;
-
-    ArrayCopy = this.extendNativeType('Array', {
+        Arr = this.sandboxNativeType('Array');
+    
+    Arr.enhance({
         // add some sugar (example: jar.lang.Array.push(arrayLike, value1, value2, ...) )
         concat: true,
 
@@ -56,7 +56,7 @@ JAR.register({
 
         len = arrayLike.length >>> 0;
 
-        newArray = ArrayCopy(len);
+        newArray = Arr(len);
 
         while (index < len) {
             newArray[index] = mapFn ? mapFn.call(context, arrayLike[index], index) : arrayLike[index];
@@ -67,5 +67,5 @@ JAR.register({
         return newArray;
     }
 
-    return ArrayCopy;
+    return Arr;
 });
