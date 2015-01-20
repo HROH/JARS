@@ -151,13 +151,7 @@ Or you can provide an object with the following options:
 
 * **globalAccess {Boolean}** (root-modules can be accessed over the namespace <code>JAR.mods</code>. This may be useful in developement - default: <code>false</code>)
 
-* **loader {Object}** (configure loaderspecific options)
- * **checkCircularDeps {Boolean}** (<code>true</code> causes the Loader to check for circular dependencies - default: <code>false</code>)  
- Can be very slow, so only use this feature if your app is not loading properly and you don't get any error messages.
-
- * **createDependencyURLList {Boolean}** (specify <code>true</code> to let the Loader create a list of all dependencies when they are loaded - default: <code>false</code>)  
- Maybe useful in a buildstep using something like phantomjs.
- You can get the list by calling <code>JAR.getDependencyURLList(callback)</code>.
+* **loaderContext {String}** (spin up or switch to another Loader instance with a complete new set of modules)
 
 * **main {String}** (define the main-file of your application)
 
@@ -166,6 +160,9 @@ You can customize the following options for your modules:
  * **baseUrl {String}** (url to the rootdirectory of your modules - default: current directory)
 
  * **cache {Boolean}** (<code>false</code> prevents caching of the files - default: <code>true</code>)
+ 
+ * **checkCircularDeps {Boolean}** (<code>true</code> causes the module to check for circular dependencies - default: <code>false</code>)  
+ Can be very slow, so only use this feature if your app is not loading properly and you don't get any error messages.
 
  * **config {Object}** (options for configuring a module)  
  You can read the config using the <code>"System!"</code>-plugin-interceptor in your dependencies.
@@ -192,11 +189,15 @@ You can customize the following options for your modules:
  This may be useful if you switch from an older to a newer version.
  It is not recommended or possible to load two different versions of one module.
 
-   You can also pass the additional option <code>restrict</code> which defines the modules that are affected by this configuration.
-   This can be a String, an Array or an Object similar to the dependency-declaration in <code>JAR.register(properties, factory)</code>.
+   You can also pass the additional options:
+   * **restrict {Object|Array|String}** (defines the modules that are affected by this configuration similar to the dependency-declaration in <code>JAR.register(properties, factory)</code>).
+   
+   * **loaderContext {String}** (the loaderContext of the modules that you want to configure)
+   By default this is the active loader.
 
     ```js
     JAR.configure('modules', {
+    	loaderContext: 'default' // default active loader
         restrict: 'jar.lang.*', // restrict configuration to all the modules under 'jar.lang'
         baseUrl: 'http://localhost/libs/',
         minified: true
@@ -206,7 +207,7 @@ You can customize the following options for your modules:
     JAR.$import('jar.lang.Object');
     ```
 
-   Note that these configurations are semi-transparent.
+   Note that these configurations inherit options from their parent (e.g. jar.lang -> jar.lang.* -> jar.* -> global config).
    So if there exists no configuration for a specific module the Loader will look for a configuration on a higher or - if you omit the restriction - on the global level.
 * **supressErrors {Boolean}** (whether thrown errors in a <code>JAR.main</code>-block should be caught - default: <code>false</code>)
 
