@@ -1,7 +1,7 @@
 (function globalSetup(global, undef) {
     'use strict';
 
-    var SourceManager, LoaderManager, ConfigurationManager, hasOwnProp;
+    var SourceManager, LoaderManager, hasOwnProp;
 
     /**
      * @access private
@@ -22,18 +22,38 @@
         };
     })();
 
-    function objectEach(obj, callback) {
+    /**
+     * @access private
+     * 
+     * @memberof JAR
+     * @inner
+     * 
+     * @param {Object} object
+     * @param {Function()} callback
+     */
+    function objectEach(object, callback) {
         var property;
 
-        for (property in obj) {
-            if (hasOwnProp(obj, property)) {
-                if (callback(obj[property], property)) {
+        for (property in object) {
+            if (hasOwnProp(object, property)) {
+                if (callback(object[property], property)) {
                     break;
                 }
             }
         }
     }
 
+    /**
+     * @access private
+     * 
+     * @memberof JAR
+     * @inner
+     * 
+     * @param {Object} dest
+     * @param {Object} source
+     * 
+     * @return {Object}
+     */
     function objectMerge(dest, source) {
         objectEach(source, function mergeValue(value, key) {
             dest[key] = value;
@@ -42,6 +62,15 @@
         return dest;
     }
 
+    /**
+     * @access private
+     * 
+     * @memberof JAR
+     * @inner
+     * 
+     * @param {Array} object
+     * @param {Function()} callback
+     */
     function arrayEach(array, callback) {
         var index = 0,
             length = array.length;
@@ -52,299 +81,6 @@
             }
         }
     }
-
-    ConfigurationManager = (function configurationManagerSetup() {
-        var MIN_TIMEOUT = 0.5,
-            STRING_CHECK = 'String',
-            OBJECT_CHECK = 'Object',
-            BOOLEAN_CHECK = 'Boolean',
-            loaderConfig = {
-                checkCircularDeps: false,
-
-                createDependencyURLList: false
-            },
-            modulesConfig = {
-                '*': {
-                    config: {}
-                }
-            },
-            ConfigurationManager, definitions;
-
-        definitions = {
-            baseUrl: {
-                check: STRING_CHECK,
-
-                transform: function baseUrlTransform(baseUrl) {
-                    return LoaderManager.Resolver.ensureEndsWithSlash(baseUrl);
-                }
-            },
-
-            cache: {
-                check: BOOLEAN_CHECK,
-                /**
-                 * @param {Boolean} cache
-                 * 
-                 * @return {Boolean}
-                 */
-                transform: function cacheTransform(cache) {
-                    return !!cache;
-                }
-            },
-
-            config: {
-                check: OBJECT_CHECK,
-                /**
-                 * @param {Object} config
-                 * @param {String} moduleName
-                 * 
-                 * @return {Object}
-                 */
-                transform: function configTransform(config, moduleName) {
-                    return objectMerge(modulesConfig[moduleName].config, config);
-                }
-            },
-
-            dirPath: {
-                check: STRING_CHECK,
-
-                transform: function dirPathTransform(baseUrl) {
-                    return LoaderManager.Resolver.ensureEndsWithSlash(baseUrl);
-                }
-            },
-
-            fileName: {
-                check: STRING_CHECK
-            },
-
-            minified: {
-                check: BOOLEAN_CHECK,
-                /**
-                 * @param {Boolean} loadMin
-                 * 
-                 * @return {String}
-                 */
-                transform: function minTransform(loadMin) {
-                    return loadMin ? '.min' : '';
-                }
-            },
-
-            recover: {
-                check: OBJECT_CHECK,
-                /**
-                 * @param {Object} recoverConfig
-                 * @param {String} moduleName
-                 * 
-                 * @return {Object}
-                 */
-                transform: function recoverTransform(recoverConfig, moduleName) {
-                    // create a copy of the recover-config
-                    // because it should update for every module independendly
-                    var recover = objectMerge({}, recoverConfig);
-
-                    recover.restrict = moduleName;
-                    // if no next recover-config is given set it explicitly
-                    // this is important because the recoverflow is as follows:
-                    // - if the module has a recover-config, use it to update its config
-                    // - if it has no recover-config look for it in a higher bundle-config
-                    // - if such a config is found, update the config for the module
-                    // - when the module-config is updated, options will always be overwritten but never deleted
-                    // So if the module has a recover-config that doesn't get replaced
-                    // it may repeatedly try to recover with this config
-                    recover.recover || (recover.recover = null);
-
-                    return recover;
-                }
-            },
-
-            timeout: {
-                check: 'Number',
-                /**
-                 * @param {Number} timeout
-                 * 
-                 * @return {Number}
-                 */
-                transform: function timeoutTransform(timeout) {
-                    return timeout > MIN_TIMEOUT ? timeout : MIN_TIMEOUT;
-                }
-            },
-
-            versionSuffix: {
-                check: STRING_CHECK
-            }
-        };
-
-        function getParentModuleConfigObject(moduleName) {
-            var Resolver = LoaderManager.Resolver,
-                parentModuleName = Resolver.getImplicitDependencyName(Resolver.isBundleRequest(moduleName) ? Resolver.extractModuleNameFromBundle(moduleName) : moduleName);
-
-            return getModuleConfigObject(parentModuleName ? Resolver.getBundleName(parentModuleName) : Resolver.getRootName());
-        }
-
-        function getModuleConfigObject(moduleName) {
-            var parentModuleConfigObject, moduleConfigObject;
-
-            if (!modulesConfig[moduleName]) {
-                parentModuleConfigObject = getParentModuleConfigObject(moduleName);
-
-                moduleConfigObject = modulesConfig[moduleName] = createConfig(parentModuleConfigObject);
-                moduleConfigObject.config = createConfig(parentModuleConfigObject.config);
-            }
-
-            return modulesConfig[moduleName];
-        }
-
-        function createConfig(parentConfig) {
-            function Config() {
-
-            }
-
-            Config.prototype = parentConfig;
-
-            return new Config();
-        }
-
-        /**
-         * @access private
-         * 
-         * @memberof JAR~ConfigurationManager
-         * @inner
-         * 
-         * @param {String} moduleName
-         * @param {String} option
-         * @param {*} value
-         */
-        function configurationManagerTransformModuleConfig(moduleName, option, value) {
-            var transform = definitions[option].transform;
-
-            return transform ? transform(value, moduleName) : value;
-        }
-
-        /**
-         * @access private
-         * 
-         * @memberof JAR~ConfigurationManager
-         * @inner
-         * 
-         * @param {String} moduleName
-         * @param {Object} newConfig
-         */
-        function configurationManagerUpdateModuleConfig(moduleName, newConfig) {
-            var System = LoaderManager.getSystem(),
-                config = getModuleConfigObject(moduleName),
-                definition;
-
-            objectEach(newConfig, function updateConfig(value, option) {
-                if (hasOwnProp(definitions, option)) {
-                    definition = definitions[option];
-
-                    if (System.isFunction(value)) {
-                        value = value(config[option], moduleName);
-                    }
-
-                    if (System['is' + definition.check](value)) {
-                        config[option] = configurationManagerTransformModuleConfig(moduleName, option, value);
-                    }
-                    else if (System.isNull(value)) {
-                        delete config[option];
-                    }
-                }
-            });
-        }
-
-        /**
-         * @access private
-         * 
-         * @namespace ConfigurationManager
-         * 
-         * @memberof JAR
-         * @inner
-         */
-        ConfigurationManager = {
-            /**
-             * @access public
-             * 
-             * @memberof JAR~ConfigurationManager
-             * 
-             * @param {(Object|Array)} newConfig
-             * 
-             * @return {Object}
-             */
-            setModuleConfig: function(newConfig) {
-                var System = LoaderManager.getSystem(),
-                    Resolver = LoaderManager.Resolver,
-                    modules;
-
-                if (System.isArray(newConfig)) {
-                    arrayEach(newConfig, function setModuleConfig(config) {
-                        ConfigurationManager.setModuleConfig(config);
-                    });
-                }
-                else if (System.isObject(newConfig)) {
-                    modules = newConfig.restrict ? Resolver.resolve(newConfig.restrict) : [Resolver.getRootName()];
-
-                    arrayEach(modules, function updateModuleConfig(moduleName) {
-                        configurationManagerUpdateModuleConfig(moduleName, newConfig);
-                    });
-                }
-
-                return modulesConfig;
-            },
-            /**
-             * @access public
-             * 
-             * @memberof JAR~ConfigurationManager
-             * 
-             * @param {String} moduleName
-             * @param {String} option
-             * @param {Boolean} skipUntil
-             * 
-             * @return {*}
-             */
-            getModuleConfig: function(moduleName, option, defaultValue, skipUntil) {
-                var config = getModuleConfigObject(moduleName),
-                    result;
-
-                if (skipUntil && !hasOwnProp(config, option)) {
-                    result = ConfigurationManager.getModuleConfig(skipUntil, option, defaultValue);
-                }
-                else if (option in config) {
-                    result = config[option];
-                }
-                else {
-                    result = defaultValue;
-                }
-
-                return result;
-            },
-            /**
-             * @access public
-             * 
-             * @memberof JAR~ConfigurationManager
-             * 
-             * @param {String} option
-             * @param {Object} value
-             * 
-             * @return {Object}
-             */
-            setLoaderConfig: function(config) {
-                return objectMerge(loaderConfig, config);
-            },
-            /**
-             * @access public
-             * 
-             * @memberof JAR~ConfigurationManager
-             * 
-             * @param {String} option
-             * 
-             * @return {*}
-             */
-            getLoaderConfig: function(option) {
-                return loaderConfig[option];
-            }
-        };
-
-        return ConfigurationManager;
-    })();
 
     /**
      * @access private
@@ -365,10 +101,18 @@
              * 
              * @memberof JAR~SourceManager
              * 
-             * @return {HTMLCollection}
+             * @return {String}
              */
-            getScripts: function() {
-                return doc.getElementsByTagName('script');
+            getMain: function() {
+                var main;
+
+                arrayEach(doc.getElementsByTagName('script'), function findMainScript(script) {
+                    main = script.getAttribute('data-main');
+
+                    return !!main;
+                });
+
+                return main;
             },
             /**
              * @access public
@@ -378,7 +122,7 @@
              * @param {String} moduleName
              * @param {String} path
              */
-            loadScript: function(moduleName, path) {
+            loadSource: function(moduleName, path) {
                 var script = doc.createElement('script');
 
                 head.appendChild(script);
@@ -399,7 +143,7 @@
              * 
              * @return {Boolean}
              */
-            findScript: function(moduleName) {
+            findSource: function(moduleName) {
                 var script = (doc.currentScript && doc.currentScript.id === moduleName) ? doc.currentScript : doc.getElementById(moduleName),
                     foundScript = !! script;
 
@@ -418,7 +162,7 @@
              * 
              * @return {String} path
              */
-            removeScript: function(moduleName) {
+            removeSource: function(moduleName) {
                 var script = scripts[moduleName],
                     path = script.src;
 
@@ -436,7 +180,226 @@
             loaders = {},
             loaderCoreModules = {},
             interceptors = {},
-            Module, Resolver, LoaderManager;
+            Module, Resolver, LoaderManager, Config;
+
+        Config = (function configurationSetup() {
+            var MIN_TIMEOUT = 0.5,
+                STRING_CHECK = 'String',
+                OBJECT_CHECK = 'Object',
+                BOOLEAN_CHECK = 'Boolean',
+                definitions;
+
+            definitions = {
+                baseUrl: {
+                    check: STRING_CHECK,
+                    /**
+                     * @param {String} baseUrl
+                     * 
+                     * @return {String}
+                     */
+                    transform: function baseUrlTransform(baseUrl) {
+                        return Resolver.ensureEndsWithSlash(baseUrl);
+                    }
+                },
+
+                cache: {
+                    check: BOOLEAN_CHECK,
+                    /**
+                     * @param {Boolean} cache
+                     * 
+                     * @return {Boolean}
+                     */
+                    transform: function cacheTransform(cache) {
+                        return !!cache;
+                    }
+                },
+
+                checkCircularDeps: {
+                    check: BOOLEAN_CHECK
+                },
+
+                config: {
+                    check: OBJECT_CHECK,
+                    /**
+                     * @param {Object} config
+                     * @param {String} moduleName
+                     * 
+                     * @return {Object}
+                     */
+                    transform: function configTransform(config, moduleName) {
+                        return objectMerge(LoaderManager.getModule(moduleName).getConfig('config', Resolver.isBundleRequest(moduleName)), config);
+                    }
+                },
+
+                dirPath: {
+                    check: STRING_CHECK,
+                    /**
+                     * @param {String} dirPath
+                     * 
+                     * @return {String}
+                     */
+                    transform: function dirPathTransform(dirPath) {
+                        return Resolver.ensureEndsWithSlash(dirPath);
+                    }
+                },
+
+                fileName: {
+                    check: STRING_CHECK
+                },
+
+                minified: {
+                    check: BOOLEAN_CHECK,
+                    /**
+                     * @param {Boolean} loadMin
+                     * 
+                     * @return {String}
+                     */
+                    transform: function minTransform(loadMin) {
+                        return loadMin ? '.min' : '';
+                    }
+                },
+
+                recover: {
+                    check: OBJECT_CHECK,
+                    /**
+                     * @param {Object} recoverConfig
+                     * @param {String} moduleName
+                     * 
+                     * @return {Object}
+                     */
+                    transform: function recoverTransform(recoverConfig, moduleName) {
+                        // create a copy of the recover-config
+                        // because it should update for every module independendly
+                        var recover = objectMerge({}, recoverConfig);
+
+                        recover.restrict = moduleName;
+                        // if no next recover-config is given set it explicitly
+                        // this is important because the recoverflow is as follows:
+                        // - if the module has a recover-config, use it to update its config
+                        // - if it has no recover-config look for it in a higher bundle-config
+                        // - if such a config is found, update the config for the module
+                        // - when the module-config is updated, options will always be overwritten but never deleted
+                        // So if the module has a recover-config that doesn't get replaced
+                        // it may repeatedly try to recover with this config
+                        recover.recover || (recover.recover = null);
+
+                        return recover;
+                    }
+                },
+
+                timeout: {
+                    check: 'Number',
+                    /**
+                     * @param {Number} timeout
+                     * 
+                     * @return {Number}
+                     */
+                    transform: function timeoutTransform(timeout) {
+                        return timeout > MIN_TIMEOUT ? timeout : MIN_TIMEOUT;
+                    }
+                },
+
+                versionSuffix: {
+                    check: STRING_CHECK
+                }
+            };
+
+            /**
+             * @access private
+             * 
+             * @memberof JAR~LoaderManager
+             * @inner
+             * 
+             * @param {String} moduleName
+             */
+            function Config(moduleName) {
+                this.moduleName = moduleName;
+                this.children = {};
+                this.config = {};
+            }
+
+            Config.prototype = {
+                /**
+                 * @access public
+                 * 
+                 * @alias JAR~LoaderManager~Config
+                 * 
+                 * @memberof JAR~LoaderManager~Config#
+                 */
+                constructor: Config,
+                /**
+                 * @access public
+                 * 
+                 * @memberof JAR~LoaderManager~Config#
+                 * 
+                 * @param {Object} newConfig
+                 * 
+                 * @return {Object}
+                 */
+                update: function(newConfig) {
+                    var config = this,
+                        System = LoaderManager.getSystem();
+
+                    objectEach(newConfig, function updateConfig(value, option) {
+                        var transform, definition;
+
+                        if (hasOwnProp(definitions, option)) {
+                            definition = definitions[option];
+                            transform = definition.transform;
+
+                            if (System.isFunction(value)) {
+                                value = value(config[option], config.moduleName);
+                            }
+
+                            if (System['is' + definition.check](value)) {
+                                config[option] = transform ? transform(value, config.moduleName) : value;
+                            }
+                            else if (System.isNull(value)) {
+                                delete config[option];
+                            }
+                        }
+                    });
+
+                    return config;
+                },
+                /**
+                 * @access public
+                 * 
+                 * @memberof JAR~LoaderManager~Config#
+                 * 
+                 * @param {String} moduleName
+                 * 
+                 * @return {ChildConfig}
+                 */
+                child: function(moduleName) {
+                    var childConfig = this.children[moduleName];
+
+                    if (!childConfig) {
+                        childConfig = this.children[moduleName] = createChildConfig(this);
+                        childConfig.moduleName = moduleName;
+                        childConfig.config = createChildConfig(this.config);
+                    }
+
+                    return childConfig;
+                }
+            };
+
+            /**
+             * @access private
+             * 
+             * @memberof JAR~LoaderManager
+             * @inner
+             */
+            function ChildConfig() {}
+
+            function createChildConfig(parentConfig) {
+                ChildConfig.prototype = parentConfig;
+
+                return new ChildConfig();
+            }
+
+            return Config;
+        })();
 
         Module = (function moduleSetup() {
             var QUEUE_SUCCESS = 0,
@@ -776,6 +739,8 @@
 
                 module.interceptorData = {};
                 module.interceptorDeps = [];
+
+                module.initConfig();
             }
 
             Module.prototype = {
@@ -803,6 +768,19 @@
                  * @memberof JAR~LoaderManager~Module#
                  */
                 bundleCounter: 0,
+                /**
+                 * @access public
+                 * 
+                 * @memberof JAR~LoaderManager~Module#
+                 */
+                initConfig: function() {
+                    var module = this,
+                        loader = module.loader,
+                        implicitDependency = module.dep;
+
+                    module.bundleConfig = (implicitDependency ? loader.getModule(implicitDependency).bundleConfig : loader.rootConfig).child(module.bundleName);
+                    module.config = module.bundleConfig.child(module.name);
+                },
                 /**
                  * @access public
                  * 
@@ -1089,7 +1067,7 @@
                         hasCircularDependency = false,
                         circularDependencies;
 
-                    if (module.loader.getConfig('checkCircularDeps')) {
+                    if (module.getConfig('checkCircularDeps')) {
                         circularDependencies = module.findCircularDeps();
                         hasCircularDependency = !! circularDependencies.length;
 
@@ -1102,8 +1080,6 @@
 
                     return hasCircularDependency;
                 },
-                // TODO is there a more performant way to check for circular dependencies?
-                // for now turned of in production but can be enabled over JAR.configure('loader', {checkCircularDeps: true})
                 /**
                  * @access public
                  * 
@@ -1206,17 +1182,35 @@
                  * @return {*}
                  */
                 getConfig: function(option, skipUntil) {
-                    return ConfigurationManager.getModuleConfig(this.name, option, this.options[option], skipUntil);
+                    var module = this,
+                        loader = module.loader,
+                        defaultValue = module.options[option],
+                        config = module.config,
+                        result;
+
+                    if (skipUntil && !hasOwnProp(config, option)) {
+                        config = Resolver.isRootName(skipUntil) ? loader.rootConfig : loader.getModule(skipUntil).bundleConfig;
+                    }
+
+                    if (option in config) {
+                        result = config[option];
+                    }
+                    else {
+                        result = defaultValue;
+                    }
+
+                    return result;
                 },
                 /**
                  * @access public
                  * 
                  * @memberof JAR~LoaderManager~Module#
                  * 
-                 * @param {Object} config
+                 * @param {Object} newConfig
+                 * @param {Boolean} updateBundleConfig
                  */
-                setConfig: function(config) {
-                    ConfigurationManager.setModuleConfig(config);
+                updateConfig: function(newConfig, updateBundleConfig) {
+                    this[updateBundleConfig ? 'bundleConfig' : 'config'].update(newConfig);
                 },
                 /**
                  * @access public
@@ -1349,8 +1343,16 @@
                         module.setBundleState(MODULE_BUNDLE_LOADING);
 
                         module.loader.listenFor(module.bundleName, [module.name], function onModuleLoaded() {
-                            module.log(MSG_BUNDLE_LOADING, true);
-                            module.listenFor(module.bundle, true);
+                            var bundle = module.bundle;
+
+                            if (bundle.length) {
+                                module.log(MSG_BUNDLE_FOUND, true, {
+                                    bundle: bundle.join(separator)
+                                });
+
+                                module.log(MSG_BUNDLE_LOADING, true);
+                                module.listenFor(bundle, true);
+                            }
                         }, function onAbort() {
                             module.abort(false, true);
                         });
@@ -1420,7 +1422,7 @@
                         module.abort();
                     }, module.getConfig('timeout') * 1000);
 
-                    SourceManager.loadScript(module.loader.context + ':' + module.name, path);
+                    SourceManager.loadSource(module.loader.context + ':' + module.name, path);
                 },
                 /**
                  * @access public
@@ -1433,8 +1435,9 @@
                     var module = this,
                         loader = module.loader,
                         moduleName = module.name,
-                        foundRecover = module.getConfig('recover', module.nextRecover),
-                        recoverModuleName, nextRecoverModule;
+                        nextRecover = module.nextRecover,
+                        foundRecover = nextRecover === false ? nextRecover : module.getConfig('recover', nextRecover),
+                        recoverModuleName;
 
                     if (foundRecover) {
                         recoverModuleName = foundRecover.restrict;
@@ -1442,14 +1445,13 @@
                         // This is a recover on a higher level
                         if (recoverModuleName !== moduleName) {
                             // extract the next recovermodule
-                            nextRecoverModule = loader.getModule(loader.getModule(recoverModuleName).dep);
-                            nextRecoverModule && (module.nextRecover = nextRecoverModule.bundleName);
+                            module.nextRecover = Resolver.isRootName(recoverModuleName) ? false : loader.getModule(recoverModuleName).dep || Resolver.getRootName();
 
                             // Only recover this module
                             foundRecover.restrict = moduleName;
                         }
 
-                        module.setConfig(foundRecover);
+                        module.updateConfig(foundRecover);
 
                         // Restore module recover assoziation
                         foundRecover.restrict = recoverModuleName;
@@ -1459,7 +1461,7 @@
                         module.load();
                     }
                     else {
-                        delete module.nextRecover;
+                        module.nextRecover = false;
                     }
 
                     return !!foundRecover;
@@ -1492,7 +1494,7 @@
                                 emptyQueue = true;
 
                                 module.log(MSG_TIMEOUT, false, {
-                                    path: SourceManager.removeScript(module.loader.context + ':' + module.name),
+                                    path: SourceManager.removeSource(module.loader.context + ':' + module.name),
 
                                     sec: module.getConfig('timeout')
                                 });
@@ -1571,9 +1573,21 @@
                  * 
                  * @memberof JAR~LoaderManager~Module#
                  * 
+                 * @param {Array} dependencies
+                 */
+                $import: function(dependencies) {
+                    var module = this;
+
+                    module.deps = module.deps.concat(Resolver.resolve(dependencies, module.name));
+                },
+                /**
+                 * @access public
+                 * 
+                 * @memberof JAR~LoaderManager~Module#
+                 * 
                  * @param {Function} factory
                  */
-                register: function(factory) {
+                $export: function(factory) {
                     var module = this,
                         moduleState;
 
@@ -1592,6 +1606,13 @@
                     }
 
                     module.setState(moduleState);
+
+                    if (module.checkForCircularDeps()) {
+                        module.abort();
+                    }
+                    else {
+                        module.requestDeps();
+                    }
                 },
                 /**
                  * @access public
@@ -1600,31 +1621,20 @@
                  * 
                  * @param {Array} bundle
                  */
-                linkBundle: function(bundle) {
+                defineBundle: function(bundle) {
                     var module = this;
 
-                    module.bundle = bundle = Resolver.resolveBundle(bundle, module.name);
-
-                    if (bundle.length) {
-                        module.log(MSG_BUNDLE_FOUND, true, {
-                            bundle: bundle.join(separator)
-                        });
-                    }
+                    module.bundle = Resolver.resolveBundle(bundle, module.name);
                 },
                 /**
                  * @access public
                  * 
                  * @memberof JAR~LoaderManager~Module#
-                 * 
-                 * @param {Array} dependencies
-                 * @param {Number} autoRegisterLevel
                  */
-                linkDeps: function(dependencies, autoRegisterLevel) {
+                requestDeps: function() {
                     var module = this,
-                        loader = module.loader,
-                        implicitDependency = module.dep;
-
-                    module.deps = dependencies = Resolver.resolve(dependencies, module.name);
+                        implicitDependency = module.dep,
+                        dependencies = module.deps;
 
                     if (dependencies.length) {
                         module.log(MSG_DEPENDENCIES_FOUND, false, {
@@ -1633,22 +1643,11 @@
                     }
 
                     if (implicitDependency) {
-                        if (autoRegisterLevel > 0) {
-                            loader.getModule(implicitDependency).abort(true);
+                        module.log(MSG_DEPENDENCY_FOUND, false, {
+                            dep: implicitDependency
+                        });
 
-                            loader.register({
-                                MID: implicitDependency,
-
-                                autoRegLvl: --autoRegisterLevel
-                            });
-                        }
-                        else {
-                            module.log(MSG_DEPENDENCY_FOUND, false, {
-                                dep: implicitDependency
-                            });
-
-                            dependencies = module.getAllDeps();
-                        }
+                        dependencies = module.getAllDeps();
                     }
 
 
@@ -1662,11 +1661,7 @@
                  * @param {Boolean} notifyBundle
                  */
                 notify: function(notifyBundle) {
-                    var module = this;
-
-                    module.loader.getConfig('createDependencyURLList') && module.addToURLList(notifyBundle);
-
-                    module.dequeue(QUEUE_SUCCESS, notifyBundle);
+                    this.dequeue(QUEUE_SUCCESS, notifyBundle);
                 },
                 /**
                  * @access public
@@ -1725,10 +1720,13 @@
          * @param {String} context
          */
         function Loader(context) {
-            var loader = this;
+            var loader = this,
+                rootName = Resolver.getRootName();
 
             loader.context = context;
-            loader.currentModuleName = Resolver.getRootName();
+            loader.currentModuleName = rootName;
+
+            loader.rootConfig = new Config(rootName);
         }
 
         Loader.prototype = {
@@ -1755,6 +1753,21 @@
 
                 loader.registerCore();
             },
+
+            setModuleConfig: function(newConfig) {
+                var loader = this,
+                    modules = newConfig.restrict ? Resolver.resolve(newConfig.restrict) : [Resolver.getRootName()];
+
+                arrayEach(modules, function updateModuleConfig(moduleName) {
+
+                    if (Resolver.isRootName(moduleName)) {
+                        loader.rootConfig.update(newConfig);
+                    }
+                    else {
+                        loader.getModule(moduleName).updateConfig(newConfig, Resolver.isBundleRequest(moduleName));
+                    }
+                });
+            },
             /**
              * @access public
              * 
@@ -1764,18 +1777,6 @@
              */
             setCurrentModuleName: function(moduleName) {
                 this.currentModuleName = moduleName;
-            },
-            /**
-             * @access public
-             * 
-             * @memberof JAR~LoaderManager~Loader#
-             * 
-             * @param {String} option
-             * 
-             * @return {*}
-             */
-            getConfig: function(option) {
-                return ConfigurationManager.getLoaderConfig(option);
             },
             /**
              * @access public
@@ -1893,15 +1894,11 @@
                     module = loader.getModule(moduleName);
 
                 if (!module.isRegistered(true)) {
-                    module.register(factory);
+                    module.defineBundle(properties.bundle);
 
-                    module.linkBundle(properties.bundle);
+                    module.$import(properties.deps);
 
-                    module.linkDeps(properties.deps, properties.autoRegLvl);
-
-                    if (module.checkForCircularDeps()) {
-                        module.abort();
-                    }
+                    module.$export(factory);
                 }
             },
             /**
@@ -2466,17 +2463,40 @@
              * 
              * @memberof JAR~LoaderManager
              * 
-             * @param {String} context
+             * @param {String} loaderContext
              * 
              * @return {String}
              */
-            setContext: function(context) {
-                var createContext = !hasOwnProp(loaders, context);
+            setLoaderContext: function(loaderContext) {
+                var createLoaderContext = !hasOwnProp(loaders, loaderContext);
 
-                LoaderManager.loader = loaders[context] = createContext ? new Loader(context) : loaders[context];
-                createContext && loaders[context].init();
+                LoaderManager.loader = loaders[loaderContext] = createLoaderContext ? new Loader(loaderContext) : loaders[loaderContext];
+                createLoaderContext && loaders[loaderContext].init();
 
-                return context;
+                return loaderContext;
+            },
+            /**
+             * @access public
+             * 
+             * @memberof JAR~LoaderManager
+             * 
+             * @param {(Object|Array)} newConfig
+             * 
+             * @return {Object}
+             */
+            setModuleConfig: function(newConfig) {
+                var System = LoaderManager.getSystem();
+
+                if (System.isArray(newConfig)) {
+                    arrayEach(newConfig, function setModuleConfig(config) {
+                        LoaderManager.setModuleConfig(config);
+                    });
+                }
+                else if (System.isObject(newConfig)) {
+                    (loaders[newConfig.loaderContext] || LoaderManager.loader).setModuleConfig(newConfig);
+                }
+
+                return LoaderManager.loader.rootConfig;
             },
             /**
              * @access public
@@ -2496,7 +2516,7 @@
                     });
 
                     loader.init();
-                    loader.getModuleRef('System.Logger').info('flushed Loader with context "${0}"', [loader.context]);
+                    loader.getModuleRef('System.Logger').info('successfully flushed Loader with context "${0}"', [loader.context]);
                 }
 
                 return !!loader;
@@ -2573,7 +2593,7 @@
                     });
                 }
                 else {
-                    if (forceRecompute || !(loader.getConfig('createDependencyURLList') || loader.list.length)) {
+                    if (forceRecompute || !loader.list.length) {
                         loader.resetModulesURLList();
 
                         loader.eachModules(function addModuleToURLList(module) {
@@ -2583,6 +2603,10 @@
 
                     loadedCallback(loader.list);
                 }
+            },
+
+            getModule: function(moduleName) {
+                return LoaderManager.loader.getModule(moduleName);
             },
             /**
              * @access public
@@ -2664,13 +2688,13 @@
              */
             register: function(properties, factory) {
                 var moduleName = properties.MID = Resolver.appendVersion(properties.MID, properties.version),
-                    defaultContext = LoaderManager.loader.context,
+                    currentLoaderContext = LoaderManager.loader.context,
                     currentLoader;
 
-                if (!SourceManager.findScript(defaultContext + ':' + moduleName)) {
+                if (!SourceManager.findSource(currentLoaderContext + ':' + moduleName)) {
                     objectEach(loaders, function findLoader(loader, loaderContext) {
-                        if (SourceManager.findScript(loaderContext + ':' + moduleName)) {
-                            LoaderManager.setContext(loaderContext);
+                        if (SourceManager.findSource(loaderContext + ':' + moduleName)) {
+                            LoaderManager.setLoaderContext(loaderContext);
 
                             return true;
                         }
@@ -2681,749 +2705,747 @@
 
                 currentLoader.register(properties, factory);
 
-                if (currentLoader !== loaders[defaultContext]) {
-                    LoaderManager.setContext(defaultContext);
+                if (currentLoader !== loaders[currentLoaderContext]) {
+                    LoaderManager.setLoaderContext(currentLoaderContext);
                 }
             }
         };
+
+        LoaderManager.addInterceptor('!', function pluginInterceptor(options) {
+            var moduleRef = options.module,
+                errback = options.fail;
+
+            delete options.module;
+
+            if (LoaderManager.getSystem().isFunction(moduleRef.$plugIn)) {
+                moduleRef.$plugIn(options);
+            }
+            else {
+                errback('Could not call method "$plugIn" on this module');
+            }
+        });
+
+        LoaderManager.addInterceptor('::', function partialModuleInterceptor(options) {
+            var moduleRef = options.module,
+                property = options.data;
+
+            if (moduleRef && hasOwnProp(moduleRef, property)) {
+                options.success(moduleRef[property]);
+            }
+            else {
+                options.fail('the module has no property "' + property + '"');
+            }
+        });
+
+        LoaderManager.addCoreModule('System', {}, function systemSetup() {
+            var types = 'Null Undefined String Number Boolean Array Arguments Object Function Date RegExp'.split(' '),
+                nothing = null,
+                typeLookup = {},
+                toString = ({}).toString,
+                isArgs, System;
+
+            /**
+             * @access public
+             * 
+             * @namespace System
+             */
+            System = {
+                /**
+                 * @access public
+                 * 
+                 * @memberof System
+                 * 
+                 * @param {*} value
+                 * 
+                 * @return {String}
+                 */
+                getType: function getType(value) {
+                    var type;
+
+                    if (System.isSet(value)) {
+                        if (value.nodeType === 1 || value.nodeType === 9) {
+                            type = 'element';
+                        }
+                        else {
+                            type = typeLookup[toString.call(value)];
+
+                            if (type === 'number') {
+                                if (isNaN(value)) {
+                                    type = 'nan';
+                                }
+                                else if (!isFinite(value)) {
+                                    type = 'infinity';
+                                }
+                            }
+                        }
+                    }
+                    else {
+                        type = String(value);
+                    }
+
+                    return type || typeof value;
+                },
+                /**
+                 * @access public
+                 * 
+                 * @memberof System
+                 * 
+                 * @param {*} value
+                 * 
+                 * @return {Boolean}
+                 */
+                isSet: function(value) {
+                    return value != nothing;
+                },
+                /**
+                 * @access public
+                 * 
+                 * @memberof System
+                 * 
+                 * @param {*} value
+                 * 
+                 * @return {Boolean}
+                 */
+                isArrayLike: function(value) {
+                    var isArrayLike = false,
+                        length;
+
+                    if (value) {
+                        length = value.length;
+
+                        isArrayLike = System.isArray(value) || (System.isNumber(length) && length === 0 || (length > 0 && ((length - 1) in value)));
+                    }
+
+                    return isArrayLike;
+                },
+                /**
+                 * @access public
+                 * 
+                 * @memberof System
+                 * 
+                 * @param {*} value
+                 * 
+                 * @return {Boolean}
+                 */
+                isDefined: function(value) {
+                    return !System.isUndefined(value);
+                },
+                /**
+                 * @access public
+                 * 
+                 * @function
+                 * @memberof System
+                 * 
+                 * @param {*} value
+                 * 
+                 * @return {Boolean}
+                 */
+                isInteger: Number.isInteger || function(value) {
+                    return System.isNumber(value) && parseInt(value, 10) === value;
+                },
+                /**
+                 * @access public
+                 * 
+                 * @memberof System
+                 * 
+                 * @param {*} value
+                 * 
+                 * @return {Boolean}
+                 */
+                isNaN: function(value) {
+                    return global.isNaN(value) && value !== value;
+                },
+                /**
+                 * @access public
+                 * 
+                 * @memberof System
+                 * 
+                 * @param {Object} instance
+                 * @param {(Function|Array<function>)} Class
+                 * 
+                 * @return {Boolean}
+                 */
+                isA: function(instance, Class) {
+                    var isInstanceOf = false;
+
+                    if (System.isArray(Class)) {
+                        arrayEach(Class, function isA(OneClass) {
+                            isInstanceOf = System.isA(instance, OneClass);
+
+                            return isInstanceOf;
+                        });
+                    }
+                    else {
+                        isInstanceOf = instance instanceof Class;
+                    }
+
+                    return isInstanceOf;
+                },
+                /**
+                 * @access public
+                 * 
+                 * @memberof System
+                 * 
+                 * @param {Object} pluginRequest
+                 */
+                $plugIn: function(pluginRequest) {
+                    var module = LoaderManager.loader.getModule(pluginRequest.listener);
+
+                    pluginRequest.success(module.getConfig('config'));
+                }
+            };
+
+            /**
+             * @access public
+             * 
+             * @function isNull
+             * @memberof System
+             * 
+             * @param {*} value
+             * 
+             * @return {Boolean}
+             */
+
+            /**
+             * @access public
+             * 
+             * @function isUndefined
+             * @memberof System
+             * 
+             * @param {*} value
+             * 
+             * @return {Boolean}
+             */
+
+            /**
+             * @access public
+             * 
+             * @function isString
+             * @memberof System
+             * 
+             * @param {*} value
+             * 
+             * @return {Boolean}
+             */
+
+            /**
+             * @access public
+             * 
+             * @function isNumber
+             * @memberof System
+             * 
+             * @param {*} value
+             * 
+             * @return {Boolean}
+             */
+
+            /**
+             * @access public
+             * 
+             * @function isBoolean
+             * @memberof System
+             * 
+             * @param {*} value
+             * 
+             * @return {Boolean}
+             */
+
+            /**
+             * @access public
+             * 
+             * @function isArray
+             * @memberof System
+             * 
+             * @param {*} value
+             * 
+             * @return {Boolean}
+             */
+
+            /**
+             * @access public
+             * 
+             * @function isObject
+             * @memberof System
+             * 
+             * @param {*} value
+             * 
+             * @return {Boolean}
+             */
+
+            /**
+             * @access public
+             * 
+             * @function isFunction
+             * @memberof System
+             * 
+             * @param {*} value
+             * 
+             * @return {Boolean}
+             */
+
+            /**
+             * @access public
+             * 
+             * @function isDate
+             * @memberof System
+             * 
+             * @param {*} value
+             * 
+             * @return {Boolean}
+             */
+
+            /**
+             * @access public
+             * 
+             * @function isRegExp
+             * @memberof System
+             * 
+             * @param {*} value
+             * 
+             * @return {Boolean}
+             */
+
+            /**
+             * @access private
+             * 
+             * @memberof System
+             * @inner
+             * 
+             * @param {String} typeDef
+             * 
+             * @return {Function(*):boolean}
+             */
+            function typeValidatorSetup(typeDef) {
+                var nativeTypeValidator = global[typeDef] && global[typeDef]['is' + typeDef];
+
+                typeLookup['[object ' + typeDef + ']'] = typeDef = typeDef.toLowerCase();
+
+                return nativeTypeValidator || function typeValidator(value) {
+                    return System.getType(value) === typeDef;
+                };
+            }
+
+            arrayEach(types, function createTypeValidator(type) {
+                System['is' + type] = typeValidatorSetup(type);
+            });
+
+            isArgs = System.isArguments;
+
+            /**
+             * @access public
+             * 
+             * @memberof System
+             * 
+             * @param {*} value
+             * 
+             * @return {Boolean}
+             */
+            System.isArguments = function(value) {
+                return value && (isArgs(value) || System.isArrayLike(value));
+            };
+
+            return System;
+        });
+
+        LoaderManager.addCoreModule('System.Logger', {
+            deps: ['.!', '.::isArray', '.::isFunction', '.::isNumber', '.::isObject', '.::isString']
+        }, function systemLoggerSetup(config, isArray, isFunction, isNumber, isObject, isString) {
+            var debuggers = {},
+                stdLevels = 'log info debug warn error'.split(' '),
+                rTemplateKey = /\$\{(.*?)\}/g,
+                loggerCache = {};
+
+            /**
+             * @access private
+             * 
+             * @memberof System.Logger
+             * @inner
+             * 
+             * @param {Array} match
+             * @param {String} key
+             * 
+             * @return {String}
+             */
+            function formatLog(match, key) {
+                var values = formatLog.values,
+                    value;
+
+                if (hasOwnProp(values, key)) {
+                    value = values[key];
+                    delete values[key];
+                }
+                else {
+                    value = 'UNKNOWN';
+                }
+
+                return value;
+            }
+
+            /**
+             * @access private
+             * 
+             * @memberof System.Logger
+             * @inner
+             * 
+             * @param {(String|Number)} levelOrPriority
+             * 
+             * @return {Number}
+             */
+            function getPriority(levelOrPriority) {
+                var logLevels = Logger.logLevels,
+                    priority = logLevels.ALL;
+
+                if (isString(levelOrPriority) && hasOwnProp(logLevels, (levelOrPriority = levelOrPriority.toUpperCase()))) {
+                    priority = logLevels[levelOrPriority];
+                }
+                else if (isNumber(levelOrPriority)) {
+                    priority = levelOrPriority;
+                }
+
+                return priority;
+            }
+
+            /**
+             * @access private
+             * 
+             * @memberof System.Logger
+             * @inner
+             * 
+             * @param {Boolean} debug
+             * @param {String} level
+             * @param {String} context
+             * 
+             * @return {Boolean}
+             */
+            function isDebuggingEnabled(debug, level, context) {
+                return debug && comparePriority(level) && compareDebugContext(context);
+            }
+
+            /**
+             * @access private
+             * 
+             * @memberof System.Logger
+             * @inner
+             * 
+             * @param {String} level
+             * 
+             * @return {Boolean}
+             */
+            function comparePriority(level) {
+                return getPriority(level) >= getPriority(config.level);
+            }
+
+            /**
+             * @access private
+             * 
+             * @memberof System.Logger
+             * @inner
+             * 
+             * @param {String} context
+             * 
+             * @return {Boolean}
+             */
+            function compareDebugContext(context) {
+                var debugContext = config.context,
+                    includeContext, excludeContext;
+
+                if (isObject(debugContext)) {
+                    includeContext = debugContext.include;
+                    excludeContext = debugContext.exclude;
+                }
+                else {
+                    includeContext = debugContext;
+                }
+
+                return includeContext ? inContextList(context, includeContext) : excludeContext ? !inContextList(context, excludeContext) : true;
+            }
+
+            /**
+             * @access private
+             * 
+             * @memberof System.Logger
+             * @inner
+             * 
+             * @param {String} level
+             * @param {(Array|String)} contextList
+             * 
+             * @return {Boolean}
+             */
+            function inContextList(context, contextList) {
+                var contextDelimiter = ',';
+
+                if (isArray(contextList)) {
+                    contextList = contextList.join(contextDelimiter);
+                }
+
+                contextList = contextDelimiter + contextList + contextDelimiter;
+
+                return contextList.indexOf(contextDelimiter + context + contextDelimiter) > -1;
+            }
+
+            /**
+             * @access private
+             * 
+             * @memberof System.Logger
+             * @inner
+             * 
+             * @param {String} mode
+             * 
+             * @return {Object}
+             */
+            function getActiveDebugger(mode) {
+                return debuggers[mode] || debuggers.console;
+            }
+
+            /**
+             * @access public
+             * 
+             * @memberof System
+             * 
+             * @class Logger
+             * 
+             * @param {String} logContext
+             * @param {Object} options
+             */
+            function Logger(logContext, options) {
+                var logger = this;
+
+                logger.context = logContext || 'Default';
+                loggerCache[logContext] = logger;
+
+                logger.options = options || {};
+                logger.options.tpl = logger.options.tpl || {};
+            }
+
+            /**
+             * @access private
+             * 
+             * @memberof System.Logger#
+             * 
+             * @param {String} level
+             * @param {*} message
+             * @param {(Object|Array)} values
+             */
+            Logger.prototype._out = function(level, message, values) {
+                var logger = this,
+                    context = logger.context,
+                    options = logger.options,
+                    currentDebugger = getActiveDebugger(options.mode || config.mode),
+                    debuggerMethod = currentDebugger[level] ? level : 'log';
+
+                if (isDebuggingEnabled(options.debug || config.debug, level, context) && isFunction(currentDebugger[debuggerMethod])) {
+                    message = options.tpl[message] || message;
+
+                    if (isString(message) && (isObject(values) || isArray(values))) {
+                        formatLog.values = values;
+
+                        message = message.replace(rTemplateKey, formatLog);
+
+                        formatLog.values = null;
+                    }
+
+                    currentDebugger[debuggerMethod](context, {
+                        timestamp: new Date().toUTCString(),
+
+                        message: message,
+
+                        meta: values
+                    });
+                }
+            };
+            /**
+             * @access public
+             * 
+             * @memberof System.Logger
+             * 
+             * @type {Object<string, number>}
+             */
+            Logger.logLevels = {
+                ALL: -Infinity
+            };
+
+            /**
+             * @access public
+             * 
+             * @memberof System.Logger
+             * 
+             * @param {String} level
+             * @param {Number} priority
+             */
+            Logger.addLogLevel = function(level, priority) {
+                var levelConst = level.toUpperCase();
+
+                if (!hasOwnProp(Logger.logLevels, levelConst)) {
+                    Logger.logLevels[levelConst] = isNumber(priority) ? priority : Logger.logLevels.ALL;
+
+                    Logger.prototype[level] = function loggerFn(data, values) {
+                        this._out(level, data, values);
+                    };
+
+                    Logger[level] = function staticLoggerFn(data, values) {
+                        Logger[level + 'WithContext']('JAR', data, values);
+                    };
+
+                    Logger[level + 'WithContext'] = function staticLoggerFnWithContext(logContext, data, values, options) {
+                        (loggerCache[logContext] || new Logger(logContext, options))[level](data, values);
+                    };
+                }
+            };
+
+            /**
+             * @access public
+             * 
+             * @memberof System.Logger
+             * 
+             * @param {Object} options
+             * 
+             * @return {System.Logger}
+             */
+            Logger.forCurrentModule = function(options) {
+                var logContext = LoaderManager.getCurrentModuleData().moduleName;
+
+                Resolver.isRootName(logContext) && (logContext = 'JAR');
+
+                return loggerCache[logContext] || new Logger(logContext, options);
+            };
+
+            /**
+             * @access public
+             * 
+             * @memberof System.Logger
+             * 
+             * @param {Object} pluginRequest
+             */
+            Logger.$plugIn = function(pluginRequest) {
+                var data = pluginRequest.data.split(':');
+
+                pluginRequest.$importAndLink(data[1], function(Debugger) {
+                    Logger.addDebugger(data[0], Debugger.setup);
+
+                    pluginRequest.success(Logger);
+                }, pluginRequest.fail);
+            };
+
+            /**
+             * @access public
+             * 
+             * @memberof System.Logger
+             * 
+             * @param {String} mode
+             * @param {Function} debuggerSetup
+             */
+            Logger.addDebugger = function(mode, debuggerSetup) {
+                var modeConfig = mode + 'Config';
+
+                if (!hasOwnProp(debuggers, mode) && isFunction(debuggerSetup)) {
+                    debuggers[mode] = debuggerSetup(function debuggerConfigGetter(option) {
+                        return (config[modeConfig] || {})[option];
+                    });
+                }
+            };
+
+            arrayEach(stdLevels, function addLogLevel(stdLevel, levelIndex) {
+                Logger.addLogLevel(stdLevel, (levelIndex + 1) * 10);
+            });
+
+            Logger.addDebugger('console', function consoleDebuggerSetup(config) {
+                var console = global.console,
+                    canUseGroups = console && console.group && console.groupEnd,
+                    pseudoConsole = {},
+                    method,
+                    lastLogContext;
+
+                arrayEach(stdLevels, function createConsoleForward(stdLevel) {
+                    method = stdLevel;
+                    pseudoConsole[method] = console ? forwardConsole(console[method] ? method : stdLevels[0]) : noop;
+                });
+
+                function noop() {}
+
+                function forwardConsole(method) {
+                    return function log(logContext, data) {
+                        var throwError = method === 'error' && config('throwError'),
+                            metainfo = [];
+
+                        config('timestamp') && metainfo.push('[' + data.timestamp + ']');
+
+                        if (!(canUseGroups && config('groupByContext')) || throwError) {
+                            metainfo.push('[' + logContext + ']');
+
+                            if (throwError) {
+                                throw new Error(metainfo.join(' ') + ' -> ' + data.message);
+                            }
+                        }
+                        else if (lastLogContext !== logContext) {
+                            lastLogContext && global.console.groupEnd(lastLogContext);
+
+                            global.console.group(logContext);
+
+                            lastLogContext = logContext;
+                        }
+
+                        global.console[method](metainfo.join(' '), data.message);
+                    };
+                }
+
+                return pseudoConsole;
+            });
+
+            return Logger;
+        });
+
+        LoaderManager.addCoreModule('jar', {
+            bundle: ['async.*', 'feature.*', 'html.*', 'lang.*', 'util.*']
+        }, function() {
+            /**
+             * @namespace jar
+             * 
+             * @borrows LoaderManager.getModuleRef as use
+             * @borrows LoaderManager.$importLazy as $importLazy
+             * @borrows LoaderManager.getCurrentModuleData as getCurrentModuleData
+             */
+            var jar = {
+                /**
+                 * @access public
+                 * 
+                 * @memberof jar
+                 * 
+                 * @param {(Object|Array|String)} moduleNames
+                 * 
+                 * @return {Array}
+                 */
+                useAll: function(moduleNames) {
+                    var refs = [];
+
+                    moduleNames = Resolver.resolve(moduleNames);
+
+                    arrayEach(moduleNames, function use(moduleName) {
+                        refs.push(jar.use(moduleName));
+                    });
+
+                    return refs;
+                },
+
+                use: LoaderManager.getModuleRef,
+
+                $importLazy: LoaderManager.$importLazy,
+
+                getCurrentModuleData: LoaderManager.getCurrentModuleData
+            };
+
+            return jar;
+        });
 
         return LoaderManager;
     })();
 
-    LoaderManager.addInterceptor('!', function pluginInterceptor(options) {
-        var moduleRef = options.module,
-            errback = options.fail;
-
-        delete options.module;
-
-        if (LoaderManager.getSystem().isFunction(moduleRef.$plugIn)) {
-            moduleRef.$plugIn(options);
-        }
-        else {
-            errback('Could not call method "$plugIn" on this module');
-        }
-    });
-
-    LoaderManager.addInterceptor('::', function partialModuleInterceptor(options) {
-        var moduleRef = options.module,
-            property = options.data;
-
-        if (moduleRef && hasOwnProp(moduleRef, property)) {
-            options.success(moduleRef[property]);
-        }
-        else {
-            options.fail('the module has no property "' + property + '"');
-        }
-    });
-
-    LoaderManager.addCoreModule('System', {}, function systemSetup() {
-        var types = 'Null Undefined String Number Boolean Array Arguments Object Function Date RegExp'.split(' '),
-            nothing = null,
-            typeLookup = {},
-            toString = ({}).toString,
-            isArgs, System;
-
-        /**
-         * @access public
-         * 
-         * @namespace System
-         */
-        System = {
-            /**
-             * @access public
-             * 
-             * @memberof System
-             * 
-             * @param {*} value
-             * 
-             * @return {String}
-             */
-            getType: function getType(value) {
-                var type;
-
-                if (System.isSet(value)) {
-                    if (value.nodeType === 1 || value.nodeType === 9) {
-                        type = 'element';
-                    }
-                    else {
-                        type = typeLookup[toString.call(value)];
-
-                        if (type === 'number') {
-                            if (isNaN(value)) {
-                                type = 'nan';
-                            }
-                            else if (!isFinite(value)) {
-                                type = 'infinity';
-                            }
-                        }
-                    }
-                }
-                else {
-                    type = String(value);
-                }
-
-                return type || typeof value;
-            },
-            /**
-             * @access public
-             * 
-             * @memberof System
-             * 
-             * @param {*} value
-             * 
-             * @return {Boolean}
-             */
-            isSet: function(value) {
-                return value != nothing;
-            },
-            /**
-             * @access public
-             * 
-             * @memberof System
-             * 
-             * @param {*} value
-             * 
-             * @return {Boolean}
-             */
-            isArrayLike: function(value) {
-                var isArrayLike = false,
-                    length;
-
-                if (value) {
-                    length = value.length;
-
-                    isArrayLike = System.isArray(value) || (System.isNumber(length) && length === 0 || (length > 0 && ((length - 1) in value)));
-                }
-
-                return isArrayLike;
-            },
-            /**
-             * @access public
-             * 
-             * @memberof System
-             * 
-             * @param {*} value
-             * 
-             * @return {Boolean}
-             */
-            isDefined: function(value) {
-                return !System.isUndefined(value);
-            },
-            /**
-             * @access public
-             * 
-             * @function
-             * @memberof System
-             * 
-             * @param {*} value
-             * 
-             * @return {Boolean}
-             */
-            isInteger: Number.isInteger || function(value) {
-                return System.isNumber(value) && parseInt(value, 10) === value;
-            },
-            /**
-             * @access public
-             * 
-             * @memberof System
-             * 
-             * @param {*} value
-             * 
-             * @return {Boolean}
-             */
-            isNaN: function(value) {
-                return global.isNaN(value) && value !== value;
-            },
-            /**
-             * @access public
-             * 
-             * @memberof System
-             * 
-             * @param {Object} instance
-             * @param {(Function|Array<function>)} Class
-             * 
-             * @return {Boolean}
-             */
-            isA: function(instance, Class) {
-                var isInstanceOf = false;
-
-                if (System.isArray(Class)) {
-                    arrayEach(Class, function isA(OneClass) {
-                        isInstanceOf = System.isA(instance, OneClass);
-
-                        return isInstanceOf;
-                    });
-                }
-                else {
-                    isInstanceOf = instance instanceof Class;
-                }
-
-                return isInstanceOf;
-            },
-            /**
-             * @access public
-             * 
-             * @memberof System
-             * 
-             * @param {Object} pluginRequest
-             */
-            $plugIn: function(pluginRequest) {
-                var module = LoaderManager.loader.getModule(pluginRequest.listener);
-
-                pluginRequest.success(module.getConfig('config'));
-            }
-        };
-
-        /**
-         * @access public
-         * 
-         * @function isNull
-         * @memberof System
-         * 
-         * @param {*} value
-         * 
-         * @return {Boolean}
-         */
-
-        /**
-         * @access public
-         * 
-         * @function isUndefined
-         * @memberof System
-         * 
-         * @param {*} value
-         * 
-         * @return {Boolean}
-         */
-
-        /**
-         * @access public
-         * 
-         * @function isString
-         * @memberof System
-         * 
-         * @param {*} value
-         * 
-         * @return {Boolean}
-         */
-
-        /**
-         * @access public
-         * 
-         * @function isNumber
-         * @memberof System
-         * 
-         * @param {*} value
-         * 
-         * @return {Boolean}
-         */
-
-        /**
-         * @access public
-         * 
-         * @function isBoolean
-         * @memberof System
-         * 
-         * @param {*} value
-         * 
-         * @return {Boolean}
-         */
-
-        /**
-         * @access public
-         * 
-         * @function isArray
-         * @memberof System
-         * 
-         * @param {*} value
-         * 
-         * @return {Boolean}
-         */
-
-        /**
-         * @access public
-         * 
-         * @function isObject
-         * @memberof System
-         * 
-         * @param {*} value
-         * 
-         * @return {Boolean}
-         */
-
-        /**
-         * @access public
-         * 
-         * @function isFunction
-         * @memberof System
-         * 
-         * @param {*} value
-         * 
-         * @return {Boolean}
-         */
-
-        /**
-         * @access public
-         * 
-         * @function isDate
-         * @memberof System
-         * 
-         * @param {*} value
-         * 
-         * @return {Boolean}
-         */
-
-        /**
-         * @access public
-         * 
-         * @function isRegExp
-         * @memberof System
-         * 
-         * @param {*} value
-         * 
-         * @return {Boolean}
-         */
-
-        /**
-         * @access private
-         * 
-         * @memberof System
-         * @inner
-         * 
-         * @param {String} typeDef
-         * 
-         * @return {Function(*):boolean}
-         */
-        function typeValidatorSetup(typeDef) {
-            var nativeTypeValidator = global[typeDef] && global[typeDef]['is' + typeDef];
-
-            typeLookup['[object ' + typeDef + ']'] = typeDef = typeDef.toLowerCase();
-
-            return nativeTypeValidator || function typeValidator(value) {
-                return System.getType(value) === typeDef;
-            };
-        }
-
-        arrayEach(types, function createTypeValidator(type) {
-            System['is' + type] = typeValidatorSetup(type);
-        });
-
-        isArgs = System.isArguments;
-
-        /**
-         * @access public
-         * 
-         * @memberof System
-         * 
-         * @param {*} value
-         * 
-         * @return {Boolean}
-         */
-        System.isArguments = function(value) {
-            return value && (isArgs(value) || System.isArrayLike(value));
-        };
-
-        return System;
-    });
-
-    LoaderManager.addCoreModule('System.Logger', {
-        deps: ['.!', '.::isArray', '.::isFunction', '.::isNumber', '.::isObject', '.::isString']
-    }, function systemLoggerSetup(config, isArray, isFunction, isNumber, isObject, isString) {
-        var debuggers = {},
-            stdLevels = 'log info debug warn error'.split(' '),
-            rTemplateKey = /\$\{(.*?)\}/g,
-            loggerCache = {};
-
-        /**
-         * @access private
-         * 
-         * @memberof System.Logger
-         * @inner
-         * 
-         * @param {Array} match
-         * @param {String} key
-         * 
-         * @return {String}
-         */
-        function formatLog(match, key) {
-            var values = formatLog.values,
-                value;
-
-            if (hasOwnProp(values, key)) {
-                value = values[key];
-                delete values[key];
-            }
-            else {
-                value = 'UNKNOWN';
-            }
-
-            return value;
-        }
-
-        /**
-         * @access private
-         * 
-         * @memberof System.Logger
-         * @inner
-         * 
-         * @param {(String|Number)} levelOrPriority
-         * 
-         * @return {Number}
-         */
-        function getPriority(levelOrPriority) {
-            var logLevels = Logger.logLevels,
-                priority = logLevels.ALL;
-
-            if (isString(levelOrPriority) && hasOwnProp(logLevels, (levelOrPriority = levelOrPriority.toUpperCase()))) {
-                priority = logLevels[levelOrPriority];
-            }
-            else if (isNumber(levelOrPriority)) {
-                priority = levelOrPriority;
-            }
-
-            return priority;
-        }
-
-        /**
-         * @access private
-         * 
-         * @memberof System.Logger
-         * @inner
-         * 
-         * @param {Boolean} debug
-         * @param {String} level
-         * @param {String} context
-         * 
-         * @return {Boolean}
-         */
-        function isDebuggingEnabled(debug, level, context) {
-            return debug && comparePriority(level) && compareDebugContext(context);
-        }
-
-        /**
-         * @access private
-         * 
-         * @memberof System.Logger
-         * @inner
-         * 
-         * @param {String} level
-         * 
-         * @return {Boolean}
-         */
-        function comparePriority(level) {
-            return getPriority(level) >= getPriority(config.level);
-        }
-
-        /**
-         * @access private
-         * 
-         * @memberof System.Logger
-         * @inner
-         * 
-         * @param {String} context
-         * 
-         * @return {Boolean}
-         */
-        function compareDebugContext(context) {
-            var debugContext = config.context,
-                includeContext, excludeContext;
-
-            if (isObject(debugContext)) {
-                includeContext = debugContext.include;
-                excludeContext = debugContext.exclude;
-            }
-            else {
-                includeContext = debugContext;
-            }
-
-            return includeContext ? inContextList(context, includeContext) : excludeContext ? !inContextList(context, excludeContext) : true;
-        }
-
-        /**
-         * @access private
-         * 
-         * @memberof System.Logger
-         * @inner
-         * 
-         * @param {String} level
-         * @param {(Array|String)} contextList
-         * 
-         * @return {Boolean}
-         */
-        function inContextList(context, contextList) {
-            var contextDelimiter = ',';
-
-            if (isArray(contextList)) {
-                contextList = contextList.join(contextDelimiter);
-            }
-
-            contextList = contextDelimiter + contextList + contextDelimiter;
-
-            return contextList.indexOf(contextDelimiter + context + contextDelimiter) > -1;
-        }
-
-        /**
-         * @access private
-         * 
-         * @memberof System.Logger
-         * @inner
-         * 
-         * @param {String} mode
-         * 
-         * @return {Object}
-         */
-        function getActiveDebugger(mode) {
-            return debuggers[mode] || debuggers.console;
-        }
-
-        /**
-         * @access public
-         * 
-         * @memberof System
-         * 
-         * @class Logger
-         * 
-         * @param {String} logContext
-         * @param {Object} options
-         */
-        function Logger(logContext, options) {
-            var logger = this;
-
-            logger.context = logContext || 'Default';
-            loggerCache[logContext] = logger;
-
-            logger.options = options || {};
-            logger.options.tpl = logger.options.tpl || {};
-        }
-
-        /**
-         * @access private
-         * 
-         * @memberof System.Logger#
-         * 
-         * @param {String} level
-         * @param {*} message
-         * @param {(Object|Array)} values
-         */
-        Logger.prototype._out = function(level, message, values) {
-            var logger = this,
-                context = logger.context,
-                options = logger.options,
-                currentDebugger = getActiveDebugger(options.mode || config.mode),
-                debuggerMethod = currentDebugger[level] ? level : 'log';
-
-            if (isDebuggingEnabled(options.debug || config.debug, level, context) && isFunction(currentDebugger[debuggerMethod])) {
-                message = options.tpl[message] || message;
-
-                if (isString(message) && (isObject(values) || isArray(values))) {
-                    formatLog.values = values;
-
-                    message = message.replace(rTemplateKey, formatLog);
-
-                    formatLog.values = null;
-                }
-
-                currentDebugger[debuggerMethod](context, {
-                    timestamp: new Date().toUTCString(),
-
-                    message: message,
-
-                    meta: values
-                });
-            }
-        };
-        /**
-         * @access public
-         * 
-         * @memberof System.Logger
-         * 
-         * @type {Object<string, number>}
-         */
-        Logger.logLevels = {
-            ALL: -Infinity
-        };
-
-        /**
-         * @access public
-         * 
-         * @memberof System.Logger
-         * 
-         * @param {String} level
-         * @param {Number} priority
-         */
-        Logger.addLogLevel = function(level, priority) {
-            var levelConst = level.toUpperCase();
-
-            if (!hasOwnProp(Logger.logLevels, levelConst)) {
-                Logger.logLevels[levelConst] = isNumber(priority) ? priority : Logger.logLevels.ALL;
-
-                Logger.prototype[level] = function loggerFn(data, values) {
-                    this._out(level, data, values);
-                };
-
-                Logger[level] = function staticLoggerFn(data, values) {
-                    Logger[level + 'WithContext']('JAR', data, values);
-                };
-
-                Logger[level + 'WithContext'] = function staticLoggerFnWithContext(logContext, data, values, options) {
-                    (loggerCache[logContext] || new Logger(logContext, options))[level](data, values);
-                };
-            }
-        };
-
-        /**
-         * @access public
-         * 
-         * @memberof System.Logger
-         * 
-         * @param {Object} options
-         * 
-         * @return {System.Logger}
-         */
-        Logger.forCurrentModule = function(options) {
-            var logContext = LoaderManager.getCurrentModuleData().moduleName;
-
-            LoaderManager.Resolver.isRootName(logContext) && (logContext = 'JAR');
-
-            return loggerCache[logContext] || new Logger(logContext, options);
-        };
-
-        /**
-         * @access public
-         * 
-         * @memberof System.Logger
-         * 
-         * @param {Object} pluginRequest
-         */
-        Logger.$plugIn = function(pluginRequest) {
-            var data = pluginRequest.data.split(':');
-
-            pluginRequest.$importAndLink(data[1], function(Debugger) {
-                Logger.addDebugger(data[0], Debugger.setup);
-
-                pluginRequest.success(Logger);
-            }, pluginRequest.fail);
-        };
-
-        /**
-         * @access public
-         * 
-         * @memberof System.Logger
-         * 
-         * @param {String} mode
-         * @param {Function} debuggerSetup
-         */
-        Logger.addDebugger = function(mode, debuggerSetup) {
-            var modeConfig = mode + 'Config';
-
-            if (!hasOwnProp(debuggers, mode) && isFunction(debuggerSetup)) {
-                debuggers[mode] = debuggerSetup(function debuggerConfigGetter(option) {
-                    return (config[modeConfig] || {})[option];
-                });
-            }
-        };
-
-        arrayEach(stdLevels, function addLogLevel(stdLevel, levelIndex) {
-            Logger.addLogLevel(stdLevel, (levelIndex + 1) * 10);
-        });
-
-        Logger.addDebugger('console', function consoleDebuggerSetup(config) {
-            var console = global.console,
-                canUseGroups = console && console.group && console.groupEnd,
-                pseudoConsole = {},
-                method,
-                lastLogContext;
-
-            arrayEach(stdLevels, function createConsoleForward(stdLevel) {
-                method = stdLevel;
-                pseudoConsole[method] = console ? forwardConsole(console[method] ? method : stdLevels[0]) : noop;
-            });
-
-            function noop() {}
-
-            function forwardConsole(method) {
-                return function log(logContext, data) {
-                    var throwError = method === 'error' && config('throwError'),
-                        metainfo = [];
-
-                    config('timestamp') && metainfo.push('[' + data.timestamp + ']');
-
-                    if (!(canUseGroups && config('groupByContext')) || throwError) {
-                        metainfo.push('[' + logContext + ']');
-
-                        if (throwError) {
-                            throw new Error(metainfo.join(' ') + ' -> ' + data.message);
-                        }
-                    }
-                    else if (lastLogContext !== logContext) {
-                        lastLogContext && global.console.groupEnd(lastLogContext);
-
-                        global.console.group(logContext);
-
-                        lastLogContext = logContext;
-                    }
-
-                    global.console[method](metainfo.join(' '), data.message);
-                };
-            }
-
-            return pseudoConsole;
-        });
-
-        return Logger;
-    });
-
-    LoaderManager.addCoreModule('jar', {
-        bundle: ['async.*', 'feature.*', 'html.*', 'lang.*', 'util.*']
-    }, function() {
-        /**
-         * @namespace jar
-         * 
-         * @borrows LoaderManager.getModuleRef as use
-         * @borrows LoaderManager.$importLazy as $importLazy
-         * @borrows LoaderManager.getCurrentModuleData as getCurrentModuleData
-         */
-        var jar = {
-            /**
-             * @access public
-             * 
-             * @memberof jar
-             * 
-             * @param {(Object|Array|String)} moduleNames
-             * 
-             * @return {Array}
-             */
-            useAll: function(moduleNames) {
-                var refs = [];
-
-                moduleNames = LoaderManager.Resolver.resolve(moduleNames);
-
-                arrayEach(moduleNames, function use(moduleName) {
-                    refs.push(jar.use(moduleName));
-                });
-
-                return refs;
-            },
-
-            use: LoaderManager.getModuleRef,
-
-            $importLazy: LoaderManager.$importLazy,
-
-            getCurrentModuleData: LoaderManager.getCurrentModuleData
-        };
-
-        return jar;
-    });
-
-    LoaderManager.setContext('default');
+    LoaderManager.setLoaderContext('default');
 
     global.JAR = (function jarSetup() {
         var previousJAR = global.JAR,
             moduleNamesQueue = [],
             configurators = {},
             configs = {
-                bundle: [],
-
                 environment: undef,
 
                 environments: {},
@@ -3431,6 +3453,15 @@
                 globalAccess: false,
 
                 supressErrors: false
+            },
+            defaultModuleConfig = {
+                cache: true,
+
+                minified: false,
+
+                versionSuffix: null,
+
+                timeout: 5
             },
             JAR;
 
@@ -3496,7 +3527,7 @@
              * @param {(String|Object|Array)} moduleData
              */
             $import: function(moduleData) {
-                moduleNamesQueue = moduleNamesQueue.concat(LoaderManager.Resolver.isRootName(moduleData) ? configs.bundle : moduleData);
+                moduleNamesQueue = moduleNamesQueue.concat(moduleData);
 
                 return this;
             },
@@ -3506,37 +3537,27 @@
              * @memberof JAR
              * 
              * @param {String} moduleName
-             * @param {(Array|Function)} bundle
-             * @param {Function|Undefined} factory
              */
-            $export: function(moduleName, bundle, factory) {
-                var System = LoaderManager.getSystem(),
-                    resolvedModules = LoaderManager.Resolver.resolve(moduleNamesQueue, moduleName);
+            module: function(moduleName) {
+                var module = LoaderManager.getModule(moduleName);
 
-                if (System.isFunction(bundle)) {
-                    factory = bundle;
-                    bundle = undef;
-                }
+                return {
+                    $import: function(dependencies) {
+                        module.$import(dependencies);
 
-                moduleNamesQueue.length = 0;
+                        return this;
+                    },
 
-                LoaderManager.register({
-                    MID: moduleName,
+                    bundle: function(bundle) {
+                        module.defineBundle(bundle);
 
-                    deps: resolvedModules,
+                        return this;
+                    },
 
-                    bundle: bundle
-                }, function() {
-                    var modules = {};
-
-                    arrayEach(arguments, function mapModule(module, index) {
-                        modules[index] = modules[resolvedModules[index]] = module;
-                    });
-
-                    return factory.call(this, modules);
-                });
-
-                return this;
+                    $export: function(factory) {
+                        module.$export(factory);
+                    }
+                };
             },
 
             register: LoaderManager.register,
@@ -3660,40 +3681,25 @@
          */
         function bootstrapJAR() {
             var baseUrl = './',
-                scripts = SourceManager.getScripts(),
                 bootstrapConfig = global.jarconfig || {},
                 bootstrapModules = bootstrapConfig.modules,
-                mainScript;
+                main = SourceManager.getMain();
 
-            arrayEach(scripts, function findMainScript(script) {
-                mainScript = script.getAttribute('data-main');
+            if (main) {
+                baseUrl = main.substring(0, main.lastIndexOf('/')) || baseUrl;
 
-                if (mainScript) {
-                    baseUrl = mainScript.substring(0, mainScript.lastIndexOf('/')) || baseUrl;
-
-                    return true;
+                if (!bootstrapConfig.main) {
+                    bootstrapConfig.main = main;
                 }
-            });
 
-            if (mainScript && !bootstrapConfig.main) {
-                bootstrapConfig.main = mainScript;
+                defaultModuleConfig.baseUrl = baseUrl;
             }
 
             if (!LoaderManager.getSystem().isArray(bootstrapModules)) {
                 bootstrapModules = bootstrapConfig.modules = bootstrapModules ? [bootstrapModules] : [];
             }
 
-            bootstrapModules.unshift({
-                baseUrl: baseUrl,
-
-                cache: true,
-
-                minified: false,
-
-                versionSuffix: null,
-
-                timeout: 5
-            });
+            bootstrapModules.unshift(defaultModuleConfig);
 
             JAR.configure(bootstrapConfig);
         }
@@ -3735,7 +3741,7 @@
              * @return {String}
              */
             main: function(mainScript, oldMainScript) {
-                return oldMainScript || (mainScript && SourceManager.loadScript('main', mainScript + '.js'));
+                return oldMainScript || (mainScript && SourceManager.loadSource('main', mainScript + '.js'));
             },
             /**
              * @param {Object} environments
@@ -3767,25 +3773,24 @@
              * @return {Object}
              */
             modules: function(newModuleConfigs) {
-                return ConfigurationManager.setModuleConfig(newModuleConfigs);
+                return LoaderManager.setModuleConfig(newModuleConfigs);
             },
+            /**
+             * @param {String} newLoaderContext
+             * @param {String} oldLoaderContext
+             * 
+             * @return {Object}
+             */
+            loaderContext: function(newLoaderContext, oldLoaderContext) {
+                if (newLoaderContext !== oldLoaderContext) {
+                    newLoaderContext = LoaderManager.setLoaderContext(newLoaderContext);
 
-            context: function(newContext, oldContext) {
-                if (newContext !== oldContext) {
-                    newContext = LoaderManager.setContext(newContext);
+                    LoaderManager.setModuleConfig(defaultModuleConfig);
 
                     exposeModulesGlobal(configs.globalAccess);
                 }
 
-                return newContext;
-            },
-            /**
-             * @param {Object} loaderConfig
-             * 
-             * @return {Object}
-             */
-            loader: function(loaderConfig) {
-                return ConfigurationManager.setLoaderConfig(loaderConfig);
+                return newLoaderContext;
             },
             /**
              * @param {Object} newInterceptors
@@ -3804,28 +3809,6 @@
                 return oldInterceptors;
             }
         });
-
-        /*defaultConfig.environments = {
-            production: {
-                modules: {
-                    minified: true
-                },
-
-                debugging: true,
-
-                globalAccess: false
-            },
-
-            development: {
-                modules: {
-                    minified: false
-                },
-
-                debugging: true,
-
-                globalAccess: true
-            }
-        };*/
 
         bootstrapJAR();
 
