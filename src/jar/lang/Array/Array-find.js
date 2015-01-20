@@ -7,7 +7,7 @@ JAR.register({
     'use strict';
 
     var MSG_NO_FUNCTION = 'The predicate is not a function',
-        Arr;
+        Arr = this;
 
     Arr.enhance({
         find: createFinder(),
