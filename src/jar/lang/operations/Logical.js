@@ -1,6 +1,6 @@
 JAR.register({
     MID: 'jar.lang.operations.Logical',
-    deps: ['.::createOperation', '.::operands', '..Object!iterate', '.Enum']
+    deps: ['.::createOperation', '.::operands', '..Object!iterate', '..Enum']
 }, function(createOperation, operands, Obj, Enum) {
     'use strict';
 
