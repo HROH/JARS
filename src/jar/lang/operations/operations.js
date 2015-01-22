@@ -1,8 +1,12 @@
-JAR.register({
-    MID: 'jar.lang.operations',
-    deps: ['.assert', '.Enum'],
-    bundle: ['Arithmetic', 'Comparison', 'Bitwise', 'Logical']
-}, function(assert, Enum) {
+JAR.module('jar.lang.operations', [
+    'Arithmetic',
+    'Comparison',
+    'Bitwise',
+    'Logical'
+]).$import([
+    '.assert',
+    '.Enum'
+]).$export(function(assert, Enum) {
     'use strict';
 
     var operationPlaceholder = '${op}',

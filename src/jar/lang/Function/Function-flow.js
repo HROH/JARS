@@ -1,9 +1,13 @@
-JAR.register({
-    MID: 'jar.lang.Function.Function-flow',
-    deps: [{
-        '.': ['::from', '::apply']
-    }, '..Array::from', '..Object!derive']
-}, function(fromFunction, applyFunction, fromArgs, Obj) {
+JAR.module('jar.lang.Function.Function-flow').$import([
+    {
+        '.': [
+            '::from',
+            '::apply'
+        ]
+    },
+    '..Array::from',
+    '..Object!derive'
+]).$export(function(fromFunction, applyFunction, fromArgs, Obj) {
     'use strict';
 
     var Fn = this,

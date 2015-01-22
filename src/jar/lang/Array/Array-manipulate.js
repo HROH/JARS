@@ -1,7 +1,8 @@
-JAR.register({
-    MID: 'jar.lang.Array.Array-manipulate',
-    deps: ['System::isArrayLike', '.!index,iterate', '..Object!derive']
-}, function(isArrayLike, Arr, Obj) {
+JAR.module('jar.lang.Array.Array-manipulate').$import([
+    'System::isArrayLike',
+    '.!index,iterate',
+    '..Object!derive'
+]).$export(function(isArrayLike, Arr, Obj) {
     'use strict';
 
     var forEach = Arr.forEach;

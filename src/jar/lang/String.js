@@ -1,9 +1,12 @@
-JAR.register({
-    MID: 'jar.lang.String',
-    deps: [{
-        System: ['::isA', '::isString']
-    }, '.Array!manipulate,reduce']
-}, function(isA, isString, Arr) {
+JAR.module('jar.lang.String').$import([
+    {
+        System: [
+            '::isA',
+            '::isString'
+        ]
+    },
+    '.Array!manipulate,reduce'
+]).$export(function(isA, isString, Arr) {
     'use strict';
 
     var lang = this,

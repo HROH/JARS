@@ -227,7 +227,7 @@
                      * @return {Object}
                      */
                     transform: function configTransform(config, moduleName) {
-                        return objectMerge(LoaderManager.getModule(moduleName).getConfig('config', Resolver.isBundleRequest(moduleName)), config);
+                        return objectMerge(LoaderManager.loader.getModule(moduleName).getConfig('config', Resolver.isBundleRequest(moduleName)), config);
                     }
                 },
 
@@ -1578,7 +1578,9 @@
                 $import: function(dependencies) {
                     var module = this;
 
-                    module.deps = module.deps.concat(Resolver.resolve(dependencies, module.name));
+                    if (module.isState(MODULE_WAITING)) {
+                        module.deps = module.deps.concat(Resolver.resolve(dependencies, module.name));
+                    }
                 },
                 /**
                  * @access public
@@ -1591,27 +1593,29 @@
                     var module = this,
                         moduleState;
 
-                    module.factory = factory || Object;
+                    if (!module.isRegistered(true)) {
+                        module.factory = factory || Object;
 
-                    module.log(MSG_MODULE_REGISTERING);
+                        module.log(MSG_MODULE_REGISTERING);
 
-                    if (module.isState(MODULE_LOADING)) {
-                        global.clearTimeout(module.timeoutID);
-                        moduleState = MODULE_REGISTERED;
-                    }
-                    else {
-                        module.log(MSG_MODULE_LOADED_MANUAL);
+                        if (module.isState(MODULE_LOADING)) {
+                            global.clearTimeout(module.timeoutID);
+                            moduleState = MODULE_REGISTERED;
+                        }
+                        else {
+                            module.log(MSG_MODULE_LOADED_MANUAL);
 
-                        moduleState = MODULE_LOADED_MANUAL;
-                    }
+                            moduleState = MODULE_LOADED_MANUAL;
+                        }
 
-                    module.setState(moduleState);
+                        module.setState(moduleState);
 
-                    if (module.checkForCircularDeps()) {
-                        module.abort();
-                    }
-                    else {
-                        module.requestDeps();
+                        if (module.checkForCircularDeps()) {
+                            module.abort();
+                        }
+                        else {
+                            module.requestDeps();
+                        }
                     }
                 },
                 /**
@@ -1624,7 +1628,9 @@
                 defineBundle: function(bundle) {
                     var module = this;
 
-                    module.bundle = Resolver.resolveBundle(bundle, module.name);
+                    if (module.isBundleState(MODULE_BUNDLE_WAITING)) {
+                        module.bundle = Resolver.resolveBundle(bundle, module.name);
+                    }
                 },
                 /**
                  * @access public
@@ -1871,13 +1877,16 @@
              */
             registerCore: function() {
                 var loader = this,
-                    properties;
+                    module;
 
                 objectEach(loaderCoreModules, function registerCoreModule(coreModule, moduleName) {
-                    coreModule = loaderCoreModules[moduleName];
-                    properties = coreModule[0] || {};
-                    properties.MID = moduleName;
-                    loader.register(properties, coreModule[1]);
+                    var dependencies = coreModule[0].deps;
+
+                    module = loader.registerModule(moduleName, coreModule[0].bundle);
+
+                    dependencies && module.$import(dependencies);
+
+                    module.$export(coreModule[1]);
                 });
             },
             /**
@@ -1885,21 +1894,30 @@
              * 
              * @memberof JAR~LoaderManager~Loader#
              * 
-             * @param {Object} properties
-             * @param {Function():*} factory
+             * @param {String} moduleName
              */
-            register: function(properties, factory) {
-                var loader = this,
-                    moduleName = properties.MID,
-                    module = loader.getModule(moduleName);
+            registerModule: function(moduleName, bundle) {
+                var module = this.getModule(moduleName);
 
-                if (!module.isRegistered(true)) {
-                    module.defineBundle(properties.bundle);
+                bundle && module.defineBundle(bundle);
 
-                    module.$import(properties.deps);
+                return {
+                    $import: function(dependencies) {
+                        module.$import(dependencies);
 
-                    module.$export(factory);
-                }
+                        return this;
+                    },
+
+                    bundle: function(bundle) {
+                        module.defineBundle(bundle);
+
+                        return this;
+                    },
+
+                    $export: function(factory) {
+                        module.$export(factory);
+                    }
+                };
             },
             /**
              * @access public
@@ -2604,10 +2622,6 @@
                     loadedCallback(loader.list);
                 }
             },
-
-            getModule: function(moduleName) {
-                return LoaderManager.loader.getModule(moduleName);
-            },
             /**
              * @access public
              * 
@@ -2683,13 +2697,11 @@
              * 
              * @memberof JAR~LoaderManager
              * 
-             * @param {Object} properties
-             * @param {Function()} factory
+             * @param {String} moduleName
              */
-            register: function(properties, factory) {
-                var moduleName = properties.MID = Resolver.appendVersion(properties.MID, properties.version),
-                    currentLoaderContext = LoaderManager.loader.context,
-                    currentLoader;
+            registerModule: function(moduleName) {
+                var currentLoaderContext = LoaderManager.loader.context,
+                    currentLoader, module;
 
                 if (!SourceManager.findSource(currentLoaderContext + ':' + moduleName)) {
                     objectEach(loaders, function findLoader(loader, loaderContext) {
@@ -2703,12 +2715,14 @@
 
                 currentLoader = LoaderManager.loader;
 
-                currentLoader.register(properties, factory);
+                module = currentLoader.registerModule(moduleName);
 
                 if (currentLoader !== loaders[currentLoaderContext]) {
                     LoaderManager.setLoaderContext(currentLoaderContext);
                 }
-            }
+
+                return module;
+            },
         };
 
         LoaderManager.addInterceptor('!', function pluginInterceptor(options) {
@@ -3468,7 +3482,7 @@
         /**
          * @namespace JAR
          * 
-         * @borrows LoaderManager.register as register
+         * @borrows LoaderManager.registerModule as module
          * @borrows LoaderManager.getDependencyURLList as getDependencyURLList
          */
         JAR = {
@@ -3531,37 +3545,19 @@
 
                 return this;
             },
+
+            module: LoaderManager.registerModule,
             /**
              * @access public
              * 
              * @memberof JAR
              * 
              * @param {String} moduleName
+             * @param {Array} bundle
              */
-            module: function(moduleName) {
-                var module = LoaderManager.getModule(moduleName);
-
-                return {
-                    $import: function(dependencies) {
-                        module.$import(dependencies);
-
-                        return this;
-                    },
-
-                    bundle: function(bundle) {
-                        module.defineBundle(bundle);
-
-                        return this;
-                    },
-
-                    $export: function(factory) {
-                        module.$export(factory);
-                    }
-                };
+            moduleAuto: function(moduleName, bundle) {
+                JAR.module(moduleName, bundle).$export();
             },
-
-            register: LoaderManager.register,
-
             /**
              * @access public
              * 

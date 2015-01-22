@@ -1,8 +1,5 @@
 // Example for an Interface
-JAR.register({
-    MID: 'jar.lang.I$Iterable',
-    deps: '.Interface'
-}, function(Interface) {
+JAR.module('jar.lang.I$Iterable').$import('.Interface').$export(function(Interface) {
     'use strict';
 
     var I$Iterable = new Interface('Iterable', [

@@ -1,9 +1,10 @@
-JAR.register({
-    MID: 'jar.lang.Array.Array-reduce',
-    deps: {
-        '..assert': ['.', '::isSet', 'Type::isFunction']
-    }
-}, function(assert, assertIsSet, assertIsFunction) {
+JAR.module('jar.lang.Array.Array-reduce').$import({
+    '..assert': [
+        '.',
+        '::isSet',
+        'Type::isFunction'
+    ]
+}).$export(function(assert, assertIsSet, assertIsFunction) {
     'use strict';
 
     var Arr = this,

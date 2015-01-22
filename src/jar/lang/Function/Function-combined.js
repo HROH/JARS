@@ -1,9 +1,14 @@
-JAR.register({
-    MID: 'jar.lang.Function.Function-combined',
-    deps: [{
-        '.': ['::from', '::apply']
-    }, 'System::isFunction', '..Array!reduce', '..Object!derive']
-}, function(fromFunction, applyFunction, isFunction, Arr, Obj) {
+JAR.module('jar.lang.Function.Function-combined').$import([
+    {
+        '.': [
+            '::from',
+            '::apply'
+        ]
+    },
+    'System::isFunction',
+    '..Array!reduce',
+    '..Object!derive'
+]).$export(function(fromFunction, applyFunction, isFunction, Arr, Obj) {
     'use strict';
 
     var Fn = this;

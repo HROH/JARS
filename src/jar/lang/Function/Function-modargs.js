@@ -1,10 +1,17 @@
-JAR.register({
-    MID: 'jar.lang.Function.Function-modargs',
-    deps: [{
-        '.': ['::from', '::apply'],
-        '..Array': ['::from', '::reverse']
-    }, 'System!', '..Object!derive']
-}, function(fromFunction, applyFunction, fromArgs, reverseArray, config, Obj) {
+JAR.module('jar.lang.Function.Function-modargs').$import([
+    {
+        '.': [
+            '::from',
+            '::apply'
+        ],
+        '..Array': [
+            '::from',
+            '::reverse'
+        ]
+    },
+    'System!',
+    '..Object!derive'
+]).$export(function(fromFunction, applyFunction, fromArgs, reverseArray, config, Obj) {
     'use strict';
 
     var Fn = this;

@@ -1,6 +1,4 @@
-JAR.register({
-    MID: 'jar.lang.Class.Final'
-}, function() {
+JAR.module('jar.lang.Class.Final').$export(function() {
     'use strict';
 
     var ClassFactory = this,

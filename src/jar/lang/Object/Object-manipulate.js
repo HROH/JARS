@@ -1,7 +1,7 @@
-JAR.register({
-    MID: 'jar.lang.Object.Object-manipulate',
-    deps: ['.!derive,iterate', '..Array!reduce']
-}, function(Obj, Arr) {
+JAR.module('jar.lang.Object.Object-manipulate').$import([
+    '.!derive,iterate',
+    '..Array!reduce'
+]).$export(function(Obj, Arr) {
     'use strict';
 
     Obj.enhance({

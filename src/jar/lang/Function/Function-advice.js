@@ -1,7 +1,7 @@
-JAR.register({
-    MID: 'jar.lang.Function.Function-advice',
-    deps: ['.::apply', '..Object!derive']
-}, function(applyFunction, Obj) {
+JAR.module('jar.lang.Function.Function-advice').$import([
+    '.::apply',
+    '..Object!derive'
+]).$export(function(applyFunction, Obj) {
     'use strict';
 
     var Fn = this;

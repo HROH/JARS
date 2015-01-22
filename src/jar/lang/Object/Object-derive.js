@@ -1,7 +1,7 @@
-JAR.register({
-    MID: 'jar.lang.Object.Object-derive',
-    deps: ['..Array!reduce', '.!reduce']
-}, function(Arr, Obj) {
+JAR.module('jar.lang.Object.Object-derive').$import([
+    '..Array!reduce',
+    '.!reduce'
+]).$export(function(Arr, Obj) {
     'use strict';
 
     var reduce = Obj.reduce;

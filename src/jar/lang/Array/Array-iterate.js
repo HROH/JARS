@@ -1,9 +1,9 @@
-JAR.register({
-    MID: 'jar.lang.Array.Array-iterate',
-    deps: {
-        '..assert': ['::isSet', 'Type::isFunction']
-    }
-}, function(assertIsSet, assertIsFunction) {
+JAR.module('jar.lang.Array.Array-iterate').$import({
+    '..assert': [
+        '::isSet',
+        'Type::isFunction'
+    ]
+}).$export(function(assertIsSet, assertIsFunction) {
     'use strict';
 
     var Arr = this,
