@@ -1578,7 +1578,7 @@
                 $import: function(dependencies) {
                     var module = this;
 
-                    if (module.isState(MODULE_WAITING)) {
+                    if (!module.isRegistered()) {
                         module.deps = module.deps.concat(Resolver.resolve(dependencies, module.name));
                     }
                 },
