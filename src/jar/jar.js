@@ -180,7 +180,7 @@
             loaders = {},
             loaderCoreModules = {},
             interceptors = {},
-            Module, Resolver, LoaderManager, Config;
+            Module, Resolver, LoaderManager, Config, Interception;
 
         Config = (function configurationSetup() {
             var MIN_TIMEOUT = 0.5,
@@ -1950,46 +1950,10 @@
              */
             intercept: function(interceptedModuleName, listeningModuleName, callback, errback) {
                 var loader = this,
-                    listeningModule = !Resolver.isRootName(listeningModuleName) && loader.getModule(listeningModuleName),
-                    interceptorInfo = Resolver.extractInterceptorInfo(interceptedModuleName);
+                    interceptorType = Resolver.extractInterceptorInfo(interceptedModuleName).type;
 
-                return interceptorInfo.type ? function interceptionListener(moduleName) {
-                    interceptors[interceptorInfo.type]({
-                        listener: listeningModuleName,
-
-                        getFilePath: function(fileType) {
-                            return listeningModule && listeningModule.getFullPath(fileType);
-                        },
-
-                        module: loader.getModuleRef(moduleName),
-
-                        data: interceptorInfo.data,
-
-                        $import: LoaderManager.$importLazy,
-
-                        $importAndLink: function(moduleNames, callback, errback, progressback) {
-                            var interceptorDeps;
-
-                            moduleNames = Resolver.resolve(moduleNames, interceptedModuleName);
-
-                            if (listeningModule) {
-                                interceptorDeps = listeningModule.interceptorDeps;
-                                interceptorDeps.push.apply(interceptorDeps, moduleNames);
-                            }
-
-                            LoaderManager.$importLazy(moduleNames, callback, errback, progressback);
-                        },
-
-                        success: function(data) {
-                            callback(interceptedModuleName, data);
-                        },
-
-                        fail: function(error) {
-                            loader.getModule(interceptedModuleName).logInterceptionError(interceptorInfo, error);
-
-                            errback(interceptedModuleName);
-                        }
-                    });
+                return interceptorType ? function interceptionListener(moduleName) {
+                    interceptors[interceptorType](loader.getModuleRef(moduleName), new Interception(interceptedModuleName, listeningModuleName, callback, errback));
                 } : callback;
             },
             /**
@@ -2085,6 +2049,60 @@
                 });
             }
         };
+
+        Interception = (function interceptionSetup() {
+            function Interception(interceptor, listener, callback, errback) {
+                var interception = this,
+                    interceptorInfo = Resolver.extractInterceptorInfo(interceptor);
+
+                interception.listener = listener;
+                interception.data = interceptorInfo.data;
+                interception.interceptor = interceptor;
+                interception._callback = callback;
+                interception._errback = errback;
+            }
+
+            Interception.prototype = {
+                constructor: Interception,
+
+                getFilePath: function(fileType) {
+                    return !Resolver.isRootName(this.listener) && LoaderManager.loader.getModule(this.listener).getFullPath(fileType);
+                },
+
+                $import: function(moduleNames, callback, errback, progressback) {
+                    LoaderManager.$importLazy(moduleNames, callback, errback, progressback);
+                },
+
+                $importAndLink: function(moduleNames, callback, errback, progressback) {
+                    var interceptorDeps;
+
+                    moduleNames = Resolver.resolve(moduleNames, this.interceptor);
+
+                    if (!Resolver.isRootName(this.listener)) {
+                        interceptorDeps = LoaderManager.loader.getModule(this.listener).interceptorDeps;
+                        interceptorDeps.push.apply(interceptorDeps, moduleNames);
+                    }
+
+                    LoaderManager.$importLazy(moduleNames, callback, errback, progressback);
+                },
+
+                success: function(data) {
+                    this._callback(this.interceptor, data);
+                },
+
+                fail: function(error) {
+                    LoaderManager.loader.getModule(this.interceptor).logInterceptionError({
+                        type: Resolver.extractInterceptorInfo(this.interceptor).type,
+
+                        data: this.data
+                    }, error);
+
+                    this._errback(this.interceptor);
+                }
+            };
+
+            return Interception;
+        })();
 
         Resolver = (function resolverSetup() {
             var rEndSlash = /\/$/,
@@ -2700,7 +2718,8 @@
              * @param {String} moduleName
              */
             registerModule: function(moduleName) {
-                var currentLoader = LoaderManager.loader, currentLoaderContext = currentLoader.context,
+                var currentLoader = LoaderManager.loader,
+                    currentLoaderContext = currentLoader.context,
                     module;
 
                 if (moduleName) {
@@ -2730,23 +2749,17 @@
             },
         };
 
-        LoaderManager.addInterceptor('!', function pluginInterceptor(options) {
-            var moduleRef = options.module,
-                errback = options.fail;
-
-            delete options.module;
-
+        LoaderManager.addInterceptor('!', function pluginInterceptor(moduleRef, options) {
             if (LoaderManager.getSystem().isFunction(moduleRef.$plugIn)) {
                 moduleRef.$plugIn(options);
             }
             else {
-                errback('Could not call method "$plugIn" on this module');
+                options.fail('Could not call method "$plugIn" on this module');
             }
         });
 
-        LoaderManager.addInterceptor('::', function partialModuleInterceptor(options) {
-            var moduleRef = options.module,
-                property = options.data;
+        LoaderManager.addInterceptor('::', function partialModuleInterceptor(moduleRef, options) {
+            var property = options.data;
 
             if (moduleRef && hasOwnProp(moduleRef, property)) {
                 options.success(moduleRef[property]);
@@ -3342,7 +3355,9 @@
                     Logger.addDebugger(data[0], Debugger.setup);
 
                     pluginRequest.success(Logger);
-                }, pluginRequest.fail);
+                }, function(abortedModuleName) {
+                    pluginRequest.fail(abortedModuleName);
+                });
             };
 
             /**
