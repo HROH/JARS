@@ -2700,25 +2700,30 @@
              * @param {String} moduleName
              */
             registerModule: function(moduleName) {
-                var currentLoaderContext = LoaderManager.loader.context,
-                    currentLoader, module;
+                var currentLoader = LoaderManager.loader, currentLoaderContext = currentLoader.context,
+                    module;
 
-                if (!SourceManager.findSource(currentLoaderContext + ':' + moduleName)) {
-                    objectEach(loaders, function findLoader(loader, loaderContext) {
-                        if (SourceManager.findSource(loaderContext + ':' + moduleName)) {
-                            LoaderManager.setLoaderContext(loaderContext);
+                if (moduleName) {
+                    if (!SourceManager.findSource(currentLoaderContext + ':' + moduleName)) {
+                        objectEach(loaders, function findLoader(loader, loaderContext) {
+                            if (SourceManager.findSource(loaderContext + ':' + moduleName)) {
+                                LoaderManager.setLoaderContext(loaderContext);
 
-                            return true;
-                        }
-                    });
+                                return true;
+                            }
+                        });
+                    }
+
+                    currentLoader = LoaderManager.loader;
+
+                    module = currentLoader.registerModule(moduleName);
+
+                    if (currentLoader !== loaders[currentLoaderContext]) {
+                        LoaderManager.setLoaderContext(currentLoaderContext);
+                    }
                 }
-
-                currentLoader = LoaderManager.loader;
-
-                module = currentLoader.registerModule(moduleName);
-
-                if (currentLoader !== loaders[currentLoaderContext]) {
-                    LoaderManager.setLoaderContext(currentLoaderContext);
+                else {
+                    currentLoader.getModuleRef('System.Logger').error('No modulename provided');
                 }
 
                 return module;
