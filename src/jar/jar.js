@@ -2179,7 +2179,7 @@
                         pathParts.push(fileName);
                     }
 
-                    options.dirPath = pathParts.join(slash) + slash;
+                    options.dirPath = pathParts.length ? (pathParts.join(slash) + slash) : '';
 
                     return options;
                 },
