@@ -706,7 +706,16 @@
                  * @memberof JAR~LoaderManager
                  * @inner
                  */
-                MODULE_BUNDLE_LOADED = 2;
+                MODULE_BUNDLE_REQUESTED = 2,
+                /**
+                 * @access private
+                 * 
+                 * @const {Number}
+                 * 
+                 * @memberof JAR~LoaderManager
+                 * @inner
+                 */
+                MODULE_BUNDLE_LOADED = 3;
 
             /**
              * @access private
@@ -1340,7 +1349,7 @@
                     module.log(MSG_BUNDLE_REQUESTED, true);
 
                     if (module.isBundleState(MODULE_BUNDLE_WAITING)) {
-                        module.setBundleState(MODULE_BUNDLE_LOADING);
+                        module.setBundleState(MODULE_BUNDLE_REQUESTED);
 
                         module.loader.listenFor(module.bundleName, [module.name], function onModuleLoaded() {
                             var bundle = module.bundle;
@@ -1350,9 +1359,12 @@
                                     bundle: bundle.join(separator)
                                 });
 
+                                module.setBundleState(MODULE_BUNDLE_LOADING);
+
                                 module.log(MSG_BUNDLE_LOADING, true);
-                                module.listenFor(bundle, true);
                             }
+
+                            module.listenFor(bundle, true);
                         }, function onAbort() {
                             module.abort(false, true);
                         });
@@ -1628,7 +1640,7 @@
                 defineBundle: function(bundle) {
                     var module = this;
 
-                    if (module.isBundleState(MODULE_BUNDLE_WAITING)) {
+                    if (module.isBundleState(MODULE_BUNDLE_WAITING) || module.isBundleState(MODULE_BUNDLE_REQUESTED)) {
                         module.bundle = Resolver.resolveBundle(bundle, module.name);
                     }
                 },
