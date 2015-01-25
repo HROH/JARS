@@ -2728,8 +2728,9 @@
              * @memberof JAR~LoaderManager
              * 
              * @param {String} moduleName
+             * @param {Array} bundle
              */
-            registerModule: function(moduleName) {
+            registerModule: function(moduleName, bundle) {
                 var currentLoader = LoaderManager.loader,
                     currentLoaderContext = currentLoader.context,
                     module;
@@ -2747,7 +2748,7 @@
 
                     currentLoader = LoaderManager.loader;
 
-                    module = currentLoader.registerModule(moduleName);
+                    module = currentLoader.registerModule(moduleName, bundle);
 
                     if (currentLoader !== loaders[currentLoaderContext]) {
                         LoaderManager.setLoaderContext(currentLoaderContext);
