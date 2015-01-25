@@ -882,90 +882,28 @@
                  * @param {Object} values
                  */
                 log: (function moduleLogMessageSetup() {
-                    var messageTemplates = [],
+                    var join = [].join,
+                        messageTemplates = [],
                         messageTypes = {},
-                        module = 'module',
-                        bundle = 'bundle',
-                        requested = '${what} requested',
-                        startLoad = 'started loading ${what}',
-                        endLoad = 'finished loading ${what}',
-                        attemptedTo = 'attempted to ',
-                        attemptLoad = attemptedTo + 'load ${what} but ${why}',
-                        already = 'is already ',
-                        alreadyLoading = already + 'loading',
-                        alreadyLoaded = already + 'loaded',
-                        attemptLoadModule = replaceModule(attemptLoad),
-                        attemptLoadBundle = replaceBundle(attemptLoad),
-                        abortedLoading = 'aborted loading ${what}',
+                        SPACE = ' ',
+                        MODULE = 'module',
+                        BUNDLE = 'bundle',
+                        LOADING = 'loading',
+                        LOADED = 'loaded',
+                        MANUAL = 'manual',
+                        REQUESTED = 'requested',
+                        START_LOAD = concatString('started', LOADING),
+                        END_LOAD = concatString('finished', LOADING),
+                        FOUND = 'found',
+                        ATTEMPTED_TO = 'attempted to',
+                        ATTEMPTED_TO_LOAD = concatString(ATTEMPTED_TO, 'load'),
+                        BUT_ALREADY = 'but is already',
+                        BUT_ALREADY_LOADING = concatString(BUT_ALREADY, LOADING),
+                        BUT_ALREADY_LOADED = concatString(BUT_ALREADY, LOADED),
+                        ATTEMPTED_TO_LOAD_MODULE = concatString(ATTEMPTED_TO_LOAD, MODULE),
+                        ATTEMPTED_TO_LOAD_BUNDLE = concatString(ATTEMPTED_TO_LOAD, BUNDLE),
+                        ABORTED_LOADING = concatString('aborted', LOADING),
                         loggerOptions;
-
-                    /**
-                     * @access private
-                     * 
-                     * @param {String} message
-                     * @param {String} what
-                     * 
-                     * @return {String}
-                     */
-                    function replaceWhat(message, what) {
-                        return message.replace('${what}', what);
-                    }
-
-                    /**
-                     * @access private
-                     * 
-                     * @param {String} message
-                     * 
-                     * @return {String}
-                     */
-                    function replaceModule(message) {
-                        return replaceWhat(message, module);
-                    }
-
-                    /**
-                     * @access private
-                     * 
-                     * @param {String} message
-                     * 
-                     * @return {String}
-                     */
-                    function replaceBundle(message) {
-                        return replaceWhat(message, bundle);
-                    }
-
-                    /**
-                     * @access private
-                     * 
-                     * @param {String} message
-                     * @param {String} why
-                     * 
-                     * @return {String}
-                     */
-                    function replaceWhy(message, why) {
-                        return message.replace('${why}', why);
-                    }
-
-                    /**
-                     * @access private
-                     * 
-                     * @param {String} message
-                     * 
-                     * @return {String}
-                     */
-                    function replaceAlreadyLoaded(message) {
-                        return replaceWhy(message, alreadyLoaded);
-                    }
-
-                    /**
-                     * @access private
-                     * 
-                     * @param {String} message
-                     * 
-                     * @return {String}
-                     */
-                    function replaceAlreadyLoading(message) {
-                        return replaceWhy(message, alreadyLoading);
-                    }
 
                     /**
                      * @access private
@@ -977,6 +915,10 @@
                         arrayEach(messages, function setLogLevelForMessageType(message) {
                             messageTypes[message] = logLevel;
                         });
+                    }
+
+                    function concatString() {
+                        return join.call(arguments, SPACE);
                     }
 
                     setLogLevelForMessageTypes([
@@ -1010,39 +952,39 @@
                     MSG_MODULE_ALREADY_LOADING,
                     MSG_MODULE_ALREADY_REGISTERED], 'warn');
 
-                    messageTemplates[MSG_BUNDLE_ABORTED] = replaceBundle(abortedLoading);
-                    messageTemplates[MSG_BUNDLE_ALREADY_LOADED] = replaceAlreadyLoaded(attemptLoadBundle);
-                    messageTemplates[MSG_BUNDLE_ALREADY_LOADING] = replaceAlreadyLoading(attemptLoadBundle);
-                    messageTemplates[MSG_BUNDLE_FOUND] = replaceBundle('found bundlemodules "${bundle}" for ${what}');
-                    messageTemplates[MSG_BUNDLE_LOADED] = replaceBundle(endLoad);
-                    messageTemplates[MSG_BUNDLE_LOADING] = replaceBundle(startLoad);
-                    messageTemplates[MSG_BUNDLE_NOT_DEFINED] = replaceWhy(attemptLoadBundle, 'bundle is not defined');
-                    messageTemplates[MSG_BUNDLE_REQUESTED] = replaceBundle(requested);
+                    messageTemplates[MSG_BUNDLE_ABORTED] = concatString(ABORTED_LOADING, BUNDLE);
+                    messageTemplates[MSG_BUNDLE_ALREADY_LOADED] = concatString(ATTEMPTED_TO_LOAD_BUNDLE, BUT_ALREADY_LOADED);
+                    messageTemplates[MSG_BUNDLE_ALREADY_LOADING] = concatString(ATTEMPTED_TO_LOAD_BUNDLE, BUT_ALREADY_LOADING);
+                    messageTemplates[MSG_BUNDLE_FOUND] = concatString(FOUND, 'bundlemodules "${bundle}" for', BUNDLE);
+                    messageTemplates[MSG_BUNDLE_LOADED] = concatString(END_LOAD, BUNDLE);
+                    messageTemplates[MSG_BUNDLE_LOADING] = concatString(START_LOAD, BUNDLE);
+                    messageTemplates[MSG_BUNDLE_NOT_DEFINED] = concatString(ATTEMPTED_TO_LOAD_BUNDLE, 'but', BUNDLE, 'is not defined');
+                    messageTemplates[MSG_BUNDLE_REQUESTED] = concatString(BUNDLE, REQUESTED);
 
-                    messageTemplates[MSG_CIRCULAR_DEPENDENCIES_FOUND] = replaceModule('found circular dependencies "${deps}" for ${what}');
+                    messageTemplates[MSG_CIRCULAR_DEPENDENCIES_FOUND] = concatString(FOUND, 'circular dependencies "${deps}" for', MODULE);
 
-                    messageTemplates[MSG_DEPENDENCIES_FOUND] = replaceModule('found explicit dependencie(s) "${deps}" for ${what}');
-                    messageTemplates[MSG_DEPENDENCY_FOUND] = replaceModule('found implicit dependency "${dep}" for ${what}');
+                    messageTemplates[MSG_DEPENDENCIES_FOUND] = concatString(FOUND, 'explicit dependencie(s) "${deps}" for', MODULE);
+                    messageTemplates[MSG_DEPENDENCY_FOUND] = concatString(FOUND, 'implicit dependency "${dep}" for', MODULE);
 
-                    messageTemplates[MSG_INTERCEPTION_ERROR] = replaceModule('error in interception of this ${what} by interceptor "${type}" with data "${data}"');
+                    messageTemplates[MSG_INTERCEPTION_ERROR] = concatString('error in interception of this', MODULE, 'by interceptor "${type}" with data "${data}"');
 
-                    messageTemplates[MSG_MODULE_ALREADY_LOADED] = replaceAlreadyLoaded(attemptLoadModule);
-                    messageTemplates[MSG_MODULE_ALREADY_LOADED_MANUAL] = replaceAlreadyLoaded(attemptLoadModule) + ' manual';
-                    messageTemplates[MSG_MODULE_ALREADY_LOADING] = replaceAlreadyLoading(attemptLoadModule);
+                    messageTemplates[MSG_MODULE_ALREADY_LOADED] = concatString(ATTEMPTED_TO_LOAD_MODULE, BUT_ALREADY_LOADED);
+                    messageTemplates[MSG_MODULE_ALREADY_LOADED_MANUAL] = concatString(ATTEMPTED_TO_LOAD_MODULE, BUT_ALREADY_LOADED, MANUAL);
+                    messageTemplates[MSG_MODULE_ALREADY_LOADING] = concatString(ATTEMPTED_TO_LOAD_MODULE, BUT_ALREADY_LOADING);
 
-                    messageTemplates[MSG_MODULE_ALREADY_REGISTERED] = replaceWhy(replaceModule(attemptedTo + 'register ${what} but ${why}'), already + 'registered');
+                    messageTemplates[MSG_MODULE_ALREADY_REGISTERED] = concatString(ATTEMPTED_TO, 'register', MODULE, BUT_ALREADY, 'registered');
 
-                    messageTemplates[MSG_MODULE_LOADED] = replaceModule(endLoad);
-                    messageTemplates[MSG_MODULE_LOADED_MANUAL] = replaceModule('${what} was loaded manual');
-                    messageTemplates[MSG_MODULE_LOADING] = replaceModule(startLoad) + ' from path "${path}"';
+                    messageTemplates[MSG_MODULE_LOADED] = concatString(END_LOAD, MODULE);
+                    messageTemplates[MSG_MODULE_LOADED_MANUAL] = concatString(MODULE, 'was', LOADED, MANUAL);
+                    messageTemplates[MSG_MODULE_LOADING] = concatString(START_LOAD, MODULE, 'from path "${path}"');
 
-                    messageTemplates[MSG_MODULE_PUBLISHED] = 'was notified by "${pub}"';
-                    messageTemplates[MSG_MODULE_RECOVERING] = replaceModule('${what} tries to recover...');
-                    messageTemplates[MSG_MODULE_REGISTERING] = replaceModule('registering ${what}...');
-                    messageTemplates[MSG_MODULE_REQUESTED] = replaceModule(requested);
-                    messageTemplates[MSG_MODULE_SUBSCRIBED] = replaceModule('subscribed to "${subs}"');
+                    messageTemplates[MSG_MODULE_PUBLISHED] = concatString(MODULE, 'was notified by "${pub}"');
+                    messageTemplates[MSG_MODULE_RECOVERING] = concatString(MODULE, 'tries to recover...');
+                    messageTemplates[MSG_MODULE_REGISTERING] = concatString(MODULE, 'registering...');
+                    messageTemplates[MSG_MODULE_REQUESTED] = concatString(MODULE, REQUESTED);
+                    messageTemplates[MSG_MODULE_SUBSCRIBED] = concatString(MODULE, 'subscribed to "${subs}"');
 
-                    messageTemplates[MSG_TIMEOUT] = replaceModule(abortedLoading) + ' after ${sec} second(s) - module may not be available on path "${path}"';
+                    messageTemplates[MSG_TIMEOUT] = concatString(ABORTED_LOADING, MODULE, 'after ${sec} second(s) - file may not be available on path "${path}"');
 
                     loggerOptions = {
                         tpl: messageTemplates
