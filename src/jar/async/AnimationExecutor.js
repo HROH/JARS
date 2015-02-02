@@ -1,9 +1,14 @@
-JAR.register({
-    MID: 'jar.async.AnimationExecutor',
-    deps: ['.I$Executor', {
-        'jar.lang': ['Array!check', 'Class.Singleton', 'Date', 'String::camelize']
-    }]
-}, function(I$Executor, Arr, Singleton, Dat, camelize) {
+JAR.module('jar.async.AnimationExecutor').$import([
+    '.I$Executor',
+    {
+        'jar.lang': [
+            'Array!check',
+            'Class.Singleton',
+            'Date',
+            'String::camelize'
+        ]
+    }
+]).$export(function(I$Executor, Arr, Singleton, Dat, camelize) {
     'use strict';
 
     // TODO move implmentationtest of requestAnimationFrame into jar.feature-module

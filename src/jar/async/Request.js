@@ -1,9 +1,16 @@
-JAR.register({
-    MID: 'jar.async.Request',
-    deps: ['.Deferred', 'System', {
-        '..lang': ['Class', 'Object!reduce', 'Array!index', 'Enum', 'Function!modargs']
-    }]
-}, function(Deferred, System, Class, Obj, Arr, Enum, Fn) {
+JAR.module('jar.async.Request').$import([
+    '.Deferred',
+    'System',
+    {
+        '..lang': [
+            'Class',
+            'Object!reduce',
+            'Array!index',
+            'Enum',
+            'Function!modargs'
+        ]
+    }
+]).$export(function(Deferred, System, Class, Obj, Arr, Enum, Fn) {
     'use strict';
 
     var activeXObjects = Arr('Msxml2.XMLHTTP.6.0', 'Msxml2.XMLHTTP.3.0', 'Microsoft.XMLHTTP'),

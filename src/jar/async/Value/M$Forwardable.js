@@ -1,9 +1,9 @@
-JAR.register({
-    MID: 'jar.async.Value.M$Forwardable',
-    deps: {
-        'jar.lang': ['Function::bind', 'MixIn']
-    }
-}, function(bind, MixIn) {
+JAR.module('jar.async.Value.M$Forwardable').$import({
+    'jar.lang': [
+        'Function::bind',
+        'MixIn'
+    ]
+}).$export(function(bind, MixIn) {
     'use strict';
 
     var forwardingSubscriptions = {},

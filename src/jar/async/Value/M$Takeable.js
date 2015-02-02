@@ -1,11 +1,17 @@
-JAR.register({
-    MID: 'jar.async.Value.M$Takeable',
-    deps: ['.M$Forwardable', {
-        'jar.lang': [{
-            Function: ['!modargs', '::negate']
-        }, 'MixIn']
-    }]
-}, function(M$Forwardable, Fn, negate, MixIn) {
+JAR.module('jar.async.Value.M$Takeable').$import([
+    '.M$Forwardable',
+    {
+        'jar.lang': [
+            {
+                Function: [
+                    '!modargs',
+                    '::negate'
+                ]
+            },
+            'MixIn'
+        ]
+    }
+]).$export(function(M$Forwardable, Fn, negate, MixIn) {
     'use strict';
 
     var M$Takeable = new MixIn('Takeable', {

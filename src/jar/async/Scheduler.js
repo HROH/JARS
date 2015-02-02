@@ -1,10 +1,18 @@
-JAR.register({
-    MID: 'jar.async.Scheduler',
-    deps: [{
-        System: ['::isFunction', '::isNumber'],
-        'jar.lang': ['Class', 'Constant::TRUE', 'Object']
-    }, '.TimeoutExecutor', '.I$Executor']
-}, function(isFunction, isNumber, Class, constantTrue, Obj, TimeoutExecutor, I$Executor) {
+JAR.module('jar.async.Scheduler').$import([
+    {
+        System: [
+            '::isFunction',
+            '::isNumber'
+        ],
+        'jar.lang': [
+            'Class',
+            'Constant::TRUE',
+            'Object'
+        ]
+    },
+    '.TimeoutExecutor',
+    '.I$Executor'
+]).$export(function(isFunction, isNumber, Class, constantTrue, Obj, TimeoutExecutor, I$Executor) {
     'use strict';
 
     var Scheduler = Class('Scheduler', {

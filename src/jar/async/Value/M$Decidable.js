@@ -1,9 +1,14 @@
-JAR.register({
-    MID: 'jar.async.Value.M$Decidable',
-    deps: ['System::isObject', {
-        'jar.lang': ['Function::identity', 'Object!iterate', 'MixIn']
-    }, '.M$Forwardable']
-}, function(isObject, identity, Obj, MixIn, M$Forwardable) {
+JAR.module('jar.async.Value.M$Decidable').$export([
+    'System::isObject',
+    {
+        'jar.lang': [
+            'Function::identity',
+            'Object!iterate',
+            'MixIn'
+        ]
+    },
+    '.M$Forwardable'
+]).$export(function(isObject, identity, Obj, MixIn, M$Forwardable) {
     'use strict';
 
     var M$Decidable = new MixIn('Decidable', {

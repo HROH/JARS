@@ -1,13 +1,33 @@
-JAR.register({
-    MID: 'jar.async.Promise',
-    deps: [{
-        System: ['::isA', '::isObject', '::isArrayLike', '::isFunction', '!'],
-        '..lang': ['Class', 'Object!info,iterate', 'Array!iterate,reduce', 'Enum', {
-            Function: ['::identity', '::bind', '!flow,modargs']
-        }],
-        '.Value': ['.', 'M$Forwardable']
-    }, '.Scheduler', '.TimeoutExecutor']
-}, function(isA, isObject, isArrayLike, isFunction, config, Class, Obj, Arr, Enum, identity, bind, Fn, Value, M$Forwardable, Scheduler, TimeoutExecutor) {
+JAR.module('jar.async.Promise').$import([
+    {
+        System: [
+            '::isA',
+            '::isObject',
+            '::isArrayLike',
+            '::isFunction',
+            '!'
+        ],
+        '..lang': [
+            'Class',
+            'Object!info,iterate',
+            'Array!iterate,reduce',
+            'Enum',
+            {
+                Function: [
+                    '::identity',
+                    '::bind',
+                    '!flow,modargs'
+                ]
+            }
+        ],
+        '.Value': [
+            '.',
+            'M$Forwardable'
+        ]
+    },
+    '.Scheduler',
+    '.TimeoutExecutor'
+]).$export(function(isA, isObject, isArrayLike, isFunction, config, Class, Obj, Arr, Enum, identity, bind, Fn, Value, M$Forwardable, Scheduler, TimeoutExecutor) {
     'use strict';
 
     // TODO support stacktraces:

@@ -1,7 +1,9 @@
-JAR.register({
-    MID: 'jar.async.Importer',
-    deps: ['..', '..lang.Array', '.Deferred', '.TimeoutExecutor']
-}, function(jar, Arr, Deferred, TimeoutExecutor) {
+JAR.module('jar.async.Importer').$import([
+    '..',
+    '..lang.Array',
+    '.Deferred',
+    '.TimeoutExecutor'
+]).$export(function(jar, Arr, Deferred, TimeoutExecutor) {
     'use strict';
 
     var delayedExecutor = new TimeoutExecutor(10),

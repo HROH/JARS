@@ -1,9 +1,12 @@
-JAR.register({
-    MID: 'jar.async.Value.M$FlowRegulator',
-    deps: ['.M$Forwardable', {
-        'jar.lang': ['Function!flow', 'MixIn']
-    }]
-}, function(M$Forwardable, Fn, MixIn) {
+JAR.module('jar.async.Value.M$FlowRegulator').$import([
+    '.M$Forwardable',
+    {
+        'jar.lang': [
+            'Function!flow',
+            'MixIn'
+        ]
+    }
+]).$export(function(M$Forwardable, Fn, MixIn) {
     'use strict';
 
     var M$FlowRegulator = new MixIn('FlowRegulator', {

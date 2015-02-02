@@ -1,7 +1,7 @@
-JAR.register({
-    MID: 'jar.async.TimeoutExecutor',
-    deps: ['jar.lang.Class', '.I$Executor']
-}, function(Class, I$Executor) {
+JAR.module('jar.async.TimeoutExecutor').$import([
+    'jar.lang.Class',
+    '.I$Executor'
+]).$export(function(Class, I$Executor) {
     'use strict';
 
     var TimeoutExecutor = Class('TimeoutExecutor', {

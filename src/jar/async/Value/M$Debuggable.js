@@ -1,10 +1,13 @@
-JAR.register({
-    MID: 'jar.async.Value.M$Debuggable',
-    deps: [{
-        System: ['::isA', 'Logger'],
-        'jar.lang': ['MixIn', 'Object']
-    }]
-}, function(isA, Logger, MixIn, Obj) {
+JAR.module('jar.async.Value.M$Debuggable').$import({
+    System: [
+        '::isA',
+        'Logger'
+    ],
+    'jar.lang': [
+        'MixIn',
+        'Object'
+    ]
+}).$export(function(isA, Logger, MixIn, Obj) {
     'use strict';
 
     var debuggedValues = {},

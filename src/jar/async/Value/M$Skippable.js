@@ -1,11 +1,18 @@
-JAR.register({
-    MID: 'jar.async.Value.M$Skippable',
-    deps: ['.M$Acceptable', 'System::isNumber', {
-        'jar.lang': [{
-            Function: ['!modargs', '::negate']
-        }, 'MixIn']
-    }]
-}, function(M$Acceptable, isNumber, Fn, negate, MixIn) {
+JAR.module('jar.async.Value.M$Skippable').$import([
+    '.M$Acceptable',
+    'System::isNumber',
+    {
+        'jar.lang': [
+            {
+                Function: [
+                    '!modargs',
+                    '::negate'
+                ]
+            },
+            'MixIn'
+        ]
+    }
+]).$export(function(M$Acceptable, isNumber, Fn, negate, MixIn) {
     'use strict';
 
     var M$Skippable = new MixIn('Skippable', {

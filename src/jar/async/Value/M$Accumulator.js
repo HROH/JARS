@@ -1,7 +1,7 @@
-JAR.register({
-    MID: 'jar.async.Value.M$Accumulator',
-    deps: ['.M$Mappable', 'jar.lang.MixIn']
-}, function(M$Mappable, MixIn) {
+JAR.module('jar.async.Value.M$Accumulator').$import([
+    '.M$Mappable',
+    'jar.lang.MixIn'
+]).$export(function(M$Mappable, MixIn) {
     'use strict';
 
     var M$Accumulator = new MixIn('Accumulator', {

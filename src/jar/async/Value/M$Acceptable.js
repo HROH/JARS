@@ -1,7 +1,7 @@
-JAR.register({
-    MID: 'jar.async.Value.M$Acceptable',
-    deps: ['.M$Forwardable', 'jar.lang.MixIn']
-}, function(M$Forwardable, MixIn) {
+JAR.module('jar.async.Value.M$Acceptable').$import([
+    '.M$Forwardable',
+    'jar.lang.MixIn'
+]).$export(function(M$Forwardable, MixIn) {
     'use strict';
 
     var M$Acceptable = new MixIn('Acceptable', {

@@ -1,7 +1,8 @@
-JAR.register({
-    MID: 'jar.async.Value.M$Memorizable',
-    deps: ['.M$Accumulator', '.M$Skippable', 'jar.lang.MixIn']
-}, function(M$Accumulator, M$Skippable, MixIn) {
+JAR.module('jar.async.Value.M$Memorizable').$import([
+    '.M$Accumulator',
+    '.M$Skippable',
+    'jar.lang.MixIn'
+]).$export(function(M$Accumulator, M$Skippable, MixIn) {
     'use strict';
 
     var M$Memorizable = new MixIn('Memorizable', {

@@ -1,13 +1,37 @@
-JAR.register({
-    MID: 'jar.async.Value',
-    deps: ['.Scheduler', {
-        System: ['::isSet', '::isA', '::isFunction'],
-        'jar.lang': ['Class', {
-            Object: ['!derive,iterate', '::hasOwn']
-        }, 'Function::noop', 'Constant', 'Enum']
-    }],
-    bundle: ['M$Acceptable', 'M$Accumulator', 'M$Debuggable', 'M$Decidable', 'M$FlowRegulator', 'M$Forwardable', 'M$Mappable', 'M$Memorizable', 'M$Mergable', 'M$Skippable', 'M$Takeable']
-}, function(Scheduler, isSet, isA, isFunction, Class, Obj, hasOwn, noop, Constant, Enum) {
+JAR.module('jar.async.Value', [
+    'M$Acceptable',
+    'M$Accumulator',
+    'M$Debuggable',
+    'M$Decidable',
+    'M$FlowRegulator',
+    'M$Forwardable',
+    'M$Mappable',
+    'M$Memorizable',
+    'M$Mergable',
+    'M$Skippable',
+    'M$Takeable'
+]).$import([
+    '.Scheduler',
+    {
+        System: [
+            '::isSet',
+            '::isA',
+            '::isFunction'
+        ],
+        'jar.lang': [
+            'Class',
+            {
+                Object: [
+                    '!derive,iterate',
+                    '::hasOwn'
+                ]
+            },
+            'Function::noop',
+            'Constant',
+            'Enum'
+        ]
+    }
+]).$export(function(Scheduler, isSet, isA, isFunction, Class, Obj, hasOwn, noop, Constant, Enum) {
     'use strict';
 
     var setZero = Constant(0),

@@ -1,7 +1,8 @@
-JAR.register({
-    MID: 'jar.async.Deferred',
-    deps: ['.Promise', '.Value', '..lang.Class']
-}, function(Promise, Value, Class) {
+JAR.module('jar.async.Deferred').$import([
+    '.Promise',
+    '.Value',
+    '..lang.Class'
+]).$export(function(Promise, Value, Class) {
     'use strict';
 
     var Deferred = Class('Deferred', {

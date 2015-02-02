@@ -1,7 +1,4 @@
-JAR.register({
-    MID: 'jar.async.I$Executor',
-    deps: 'jar.lang.Interface'
-}, function(Interface) {
+JAR.module('jar.async.I$Executor').$import('jar.lang.Interface').$export(function(Interface) {
     'use strict';
 
     var I$Executor = new Interface('Executor', [

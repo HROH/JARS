@@ -1,9 +1,12 @@
-JAR.register({
-    MID: 'jar.async.Value.M$Mergable',
-    deps: ['.M$Forwardable', {
-        'jar.lang': ['Array!iterate', 'MixIn']
-    }]
-}, function(M$Forwardable, Arr, MixIn) {
+JAR.module('jar.async.Value.M$Mergable').$import([
+    '.M$Forwardable',
+    {
+        'jar.lang': [
+            'Array!iterate',
+            'MixIn'
+        ]
+    }
+]).$export(function(M$Forwardable, Arr, MixIn) {
     'use strict';
 
     var M$Mergable = new MixIn('Mergable', {

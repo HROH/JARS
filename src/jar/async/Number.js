@@ -1,11 +1,19 @@
-JAR.register({
-    MID: 'jar.async.Number',
-    deps: ['System::isSet', '.Value', {
-        'jar.lang': ['Object!reduce', 'String', {
-            'operations.Arithmetic': ['.', '::operators']
-        }]
-    }]
-}, function(isSet, Value, Obj, Str, arithmeticOperations, arithmeticOperators) {
+JAR.module('jar.async.Number').$import([
+    'System::isSet',
+    '.Value',
+    {
+        'jar.lang': [
+            'Object!reduce',
+            'String',
+            {
+                'operations.Arithmetic': [
+                    '.',
+                    '::operators'
+                ]
+            }
+        ]
+    }
+]).$export(function(isSet, Value, Obj, Str, arithmeticOperations, arithmeticOperators) {
     'use strict';
 
     var Nr = Value.createSubClass('Number', Obj.reduce(arithmeticOperators.values(), function(asyncNumberProto, arithmeticOperator, arithmeticOperationName) {
