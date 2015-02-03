@@ -35,7 +35,7 @@ JAR.module('jar.async.Value.M$Takeable').$import([
 
         takeUntil: function(untilFn) {
             return this.forward({
-                onUpdate: function(forwardedValue, newValue) {
+                update: function(forwardedValue, newValue) {
                     if (untilFn(newValue)) {
                         forwardedValue.freeze();
                     }

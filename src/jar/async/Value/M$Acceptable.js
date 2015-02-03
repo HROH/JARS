@@ -7,7 +7,7 @@ JAR.module('jar.async.Value.M$Acceptable').$import([
     var M$Acceptable = new MixIn('Acceptable', {
         accept: function(acceptFn) {
             return this.forward({
-                onUpdate: function(forwardedValue, newValue) {
+                update: function(forwardedValue, newValue) {
                     if (acceptFn(newValue)) {
                         forwardedValue.assign(newValue);
                     }

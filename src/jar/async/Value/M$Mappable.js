@@ -7,7 +7,7 @@ JAR.module('jar.async.Value.M$Mappable').$import([
     var M$Mappable = new MixIn('Mappable', {
         map: function(mapFn) {
             return this.forward({
-                onUpdate: function(forwardedValue, newValue) {
+                update: function(forwardedValue, newValue) {
                     forwardedValue.assign(mapFn(newValue));
                 }
             });

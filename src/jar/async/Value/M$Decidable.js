@@ -26,7 +26,7 @@ JAR.module('jar.async.Value.M$Decidable').$export([
             });
 
             return this.forward({
-                onUpdate: function makeDecision(forwardedValue, newValue) {
+                update: function makeDecision(forwardedValue, newValue) {
                     var nextDecision = decisionTable[decider(newValue)];
 
                     if (nextDecision) {

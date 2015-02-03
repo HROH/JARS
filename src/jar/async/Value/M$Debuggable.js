@@ -27,19 +27,19 @@ JAR.module('jar.async.Value.M$Debuggable').$import({
 
             if (!debuggedValues[hash]) {
                 subscriptionID = this.subscribe({
-                    onUpdate: function(newValue) {
+                    update: function(newValue) {
                         logger.log(MSG_VALUE_UPDATE, Obj.extend({
                             val: newValue
                         }, data));
                     },
 
-                    onError: function(newError) {
+                    error: function(newError) {
                         logger.error(MSG_VALUE_ERROR, Obj.extend({
                             msg: newError.message
                         }, data));
                     },
 
-                    onFreeze: function() {
+                    freeze: function() {
                         logger.log(MSG_VALUE_FREEZE, Obj.copy(data));
                     }
                 });

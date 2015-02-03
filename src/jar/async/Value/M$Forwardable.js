@@ -1,9 +1,12 @@
-JAR.module('jar.async.Value.M$Forwardable').$import({
-    'jar.lang': [
-        'Function::bind',
-        'MixIn'
-    ]
-}).$export(function(bind, MixIn) {
+JAR.module('jar.async.Value.M$Forwardable').$import([
+    {
+        'jar.lang': [
+            'Function::bind',
+            'MixIn'
+        ]
+    },
+    '.Value::events'
+]).$export(function(bind, MixIn, events) {
     'use strict';
 
     var forwardingSubscriptions = {},
@@ -22,11 +25,11 @@ JAR.module('jar.async.Value.M$Forwardable').$import({
             var value = this,
                 subscriptions = forwardingSubscriptions[forwardedValue.getHash()] = forwardingSubscriptions[forwardedValue.getHash()] || [],
                 subscriptionID = value.subscribe({
-                    onUpdate: attemptCustomForward(customSubscription.onUpdate, forwardedValue) || bind(forwardedValue.assign, forwardedValue),
+                    update: attemptCustomForward(customSubscription[events.UPDATE], forwardedValue) || bind(forwardedValue.assign, forwardedValue),
 
-                    onError: attemptCustomForward(customSubscription.onError, forwardedValue) || bind(forwardedValue.error, forwardedValue),
+                    error: attemptCustomForward(customSubscription[events.ERROR], forwardedValue) || bind(forwardedValue.error, forwardedValue),
 
-                    onFreeze: attemptCustomForward(customSubscription.onFreeze, forwardedValue)
+                    freeze: attemptCustomForward(customSubscription[events.FREEZE], forwardedValue)
                 });
 
             subscriptions.push(subscriptionID);
@@ -36,7 +39,7 @@ JAR.module('jar.async.Value.M$Forwardable').$import({
 
         forwardValueTo: function(forwardedValue, value) {
             return this.forwardTo(forwardedValue, {
-                onUpdate: bind(forwardedValue.assign, forwardedValue, value)
+                update: bind(forwardedValue.assign, forwardedValue, value)
             });
         },
 

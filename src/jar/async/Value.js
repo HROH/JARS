@@ -38,12 +38,9 @@ JAR.module('jar.async.Value', [
         events = new Enum(['UPDATE', 'ERROR', 'FREEZE'], {
             mirror: true
         }),
-        handleNames = Obj.map(events.values(), function(event) {
-            return 'on' + event.charAt(0) + event.substr(1).toLowerCase();
-        }),
         Value;
 
-    Value = Class('Value', Obj.extend({
+    Value = Class('Value', {
         $: {
             construct: function(value, changeScheduler) {
                 this._$counters = Obj.map(events.values(), setZero);
@@ -76,25 +73,32 @@ JAR.module('jar.async.Value', [
                 var value = this,
                     $proxy = value.$proxy,
                     subscriptionID = false,
-                    onFreeze = subscription.onFreeze,
-                    changeScheduler = value._$changeScheduler;
+                    freezeEvent = events.FREEZE,
+                    changeScheduler = value._$changeScheduler,
+                    onFreeze;
+
+                subscription = Obj.map(events.values(), function upperCaseEvent(event) {
+                    return subscription[event] || subscription[event.toLowerCase()];
+                });
+
+                onFreeze = subscription[freezeEvent];
 
                 changeScheduler.isScheduled() || changeScheduler.schedule(function scheduleInit() {
                     $proxy(value, function proxiedInit() {
                         Obj.each(events.values(), function invokeSubscriberInitial(event) {
                             if (value._$counters[event]) {
-                                value._$invokeSubscriber(subscription, handleNames[event], value._$valueRefs[event]);
+                                value._$invokeSubscriber(subscription, event, value._$valueRefs[event]);
                             }
                         });
                     });
                 });
 
-                if (!value._$counters[events.FREEZE]) {
+                if (!value._$counters[freezeEvent]) {
                     subscriptionID = value.getHash() + ' subscriber_id:' + value._$nextSubscriberID;
 
                     value._$nextSubscriberID++;
 
-                    subscription.onFreeze = function() {
+                    subscription[freezeEvent] = function() {
                         onFreeze && onFreeze.call(subscription);
                         value.unsubscribe(subscriptionID);
                     };
@@ -151,7 +155,7 @@ JAR.module('jar.async.Value', [
                             value._$valueRefs[event] = newValue;
 
                             value._$subscribers.each(function forwardValueToSubscriber(subscriber) {
-                                value._$invokeSubscriber(subscriber, handleNames[event], newValue);
+                                value._$invokeSubscriber(subscriber, event, newValue);
                             });
 
                             if (event === events.ERROR && !value.countSubscribers()) {
@@ -164,28 +168,29 @@ JAR.module('jar.async.Value', [
                 return this;
             },
 
-            invokeSubscriber: function(subscriber, handleName, value) {
-                if (isFunction(subscriber[handleName])) {
-                    subscriber[handleName](value);
+            invokeSubscriber: function(subscriber, event, value) {
+                if (isFunction(subscriber[event])) {
+                    subscriber[event](value);
                 }
-                else if (handleName === handleNames[events.ERROR]) {
+                else if (event === events.ERROR) {
                     throw new Error(value.message);
                 }
             }
+        },
+
+        on: function(event, handle) {
+            var subscription = {},
+                subscriptionID = false;
+
+            if (events.contains(event)) {
+                subscription[event] = handle;
+
+                subscriptionID = this.subscribe(subscription);
+            }
+
+            return subscriptionID;
         }
-    }, Obj.invert(handleNames).map(addSubscriberHandle)), {
-        events: events
     });
-
-    function addSubscriberHandle(event, handleName) {
-        return function(handle) {
-            var subscription = {};
-
-            subscription[handleName] = handle;
-
-            return this.subscribe(subscription);
-        };
-    }
 
     function assignValue(newValue) {
         /*jslint validthis: true */

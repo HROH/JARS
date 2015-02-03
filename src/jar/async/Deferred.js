@@ -13,11 +13,11 @@ JAR.module('jar.async.Deferred').$import([
 
                 deferred._$promise = new Promise(function(resolve, reject, notify) {
                     value.subscribe({
-                        onUpdate: function(data) {
+                        update: function(data) {
                             (data.resolve ? resolve : notify)(data.value);
                         },
                         
-                        onError: reject
+                        error: reject
                     });
                 });
             },

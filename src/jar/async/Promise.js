@@ -108,37 +108,37 @@ JAR.module('jar.async.Promise').$import([
                     handledValue = new Value(null, promiseScheduler);
 
                 this._$value.forwardTo(handledValue, {
-                    onUpdate: function(forwardedValue, data) {
+                    update: function(forwardedValue, data) {
                         var updateCallback = (data.state === promiseState.RESOLVED ? thenCallback : progressCallback) || identity;
 
                         assignWithState(forwardedValue, data.state, updateCallback(data.value));
                     },
 
-                    onError: failCallback && function(forwardedValue, error) {
+                    error: failCallback && function(forwardedValue, error) {
                         assignWithState(forwardedValue, promiseState.RESOLVED, failCallback(error));
                     }
                 });
 
                 return new promise._$ChainClass(function(resolve, reject, notify) {
                     handledValue.subscribe({
-                        onUpdate: function(data) {
+                        update: function(data) {
                             (data.state === promiseState.RESOLVED ? resolve : notify)(data.value);
                         },
 
-                        onError: reject
+                        error: reject
                     });
                 });
             },
 
             done: function(doneCallback, failCallback, progressCallback) {
                 this._$value.subscribe({
-                    onUpdate: function(data) {
+                    update: function(data) {
                         var updateCallback = (data.state === promiseState.RESOLVED ? doneCallback : progressCallback) || identity;
 
                         updateCallback(data.value);
                     },
 
-                    onError: failCallback
+                    error: failCallback
                 });
             },
 
