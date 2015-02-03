@@ -1,6 +1,7 @@
 JAR.module('jar.async.Promise').$import([
     {
         System: [
+            '::format',
             '::isA',
             '::isObject',
             '::isArrayLike',
@@ -27,7 +28,7 @@ JAR.module('jar.async.Promise').$import([
     },
     '.Scheduler',
     '.TimeoutExecutor'
-]).$export(function(isA, isObject, isArrayLike, isFunction, config, Class, Obj, Arr, Enum, identity, bind, Fn, Value, M$Forwardable, Scheduler, TimeoutExecutor) {
+]).$export(function(format, isA, isObject, isArrayLike, isFunction, config, Class, Obj, Arr, Enum, identity, bind, Fn, Value, M$Forwardable, Scheduler, TimeoutExecutor) {
     'use strict';
 
     // TODO support stacktraces:
@@ -80,7 +81,9 @@ JAR.module('jar.async.Promise').$import([
                         var valueIsPromise = Promise.isInstance(valueToAssign);
 
                         if (valueToAssign === promise) {
-                            value.error(new TypeError(ERROR_PROMISE_SELF_RESOLUTION.replace('${promiseHash}', promise.getHash())));
+                            value.error(new TypeError(format(ERROR_PROMISE_SELF_RESOLUTION, {
+                                promiseHash: promise.getHash()
+                            })));
                         }
                         else if (valueIsPromise || isThenable(valueToAssign)) {
                             valueToAssign.then(resolve, reject, notify);
@@ -165,7 +168,9 @@ JAR.module('jar.async.Promise').$import([
             timeout: function(ms, reason) {
                 var promise = this;
 
-                reason = reason || ERROR_PROMISE_TIMEOUT_REJECTION.replace('${ms}', ms);
+                reason = reason || format(ERROR_PROMISE_TIMEOUT_REJECTION, {
+                    ms: ms
+                });
 
                 return new promise._$ChainClass(function promiseTimeout(resolve, reject, notify) {
                     new TimeoutExecutor(ms).request(Fn.partial(reject, new Error(reason)));
@@ -383,7 +388,11 @@ JAR.module('jar.async.Promise').$import([
             });
         }
         else {
-            throw new Error(ERROR_PROMISE_UNHANDLED_REJECTION.replace('${promiseHash}', promise.getHash()).replace('${reason}', reason));
+            throw new Error(format(ERROR_PROMISE_UNHANDLED_REJECTION, {
+                promiseHash: promise.getHash(),
+                
+                reason: reason
+            }));
         }
     }
 
