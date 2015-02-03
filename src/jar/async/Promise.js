@@ -161,21 +161,25 @@ JAR.module('jar.async.Promise').$import([
                 var promise = this;
 
                 return new promise._$ChainClass(function(resolve, reject, notify) {
-                    promise.then(Fn.delay(resolve, ms), reject, notify);
+                    var delayedResolve = Fn.delay(resolve, ms);
+                    
+                    promise.done(delayedResolve, reject, notify);
                 });
             },
 
             timeout: function(ms, reason) {
                 var promise = this;
 
-                reason = reason || format(ERROR_PROMISE_TIMEOUT_REJECTION, {
+                reason = new Error(reason || format(ERROR_PROMISE_TIMEOUT_REJECTION, {
                     ms: ms
-                });
+                }));
 
                 return new promise._$ChainClass(function promiseTimeout(resolve, reject, notify) {
-                    new TimeoutExecutor(ms).request(Fn.partial(reject, new Error(reason)));
+                    var delayedReject = Fn.delay(reject, ms);
+                    
+                    delayedReject(reason);
 
-                    promise.then(resolve, reject, notify);
+                    promise.done(resolve, reject, notify);
                 });
             }
         },
