@@ -26,9 +26,8 @@ JAR.module('jar.async.Promise').$import([
             'M$Forwardable'
         ]
     },
-    '.Scheduler',
-    '.TimeoutExecutor'
-]).$export(function(format, isA, isObject, isArrayLike, isFunction, config, Class, Obj, Arr, Enum, identity, bind, Fn, Value, M$Forwardable, Scheduler, TimeoutExecutor) {
+    '.Scheduler'
+]).$export(function(format, isA, isObject, isArrayLike, isFunction, config, Class, Obj, Arr, Enum, identity, bind, Fn, Value, M$Forwardable, Scheduler) {
     'use strict';
 
     // TODO support stacktraces:
@@ -47,6 +46,7 @@ JAR.module('jar.async.Promise').$import([
         promiseState = new Enum(['INIT', 'PENDING', 'REJECTED', 'RESOLVED']),
         rejectionHandlers = Arr(),
         promiseScheduler = new Scheduler(),
+        partial = Fn.partial,
         Promise;
 
     Value.mixin(M$Forwardable);
@@ -93,7 +93,7 @@ JAR.module('jar.async.Promise').$import([
                         }
                     };
                     reject = bind(value.error, value);
-                    notify = Fn.partial(assignWithState, value, promiseState.PENDING);
+                    notify = partial(assignWithState, value, promiseState.PENDING);
 
                     try {
                         handler(resolve, reject, notify);
@@ -108,13 +108,12 @@ JAR.module('jar.async.Promise').$import([
 
             then: function(thenCallback, failCallback, progressCallback) {
                 var promise = this,
-                    handledValue = new Value(null, promiseScheduler);
+                    handledValue = new Value(null, promiseScheduler),
+                    handleThen = partial(handleUpdate, thenCallback, progressCallback);
 
                 this._$value.forwardTo(handledValue, {
                     update: function(forwardedValue, data) {
-                        var updateCallback = (data.state === promiseState.RESOLVED ? thenCallback : progressCallback) || identity;
-
-                        assignWithState(forwardedValue, data.state, updateCallback(data.value));
+                        assignWithState(forwardedValue, data.state, handleThen(data));
                     },
 
                     error: failCallback && function(forwardedValue, error) {
@@ -122,27 +121,11 @@ JAR.module('jar.async.Promise').$import([
                     }
                 });
 
-                return new promise._$ChainClass(function(resolve, reject, notify) {
-                    handledValue.subscribe({
-                        update: function(data) {
-                            (data.state === promiseState.RESOLVED ? resolve : notify)(data.value);
-                        },
-
-                        error: reject
-                    });
-                });
+                return new promise._$ChainClass(partial(subscribeHandles, handledValue));
             },
 
             done: function(doneCallback, failCallback, progressCallback) {
-                this._$value.subscribe({
-                    update: function(data) {
-                        var updateCallback = (data.state === promiseState.RESOLVED ? doneCallback : progressCallback) || identity;
-
-                        updateCallback(data.value);
-                    },
-
-                    error: failCallback
-                });
+                subscribeHandles(this._$value, doneCallback, failCallback, progressCallback);
             },
 
             isResolved: function() {
@@ -216,7 +199,7 @@ JAR.module('jar.async.Promise').$import([
         },
 
         spread: function(spreadCallback, failCallback, progressCallback) {
-            return this.all().then(Fn.partial(Fn.apply, spreadCallback, null), failCallback, progressCallback);
+            return this.all().then(partial(Fn.apply, spreadCallback, null), failCallback, progressCallback);
         },
 
         _$: {
@@ -359,6 +342,18 @@ JAR.module('jar.async.Promise').$import([
             });
         }
     });
+    
+    function subscribeHandles(value, resolvedHandle, rejectedHandle, notifiedHandle) {
+        value.subscribe({
+            update: partial(handleUpdate, resolvedHandle, notifiedHandle),
+            
+            error: rejectedHandle
+        });
+    }
+
+    function handleUpdate(resolvedHandle, notifiedHandle, data) {
+        ((data.state === promiseState.RESOLVED ? resolvedHandle : notifiedHandle) || identity)(data.value);
+    }
 
     function isThenable(value) {
         return isObject(value) && isFunction(value.then);
