@@ -1,16 +1,25 @@
-JAR.register({
-    MID: 'jar.lang.Function',
-    deps: {
-        System: ['::isA', '::isFunction'],
-        '.Array': ['.', '::from']
-    },
-    bundle: ['Function-advice', 'Function-combined', 'Function-flow', 'Function-guards', 'Function-modargs']
-}, function(isA, isFunction, Arr, fromArgs) {
+JAR.module('jar.lang.Function', [
+    'Function-advice',
+    'Function-combined',
+    'Function-flow',
+    'Function-guards',
+    'Function-modargs'
+]).$import({
+    System: [
+        '::isA',
+        '::isFunction'
+    ],
+    '.Array': [
+        '.',
+        '::from'
+    ]
+}).$export(function(isA, isFunction, Arr, fromArgs) {
     'use strict';
 
     var lang = this,
         fnConverter = lang.sandbox('__SYSTEM__').add('function(f, a){function fn(){return f.apply(this,arguments)};fn.arity=a||f.arity||f.length;return fn;}'),
-        Fn = lang.sandboxNativeType('Function'), apply;
+        Fn = lang.sandboxNativeType('Function'),
+        apply;
 
     Fn.enhance({
         bind: function(context) {

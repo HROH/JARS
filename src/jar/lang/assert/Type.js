@@ -1,7 +1,4 @@
-JAR.register({
-    MID: 'jar.lang.assert.Type',
-    deps: 'System'
-}, function(System) {
+JAR.module('jar.lang.assert.Type').$import('System').$export(function(System) {
     'use strict';
 
     var assert = this,

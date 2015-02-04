@@ -1,14 +1,29 @@
-JAR.register({
-    MID: 'jar.lang.Class',
-    deps: [{
-        System: ['Logger', '::isA', '::isSet', '::isObject', '::isFunction']
-    }, {
-        jar: ['::getCurrentModuleData', '::use']
-    }, {
-        '.Object': ['::from', '::hasOwn', '!all']
-    }, '.Array!check,find,index,iterate,manipulate', '.Function!advice'],
-    bundle: ['Abstract', 'Final', 'Singleton']
-}, function(Logger, isA, isSet, isObject, isFunction, getCurrentModuleData, useModule, fromObject, hasOwn, Obj, Arr, Fn) {
+JAR.module('jar.lang.Class', [
+    'Abstract',
+    'Final',
+    'Singleton'
+]).$import([
+    {
+        System: [
+            'Logger',
+            '::isA',
+            '::isSet',
+            '::isObject',
+            '::isFunction'
+        ],
+        jar: [
+            '::getCurrentModuleData',
+            '::use'
+        ],
+        '.Object': [
+            '::from',
+            '::hasOwn',
+            '!all'
+        ]
+    },
+    '.Array!check,find,index,iterate,manipulate',
+    '.Function!advice'
+]).$export(function(Logger, isA, isSet, isObject, isFunction, getCurrentModuleData, useModule, fromObject, hasOwn, Obj, Arr, Fn) {
     'use strict';
 
     var lang = this,

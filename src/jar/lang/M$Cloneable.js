@@ -1,7 +1,4 @@
-JAR.register({
-    MID: 'jar.lang.M$Cloneable',
-    deps: '.MixIn'
-}, function(MixIn) {
+JAR.module('jar.lang.M$Cloneable').$import('.MixIn').$export(function(MixIn) {
     'use strict';
 
     var M$Cloneable = new MixIn('Cloneable', {

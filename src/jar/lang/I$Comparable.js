@@ -1,8 +1,5 @@
 // Example for an Interface
-JAR.register({
-    MID: 'jar.lang.I$Comparable',
-    deps: '.Interface'
-}, function(Interface) {
+JAR.module('jar.lang.I$Comparable').$import('.Interface').$export(function(Interface) {
     'use strict';
 
     var I$Comparable = new Interface('Comparable', [

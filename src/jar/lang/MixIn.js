@@ -1,11 +1,20 @@
-JAR.register({
-    MID: 'jar.lang.MixIn',
-    deps: [{
-        System: ['::isArray', 'Logger']
-    }, 'jar::getCurrentModuleData', {
-        '.Class': ['.', '::isClass', '::isInstance']
-    }, '.Object', '.Array!check,derive,iterate', '.Function!modargs']
-}, function(isArray, Logger, getCurrentModuleData, Class, isClass, isInstance, Obj, Arr, Fn) {
+JAR.module('jar.lang.MixIn').$import([
+    {
+        System: [
+            '::isArray',
+            'Logger'
+        ],
+        '.Class': [
+            '.',
+            '::isClass',
+            '::isInstance'
+        ]
+    },
+    'jar::getCurrentModuleData',
+    '.Object',
+    '.Array!check,derive,iterate',
+    '.Function!modargs'
+]).$export(function(isArray, Logger, Class, isClass, isInstance, getCurrentModuleData, Obj, Arr, Fn) {
     'use strict';
 
     var RECEIVER_MISSING = 0,

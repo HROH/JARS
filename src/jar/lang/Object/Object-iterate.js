@@ -1,7 +1,4 @@
-JAR.register({
-    MID: 'jar.lang.Object.Object-iterate',
-    deps: '.!derive'
-}, function(Obj) {
+JAR.module('jar.lang.Object.Object-iterate').$import('.!derive').$export(function(Obj) {
     'use strict';
 
     var forOwn = createForIn(true),

@@ -1,9 +1,12 @@
-JAR.register({
-    MID: 'jar.lang.Function.Function-guards',
-    deps: [{
-        '.': ['::from', '::apply']
-    }, '..Object!derive']
-}, function(fromFunction, applyFunction, Obj) {
+JAR.module('jar.lang.Function.Function-guards').$import([
+    {
+        '.': [
+            '::from',
+            '::apply'
+        ]
+    },
+    '..Object!derive'
+]).$export(function(fromFunction, applyFunction, Obj) {
     'use strict';
 
     var Fn = this;

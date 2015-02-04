@@ -1,9 +1,14 @@
-JAR.register({
-    MID: 'jar.lang.Enum',
-    deps: [{
-        System: ['::isArray', '::isObject']
-    }, '.Array!iterate', '.Object!iterate', '.Class']
-}, function(isArray, isObject, Arr, Obj, Class) {
+JAR.module('jar.lang.Enum').$import([
+    {
+        System: [
+            '::isArray',
+            '::isObject'
+        ]
+    },
+    '.Array!iterate',
+    '.Object!iterate',
+    '.Class'
+]).$export(function(isArray, isObject, Arr, Obj, Class) {
     'use strict';
 
     var BASE_TWO = 2,

@@ -1,7 +1,8 @@
-JAR.register({
-    MID: 'jar.lang.Array.Array-index',
-    deps: ['..assert::isSet', '..Object!derive', '.!find']
-}, function(assertIsSet, Obj, Arr) {
+JAR.module('jar.lang.Array.Array-index').$import([
+    '..assert::isSet',
+    '..Object!derive',
+    '.!find'
+]).$export(function(assertIsSet, Obj, Arr) {
     'use strict';
 
     Arr.enhance({

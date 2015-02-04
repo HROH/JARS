@@ -1,8 +1,4 @@
-JAR.register({
-    MID: 'jar.lang.assert',
-    deps: 'System',
-    bundle: ['Type']
-}, function(System) {
+JAR.module('jar.lang.assert', ['Type']).$import('System').$export(function(System) {
     'use strict';
 
     function assert(value, message, options) {

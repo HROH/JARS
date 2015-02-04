@@ -1,9 +1,15 @@
-JAR.register({
-    MID: 'jar.lang.Interface',
-    deps: [{
-        System: ['Logger', '::isFunction', '::isNumber']
-    }, 'jar::getCurrentModuleData', '.Class', '.Array!check,derive,iterate']
-}, function(Logger, isFunction, isNumber, getCurrentModuleData, Class, Arr) {
+JAR.module('jar.lang.Interface').$import([
+    {
+        System: [
+            'Logger',
+            '::isFunction',
+            '::isNumber'
+        ]
+    },
+    'jar::getCurrentModuleData',
+    '.Class',
+    '.Array!check,derive,iterate'
+]).$export(function(Logger, isFunction, isNumber, getCurrentModuleData, Class, Arr) {
     'use strict';
 
     var interfaceTemplates = [],
@@ -71,7 +77,7 @@ JAR.register({
                         if (notImplementedMethods.length) {
                             logger.error(IMPLEMENTED_METHODS_MISSING, {
                                 impl: (isImplementorClass || isImplementorInstance) ? implementor.getHash() : implementor,
-                                
+
                                 missingMethods: notImplementedMethods.map(transformMethodData).join('", "')
                             });
                         }
@@ -94,7 +100,7 @@ JAR.register({
         isImplementedBy: function(interfaces, implementor, checkAny) {
             return Arr.every(interfaces, implementzInterface, {
                 impl: implementor,
-                
+
                 any: checkAny
             });
         }

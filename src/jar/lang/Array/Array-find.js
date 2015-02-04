@@ -1,9 +1,12 @@
-JAR.register({
-    MID: 'jar.lang.Array.Array-find',
-    deps: ['System::isNumber', {
-        '..assert': ['::isSet', 'Type::isFunction']
-    }]
-}, function(isNumber, assertIsSet, assertIsFunction) {
+JAR.module('jar.lang.Array.Array-find').$import([
+    'System::isNumber',
+    {
+        '..assert': [
+            '::isSet',
+            'Type::isFunction'
+        ]
+    }
+]).$export(function(isNumber, assertIsSet, assertIsFunction) {
     'use strict';
 
     var MSG_NO_FUNCTION = 'The predicate is not a function',

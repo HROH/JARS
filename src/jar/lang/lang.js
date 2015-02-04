@@ -1,10 +1,31 @@
-JAR.register({
-    MID: 'jar.lang',
-    deps: ['.::getCurrentModuleData', {
-        System: ['::isSet', '::isFunction', '::isString', '!']
-    }],
-    bundle: ['Array.*', 'assert.*', 'Class.*', 'Constant', 'Date', 'Enum', 'Function.*', 'I$Comparable', 'I$Iterable', 'Interface', 'M$Cloneable', 'M$Destructable', 'MixIn', 'Object.*', 'operations.*', 'String']
-}, function(getCurrentModuleData, isSet, isFunction, isString, config) {
+JAR.module('jar.lang', [
+    'Array.*',
+    'assert.*',
+    'Class.*',
+    'Constant',
+    'Date',
+    'Enum',
+    'Function.*',
+    'I$Comparable',
+    'I$Iterable',
+    'Interface',
+    'M$Cloneable',
+    'M$Destructable',
+    'MixIn',
+    'Object.*',
+    'operations.*',
+    'String'
+]).$import([
+    '.::getCurrentModuleData',
+    {
+        System: [
+            '::isSet',
+            '::isFunction',
+            '::isString',
+            '!'
+        ]
+    }
+]).$export(function(getCurrentModuleData, isSet, isFunction, isString, config) {
     'use strict';
 
     var sandboxes = {},

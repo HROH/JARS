@@ -1,10 +1,17 @@
-JAR.register({
-    MID: 'jar.lang.Array',
-    deps: {
-        '.assert': ['::isSet', 'Type::isFunction']
-    },
-    bundle: ['Array-check', 'Array-derive', 'Array-find', 'Array-index', 'Array-iterate', 'Array-manipulate', 'Array-reduce']
-}, function(assertIsSet, assertIsFunction) {
+JAR.module('jar.lang.Array', [
+    'Array-check',
+    'Array-derive',
+    'Array-find',
+    'Array-index',
+    'Array-iterate',
+    'Array-manipulate',
+    'Array-reduce'
+]).$import({
+    '.assert': [
+        '::isSet',
+        'Type::isFunction'
+    ]
+}).$export(function(assertIsSet, assertIsFunction) {
     'use strict';
 
     /**

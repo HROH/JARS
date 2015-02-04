@@ -1,6 +1,4 @@
-JAR.register({
-    MID: 'jar.lang.Class.Singleton'
-}, function() {
+JAR.module('jar.lang.Class.Singleton').$export(function() {
     'use strict';
 
     var ClassFactory = this,

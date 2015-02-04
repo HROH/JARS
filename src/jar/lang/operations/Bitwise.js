@@ -1,7 +1,8 @@
-JAR.register({
-    MID: 'jar.lang.operations.Bitwise',
-    deps: ['.::createOperation', '..Object!iterate', '..Enum']
-}, function(createOperation, Obj, Enum) {
+JAR.module('jar.lang.operations.Bitwise').$import([
+    '.::createOperation',
+    '..Object!iterate',
+    '..Enum'
+]).$export(function(createOperation, Obj, Enum) {
     'use strict';
 
     var Bitwise = {

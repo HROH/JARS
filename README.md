@@ -38,10 +38,7 @@ A bundle is defined in the module's properties.
 
  Example for bundle:
 ```js
-JAR.register({
-    MID: 'anotherBundle',
-    bundle: ['Module', 'Module2'] // pointing to 'anotherBundle.Module' and 'anotherBundle.Module2'
-}, function() {
+JAR.module('anotherBundle', ['Module', 'Module2'] /* pointing to 'anotherBundle.Module' and 'anotherBundle.Module2' */).$export(function() {
     ...
 });
 ```
@@ -55,25 +52,16 @@ To see how it works, just look into the existing modules.
 
  * String:
  ```js
-    JAR.register({
-        MID: 'someBundle.Module',
-        deps: 'anotherBundle.Module'
-    }, function(anotherBundleModule) { // has one dependency in another bundle
+    JAR.module('someBundle.Module').$import('anotherBundle.Module').$export(function(anotherBundleModule) { // has one dependency in another bundle
         var someBundle = this; // implicit
         ...
     });
 
-    JAR.register({
-        MID: 'someBundle.Module',
-        deps: 'anotherBundle.*'
-    }, function(anotherBundle) { // has a bundle as dependency
+    JAR.module('someBundle.Module').$import('anotherBundle.*').$export(function(anotherBundle) { // has a bundle as dependency
         ...
     });
 
-    JAR.register({
-        MID: 'someBundle.Module',
-        deps: '.Module2'
-    }, function(Module2) { // has one dependency in the same bundle
+    JAR.module('someBundle.Module').$import('.Module2').$export(function(Module2) { // has one dependency in the same bundle
         var someBundle = this;
         someBundle.Module2 === Module2 // true
         ...
@@ -82,27 +70,20 @@ To see how it works, just look into the existing modules.
 
  * Array:
  ```js
-	JAR.register({
-        MID: 'someBundle.Module',
-        deps: ['anotherBundle.Module', 'anotherBundle.Module2']
-    }, function(anotherBundleModule, anotherBundleModule2) { // has more dependencies in another bundle
+	JAR.module('someBundle.Module').$import(['anotherBundle.Module', 'anotherBundle.Module2']).$export(function(anotherBundleModule, anotherBundleModule2) { // has more dependencies in another bundle
         ...
     });
 
-    JAR.register({
-        MID: 'someBundle.Module',
-        deps: ['.Module2', '.Module3']
-    }, function(Module2, Module3) { // has more dependencies in the same bundle
+    JAR.module('someBundle.Module').$import(['.Module2', '.Module3']).$export(function(Module2, Module3) { // has more dependencies in the same bundle
         ...
     });
  ```
 
  * Object:
  ```js
-    JAR.register({
-        MID: 'someBundle.Module',
-        deps: {anotherBundle: ['.', 'Module', 'Module2']} // '.' is a special symbol that refers to the module on the lefthand side
-    }, function(anotherBundle, anotherBundleModule, anotherBundleModule2) { // has more dependencies in another bundle
+    JAR.module('someBundle.Module').$import({
+        anotherBundle: ['.' /* '.' is a special symbol that refers to the module on the lefthand side */, 'Module', 'Module2']
+    }).$export(function(anotherBundle, anotherBundleModule, anotherBundleModule2) { // has more dependencies in another bundle
         ...
     });
  ```
@@ -151,13 +132,7 @@ Or you can provide an object with the following options:
 
 * **globalAccess {Boolean}** (root-modules can be accessed over the namespace <code>JAR.mods</code>. This may be useful in developement - default: <code>false</code>)
 
-* **loader {Object}** (configure loaderspecific options)
- * **checkCircularDeps {Boolean}** (<code>true</code> causes the Loader to check for circular dependencies - default: <code>false</code>)  
- Can be very slow, so only use this feature if your app is not loading properly and you don't get any error messages.
-
- * **createDependencyURLList {Boolean}** (specify <code>true</code> to let the Loader create a list of all dependencies when they are loaded - default: <code>false</code>)  
- Maybe useful in a buildstep using something like phantomjs.
- You can get the list by calling <code>JAR.getDependencyURLList(callback)</code>.
+* **loaderContext {String}** (spin up or switch to another Loader instance with a complete new set of modules)
 
 * **main {String}** (define the main-file of your application)
 
@@ -166,6 +141,9 @@ You can customize the following options for your modules:
  * **baseUrl {String}** (url to the rootdirectory of your modules - default: current directory)
 
  * **cache {Boolean}** (<code>false</code> prevents caching of the files - default: <code>true</code>)
+ 
+ * **checkCircularDeps {Boolean}** (<code>true</code> causes the module to check for circular dependencies - default: <code>false</code>)  
+ Can be very slow, so only use this feature if your app is not loading properly and you don't get any error messages.
 
  * **config {Object}** (options for configuring a module)  
  You can read the config using the <code>"System!"</code>-plugin-interceptor in your dependencies.
@@ -192,11 +170,15 @@ You can customize the following options for your modules:
  This may be useful if you switch from an older to a newer version.
  It is not recommended or possible to load two different versions of one module.
 
-   You can also pass the additional option <code>restrict</code> which defines the modules that are affected by this configuration.
-   This can be a String, an Array or an Object similar to the dependency-declaration in <code>JAR.register(properties, factory)</code>.
+   You can also pass the additional options:
+   * **restrict {Object|Array|String}** (defines the modules that are affected by this configuration similar to the dependency-declaration in <code>JAR.module(moduleName, [bundle]).$import(dependencies)</code>).
+   
+   * **loaderContext {String}** (the loaderContext of the modules that you want to configure)
+   By default this is the active loader.
 
     ```js
     JAR.configure('modules', {
+    	loaderContext: 'default' // default active loader
         restrict: 'jar.lang.*', // restrict configuration to all the modules under 'jar.lang'
         baseUrl: 'http://localhost/libs/',
         minified: true
@@ -206,7 +188,7 @@ You can customize the following options for your modules:
     JAR.$import('jar.lang.Object');
     ```
 
-   Note that these configurations are semi-transparent.
+   Note that these configurations inherit options from their parent (e.g. jar.lang -> jar.lang.* -> jar.* -> global config).
    So if there exists no configuration for a specific module the Loader will look for a configuration on a higher or - if you omit the restriction - on the global level.
 * **supressErrors {Boolean}** (whether thrown errors in a <code>JAR.main</code>-block should be caught - default: <code>false</code>)
 
@@ -240,23 +222,15 @@ The <code>pluginRequest</code> has the following information:
  It is useful if you check for dynamic circular dependencies or if you use <code>JAR.getDependencyURLList()</code>, which gives you an ordered list of all loaded modules and their dependencies.
 
     ```js
-    JAR.register({
-        MID: 'c',
-        deps: 'b'
-    }, function() {
+    JAR.module('c').$import('b').$export(function() {
         ...
     });
 
-    JAR.register({
-        MID:  'b',
-        deps: 'a!c'
-    }, function() {
+    JAR.module('b').$import('a!c').$export(function() {
        ...
     });
 
-    JAR.register({
-        MID: 'a'
-    }, function() {
+    JAR.module('a').$export(function() {
         return {
             $plugIn: function(pluginRequest) {
                 pluginRequest.$import(pluginRequest.data /* 'c' */, pluginRequest.success, pluginRequest.fail);
@@ -275,10 +249,7 @@ If the property doesn't exist, loading is aborted and you can see an error messa
 
  Without interceptor:
  ```js
- JAR.register({
-     MID: 'someBundle.Module',
-     deps: 'System'
- }, function(System) {
+ JAR.module('someBundle.Module').$import('System').$export(function(System) {
      var isString = System.isString,
          isFunction = System.isFunction;
          ...
@@ -287,12 +258,9 @@ If the property doesn't exist, loading is aborted and you can see an error messa
 
  With interceptor:
  ```js
- JAR.register({
-     MID: 'someBundle.Module',
-     deps: {
-         System: ['::isString', '::isFunction']
-     }
- }, function(isString, isFunction) {
+ JAR.module('someBundle.Module').$import({
+     System: ['::isString', '::isFunction']
+ }).$export(function(isString, isFunction) {
          ...
  });
  ```

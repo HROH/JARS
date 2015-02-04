@@ -1,7 +1,9 @@
-JAR.register({
-    MID: 'jar.lang.operations.Logical',
-    deps: ['.::createOperation', '.::operands', '..Object!iterate', '..Enum']
-}, function(createOperation, operands, Obj, Enum) {
+JAR.module('jar.lang.operations.Logical').$import([
+    '.::createOperation',
+    '.::operands',
+    '..Object!iterate',
+    '..Enum'
+]).$export(function(createOperation, operands, Obj, Enum) {
     'use strict';
 
     var Logical = {

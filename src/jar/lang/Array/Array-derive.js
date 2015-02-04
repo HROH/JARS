@@ -1,9 +1,13 @@
-JAR.register({
-    MID: 'jar.lang.Array.Array-derive',
-    deps: [{
-        '..assert': ['::isSet', 'Type::isFunction']
-    }, '.!iterate', '..Object!derive']
-}, function(assertIsSet, assertIsFunction, Arr, Obj) {
+JAR.module('jar.lang.Array.Array-derive').$import([
+    {
+        '..assert': [
+            '::isSet',
+            'Type::isFunction'
+        ]
+    },
+    '.!iterate',
+    '..Object!derive'
+]).$export(function(assertIsSet, assertIsFunction, Arr, Obj) {
     'use strict';
 
     var forEach = Arr.forEach,

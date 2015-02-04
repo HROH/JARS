@@ -1,6 +1,4 @@
-JAR.register({
-    MID: 'jar.lang.Date'
-}, function() {
+JAR.module('jar.lang.Date').$export(function() {
     'use strict';
 
     var DateCopy = this.sandboxNativeType('Date').enhance({

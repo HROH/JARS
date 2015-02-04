@@ -1,17 +1,28 @@
-JAR.register({
-    MID: 'jar.lang.Object',
-    deps: {
-        System: ['::isA', '::isBoolean', '::isObject', '::isSet'],
-        '.Array': ['::from', '!find,iterate']
-    },
-    bundle: ['Object-derive', 'Object-info', 'Object-iterate', 'Object-manipulate', 'Object-reduce']
-}, function(isA, isBoolean, isObject, isSet, fromArgs, Arr) {
+JAR.module('jar.lang.Object', [
+    'Object-derive',
+    'Object-info',
+    'Object-iterate',
+    'Object-manipulate',
+    'Object-reduce'
+]).$import({
+    System: [
+        '::isA',
+        '::isBoolean',
+        '::isObject',
+        '::isSet'
+    ],
+    '.Array': [
+        '::from',
+        '!find,iterate'
+    ]
+}).$export(function(isA, isBoolean, isObject, isSet, fromArgs, Arr) {
     'use strict';
 
     var lang = this,
         mergeLevel = 0,
         mergedObjects = Arr(),
-        Obj = lang.sandboxNativeType('Object'), hasOwn;
+        Obj = lang.sandboxNativeType('Object'),
+        hasOwn;
 
     /**
      * Extend jar.lang.Object with some useful methods

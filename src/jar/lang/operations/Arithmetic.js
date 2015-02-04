@@ -1,7 +1,8 @@
-JAR.register({
-    MID: 'jar.lang.operations.Arithmetic',
-    deps: ['.::createOperation', '..Object!iterate', '..Enum']
-}, function(createOperation, Obj, Enum) {
+JAR.module('jar.lang.operations.Arithmetic').$import([
+    '.::createOperation',
+    '..Object!iterate',
+    '..Enum'
+]).$export(function(createOperation, Obj, Enum) {
     'use strict';
 
     var Arithmetic = {

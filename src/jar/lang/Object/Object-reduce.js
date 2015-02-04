@@ -1,6 +1,4 @@
-JAR.register({
-    MID: 'jar.lang.Object.Object-reduce'
-}, function() {
+JAR.module('jar.lang.Object.Object-reduce').$export(function() {
     'use strict';
 
     var Obj = this;
