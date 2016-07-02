@@ -51,14 +51,16 @@ JAR.module('jar.lang.operations.Comparison').$import([
         })
     };
 
-    Obj.each(Comparison.operators.values(), function(comparator, comparisonName) {
+    Obj.each(Comparison.operators.values(), defineComparisonOperation);
+    
+    function defineComparisonOperation(comparator, comparisonName) {
         var operator = comparator.op,
             alias = comparator.alias,
             negatedOperator = '!' + (operator.indexOf('=') === 0 ? operator.substring(1) : operator);
 
         Comparison['is' + comparisonName] = Comparison[alias] = Comparison[operator] = createOperation(operator);
         Comparison['isNot' + comparisonName] = Comparison['n' + alias] = Comparison[negatedOperator] = createOperation(operator, true);
-    });
+    }
 
     /**
      * @access public

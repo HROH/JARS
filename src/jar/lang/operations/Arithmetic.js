@@ -19,9 +19,11 @@ JAR.module('jar.lang.operations.Arithmetic').$import([
         })
     };
 
-    Obj.each(Arithmetic.operators.values(), function(arithmeticOperator, arithmeticOperationName) {
+    Obj.each(Arithmetic.operators.values(), defineArithmeticOperation);
+
+    function defineArithmeticOperation(arithmeticOperator, arithmeticOperationName) {
         Arithmetic[arithmeticOperationName] = Arithmetic[arithmeticOperator] = createOperation(arithmeticOperator);
-    });
+    }
 
     return Arithmetic;
 });

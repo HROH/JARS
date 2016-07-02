@@ -21,9 +21,11 @@ JAR.module('jar.lang.operations.Bitwise').$import([
         })
     };
 
-    Obj.each(Bitwise.operators.values(), function(bitwiseOperator, methodName) {
+    Obj.each(Bitwise.operators.values(), defineBitwiseOperation);
+    
+    function defineBitwiseOperation(bitwiseOperator, methodName) {
         Bitwise[bitwiseOperator] = Bitwise[methodName] = createOperation(bitwiseOperator);
-    });
+    }
 
     return Bitwise;
 });

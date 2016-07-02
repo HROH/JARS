@@ -14,13 +14,13 @@ JAR.module('jar.lang.operations', [
         operands, firstOperand, secondOperand, operationBody, operations;
 
     operands = new Enum({
-        first: 'a',
+        FIRST: 'a',
 
-        second: 'b'
+        SECOND: 'b'
     });
 
-    firstOperand = operands.first;
-    secondOperand = operands.second;
+    firstOperand = operands.FIRST;
+    secondOperand = operands.SECOND;
     operationBody = ['return arguments.length==2?', operationPlaceholder, ':(', secondOperand, '=', firstOperand, ',function(', firstOperand, '){return ', operationPlaceholder, '})'].join('');
 
     operations = {

@@ -12,14 +12,16 @@ JAR.module('jar.lang.operations.Logical').$import([
 
             or: '||',
 
-            xor: '?!' + operands.second + ':!!'
+            xor: '?!' + operands.SECOND + ':!!'
         })
     };
 
-    Obj.each(Logical.operators.values(), function(logicalOperator, methodName) {
+    Obj.each(Logical.operators.values(), defineLogicalOperation);
+    
+    function defineLogicalOperation(logicalOperator, methodName) {
         Logical[methodName] = Logical[logicalOperator] = createOperation(logicalOperator);
         Logical['n' + methodName] = Logical['!' + logicalOperator] = createOperation(logicalOperator, true);
-    });
+    }
 
     return Logical;
 });
