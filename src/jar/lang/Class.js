@@ -19,11 +19,15 @@ JAR.module('jar.lang.Class', [
             '::from',
             '::hasOwn',
             '!all'
+        ],
+        '.Function': [
+            '!advice',
+            '::apply',
+            '::attempt'
         ]
     },
-    '.Array!check,find,index,iterate,manipulate',
-    '.Function!advice'
-]).$export(function(Logger, isA, isSet, isObject, isFunction, getCurrentModuleData, useModule, fromObject, hasOwn, Obj, Arr, Fn) {
+    '.Array!check,find,index,iterate,manipulate'
+]).$export(function(Logger, isA, isSet, isObject, isFunction, getCurrentModuleData, useModule, fromObject, hasOwn, Obj, Fn, applyFunction, attempt, Arr) {
     'use strict';
 
     var lang = this,
@@ -86,26 +90,29 @@ JAR.module('jar.lang.Class', [
         var result;
 
         if (instanceOrClassExists(instanceOrClass, forInstance)) {
-            result = getHidden(instanceOrClass, forInstance).$inPrivileged ? method.apply(instanceOrClass, args) : safeProxy(instanceOrClass, method, args, forInstance);
+            result = getHidden(instanceOrClass, forInstance).$inPrivileged ? applyFunction(method, instanceOrClass, args) : safeProxy(instanceOrClass, method, args, forInstance);
         }
 
         return result;
     }
 
     function safeProxy(instanceOrClass, method, args, forInstance) {
-        var instanceOrClassHidden = getHidden(instanceOrClass, forInstance);
+        var instanceOrClassHidden = getHidden(instanceOrClass, forInstance),
+            result;
 
         prepareBeforeProxy(instanceOrClass, instanceOrClassHidden, protectedIdentifier);
 
-        try {
-            return method.apply(instanceOrClass, args);
+        result = attempt(function(){
+            return applyFunction(method, instanceOrClass, args);
+        });
+
+        cleanupAfterProxy(instanceOrClass, instanceOrClassHidden, protectedIdentifier);
+
+        if(result.error) {
+            throw new Error(result.error.message);
         }
-        catch (e) {
-            throw new Error(e.message);
-        }
-        finally {
-            cleanupAfterProxy(instanceOrClass, instanceOrClassHidden, protectedIdentifier);
-        }
+
+        return result.value;
     }
 
     function prepareBeforeProxy(instanceOrClass, instanceOrClassHidden, accessIdentifier) {
@@ -304,7 +311,7 @@ JAR.module('jar.lang.Class', [
                 // check if the method is overriding a method in the SuperClass.prototype and is not already overridden in the current Class.prototype
                 if (superProto && isFunction(superProto[methodName]) && superProto[methodName] !== method && (!hasOwn(protoToOverride, methodName) || protoToOverride[methodName] === method)) {
                     superMethod = function $super() {
-                        return superProto[methodName].apply(this, arguments);
+                        return applyFunction(superProto[methodName], this, arguments);
                     };
 
                     protoToOverride[methodName] = Fn.around(method, function beforeMethodCall() {
@@ -409,7 +416,7 @@ JAR.module('jar.lang.Class', [
                     construct = instance.construct;
 
                     if (!classProtectedProps._$skipCtor && construct) {
-                        construct.apply(instance, args);
+                        applyFunction(construct, instance, args);
                     }
                 }
             }

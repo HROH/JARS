@@ -19,7 +19,7 @@ JAR.module('jar.lang.Function', [
     var lang = this,
         fnConverter = lang.sandbox('__SYSTEM__').add('function(f, a){function fn(){return f.apply(this,arguments)};fn.arity=a||f.arity||f.length;return fn;}'),
         Fn = lang.sandboxNativeType('Function'),
-        apply;
+        applyFunction;
 
     Fn.enhance({
         bind: function(context) {
@@ -27,7 +27,7 @@ JAR.module('jar.lang.Function', [
                 FnLink = function() {},
                 boundArgs = fromArgs(arguments).slice(1),
                 returnFn = fromFunction(function boundFn() {
-                    return apply(fnToBind, (isA(this, FnLink) && context) ? this : context, boundArgs.concat(fromArgs(arguments)));
+                    return applyFunction(fnToBind, (isA(this, FnLink) && context) ? this : context, boundArgs.concat(fromArgs(arguments)));
                 }, fnToBind.arity || fnToBind.length);
 
             FnLink.prototype = fnToBind.prototype;
@@ -40,7 +40,7 @@ JAR.module('jar.lang.Function', [
             var fn = this;
 
             return fromFunction(function() {
-                return !fn.apply(this, arguments);
+                return !applyFunction(fn, this, arguments);
             }, fn.arity || fn.length);
         },
         /**
@@ -65,10 +65,23 @@ JAR.module('jar.lang.Function', [
                 idx = 0;
 
             for (; idx < times;) {
-                results[idx] = apply(this, null, args.concat(++idx));
+                results[idx] = applyFunction(this, null, args.concat(++idx));
             }
 
             return results;
+        },
+        
+        attempt: function() {
+            var result = {};
+            
+            try {
+                result.value = applyFunction(this, null, arguments);
+            }
+            catch(error) {
+                result.error = isA(error, Error) ? error : new Error(error);
+            }
+            
+            return result;
         },
 
         call: true,
@@ -86,7 +99,7 @@ JAR.module('jar.lang.Function', [
         }
     });
 
-    apply = Fn.apply;
+    applyFunction = Fn.apply;
 
     /**
      *
