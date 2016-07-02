@@ -5,12 +5,14 @@ JAR.module('jar.lang.Function.Function-flow').$import([
             '::apply'
         ]
     },
+    'System::env',
     '..Array::from',
     '..Object!derive'
-]).$export(function(fromFunction, applyFunction, fromArgs, Obj) {
+]).$export(function(fromFunction, applyFunction, env, fromArgs, Obj) {
     'use strict';
 
     var Fn = this,
+        global = env.global,
         defaultRegulatorOptions = {
             leading: true,
 
@@ -37,8 +39,8 @@ JAR.module('jar.lang.Function.Function-flow').$import([
                 var context = this,
                     args = fromArgs(arguments);
 
-                window.setTimeout(function() {
-                    fn.apply(context, args);
+                global.setTimeout(function() {
+                    applyFunction(fn, context, args);
                 }, ms);
             });
         }
@@ -75,11 +77,11 @@ JAR.module('jar.lang.Function.Function-flow').$import([
             timeoutID = closed;
 
             if (resetOnCall || !closed) {
-                closed = window.setTimeout(open, msClosed);
+                closed = global.setTimeout(open, msClosed);
             }
 
             if (timeoutID || !options.leading) {
-                resetOnCall && window.clearTimeout(timeoutID);
+                resetOnCall && global.clearTimeout(timeoutID);
                 lastArgs = arguments;
             }
             else {
