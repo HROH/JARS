@@ -42,14 +42,12 @@ JAR.module('jar.async.Scheduler').$import([
             },
 
             requestRun: function() {
-                var scheduler = this,
-                    $proxy = scheduler.$proxy,
-                    runTasks = scheduler._$runTasks;
+                var scheduler = this;
 
                 if (!scheduler._$requestID) {
                     scheduler._$requestID = scheduler._$options.executor.request(function requestRun() {
                         scheduler.cancelRun();
-                        $proxy(scheduler, runTasks);
+                        scheduler.runTasks();
                     });
                 }
 
@@ -66,15 +64,7 @@ JAR.module('jar.async.Scheduler').$import([
 
             isScheduled: function() {
                 return isNumber(this._$requestID);
-            }
-        },
-
-        _$: {
-            options: null,
-
-            requestID: null,
-
-            tasks: null,
+            },
 
             runTasks: function() {
                 var tasks = this._$tasks;
@@ -83,6 +73,14 @@ JAR.module('jar.async.Scheduler').$import([
                     tasks.shift()();
                 }
             }
+        },
+
+        _$: {
+            options: null,
+
+            requestID: null,
+
+            tasks: null
         }
     }, {
         DEFAULTS: {
