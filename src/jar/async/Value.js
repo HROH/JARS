@@ -190,6 +190,10 @@ JAR.module('jar.async.Value', [
 
             return subscriptionID;
         }
+    },
+    
+    {
+        events: events
     });
 
     function assignValue(newValue) {
