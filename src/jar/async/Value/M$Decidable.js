@@ -4,14 +4,14 @@ JAR.module('jar.async.Value.M$Decidable').$export([
         'jar.lang': [
             'Function::identity',
             'Object!iterate',
-            'MixIn'
+            'Mixin'
         ]
     },
     '.M$Forwardable'
-]).$export(function(isObject, identity, Obj, MixIn, M$Forwardable) {
+]).$export(function(isObject, identity, Obj, Mixin, M$Forwardable) {
     'use strict';
 
-    var M$Decidable = new MixIn('Decidable', {
+    var M$Decidable = new Mixin('Decidable', {
         decide: function(decider, decisionTable) {
             var decision;
 

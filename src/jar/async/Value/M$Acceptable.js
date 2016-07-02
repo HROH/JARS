@@ -1,10 +1,10 @@
 JAR.module('jar.async.Value.M$Acceptable').$import([
     '.M$Forwardable',
-    'jar.lang.MixIn'
-]).$export(function(M$Forwardable, MixIn) {
+    'jar.lang.Mixin'
+]).$export(function(M$Forwardable, Mixin) {
     'use strict';
 
-    var M$Acceptable = new MixIn('Acceptable', {
+    var M$Acceptable = new Mixin('Acceptable', {
         accept: function(acceptFn) {
             return this.forward({
                 update: function(forwardedValue, newValue) {

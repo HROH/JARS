@@ -3,13 +3,13 @@ JAR.module('jar.async.Value.M$FlowRegulator').$import([
     {
         'jar.lang': [
             'Function!flow',
-            'MixIn'
+            'Mixin'
         ]
     }
-]).$export(function(M$Forwardable, Fn, MixIn) {
+]).$export(function(M$Forwardable, Fn, Mixin) {
     'use strict';
 
-    var M$FlowRegulator = new MixIn('FlowRegulator', {
+    var M$FlowRegulator = new Mixin('FlowRegulator', {
         throttle: function(ms, options) {
             return this.forward({
                 update: Fn.throttle(regulatedUpdate, ms, options)

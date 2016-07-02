@@ -9,13 +9,13 @@ JAR.module('jar.async.Value.M$Skippable').$import([
                     '::negate'
                 ]
             },
-            'MixIn'
+            'Mixin'
         ]
     }
-]).$export(function(M$Acceptable, isNumber, Fn, negate, MixIn) {
+]).$export(function(M$Acceptable, isNumber, Fn, negate, Mixin) {
     'use strict';
 
-    var M$Skippable = new MixIn('Skippable', {
+    var M$Skippable = new Mixin('Skippable', {
         skip: function(n) {
             isNumber(n) || (n = 0);
 

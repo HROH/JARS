@@ -8,13 +8,13 @@ JAR.module('jar.async.Value.M$Takeable').$import([
                     '::negate'
                 ]
             },
-            'MixIn'
+            'Mixin'
         ]
     }
-]).$export(function(M$Forwardable, Fn, negate, MixIn) {
+]).$export(function(M$Forwardable, Fn, negate, Mixin) {
     'use strict';
 
-    var M$Takeable = new MixIn('Takeable', {
+    var M$Takeable = new Mixin('Takeable', {
         take: function(n) {
             var takenValue;
 

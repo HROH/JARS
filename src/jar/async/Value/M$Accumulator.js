@@ -1,10 +1,10 @@
 JAR.module('jar.async.Value.M$Accumulator').$import([
     '.M$Mappable',
-    'jar.lang.MixIn'
-]).$export(function(M$Mappable, MixIn) {
+    'jar.lang.Mixin'
+]).$export(function(M$Mappable, Mixin) {
     'use strict';
 
-    var M$Accumulator = new MixIn('Accumulator', {
+    var M$Accumulator = new Mixin('Accumulator', {
         scan: function(scanFn, accumulator) {
             var hasAccumulator = arguments.length > 1;
 

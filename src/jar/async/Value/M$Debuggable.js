@@ -4,10 +4,10 @@ JAR.module('jar.async.Value.M$Debuggable').$import({
         'Logger'
     ],
     'jar.lang': [
-        'MixIn',
+        'Mixin',
         'Object'
     ]
-}).$export(function(isA, Logger, MixIn, Obj) {
+}).$export(function(isA, Logger, Mixin, Obj) {
     'use strict';
 
     var debuggedValues = {},
@@ -16,7 +16,7 @@ JAR.module('jar.async.Value.M$Debuggable').$import({
         MSG_VALUE_ERROR = 'Got error for ${hash} with message ${msg}',
         MSG_VALUE_FREEZE = 'Froze ${hash}';
 
-    M$Debuggable = new MixIn('Debuggable', {
+    M$Debuggable = new Mixin('Debuggable', {
         debug: function(customLogger) {
             var logger = isA(customLogger, Logger) ? customLogger : this.Class.logger,
                 hash = this.getHash(),

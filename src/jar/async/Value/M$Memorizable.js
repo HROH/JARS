@@ -1,11 +1,11 @@
 JAR.module('jar.async.Value.M$Memorizable').$import([
     '.M$Accumulator',
     '.M$Skippable',
-    'jar.lang.MixIn'
-]).$export(function(M$Accumulator, M$Skippable, MixIn) {
+    'jar.lang.Mixin'
+]).$export(function(M$Accumulator, M$Skippable, Mixin) {
     'use strict';
 
-    var M$Memorizable = new MixIn('Memorizable', {
+    var M$Memorizable = new Mixin('Memorizable', {
         memorizeLast: function(count, fillMemory) {
             var memorizedValue;
 

@@ -3,13 +3,13 @@ JAR.module('jar.async.Value.M$Mergable').$import([
     {
         'jar.lang': [
             'Array!iterate',
-            'MixIn'
+            'Mixin'
         ]
     }
-]).$export(function(M$Forwardable, Arr, MixIn) {
+]).$export(function(M$Forwardable, Arr, Mixin) {
     'use strict';
 
-    var M$Mergable = new MixIn('Mergable', {
+    var M$Mergable = new Mixin('Mergable', {
         merge: function() {
             var values = Arr.from(arguments),
                 mergedValue = this.forward();
