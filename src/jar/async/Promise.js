@@ -15,6 +15,7 @@ JAR.module('jar.async.Promise').$import([
             'Enum',
             {
                 Function: [
+                    '::attempt',
                     '::identity',
                     '::bind',
                     '!flow,modargs'
@@ -27,7 +28,7 @@ JAR.module('jar.async.Promise').$import([
         ]
     },
     '.Scheduler'
-]).$export(function(format, isA, isObject, isArrayLike, isFunction, config, Class, Obj, Arr, Enum, identity, bind, Fn, Value, M$Forwardable, Scheduler) {
+]).$export(function(format, isA, isObject, isArrayLike, isFunction, config, Class, Obj, Arr, Enum, attempt, identity, bind, Fn, Value, M$Forwardable, Scheduler) {
     'use strict';
 
     // TODO support stacktraces:
@@ -72,7 +73,7 @@ JAR.module('jar.async.Promise').$import([
             when: function(handler) {
                 var promise = this,
                     value = promise._$value,
-                    resolve, reject, notify;
+                    resolve, reject, notify, result;
 
                 if (isFunction(handler) && !promise.isInitialized()) {
                     promise._$transitionState(promiseState.PENDING);
@@ -94,13 +95,10 @@ JAR.module('jar.async.Promise').$import([
                     };
                     reject = bind(value.error, value);
                     notify = partial(assignWithState, value, promiseState.PENDING);
-
-                    try {
-                        handler(resolve, reject, notify);
-                    }
-                    catch (e) {
-                        reject(e);
-                    }
+                    
+                    result = attempt(handler, resolve, reject, notify);
+                    
+                    result.error && reject(result.error);
                 }
 
                 return this;
