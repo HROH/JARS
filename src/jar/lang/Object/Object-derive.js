@@ -1,10 +1,10 @@
 JAR.module('jar.lang.Object.Object-derive').$import([
+    'System::isSet',
     '..Array!reduce',
-    '.!reduce'
-]).$export(function(Arr, Obj) {
+    '.!reduce',
+    '..Function::identity'
+]).$export(function(isSet, Arr, Obj, identity) {
     'use strict';
-
-    var reduce = Obj.reduce;
 
     Obj.enhance({
         /**
@@ -27,44 +27,67 @@ JAR.module('jar.lang.Object.Object-derive').$import([
          * 
          * @return {Object}
          */
-        filter: function(callback, context) {
-            var object = this;
-
-            return reduce(object, function(filteredObject, value, prop) {
-                if (callback.call(context, value, prop, object)) {
-                    filteredObject[prop] = value;
-                }
-
-                return filteredObject;
-            }, new Obj());
-        },
+        filter: transduceWith({
+            init: createObject,
+            
+            step: filterProperty,
+            
+            result: identity
+        }, true),
         /**
          * @param {Function} callback
          * @param {*} context
          * 
          * @return {Object}
          */
-        map: function(callback, context) {
-            var object = this;
-
-            return reduce(object, function(mappedObject, value, prop) {
-                mappedObject[prop] = callback.call(context, value, prop, object);
-
-                return mappedObject;
-            }, new Obj());
-        },
+        map: transduceWith({
+            init: createObject,
+            
+            step: mapProperty,
+            
+            result: identity
+        }, true),
         /**
          * @return {Object}
          */
-        invert: function() {
-            return reduce(this, invert, new Obj());
-        }
+        invert: transduceWith({
+            init: createObject,
+            
+            step: invertProperty,
+            
+            result: identity
+        })
     });
+    
+    function createObject() {
+        return new Obj();
+    }
+    
+    function filterProperty(filteredObject, value, prop, result) {
+        if(result) {
+            filteredObject[prop] = value;
+        }
+    }
+    
+    function mapProperty(mappedObject, value, prop, result) {
+        mappedObject[prop] = result;
+    }
 
-    function invert(invertedObject, value, prop) {
+    function invertProperty(invertedObject, value, prop) {
         invertedObject[value] = prop;
+    }
+    
+    function transduceWith(transducer, applyCallback) {
+        return function transduce(callback, context) {
+	        var object = this,
+	            hasContext = applyCallback && isSet(context);
+	            
+	        return transducer.result(Obj.reduce(object, function reducer(newObject, value, prop) {
+	            transducer.step(newObject, value, prop, hasContext ? callback.call(context, value, prop, object) : applyCallback && callback(value, prop, object));
 
-        return invertedObject;
+	            return newObject;
+	        }, transducer.init()));
+        };
     }
 
     return Obj.extract(Obj, ['extract', 'filter', 'map', 'invert']);
