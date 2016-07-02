@@ -11,7 +11,7 @@ JAR.module('jar.lang', [
     'Interface',
     'M$Cloneable',
     'M$Destructable',
-    'MixIn',
+    'Mixin',
     'Object.*',
     'operations.*',
     'String'
@@ -19,13 +19,14 @@ JAR.module('jar.lang', [
     '.::getCurrentModuleData',
     {
         System: [
+            '::env',
             '::isSet',
             '::isFunction',
             '::isString',
             '!'
         ]
     }
-]).$export(function(getCurrentModuleData, isSet, isFunction, isString, config) {
+]).$export(function(getCurrentModuleData, env, isSet, isFunction, isString, config) {
     'use strict';
 
     var sandboxes = {},
@@ -245,7 +246,7 @@ JAR.module('jar.lang', [
      * @return {Object}
      */
     function getNativeType(typeString) {
-        var Type = nativeTypes[typeString] || (config.allowProtoOverride ? window[typeString] : nativeTypeSandbox.add(typeString));
+        var Type = nativeTypes[typeString] || (config.allowProtoOverride ? env.global[typeString] : nativeTypeSandbox.add(typeString));
 
         if (!nativeTypes[typeString]) {
 
