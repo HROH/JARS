@@ -1,7 +1,7 @@
-JAR.module('jar.lang.M$Destructable').$import('.MixIn').$export(function(MixIn) {
+JAR.module('jar.lang.M$Destructable').$import('.Mixin').$export(function(Mixin) {
     'use strict';
 
-    var M$Destructable = new MixIn('Destructable', {
+    var M$Destructable = new Mixin('Destructable', {
         destruct: function() {
             this.Class.destruct(this);
         }

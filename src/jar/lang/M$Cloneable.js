@@ -1,7 +1,7 @@
-JAR.module('jar.lang.M$Cloneable').$import('.MixIn').$export(function(MixIn) {
+JAR.module('jar.lang.M$Cloneable').$import('.Mixin').$export(function(Mixin) {
     'use strict';
 
-    var M$Cloneable = new MixIn('Cloneable', {
+    var M$Cloneable = new Mixin('Cloneable', {
         clone: function() {
             var clone = new this.Class();
 
