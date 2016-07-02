@@ -1,21 +1,25 @@
 JAR.module('jar.async.TimeoutExecutor').$import([
+    'System::env',
     'jar.lang.Class',
     '.I$Executor'
-]).$export(function(Class, I$Executor) {
+]).$export(function(env, Class, I$Executor) {
     'use strict';
 
-    var TimeoutExecutor = Class('TimeoutExecutor', {
+    var global = env.global,
+        TimeoutExecutor;
+
+    TimeoutExecutor = Class('TimeoutExecutor', {
         construct: function(delay) {
             this.setDelay(delay);
         },
 
         cancel: function(id) {
-            return window.clearTimeout(id);
+            return global.clearTimeout(id);
         },
 
         $: {
             request: function(runner) {
-                return window.setTimeout(runner, this._$delay);
+                return global.setTimeout(runner, this._$delay);
             },
 
             setDelay: function(delay) {

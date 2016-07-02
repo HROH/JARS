@@ -1,19 +1,28 @@
 JAR.module('jar.async.Request').$import([
     '.Deferred',
-    'System',
     {
+        System: [
+            '.',
+            '::env'
+        ],
         '..lang': [
             'Class',
             'Object!reduce',
             'Array!index',
             'Enum',
-            'Function!modargs'
+            {
+                Function: [
+                    '::attempt',
+                    '!modargs'
+                ]
+            }
         ]
     }
-]).$export(function(Deferred, System, Class, Obj, Arr, Enum, Fn) {
+]).$export(function(Deferred, System, env, Class, Obj, Arr, Enum, attempt, Fn) {
     'use strict';
 
-    var activeXObjects = Arr('Msxml2.XMLHTTP.6.0', 'Msxml2.XMLHTTP.3.0', 'Microsoft.XMLHTTP'),
+    var global = env.global,
+        activeXObjects = Arr('Msxml2.XMLHTTP.6.0', 'Msxml2.XMLHTTP.3.0', 'Microsoft.XMLHTTP'),
         acceptedRequestMethods = Arr('GET', 'PUT', 'POST', 'DELETE'),
         supportedXhrIsDefined = false,
         requestState = new Enum(['UNSENT', 'OPENED', 'HEADERS_RECEIVED', 'LOADING', 'DONE']),
@@ -120,11 +129,11 @@ JAR.module('jar.async.Request').$import([
     });
 
     function defineXmlHttpRequest() {
-        if (window.XMLHttpRequest) {
-            SupportedXhr = window.XMLHttpRequest;
+        if (global.XMLHttpRequest) {
+            SupportedXhr = global.XMLHttpRequest;
         }
         else if (activeXObjects.some(supportsActiveXObject)) {
-            SupportedXhr = window.ActiveXObject;
+            SupportedXhr = global.ActiveXObject;
         }
 
         supportedXhrIsDefined = true;
@@ -133,18 +142,17 @@ JAR.module('jar.async.Request').$import([
     }
 
     function supportsActiveXObject(activeXObject) {
-        var activeXObjectIsSupported = false,
-            xhr;
-
-        try {
-            xhr = new window.ActiveXObject(activeXObject);
+        var activeXObjectIsSupported = !attempt(createActiveXObject, activeXObject).error;
+        
+        if(activeXObjectIsSupported) {
             supportedActiveXObject = activeXObject;
-            activeXObjectIsSupported = true;
-            xhr = null;
         }
-        catch (e) {}
 
         return activeXObjectIsSupported;
+    }
+    
+    function createActiveXObject(activeXObject) {
+        return new global.ActiveXObject(activeXObject);
     }
 
     function setRequestHeader(request, value, header) {

@@ -1,4 +1,5 @@
 JAR.module('jar.async.AnimationExecutor').$import([
+    'System::env',
     '.I$Executor',
     {
         'jar.lang': [
@@ -8,18 +9,19 @@ JAR.module('jar.async.AnimationExecutor').$import([
             'String::camelize'
         ]
     }
-]).$export(function(I$Executor, Arr, Singleton, Dat, camelize) {
+]).$export(function(env, I$Executor, Arr, Singleton, Dat, camelize) {
     'use strict';
 
     // TODO move implmentationtest of requestAnimationFrame into jar.feature-module
     // make AnimationExecutor.getCurrentTime() standalone polyfill
-    var lastTime = 0,
+    var global = env.global,
+        lastTime = 0,
         frameRate = 1000 / 60,
         requestAnimationFrame = 'requestAnimationFrame',
         cancelAnimationFrame = 'cancelAnimationFrame',
         cancelRequestAnimationFrame = 'cancelRequestAnimationFrame',
         vendors = Arr('', 'ms', 'moz', 'webkit', 'o'),
-        performance = window.performance,
+        performance = global.performance,
         timer = performance && performance.now ? performance : Dat,
         AnimationExecutor, animationExecutorProto;
 
@@ -34,16 +36,16 @@ JAR.module('jar.async.AnimationExecutor').$import([
             cRAF = camelize(vendor, cRAF);
         }
 
-        if (window[rAF] && (window[cAF] || window[cRAF])) {
-            cAF = window[cAF] ? cAF : cRAF;
+        if (global[rAF] && (global[cAF] || global[cRAF])) {
+            cAF = global[cAF] ? cAF : cRAF;
 
             animationExecutorProto = {
                 request: function(callback) {
-                    return window[rAF](callback);
+                    return global[rAF](callback);
                 },
 
                 cancel: function(id) {
-                    window[cAF](id);
+                    global[cAF](id);
                 }
             };
 
@@ -56,7 +58,7 @@ JAR.module('jar.async.AnimationExecutor').$import([
             request: function(callback) {
                 var currTime = this.getCurrentTime(),
                     timeToCall = Math.max(0, frameRate - (currTime - lastTime)),
-                    id = window.setTimeout(function() {
+                    id = global.setTimeout(function() {
                         callback(currTime + timeToCall);
                     }, timeToCall);
 
