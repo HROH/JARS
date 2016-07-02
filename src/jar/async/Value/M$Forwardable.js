@@ -1,18 +1,26 @@
 JAR.module('jar.async.Value.M$Forwardable').$import([
     {
         'jar.lang': [
-            'Function::bind',
-            'MixIn'
+            {
+                Function: [
+                    '::attempt',
+                    '::bind',
+                    '!modargs'
+                ]
+            },
+            'Mixin',
+            'Object!derive,iterate'
         ]
     },
-    '.Value::events'
-]).$export(function(bind, MixIn, events) {
+    '.::events'
+]).$export(function(attempt, bind, Fn, Mixin, Obj, events) {
     'use strict';
 
+    // TODO better separation of forwardingSubscriptions
     var forwardingSubscriptions = {},
         M$Forwardable;
 
-    M$Forwardable = new MixIn('Forwardable', {
+    M$Forwardable = new Mixin('Forwardable', {
         forward: function(customSubscription) {
             return this.forwardTo(new this.Class(), customSubscription);
         },
@@ -23,14 +31,9 @@ JAR.module('jar.async.Value.M$Forwardable').$import([
 
         forwardTo: function(forwardedValue, customSubscription) {
             var value = this,
-                subscriptions = forwardingSubscriptions[forwardedValue.getHash()] = forwardingSubscriptions[forwardedValue.getHash()] || [],
-                subscriptionID = value.subscribe({
-                    update: attemptCustomForward(customSubscription[events.UPDATE], forwardedValue) || bind(forwardedValue.assign, forwardedValue),
-
-                    error: attemptCustomForward(customSubscription[events.ERROR], forwardedValue) || bind(forwardedValue.error, forwardedValue),
-
-                    freeze: attemptCustomForward(customSubscription[events.FREEZE], forwardedValue)
-                });
+                forwardedValueHash = forwardedValue.getHash(),
+                subscriptions = forwardingSubscriptions[forwardedValueHash] = forwardingSubscriptions[forwardedValueHash] || [],
+                subscriptionID = value.subscribe(Obj.map(events.values(), Fn.partial(createForwardHandle, customSubscription, forwardedValue)));
 
             subscriptions.push(subscriptionID);
 
@@ -51,18 +54,27 @@ JAR.module('jar.async.Value.M$Forwardable').$import([
             }
         }
     }, {
-        classes: [this]
+        classes: [this],
+        
+        destructor: function() {
+            Obj.each(forwardingSubscriptions, function(subscriptions, forwardedValueHash) {
+			    while(subscriptions.length) {
+                    this.unsubscribe(subscriptions.pop());
+                }
+                
+                delete forwardingSubscriptions[forwardedValueHash];
+            }, this);
+        }
     });
 
-    function attemptCustomForward(customForwardMethod, forwardedValue) {
-        return customForwardMethod && function(newValue) {
-            try {
-                customForwardMethod(forwardedValue, newValue);
-            }
-            catch (e) {
-                forwardedValue.error(e);
-            }
-        };
+    function createForwardHandle(customSubscription, forwardedValue, event) {
+        var customForwardMethod = customSubscription[event] || customSubscription[event.toLowerCase()];
+        
+        return customForwardMethod ? function(newValue) {
+            var result = attempt(customForwardMethod, forwardedValue, newValue);
+            
+            result.error && forwardedValue.error(result.error);
+        } : event !== events.FREEZE && bind(forwardedValue[event === events.UPDATE ? 'assign' : 'error'], forwardedValue);
     }
 
     return M$Forwardable;
