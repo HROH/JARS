@@ -1,9 +1,9 @@
 JAR.module('jar.lang.Array.Array-iterate').$import({
     '..assert': [
-        '::isSet',
+        '::isNotNil',
         'Type::isFunction'
     ]
-}).$export(function(assertIsSet, assertIsFunction) {
+}).$export(function(assertIsNotNil, assertIsFunction) {
     'use strict';
 
     var Arr = this,
@@ -20,7 +20,7 @@ JAR.module('jar.lang.Array.Array-iterate').$import({
                 idx = 0,
                 len = arr.length >>> 0;
 
-            assertIsSet(arr, assertionMessage);
+            assertIsNotNil(arr, assertionMessage);
 
             assertIsFunction(callback, MSG_NO_FUNCTION);
 

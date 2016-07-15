@@ -2,11 +2,11 @@ JAR.module('jar.lang.Array.Array-find').$import([
     'System::isNumber',
     {
         '..assert': [
-            '::isSet',
+            '::isNotNil',
             'Type::isFunction'
         ]
     }
-]).$export(function(isNumber, assertIsSet, assertIsFunction) {
+]).$export(function(isNumber, assertIsNotNil, assertIsFunction) {
     'use strict';
 
     var MSG_NO_FUNCTION = 'The predicate is not a function',
@@ -32,7 +32,7 @@ JAR.module('jar.lang.Array.Array-find').$import([
                 ret = defaultReturn,
                 idx;
 
-            assertIsSet(arr, assertionMessage);
+            assertIsNotNil(arr, assertionMessage);
 
             assertIsFunction(predicate, MSG_NO_FUNCTION);
 

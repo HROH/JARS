@@ -9,13 +9,13 @@ JAR.module('jar.lang.Object', [
         '::isA',
         '::isBoolean',
         '::isObject',
-        '::isSet'
+        '::isNil'
     ],
     '.Array': [
         '::from',
         '!find,iterate'
     ]
-}).$export(function(isA, isBoolean, isObject, isSet, fromArgs, Arr) {
+}).$export(function(isA, isBoolean, isObject, isNil, fromArgs, Arr) {
     'use strict';
 
     var lang = this,
@@ -30,7 +30,7 @@ JAR.module('jar.lang.Object', [
     Obj.enhance({
         /**
          * @param {Boolean} deep
-         * 
+         *
          * @return {Object}
          */
         copy: function(deep) {
@@ -54,7 +54,7 @@ JAR.module('jar.lang.Object', [
                 object = this,
                 deep, keepDefault;
 
-            while (!isSet(keepDefault) && isDeepOrKeepDefault(args[args.length - 1])) {
+            while (isNil(keepDefault) && isDeepOrKeepDefault(args[args.length - 1])) {
                 keepDefault = deep;
                 deep = args.pop() || false;
             }
@@ -82,7 +82,7 @@ JAR.module('jar.lang.Object', [
     }
 
     function isDeepOrKeepDefault(value) {
-        return isBoolean(value) || !isSet(value);
+        return isBoolean(value) || isNil(value);
     }
 
     function initMerge(mergeObject) {

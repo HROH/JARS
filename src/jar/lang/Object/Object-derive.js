@@ -1,15 +1,15 @@
 JAR.module('jar.lang.Object.Object-derive').$import([
-    'System::isSet',
+    'System::isNil',
     '..Array!reduce',
     '.!reduce',
     '..Function::identity'
-]).$export(function(isSet, Arr, Obj, identity) {
+]).$export(function(isNil, Arr, Obj, identity) {
     'use strict';
 
     Obj.enhance({
         /**
          * @param {Array} keys
-         * 
+         *
          * @return {Object}
          */
         extract: function(keys) {
@@ -24,27 +24,27 @@ JAR.module('jar.lang.Object.Object-derive').$import([
         /**
          * @param {Function} callback
          * @param {*} context
-         * 
+         *
          * @return {Object}
          */
         filter: transduceWith({
             init: createObject,
-            
+
             step: filterProperty,
-            
+
             result: identity
         }, true),
         /**
          * @param {Function} callback
          * @param {*} context
-         * 
+         *
          * @return {Object}
          */
         map: transduceWith({
             init: createObject,
-            
+
             step: mapProperty,
-            
+
             result: identity
         }, true),
         /**
@@ -52,23 +52,23 @@ JAR.module('jar.lang.Object.Object-derive').$import([
          */
         invert: transduceWith({
             init: createObject,
-            
+
             step: invertProperty,
-            
+
             result: identity
         })
     });
-    
+
     function createObject() {
         return new Obj();
     }
-    
+
     function filterProperty(filteredObject, value, prop, result) {
         if(result) {
             filteredObject[prop] = value;
         }
     }
-    
+
     function mapProperty(mappedObject, value, prop, result) {
         mappedObject[prop] = result;
     }
@@ -76,12 +76,12 @@ JAR.module('jar.lang.Object.Object-derive').$import([
     function invertProperty(invertedObject, value, prop) {
         invertedObject[value] = prop;
     }
-    
+
     function transduceWith(transducer, applyCallback) {
         return function transduce(callback, context) {
 	        var object = this,
-	            hasContext = applyCallback && isSet(context);
-	            
+	            hasContext = applyCallback && !isNil(context);
+
 	        return transducer.result(Obj.reduce(object, function reducer(newObject, value, prop) {
 	            transducer.step(newObject, value, prop, hasContext ? callback.call(context, value, prop, object) : applyCallback && callback(value, prop, object));
 

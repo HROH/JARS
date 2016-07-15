@@ -1,5 +1,5 @@
 JAR.module('jar.async.Number').$import([
-    'System::isSet',
+    'System::isNil',
     '.Value',
     {
         'jar.lang': [
@@ -13,7 +13,7 @@ JAR.module('jar.async.Number').$import([
             }
         ]
     }
-]).$export(function(isSet, Value, Obj, Str, arithmeticOperations, arithmeticOperators) {
+]).$export(function(isNil, Value, Obj, Str, arithmeticOperations, arithmeticOperators) {
     'use strict';
 
     var Nr = Value.createSubClass('Number', Obj.reduce(arithmeticOperators.values(), function(asyncNumberProto, arithmeticOperator, arithmeticOperationName) {
@@ -34,7 +34,7 @@ JAR.module('jar.async.Number').$import([
         }
     }, {
         construct: function(number) {
-            this.$super(isSet(number) ? Number(number) || 0 : null);
+            this.$super(isNil(number) ? null : Number(number) || 0);
         }
     }));
 

@@ -7,7 +7,7 @@ JAR.module('jar.lang.Class', [
         System: [
             'Logger',
             '::isA',
-            '::isSet',
+            '::isNil',
             '::isObject',
             '::isFunction'
         ],
@@ -27,7 +27,7 @@ JAR.module('jar.lang.Class', [
         ]
     },
     '.Array!check,find,index,iterate,manipulate'
-]).$export(function(Logger, isA, isSet, isObject, isFunction, getCurrentModuleData, useModule, fromObject, hasOwn, Obj, Fn, applyFunction, attempt, Arr) {
+]).$export(function(Logger, isA, isNil, isObject, isFunction, getCurrentModuleData, useModule, fromObject, hasOwn, Obj, Fn, applyFunction, attempt, Arr) {
     'use strict';
 
     var lang = this,
@@ -349,7 +349,7 @@ JAR.module('jar.lang.Class', [
          *
          * @param {(Object|Array)} instance
          * @param {Array} args
-         * 
+         *
          * @return {(Object|undefined)} instance if singleton exists, called directly or via Class.extendz, empty object if abstract, else undefined
          */
         New: function(instance, args) {
@@ -530,7 +530,7 @@ JAR.module('jar.lang.Class', [
                 moduleName = Class._$modName,
                 baseName = Class._$modBaseName;
 
-            if (!isSet(baseName)) {
+            if (isNil(baseName)) {
                 Class._$modBaseName = baseName = (useModule(moduleName) === Class) ? moduleName.substring(0, moduleName.lastIndexOf('.')) || moduleName : moduleName;
             }
 
@@ -572,9 +572,9 @@ JAR.module('jar.lang.Class', [
          * To call a parent-method use this.$super(arg1, arg2, ...)
          *
          * Note: The SuperClass has to be created with jar.lang.Class()
-         * 
+         *
          * Example:
-         * 
+         *
          *		var MySubClass = jar.lang.Class('MySubClass', {
          *			construct: function() {
          *				//constructor-code goes here...
@@ -588,10 +588,10 @@ JAR.module('jar.lang.Class', [
          *		}).extendz(MyClass);
          *
          * For simplification you can use MyClass.createSubClass('MySubClass', ...)
-         * 
-         * 
+         *
+         *
          * @param {Class} SuperClass
-         * 
+         *
          * @return {Class}
          */
         $extendz: function(SuperClass, proto, staticProperties) {
@@ -664,7 +664,7 @@ JAR.module('jar.lang.Class', [
         /**
          * @param {function():void} destructor
          * @param {Object} instance
-         * 
+         *
          * @return {Class}
          */
         $addDestructor: function(destructor, instance) {
@@ -818,7 +818,7 @@ JAR.module('jar.lang.Class', [
     }
 
     /**
-     * 
+     *
      * @param {function(Class):Boolean} predicate
      * @param {function(Class):*} optionalReturn
      * @param {String} message
@@ -834,7 +834,7 @@ JAR.module('jar.lang.Class', [
     }
 
     /**
-     * 
+     *
      * @param {function(Class):Boolean} predicate
      * @param {String} message
      */
@@ -848,7 +848,7 @@ JAR.module('jar.lang.Class', [
 
     /**
      * @param {Class} Class
-     * 
+     *
      * @return {Boolean}
      */
     function isClass(Class) {
@@ -857,7 +857,7 @@ JAR.module('jar.lang.Class', [
 
     /**
      * @param {Object} instance
-     * 
+     *
      * @return {Boolean}
      */
     function isInstance(instance) {
@@ -867,7 +867,7 @@ JAR.module('jar.lang.Class', [
     /**
      * @param {String} classHashOrName
      * @param {String} moduleName
-     * 
+     *
      * @return {Class}
      */
     function getClass(classHashOrName, moduleName) {
@@ -875,7 +875,7 @@ JAR.module('jar.lang.Class', [
     }
 
     /**
-     * 
+     *
      * @return {Array<Class>}
      */
     function getClasses() {
@@ -885,7 +885,7 @@ JAR.module('jar.lang.Class', [
     /**
      * @param {(Class|String)} ClassOrHash
      * @param {Boolean} includeSubclasses
-     * 
+     *
      * @return {(Array.<Object>|undefined)}
      */
     function getInstances(ClassOrHash, includeSubclasses) {
@@ -939,28 +939,28 @@ JAR.module('jar.lang.Class', [
     /**
      * Function to create Classes in a more classical way
      * It is available as jar.lang.Class(), later
-     * 
+     *
      * An example would be:
      *
      * var MyClass = jar.lang.Class('MyClass', {
      *		construct: function() {
      *			//constructor-code goes here...
      *		},
-     *		
+     *
      *		myMethod: function(param) {
      *			//do something
      *		},
-     *		
+     *
      *		myMethod2: function()
      *			this.myMethod('test');
      *		}
      * });
-     * 
-     * 
+     *
+     *
      * @param {string} name
      * @param {Object<string, *>} proto
      * @param {Object<string, *>} staticProperties
-     * 
+     *
      * @return {Class}
      */
     function ClassFactory(name, proto, staticProperties) {

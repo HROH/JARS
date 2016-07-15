@@ -14,7 +14,7 @@ JAR.module('jar.async.Value', [
     '.Scheduler',
     {
         System: [
-            '::isSet',
+            '::isNil',
             '::isA',
             '::isFunction'
         ],
@@ -31,7 +31,7 @@ JAR.module('jar.async.Value', [
             'Enum'
         ]
     }
-]).$export(function(Scheduler, isSet, isA, isFunction, Class, Obj, hasOwn, noop, Constant, Enum) {
+]).$export(function(Scheduler, isNil, isA, isFunction, Class, Obj, hasOwn, noop, Constant, Enum) {
     'use strict';
 
     var setZero = Constant(0),
@@ -48,7 +48,7 @@ JAR.module('jar.async.Value', [
                 this._$subscribers = Obj();
                 this._$changeScheduler = isA(changeScheduler, Scheduler) ? changeScheduler : new Scheduler();
 
-                isSet(value) && this.assign(value);
+                isNil(value) || this.assign(value);
             },
 
             assign: assignValue,
@@ -191,7 +191,7 @@ JAR.module('jar.async.Value', [
             return subscriptionID;
         }
     },
-    
+
     {
         events: events
     });

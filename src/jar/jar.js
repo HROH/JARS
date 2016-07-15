@@ -45,10 +45,10 @@
 
     /**
      * @access private
-     * 
+     *
      * @memberof JAR
      * @inner
-     * 
+     *
      * @param {Object} object
      * @param {Function()} callback
      */
@@ -66,13 +66,13 @@
 
     /**
      * @access private
-     * 
+     *
      * @memberof JAR
      * @inner
-     * 
+     *
      * @param {Object} dest
      * @param {Object} source
-     * 
+     *
      * @return {Object}
      */
     function objectMerge(dest, source) {
@@ -85,10 +85,10 @@
 
     /**
      * @access private
-     * 
+     *
      * @memberof JAR
      * @inner
-     * 
+     *
      * @param {(Array|NodeList)} array
      * @param {Function()} callback
      */
@@ -105,9 +105,9 @@
 
     /**
      * @access private
-     * 
+     *
      * @namespace SourceManager
-     * 
+     *
      * @memberof JAR
      * @inner
      */
@@ -119,9 +119,9 @@
         return {
             /**
              * @access public
-             * 
+             *
              * @memberof JAR~SourceManager
-             * 
+             *
              * @return {String}
              */
             getMain: function() {
@@ -137,9 +137,9 @@
             },
             /**
              * @access public
-             * 
+             *
              * @memberof JAR~SourceManager
-             * 
+             *
              * @param {String} moduleName
              * @param {String} path
              */
@@ -157,11 +157,11 @@
             },
             /**
              * @access public
-             * 
+             *
              * @memberof JAR~SourceManager
-             * 
+             *
              * @param {String} moduleName
-             * 
+             *
              * @return {Boolean}
              */
             findSource: function(moduleName) {
@@ -176,11 +176,11 @@
             },
             /**
              * @access public
-             * 
+             *
              * @memberof JAR~SourceManager
-             * 
+             *
              * @param {String} moduleName
-             * 
+             *
              * @return {String} path
              */
             removeSource: function(moduleName) {
@@ -230,12 +230,12 @@
 
             /**
              * @access private
-             * 
+             *
              * @memberof JAR~LoaderManager~Resolver
              * @inner
-             * 
+             *
              * @param {String} moduleName
-             * 
+             *
              * @return {Boolean}
              */
             function resolverIsRelativeModuleName(moduleName) {
@@ -244,20 +244,20 @@
 
             /**
              * @access private
-             * 
+             *
              * @namespace Resolver
-             * 
+             *
              * @memberof JAR~LoaderManager
              * @inner
              */
             Resolver = {
                 /**
                  * @access public
-                 * 
+                 *
                  * @memberof JAR~LoaderManager~Resolver
-                 * 
+                 *
                  * @param {String} moduleName
-                 * 
+                 *
                  * @return {Boolean}
                  */
                 isRootName: function(moduleName) {
@@ -265,9 +265,9 @@
                 },
                 /**
                  * @access public
-                 * 
+                 *
                  * @memberof JAR~LoaderManager~Resolver
-                 * 
+                 *
                  * @return {String}
                  */
                 getRootName: function() {
@@ -275,11 +275,11 @@
                 },
                 /**
                  * @access public
-                 * 
+                 *
                  * @memberof JAR~LoaderManager~Resolver
-                 * 
+                 *
                  * @param {String} moduleName
-                 * 
+                 *
                  * @return {Object}
                  */
                 getPathOptions: function(moduleName) {
@@ -301,11 +301,11 @@
                 },
                 /**
                  * @access public
-                 * 
+                 *
                  * @memberof JAR~LoaderManager~Resolver
-                 * 
+                 *
                  * @param {String} path
-                 * 
+                 *
                  * @return {String}
                  */
                 ensureEndsWithSlash: function(path) {
@@ -313,11 +313,11 @@
                 },
                 /**
                  * @access public
-                 * 
+                 *
                  * @memberof JAR~LoaderManager~Resolver
-                 * 
+                 *
                  * @param {String} moduleName
-                 * 
+                 *
                  * @return {String}
                  */
                 getBundleName: function(moduleName) {
@@ -325,11 +325,11 @@
                 },
                 /**
                  * @access public
-                 * 
+                 *
                  * @memberof JAR~LoaderManager~Resolver
-                 * 
+                 *
                  * @param {String} moduleName
-                 * 
+                 *
                  * @return {String}
                  */
                 getImplicitDependencyName: function(moduleName) {
@@ -347,11 +347,11 @@
                 },
                 /**
                  * @access public
-                 * 
+                 *
                  * @memberof JAR~LoaderManager~Resolver
-                 * 
+                 *
                  * @param {String} moduleName
-                 * 
+                 *
                  * @return {Boolean}
                  */
                 isVersionedModule: function(moduleName) {
@@ -359,12 +359,12 @@
                 },
                 /**
                  * @access public
-                 * 
+                 *
                  * @memberof JAR~LoaderManager~Resolver
-                 * 
+                 *
                  * @param {String} moduleName
                  * @param {String} version
-                 * 
+                 *
                  * @return {String}
                  */
                 appendVersion: function(moduleName, version) {
@@ -372,11 +372,11 @@
                 },
                 /**
                  * @access public
-                 * 
+                 *
                  * @memberof JAR~LoaderManager~Resolver
-                 * 
+                 *
                  * @param {String} moduleName
-                 * 
+                 *
                  * @return {String}
                  */
                 extractModuleNameFromBundle: function(moduleName) {
@@ -384,11 +384,11 @@
                 },
                 /**
                  * @access public
-                 * 
+                 *
                  * @memberof JAR~LoaderManager~Resolver
-                 * 
+                 *
                  * @param {String} moduleName
-                 * 
+                 *
                  * @return {Boolean}
                  */
                 isBundleRequest: function(moduleName) {
@@ -396,11 +396,11 @@
                 },
                 /**
                  * @access public
-                 * 
+                 *
                  * @memberof JAR~LoaderManager~Resolver
-                 * 
+                 *
                  * @param {String} moduleName
-                 * 
+                 *
                  * @return {Array}
                  */
                 extractInterceptorInfo: function(moduleName) {
@@ -433,13 +433,13 @@
                 },
                 /**
                  * @access public
-                 * 
+                 *
                  * @memberof JAR~LoaderManager~Resolver
-                 * 
+                 *
                  * @param {Array} modules
                  * @param {String} referenceModuleName
                  * @param {Number} resolveType
-                 * 
+                 *
                  * @return {Array<string>}
                  */
                 resolveArray: function(modules, referenceModuleName, resolveType) {
@@ -453,13 +453,13 @@
                 },
                 /**
                  * @access public
-                 * 
+                 *
                  * @memberof JAR~LoaderManager~Resolver
-                 * 
+                 *
                  * @param {Object} modules
                  * @param {String} referenceModuleName
                  * @param {Number} resolveType
-                 * 
+                 *
                  * @return {Array<string>}
                  */
                 resolveObject: function(modules, referenceModuleName, resolveType) {
@@ -473,13 +473,13 @@
                 },
                 /**
                  * @access public
-                 * 
+                 *
                  * @memberof JAR~LoaderManager~Resolver
-                 * 
+                 *
                  * @param {String} moduleName
                  * @param {String} referenceModuleName
                  * @param {Number} resolveType
-                 * 
+                 *
                  * @return {Array<string>}
                  */
                 resolveString: function(moduleName, referenceModuleName, resolveType) {
@@ -518,12 +518,12 @@
                 },
                 /**
                  * @access public
-                 * 
+                 *
                  * @memberof JAR~LoaderManager~Resolver
-                 * 
+                 *
                  * @param {Array} refParts
                  * @param {String} moduleName
-                 * 
+                 *
                  * @return {String}
                  */
                 buildAbsoluteModuleName: function(refParts, moduleName) {
@@ -542,13 +542,13 @@
                 },
                 /**
                  * @access public
-                 * 
+                 *
                  * @memberof JAR~LoaderManager~Resolver
-                 * 
+                 *
                  * @param {(String|Object|Array)} modules
                  * @param {String} referenceModuleName
                  * @param {Number} resolveType
-                 * 
+                 *
                  * @return {Array<string>}
                  */
                 resolve: function(modules, referenceModuleName, resolveType) {
@@ -566,12 +566,12 @@
                 },
                 /**
                  * @access public
-                 * 
+                 *
                  * @memberof JAR~LoaderManager~Resolver
-                 * 
+                 *
                  * @param {(String|Object|Array)} modules
                  * @param {String} referenceModuleName
-                 * 
+                 *
                  * @return {Array<string>}
                  */
                 resolveBundle: function(modules, referenceModuleName) {
@@ -588,12 +588,12 @@
             Interception = (function interceptionSetup() {
                 /**
                  * @access private
-                 * 
+                 *
                  * @constructor Interception
-                 * 
+                 *
                  * @memberof JAR~LoaderManager~Loader
                  * @inner
-                 * 
+                 *
                  * @param {String} dependency
                  * @param {String} listener
                  * @param {JAR~LoaderManager~Loader~Module~successCallback} callback
@@ -613,19 +613,19 @@
                 Interception.prototype = {
                     /**
                      * @access public
-                     * 
+                     *
                      * @alias JAR~LoaderManager~Loader~Interception
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Interception#
                      */
                     constructor: Interception,
                     /**
                      * @access public
-                     * 
+                     *
                      * @param {String} fileType
-                     * 
+                     *
                      * @return {String}
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Interception#
                      */
                     getFilePath: function(fileType) {
@@ -633,12 +633,12 @@
                     },
                     /**
                      * @access public
-                     * 
+                     *
                      * @param {Array} moduleNames
                      * @param {Function()} callback
                      * @param {JAR~LoaderManager~Loader~Module~failCallback} errback
                      * @param {Function()} progressback
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Interception#
                      */
                     $import: function(moduleNames, callback, errback, progressback) {
@@ -646,12 +646,12 @@
                     },
                     /**
                      * @access public
-                     * 
+                     *
                      * @param {Array} moduleNames
                      * @param {Function()} callback
                      * @param {JAR~LoaderManager~Loader~Module~failCallback} [errback]
                      * @param {Function()} [progressback]
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Interception#
                      */
                     $importAndLink: function(moduleNames, callback, errback, progressback) {
@@ -668,9 +668,9 @@
                     },
                     /**
                      * @access public
-                     * 
+                     *
                      * @param {*} data
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Interception#
                      */
                     success: function(data) {
@@ -678,9 +678,9 @@
                     },
                     /**
                      * @access public
-                     * 
+                     *
                      * @param {String} error
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Interception#
                      */
                     fail: function(error) {
@@ -715,7 +715,7 @@
                         check: BOOLEAN_CHECK,
                         /**
                          * @param {Boolean} cache
-                         * 
+                         *
                          * @return {Boolean}
                          */
                         transform: function cacheTransform(cache) {
@@ -732,7 +732,7 @@
                         /**
                          * @param {Object} config
                          * @param {String} moduleName
-                         * 
+                         *
                          * @return {Object}
                          */
                         transform: function configTransform(config, moduleName) {
@@ -754,7 +754,7 @@
                         check: BOOLEAN_CHECK,
                         /**
                          * @param {Boolean} loadMin
-                         * 
+                         *
                          * @return {String}
                          */
                         transform: function minTransform(loadMin) {
@@ -767,7 +767,7 @@
                         /**
                          * @param {Object} recoverConfig
                          * @param {String} moduleName
-                         * 
+                         *
                          * @return {Object}
                          */
                         transform: function recoverTransform(recoverConfig, moduleName) {
@@ -794,7 +794,7 @@
                         check: 'Number',
                         /**
                          * @param {Number} timeout
-                         * 
+                         *
                          * @return {Number}
                          */
                         transform: function timeoutTransform(timeout) {
@@ -810,12 +810,12 @@
                 };
                 /**
                  * @access private
-                 * 
+                 *
                  * @constructor Config
-                 * 
+                 *
                  * @memberof JAR~LoaderManager~Loader
                  * @inner
-                 * 
+                 *
                  * @param {String} moduleName
                  */
                 function Config(moduleName) {
@@ -827,19 +827,19 @@
                 Config.prototype = {
                     /**
                      * @access public
-                     * 
+                     *
                      * @alias JAR~LoaderManager~Loader~Config
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Config#
                      */
                     constructor: Config,
                     /**
                      * @access public
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Config#
-                     * 
+                     *
                      * @param {Object} newConfig
-                     * 
+                     *
                      * @return {Object}
                      */
                     update: function(newConfig) {
@@ -870,11 +870,11 @@
                     },
                     /**
                      * @access public
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Config#
-                     * 
+                     *
                      * @param {String} moduleName
-                     * 
+                     *
                      * @return {JAR~LoaderManager~Loader~Config}
                      */
                     child: function(moduleName) {
@@ -892,7 +892,7 @@
 
                 /**
                  * @access private
-                 * 
+                 *
                  * @memberof JAR~LoaderManager~Loader~Config
                  * @inner
                  */
@@ -915,297 +915,297 @@
                     // Loader message indices
                     /**
                      * @access private
-                     * 
+                     *
                      * @constant
                      * @type {Number}
                      * @default
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module
                      * @inner
                      */
                     MSG_BUNDLE_ABORTED = 0,
                     /**
                      * @access private
-                     * 
+                     *
                      * @constant
                      * @type {Number}
                      * @default
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module
                      * @inner
                      */
                     MSG_BUNDLE_ALREADY_LOADED = 1,
                     /**
                      * @access private
-                     * 
+                     *
                      * @constant
                      * @type {Number}
                      * @default
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module
                      * @inner
                      */
                     MSG_BUNDLE_ALREADY_LOADING = 2,
                     /**
                      * @access private
-                     * 
+                     *
                      * @constant
                      * @type {Number}
                      * @default
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module
                      * @inner
                      */
                     MSG_BUNDLE_FOUND = 3,
                     /**
                      * @access private
-                     * 
+                     *
                      * @constant
                      * @type {Number}
                      * @default
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module
                      * @inner
                      */
                     MSG_BUNDLE_LOADED = 4,
                     /**
                      * @access private
-                     * 
+                     *
                      * @constant
                      * @type {Number}
                      * @default
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module
                      * @inner
                      */
                     MSG_BUNDLE_LOADING = 5,
                     /**
                      * @access private
-                     * 
+                     *
                      * @constant
                      * @type {Number}
                      * @default
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module
                      * @inner
                      */
                     MSG_BUNDLE_NOT_DEFINED = 6,
                     /**
                      * @access private
-                     * 
+                     *
                      * @constant
                      * @type {Number}
                      * @default
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module
                      * @inner
                      */
                     MSG_BUNDLE_NOTIFIED = 7,
                     /**
                      * @access private
-                     * 
+                     *
                      * @constant
                      * @type {Number}
                      * @default
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module
                      * @inner
                      */
                     MSG_BUNDLE_REQUESTED = 8,
                     /**
                      * @access private
-                     * 
+                     *
                      * @constant
                      * @type {Number}
                      * @default
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module
                      * @inner
                      */
                     MSG_BUNDLE_SUBSCRIBED = 9,
                     /**
                      * @access private
-                     * 
+                     *
                      * @constant
                      * @type {Number}
                      * @default
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module
                      * @inner
                      */
                     MSG_CIRCULAR_DEPENDENCIES_FOUND = 10,
                     /**
                      * @access private
-                     * 
+                     *
                      * @constant
                      * @type {Number}
                      * @default
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module
                      * @inner
                      */
                     MSG_DEPENDENCIES_FOUND = 11,
                     /**
                      * @access private
-                     * 
+                     *
                      * @constant
                      * @type {Number}
                      * @default
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module
                      * @inner
                      */
                     MSG_DEPENDENCY_FOUND = 12,
                     /**
                      * @access private
-                     * 
+                     *
                      * @constant
                      * @type {Number}
                      * @default
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module
                      * @inner
                      */
                     MSG_INTERCEPTION_ERROR = 13,
                     /**
                      * @access private
-                     * 
+                     *
                      * @constant
                      * @type {Number}
                      * @default
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module
                      * @inner
                      */
                     MSG_MODULE_ALREADY_LOADED = 14,
                     /**
                      * @access private
-                     * 
+                     *
                      * @constant
                      * @type {Number}
                      * @default
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module
                      * @inner
                      */
                     MSG_MODULE_ALREADY_LOADED_MANUAL = 15,
                     /**
                      * @access private
-                     * 
+                     *
                      * @constant
                      * @type {Number}
                      * @default
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module
                      * @inner
                      */
                     MSG_MODULE_ALREADY_LOADING = 16,
                     /**
                      * @access private
-                     * 
+                     *
                      * @constant
                      * @type {Number}
                      * @default
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module
                      * @inner
                      */
                     MSG_MODULE_ALREADY_REGISTERED = 17,
                     /**
                      * @access private
-                     * 
+                     *
                      * @constant
                      * @type {Number}
                      * @default
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module
                      * @inner
                      */
                     MSG_MODULE_LOADED = 18,
                     /**
                      * @access private
-                     * 
+                     *
                      * @constant
                      * @type {Number}
                      * @default
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module
                      * @inner
                      */
                     MSG_MODULE_LOADED_MANUAL = 19,
                     /**
                      * @access private
-                     * 
+                     *
                      * @constant
                      * @type {Number}
                      * @default
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module
                      * @inner
                      */
                     MSG_MODULE_LOADING = 20,
                     /**
                      * @access private
-                     * 
+                     *
                      * @constant
                      * @type {Number}
                      * @default
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module
                      * @inner
                      */
                     MSG_MODULE_NOTIFIED = 21,
                     /**
                      * @access private
-                     * 
+                     *
                      * @constant
                      * @type {Number}
                      * @default
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module
                      * @inner
                      */
                     MSG_MODULE_RECOVERING = 22,
                     /**
                      * @access private
-                     * 
+                     *
                      * @constant
                      * @type {Number}
                      * @default
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module
                      * @inner
                      */
                     MSG_MODULE_REGISTERING = 23,
                     /**
                      * @access private
-                     * 
+                     *
                      * @constant
                      * @type {Number}
                      * @default
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module
                      * @inner
                      */
                     MSG_MODULE_REQUESTED = 24,
                     /**
                      * @access private
-                     * 
+                     *
                      * @constant
                      * @type {Number}
                      * @default
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module
                      * @inner
                      */
                     MSG_MODULE_SUBSCRIBED = 25,
                     /**
                      * @access private
-                     * 
+                     *
                      * @constant
                      * @type {Number}
                      * @default
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module
                      * @inner
                      */
@@ -1214,55 +1214,55 @@
                     // Module states
                     /**
                      * @access private
-                     * 
+                     *
                      * @constant
                      * @type {Number}
                      * @default
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module
                      * @inner
                      */
                     MODULE_WAITING = 1,
                     /**
                      * @access private
-                     * 
+                     *
                      * @constant
                      * @type {Number}
                      * @default
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module
                      * @inner
                      */
                     MODULE_LOADING = 2,
                     /**
                      * @access private
-                     * 
+                     *
                      * @constant
                      * @type {Number}
                      * @default
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module
                      * @inner
                      */
                     MODULE_LOADED = 3,
                     /**
                      * @access private
-                     * 
+                     *
                      * @constant
                      * @type {Number}
                      * @default
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module
                      * @inner
                      */
                     MODULE_REGISTERED = 4,
                     /**
                      * @access private
-                     * 
+                     *
                      * @constant
                      * @type {Number}
                      * @default
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module
                      * @inner
                      */
@@ -1271,44 +1271,44 @@
                     // Bundle states
                     /**
                      * @access private
-                     * 
+                     *
                      * @constant
                      * @type {Number}
                      * @default
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module
                      * @inner
                      */
                     MODULE_BUNDLE_WAITING = 0,
                     /**
                      * @access private
-                     * 
+                     *
                      * @constant
                      * @type {Number}
                      * @default
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module
                      * @inner
                      */
                     MODULE_BUNDLE_LOADING = 1,
                     /**
                      * @access private
-                     * 
+                     *
                      * @constant
                      * @type {Number}
                      * @default
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module
                      * @inner
                      */
                     MODULE_BUNDLE_REQUESTED = 2,
                     /**
                      * @access private
-                     * 
+                     *
                      * @constant
                      * @type {Number}
                      * @default
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module
                      * @inner
                      */
@@ -1316,42 +1316,42 @@
 
                 /**
                  * @callback successCallback
-                 * 
+                 *
                  * @memberof JAR~LoaderManager~Loader~Module
                  * @inner
-                 * 
+                 *
                  * @param {String} moduleName
                  * @param {*} data
                  */
 
                 /**
                  * @callback failCallback
-                 * 
+                 *
                  * @memberof JAR~LoaderManager~Loader~Module
                  * @inner
-                 * 
+                 *
                  * @param {String} moduleName
                  */
 
                 /**
                  * @callback factoryCallback
-                 * 
+                 *
                  * @memberof JAR~LoaderManager~Loader~Module
                  * @inner
-                 * 
+                 *
                  * @param {...*} dependencyRefs
-                 * 
+                 *
                  * @param {*} moduleRef
                  */
 
                 /**
                  * @access private
-                 * 
+                 *
                  * @constructor Module
-                 * 
+                 *
                  * @memberof JAR~LoaderManager~Loader
                  * @inner
-                 * 
+                 *
                  * @param {JAR~LoaderManager~Loader} loader
                  * @param {String} moduleName
                  */
@@ -1382,33 +1382,33 @@
                 Module.prototype = {
                     /**
                      * @access public
-                     * 
+                     *
                      * @alias JAR~LoaderManager~Loader~Module
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module#
                      */
                     constructor: Module,
                     /**
                      * @access public
-                     * 
+                     *
                      * @type {Number}
                      * @default
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module#
                      */
                     depsCounter: 0,
                     /**
                      * @access public
-                     * 
+                     *
                      * @type {Number}
                      * @default
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module#
                      */
                     bundleCounter: 0,
                     /**
                      * @access public
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module#
                      */
                     initConfig: function() {
@@ -1421,12 +1421,12 @@
                     },
                     /**
                      * @access public
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module#
-                     * 
+                     *
                      * @param {Number} state
                      * @param {Boolean} [checkBundleState]
-                     * 
+                     *
                      * @return {Boolean}
                      */
                     isState: function(state, checkBundleState) {
@@ -1434,9 +1434,9 @@
                     },
                     /**
                      * @access public
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module#
-                     * 
+                     *
                      * @param {Number} state
                      * @param {Boolean} [setBundleState]
                      */
@@ -1445,11 +1445,11 @@
                     },
                     /**
                      * @access public
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module#
-                     * 
+                     *
                      * @param {Boolean} [logState]
-                     * 
+                     *
                      * @return {Boolean}
                      */
                     isRegistered: function(logState) {
@@ -1462,9 +1462,9 @@
                     },
                     /**
                      * @access public
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module#
-                     * 
+                     *
                      * @return {Boolean}
                      */
                     isLoading: function() {
@@ -1472,9 +1472,9 @@
                     },
                     /**
                      * @access public
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module#
-                     * 
+                     *
                      * @return {Boolean}
                      */
                     isLoaded: function() {
@@ -1482,10 +1482,10 @@
                     },
                     /**
                      * @access public
-                     * 
+                     *
                      * @function
                      * @memberof JAR~LoaderManager~Loader~Module#
-                     * 
+                     *
                      * @param {Number} messageType
                      * @param {Boolean} logBundle
                      * @param {Object} values
@@ -1516,7 +1516,7 @@
 
                         /**
                          * @access private
-                         * 
+                         *
                          * @param {Array<number>} messages
                          * @param {String} logLevel
                          */
@@ -1548,7 +1548,7 @@
                         MSG_BUNDLE_ALREADY_LOADING,
                         MSG_MODULE_ALREADY_LOADED,
                         MSG_MODULE_ALREADY_LOADING], 'info');
-                        
+
                         setLogLevelForMessageTypes([
                         MSG_BUNDLE_NOT_DEFINED,
                         MSG_MODULE_ALREADY_LOADED_MANUAL,
@@ -1618,9 +1618,9 @@
                     })(),
                     /**
                      * @access public
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module#
-                     * 
+                     *
                      * @return {Boolean}
                      */
                     checkForCircularDeps: function() {
@@ -1643,11 +1643,11 @@
                     },
                     /**
                      * @access public
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module#
-                     * 
+                     *
                      * @param {Object} [traversedModules]
-                     * 
+                     *
                      * @return {Array}
                      */
                     findCircularDeps: function(traversedModules) {
@@ -1681,9 +1681,9 @@
                     },
                     /**
                      * @access public
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module#
-                     * 
+                     *
                      * @return {Array}
                      */
                     getAllDeps: function() {
@@ -1697,11 +1697,11 @@
                     },
                     /**
                      * @access public
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module#
-                     * 
+                     *
                      * @param {String} fileType
-                     * 
+                     *
                      * @return {String}
                      */
                     getFileName: function(fileType) {
@@ -1712,9 +1712,9 @@
                     },
                     /**
                      * @access public
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module#
-                     * 
+                     *
                      * @return {String}
                      */
                     getPath: function() {
@@ -1724,11 +1724,11 @@
                     },
                     /**
                      * @access public
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module#
-                     * 
+                     *
                      * @param {String} [fileType]
-                     * 
+                     *
                      * @return {String}
                      */
                     getFullPath: function(fileType) {
@@ -1736,12 +1736,12 @@
                     },
                     /**
                      * @access public
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module#
-                     * 
+                     *
                      * @param {String} option
                      * @param {String} [skipUntil]
-                     * 
+                     *
                      * @return {*}
                      */
                     getConfig: function(option, skipUntil) {
@@ -1766,9 +1766,9 @@
                     },
                     /**
                      * @access public
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module#
-                     * 
+                     *
                      * @param {Object} newConfig
                      * @param {Boolean} [updateBundleConfig]
                      */
@@ -1777,7 +1777,7 @@
                     },
                     /**
                      * @access public
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module#
                      */
                     depsLoaded: function() {
@@ -1793,7 +1793,7 @@
                     },
                     /**
                      * @access public
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module#
                      */
                     bundleLoaded: function() {
@@ -1809,9 +1809,9 @@
                     },
                     /**
                      * @access public
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module#
-                     * 
+                     *
                      * @param {Array<string>} moduleNames
                      * @param {Boolean} [asBundle]
                      */
@@ -1831,7 +1831,7 @@
                                     pub: publishingModuleName
                                 });
 
-                                if (System.isSet(data)) {
+                                if (!System.isNil(data)) {
                                     module.interceptorData[publishingModuleName] = data;
                                 }
 
@@ -1845,12 +1845,12 @@
                     },
                     /**
                      * @access public
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module#
-                     * 
+                     *
                      * @param {Number} count
                      * @param {Boolean} forBundle
-                     * 
+                     *
                      * @return {Boolean}
                      */
                     setLoadedIfReady: function(count, forBundle) {
@@ -1870,11 +1870,11 @@
                     },
                     /**
                      * @access public
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module#
-                     * 
+                     *
                      * @param {Boolean} requestBundle
-                     * 
+                     *
                      * @return {JAR~LoaderManager~Loader~Module}
                      */
                     request: function(requestBundle) {
@@ -1897,7 +1897,7 @@
                     },
                     /**
                      * @access public
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module#
                      */
                     loadBundle: function() {
@@ -1926,9 +1926,9 @@
                     },
                     /**
                      * @access public
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module#
-                     * 
+                     *
                      * @param {Object} interceptionInfo
                      * @param {(String|Error)} error
                      */
@@ -1947,9 +1947,9 @@
                     },
                     /**
                      * @access public
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module#
-                     * 
+                     *
                      * @param {JAR~LoaderManager~Loader~Module~successCallback} callback
                      * @param {JAR~LoaderManager~Loader~Module~failCallback} errback
                      * @param {Boolean} isBundleRequest
@@ -1966,7 +1966,7 @@
                     },
                     /**
                      * @access public
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module#
                      */
                     load: function() {
@@ -1987,9 +1987,9 @@
                     },
                     /**
                      * @access public
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module#
-                     * 
+                     *
                      * @return {Boolean}
                      */
                     findRecover: function() {
@@ -2029,9 +2029,9 @@
                     },
                     /**
                      * @access public
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module#
-                     * 
+                     *
                      * @param {Boolean} [silent]
                      * @param {Boolean} [abortBundle]
                      */
@@ -2072,11 +2072,11 @@
                     },
                     /**
                      * @access public
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module#
-                     * 
+                     *
                      * @param {Boolean} forBundle
-                     * 
+                     *
                      * @return {String}
                      */
                     getName: function(forBundle) {
@@ -2084,11 +2084,11 @@
                     },
                     /**
                      * @access public
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module#
-                     * 
+                     *
                      * @param {Boolean} forBundle
-                     * 
+                     *
                      * @return {Array}
                      */
                     getQueue: function(forBundle) {
@@ -2096,9 +2096,9 @@
                     },
                     /**
                      * @access public
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module#
-                     * 
+                     *
                      * @param {JAR~LoaderManager~Loader~Module~successCallback} callback
                      * @param {JAR~LoaderManager~Loader~Module~failCallback} errback
                      * @param {Boolean} enqueueBundle
@@ -2108,9 +2108,9 @@
                     },
                     /**
                      * @access public
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module#
-                     * 
+                     *
                      * @param {Number} queueType
                      * @param {Boolean} dequeueBundle
                      */
@@ -2131,9 +2131,9 @@
                     },
                     /**
                      * @access public
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module#
-                     * 
+                     *
                      * @param {(Object|Array|String)} dependencies
                      */
                     $import: function(dependencies) {
@@ -2145,9 +2145,9 @@
                     },
                     /**
                      * @access public
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module#
-                     * 
+                     *
                      * @param {JAR~LoaderManager~Loader~Module~factoryCallback} factory
                      */
                     $export: function(factory) {
@@ -2181,9 +2181,9 @@
                     },
                     /**
                      * @access public
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module#
-                     * 
+                     *
                      * @param {Array} bundle
                      */
                     defineBundle: function(bundle) {
@@ -2195,7 +2195,7 @@
                     },
                     /**
                      * @access public
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module#
                      */
                     requestDeps: function() {
@@ -2222,9 +2222,9 @@
                     },
                     /**
                      * @access public
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module#
-                     * 
+                     *
                      * @param {Boolean} [notifyBundle]
                      */
                     notify: function(notifyBundle) {
@@ -2232,7 +2232,7 @@
                     },
                     /**
                      * @access public
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module#
                      */
                     init: function() {
@@ -2251,9 +2251,9 @@
                     },
                     /**
                      * @access public
-                     * 
+                     *
                      * @memberof JAR~LoaderManager~Loader~Module#
-                     * 
+                     *
                      * @return {Array}
                      */
                     getDepRefs: function() {
@@ -2266,7 +2266,7 @@
 
                         arrayEach(dependencies, function getDepRef(dependencyName) {
                             data = module.interceptorData[dependencyName];
-                            depRefs.push(System.isSet(data) ? data : loader.getModule(dependencyName).ref);
+                            depRefs.push(!System.isNil(data) ? data : loader.getModule(dependencyName).ref);
                         });
 
                         return depRefs;
@@ -2278,12 +2278,12 @@
 
             /**
              * @access private
-             * 
+             *
              * @constructor Loader
-             * 
+             *
              * @memberof JAR~LoaderManager
              * @inner
-             * 
+             *
              * @param {String} context
              */
             function Loader(context) {
@@ -2299,15 +2299,15 @@
             Loader.prototype = {
                 /**
                  * @access public
-                 * 
+                 *
                  * @alias JAR~LoaderManager~Loader
-                 * 
+                 *
                  * @memberof JAR~LoaderManager~Loader#
                  */
                 constructor: Loader,
                 /**
                  * @access public
-                 * 
+                 *
                  * @memberof JAR~LoaderManager~Loader#
                  */
                 init: function() {
@@ -2322,9 +2322,9 @@
                 },
                 /**
                  * @access public
-                 * 
+                 *
                  * @memberof JAR~LoaderManager~Loader#
-                 * 
+                 *
                  * @param {Object} newConfig
                  */
                 setModuleConfig: function(newConfig) {
@@ -2343,9 +2343,9 @@
                 },
                 /**
                  * @access public
-                 * 
+                 *
                  * @memberof JAR~LoaderManager~Loader#
-                 * 
+                 *
                  * @param {String} moduleName
                  */
                 setCurrentModuleName: function(moduleName) {
@@ -2353,9 +2353,9 @@
                 },
                 /**
                  * @access public
-                 * 
+                 *
                  * @memberof JAR~LoaderManager~Loader#
-                 * 
+                 *
                  * @return {Object}
                  */
                 getCurrentModuleData: function() {
@@ -2371,9 +2371,9 @@
                 },
                 /**
                  * @access public
-                 * 
+                 *
                  * @memberof JAR~LoaderManager~Loader#
-                 * 
+                 *
                  * @return {Object}
                  */
                 getSystem: function() {
@@ -2391,11 +2391,11 @@
                 },
                 /**
                  * @access public
-                 * 
+                 *
                  * @memberof JAR~LoaderManager~Loader#
-                 * 
+                 *
                  * @param {String} moduleName
-                 * 
+                 *
                  * @return {*}
                  */
                 getModuleRef: function(moduleName) {
@@ -2403,11 +2403,11 @@
                 },
                 /**
                  * @access public
-                 * 
+                 *
                  * @memberof JAR~LoaderManager~Loader#
-                 * 
+                 *
                  * @param {String} moduleName
-                 * 
+                 *
                  * @return {JAR~LoaderManager~Loader~Module}
                  */
                 getModule: function(moduleName) {
@@ -2424,11 +2424,11 @@
                 },
                 /**
                  * @access public
-                 * 
+                 *
                  * @memberof JAR~LoaderManager~Loader#
-                 * 
+                 *
                  * @param {String} moduleName
-                 * 
+                 *
                  * @return {JAR~LoaderManager~Loader~Module}
                  */
                 createModule: function(moduleName) {
@@ -2438,9 +2438,9 @@
                 },
                 /**
                  * @access public
-                 * 
+                 *
                  * @memberof JAR~LoaderManager~Loader#
-                 * 
+                 *
                  * @param {Function(JAR~LoaderManager~Loader~Module)} callback
                  */
                 eachModules: function(callback) {
@@ -2448,7 +2448,7 @@
                 },
                 /**
                  * @access public
-                 * 
+                 *
                  * @memberof JAR~LoaderManager~Loader#
                  */
                 registerCore: function() {
@@ -2467,9 +2467,9 @@
                 },
                 /**
                  * @access public
-                 * 
+                 *
                  * @memberof JAR~LoaderManager~Loader#
-                 * 
+                 *
                  * @param {String} moduleName
                  * @param {Array} bundle
                  */
@@ -2492,9 +2492,9 @@
                 },
                 /**
                  * @access public
-                 * 
+                 *
                  * @memberof JAR~LoaderManager~Loader#
-                 * 
+                 *
                  * @param {String} listeningModuleName
                  * @param {Array<string>} moduleNames
                  * @param {JAR~LoaderManager~Loader~Module~successCallback} callback
@@ -2509,14 +2509,14 @@
                 },
                 /**
                  * @access public
-                 * 
+                 *
                  * @memberof JAR~LoaderManager~Loader#
-                 * 
+                 *
                  * @param {String} interceptedModuleName
                  * @param {String} listeningModuleName
                  * @param {JAR~LoaderManager~Loader~Module~successCallback} callback
                  * @param {JAR~LoaderManager~Loader~Module~failCallback} errback
-                 * 
+                 *
                  * @return {JAR~LoaderManager~Loader~Module~successCallback}
                  */
                 intercept: function(interceptedModuleName, listeningModuleName, callback, errback) {
@@ -2529,11 +2529,11 @@
                 },
                 /**
                  * @access public
-                 * 
+                 *
                  * @memberof JAR~LoaderManager~Loader#
-                 * 
+                 *
                  * @param {String} moduleName
-                 * 
+                 *
                  * @return {JAR~LoaderManager~Loader~Module}
                  */
                 $import: function(moduleName) {
@@ -2541,9 +2541,9 @@
                 },
                 /**
                  * @access public
-                 * 
+                 *
                  * @memberof JAR~LoaderManager~Loader#
-                 * 
+                 *
                  * @param {JAR~LoaderManager~Loader~Module} module
                  * @param {Boolean} [addBundle]
                  */
@@ -2568,9 +2568,9 @@
                 },
                 /**
                  * @access public
-                 * 
+                 *
                  * @memberof JAR~LoaderManager~Loader#
-                 * 
+                 *
                  * @param {Array} modules
                  */
                 pushModules: function(modules) {
@@ -2582,7 +2582,7 @@
                 },
                 /**
                  * @access public
-                 * 
+                 *
                  * @memberof JAR~LoaderManager~Loader#
                  */
                 resetModulesUrlList: function() {
@@ -2602,20 +2602,20 @@
 
         /**
          * @access private
-         * 
+         *
          * @namespace LoaderManager
-         * 
+         *
          * @memberof JAR
          * @inner
          */
         LoaderManager = {
             /**
              * @access public
-             * 
+             *
              * @memberof JAR~LoaderManager
-             * 
+             *
              * @param {String} loaderContext
-             * 
+             *
              * @return {String}
              */
             setLoaderContext: function(loaderContext) {
@@ -2628,11 +2628,11 @@
             },
             /**
              * @access public
-             * 
+             *
              * @memberof JAR~LoaderManager
-             * 
+             *
              * @param {(Object|Array)} newConfig
-             * 
+             *
              * @return {Object}
              */
             setModuleConfig: function(newConfig) {
@@ -2651,11 +2651,11 @@
             },
             /**
              * @access public
-             * 
+             *
              * @memberof JAR~LoaderManager
-             * 
+             *
              * @param {String} loaderContext
-             * 
+             *
              * @return {Boolean}
              */
             flush: function(loaderContext) {
@@ -2674,9 +2674,9 @@
             },
             /**
              * @access public
-             * 
+             *
              * @memberof JAR~LoaderManager
-             * 
+             *
              * @param {String} moduleName
              * @param {Object} properties
              * @param {JAR~LoaderManager~Loader~Module~factoryCallback} factory
@@ -2686,9 +2686,9 @@
             },
             /**
              * @access public
-             * 
+             *
              * @memberof JAR~LoaderManager
-             * 
+             *
              * @param {String} interceptorType
              * @param {Function(object)} interceptor
              */
@@ -2701,9 +2701,9 @@
             },
             /**
              * @access public
-             * 
+             *
              * @memberof JAR~LoaderManager
-             * 
+             *
              * @return {Object}
              */
             getCurrentModuleData: function() {
@@ -2714,15 +2714,15 @@
              * in the order they are dependending on each other.
              * This method can be used to create a custom build
              * preferable with grunt and phantomjs.</p>
-             * 
+             *
              * <p>It is possible to recompute the list.
              * This is only for aesthetics.
              * Even without recomputation the list will still be valid.</p>
-             * 
+             *
              * @access public
-             * 
+             *
              * @memberof JAR~LoaderManager
-             * 
+             *
              * @param {Function(array)} loadedCallback
              * @param {Boolean} forceRecompute
              */
@@ -2757,11 +2757,11 @@
             },
             /**
              * @access public
-             * 
+             *
              * @memberof JAR~LoaderManager
-             * 
+             *
              * @param {String} moduleName
-             * 
+             *
              * @return {*}
              */
             getModuleRef: function(moduleName) {
@@ -2769,9 +2769,9 @@
             },
             /**
              * @access public
-             * 
+             *
              * @memberof JAR~LoaderManager
-             * 
+             *
              * @return {Object}
              */
             getSystem: function() {
@@ -2789,9 +2789,9 @@
             },
             /**
              * @access public
-             * 
+             *
              * @memberof JAR~LoaderManager
-             * 
+             *
              * @return {Object}
              */
             getRoot: function() {
@@ -2799,9 +2799,9 @@
             },
             /**
              * @access public
-             * 
+             *
              * @memberof JAR~LoaderManager
-             * 
+             *
              * @param {(Object|Array|String)} moduleNames
              * @param {Function(...*)} callback
              * @param {JAR~LoaderManager~Loader~Module~failCallback} errback
@@ -2825,7 +2825,7 @@
                 System.isFunction(progressback) || (progressback = undef);
 
                 loader.listenFor(moduleName, moduleNames, function publishLazy(publishingModuleName, data) {
-                    ref = System.isSet(data) ? data : loader.getModuleRef(publishingModuleName);
+                    ref = !System.isNil(data) ? data : loader.getModuleRef(publishingModuleName);
                     refs[refsIndexLookUp[publishingModuleName]] = ref;
 
                     counter--;
@@ -2837,9 +2837,9 @@
             },
             /**
              * @access public
-             * 
+             *
              * @memberof JAR~LoaderManager
-             * 
+             *
              * @param {String} moduleName
              * @param {Array} bundle
              */
@@ -2906,9 +2906,9 @@
 
             /**
              * @exports System
-             * 
+             *
              * @access public
-             * 
+             *
              * @namespace System
              */
             System = {
@@ -2927,7 +2927,7 @@
                 getType: function getType(value) {
                     var type;
 
-                    if (System.isSet(value)) {
+                    if (!System.isNil(value)) {
                         if (value.nodeType === 1 || value.nodeType === 9) {
                             type = 'element';
                         }
@@ -2952,23 +2952,23 @@
                 },
                 /**
                  * @access public
-                 * 
+                 *
                  * @memberof System
-                 * 
+                 *
                  * @param {*} value
-                 * 
+                 *
                  * @return {Boolean}
                  */
-                isSet: function(value) {
-                    return value != NOTHING;
+                isNil: function(value) {
+                    return value == NOTHING;
                 },
                 /**
                  * @access public
-                 * 
+                 *
                  * @memberof System
-                 * 
+                 *
                  * @param {*} value
-                 * 
+                 *
                  * @return {Boolean}
                  */
                 isArrayLike: function(value) {
@@ -2985,11 +2985,11 @@
                 },
                 /**
                  * @access public
-                 * 
+                 *
                  * @memberof System
-                 * 
+                 *
                  * @param {*} value
-                 * 
+                 *
                  * @return {Boolean}
                  */
                 isDefined: function(value) {
@@ -2997,12 +2997,12 @@
                 },
                 /**
                  * @access public
-                 * 
+                 *
                  * @function
                  * @memberof System
-                 * 
+                 *
                  * @param {*} value
-                 * 
+                 *
                  * @return {Boolean}
                  */
                 isInteger: Number.isInteger || function(value) {
@@ -3010,11 +3010,11 @@
                 },
                 /**
                  * @access public
-                 * 
+                 *
                  * @memberof System
-                 * 
+                 *
                  * @param {*} value
-                 * 
+                 *
                  * @return {Boolean}
                  */
                 isNaN: function(value) {
@@ -3022,12 +3022,12 @@
                 },
                 /**
                  * @access public
-                 * 
+                 *
                  * @memberof System
-                 * 
+                 *
                  * @param {Object} instance
                  * @param {(Function|Array<function>)} Class
-                 * 
+                 *
                  * @return {Boolean}
                  */
                 isA: function(instance, Class) {
@@ -3048,12 +3048,12 @@
                 },
                 /**
                  * @access public
-                 * 
+                 *
                  * @memberof System
-                 * 
+                 *
                  * @param {String} message
                  * @param {(Object|Array)} data
-                 * 
+                 *
                  * @return {String}
                  */
                 format: function(message, data) {
@@ -3067,9 +3067,9 @@
                 },
                 /**
                  * @access public
-                 * 
+                 *
                  * @memberof System
-                 * 
+                 *
                  * @param {JAR~LoaderManager~Loader~Interception} pluginRequest
                  */
                 $plugIn: function(pluginRequest) {
@@ -3081,122 +3081,122 @@
 
             /**
              * @access public
-             * 
+             *
              * @function isNull
              * @memberof System
-             * 
+             *
              * @param {*} value
-             * 
+             *
              * @return {Boolean}
              */
 
             /**
              * @access public
-             * 
+             *
              * @function isUndefined
              * @memberof System
-             * 
+             *
              * @param {*} value
-             * 
+             *
              * @return {Boolean}
              */
 
             /**
              * @access public
-             * 
+             *
              * @function isString
              * @memberof System
-             * 
+             *
              * @param {*} value
-             * 
+             *
              * @return {Boolean}
              */
 
             /**
              * @access public
-             * 
+             *
              * @function isNumber
              * @memberof System
-             * 
+             *
              * @param {*} value
-             * 
+             *
              * @return {Boolean}
              */
 
             /**
              * @access public
-             * 
+             *
              * @function isBoolean
              * @memberof System
-             * 
+             *
              * @param {*} value
-             * 
+             *
              * @return {Boolean}
              */
 
             /**
              * @access public
-             * 
+             *
              * @function isArray
              * @memberof System
-             * 
+             *
              * @param {*} value
-             * 
+             *
              * @return {Boolean}
              */
 
             /**
              * @access public
-             * 
+             *
              * @function isObject
              * @memberof System
-             * 
+             *
              * @param {*} value
-             * 
+             *
              * @return {Boolean}
              */
 
             /**
              * @access public
-             * 
+             *
              * @function isFunction
              * @memberof System
-             * 
+             *
              * @param {*} value
-             * 
+             *
              * @return {Boolean}
              */
 
             /**
              * @access public
-             * 
+             *
              * @function isDate
              * @memberof System
-             * 
+             *
              * @param {*} value
-             * 
+             *
              * @return {Boolean}
              */
 
             /**
              * @access public
-             * 
+             *
              * @function isRegExp
              * @memberof System
-             * 
+             *
              * @param {*} value
-             * 
+             *
              * @return {Boolean}
              */
 
             /**
              * @access private
-             * 
+             *
              * @memberof System
              * @inner
-             * 
+             *
              * @param {String} typeDef
-             * 
+             *
              * @return {Function(*):boolean}
              */
             function typeValidatorSetup(typeDef) {
@@ -3217,11 +3217,11 @@
 
             /**
              * @access public
-             * 
+             *
              * @memberof System
-             * 
+             *
              * @param {*} value
-             * 
+             *
              * @return {Boolean}
              */
             System.isArguments = function(value) {
@@ -3230,13 +3230,13 @@
 
             /**
              * @access private
-             * 
+             *
              * @memberof System
              * @inner
-             * 
+             *
              * @param {Array} match
              * @param {String} key
-             * 
+             *
              * @return {String}
              */
             function formatReplace(match, key) {
@@ -3257,12 +3257,12 @@
 
             /**
              * @access private
-             * 
+             *
              * @memberof System.Logger
              * @inner
-             * 
+             *
              * @param {(String|Number)} levelOrPriority
-             * 
+             *
              * @return {Number}
              */
             function getPriority(levelOrPriority) {
@@ -3281,14 +3281,14 @@
 
             /**
              * @access private
-             * 
+             *
              * @memberof System.Logger
              * @inner
-             * 
+             *
              * @param {Boolean} debug
              * @param {String} level
              * @param {String} context
-             * 
+             *
              * @return {Boolean}
              */
             function isDebuggingEnabled(debug, level, context) {
@@ -3297,12 +3297,12 @@
 
             /**
              * @access private
-             * 
+             *
              * @memberof System.Logger
              * @inner
-             * 
+             *
              * @param {String} level
-             * 
+             *
              * @return {Boolean}
              */
             function comparePriority(level) {
@@ -3311,12 +3311,12 @@
 
             /**
              * @access private
-             * 
+             *
              * @memberof System.Logger
              * @inner
-             * 
+             *
              * @param {String} context
-             * 
+             *
              * @return {Boolean}
              */
             function compareDebugContext(context) {
@@ -3336,13 +3336,13 @@
 
             /**
              * @access private
-             * 
+             *
              * @memberof System.Logger
              * @inner
-             * 
+             *
              * @param {String} context
              * @param {(Array|String)} contextList
-             * 
+             *
              * @return {Boolean}
              */
             function inContextList(context, contextList) {
@@ -3359,12 +3359,12 @@
 
             /**
              * @access private
-             * 
+             *
              * @memberof System.Logger
              * @inner
-             * 
+             *
              * @param {String} mode
-             * 
+             *
              * @return {Object}
              */
             function getActiveDebugger(mode) {
@@ -3373,11 +3373,11 @@
 
             /**
              * @access public
-             * 
+             *
              * @memberof System
-             * 
+             *
              * @class Logger
-             * 
+             *
              * @param {String} logContext
              * @param {Object} options
              */
@@ -3393,9 +3393,9 @@
 
             /**
              * @access private
-             * 
+             *
              * @memberof System.Logger#
-             * 
+             *
              * @param {String} level
              * @param {*} message
              * @param {(Object|Array)} values
@@ -3425,9 +3425,9 @@
             };
             /**
              * @access public
-             * 
+             *
              * @memberof System.Logger
-             * 
+             *
              * @type {Object<string, number>}
              */
             Logger.logLevels = {
@@ -3436,9 +3436,9 @@
 
             /**
              * @access public
-             * 
+             *
              * @memberof System.Logger
-             * 
+             *
              * @param {String} level
              * @param {Number} priority
              */
@@ -3464,11 +3464,11 @@
 
             /**
              * @access public
-             * 
+             *
              * @memberof System.Logger
-             * 
+             *
              * @param {Object} options
-             * 
+             *
              * @return {System.Logger}
              */
             Logger.forCurrentModule = function(options) {
@@ -3481,9 +3481,9 @@
 
             /**
              * @access public
-             * 
+             *
              * @memberof System.Logger
-             * 
+             *
              * @param {Object} pluginRequest
              */
             Logger.$plugIn = function(pluginRequest) {
@@ -3500,9 +3500,9 @@
 
             /**
              * @access public
-             * 
+             *
              * @memberof System.Logger
-             * 
+             *
              * @param {String} mode
              * @param {Function()} debuggerSetup
              */
@@ -3570,7 +3570,7 @@
         }, function() {
             /**
              * @namespace jar
-             * 
+             *
              * @borrows LoaderManager.getModuleRef as use
              * @borrows LoaderManager.$importLazy as $importLazy
              * @borrows LoaderManager.getCurrentModuleData as getCurrentModuleData
@@ -3578,11 +3578,11 @@
             var jar = {
                 /**
                  * @access public
-                 * 
+                 *
                  * @memberof jar
-                 * 
+                 *
                  * @param {(Object|Array|String)} moduleNames
-                 * 
+                 *
                  * @return {Array}
                  */
                 useAll: function(moduleNames) {
@@ -3636,16 +3636,16 @@
 
         /**
          * @namespace JAR
-         * 
+         *
          * @borrows LoaderManager.registerModule as module
          * @borrows LoaderManager.getDependencyUrlList as getDependencyUrlList
          */
         JAR = {
             /**
              * @access public
-             * 
+             *
              * @memberof JAR
-             * 
+             *
              * @param {Function()} main
              * @param {JAR~LoaderManager~Loader~Module~failCallback} onAbort
              */
@@ -3690,9 +3690,9 @@
             },
             /**
              * @access public
-             * 
+             *
              * @memberof JAR
-             * 
+             *
              * @param {(String|Object|Array)} moduleData
              */
             $import: function(moduleData) {
@@ -3704,9 +3704,9 @@
             module: LoaderManager.registerModule,
             /**
              * @access public
-             * 
+             *
              * @memberof JAR
-             * 
+             *
              * @param {String} moduleName
              * @param {Array} bundle
              */
@@ -3715,9 +3715,9 @@
             },
             /**
              * @access public
-             * 
+             *
              * @memberof JAR
-             * 
+             *
              * @param {(Object|String)} config
              * @param {(Function)} configurator
              */
@@ -3735,9 +3735,9 @@
             },
             /**
              * @access public
-             * 
+             *
              * @memberof JAR
-             * 
+             *
              * @param {(Object|String)} config
              * @param {*} [value]
              */
@@ -3762,11 +3762,11 @@
             getDependencyUrlList: LoaderManager.getDependencyUrlList,
             /**
              * @access public
-             * 
+             *
              * @memberof JAR
-             * 
+             *
              * @param {String} context
-             * 
+             *
              * @return {Boolean}
              */
             flush: function(context) {
@@ -3778,9 +3778,9 @@
             },
             /**
              * @access public
-             * 
+             *
              * @memberof JAR
-             * 
+             *
              * @return {Object}
              */
             noConflict: function() {
@@ -3790,9 +3790,9 @@
             },
             /**
              * @access public
-             * 
+             *
              * @memberof JAR
-             * 
+             *
              * @type {String}
              */
             version: '0.3.0'
@@ -3800,10 +3800,10 @@
 
         /**
          * @access private
-         * 
+         *
          * @memberof JAR
          * @inner
-         * 
+         *
          * @param {String} abortedModuleName
          */
         function globalErrback(abortedModuleName) {
@@ -3812,10 +3812,10 @@
 
         /**
          * @access private
-         * 
+         *
          * @memberof JAR
          * @inner
-         * 
+         *
          * @param {Boolean} expose
          */
         function exposeModulesGlobal(expose) {
@@ -3826,7 +3826,7 @@
 
         /**
          * @access private
-         * 
+         *
          * @memberof JAR
          * @inner
          */
@@ -3872,7 +3872,7 @@
             /**
              * @param {Boolean} makeGlobal
              * @param {Boolean} isGlobal
-             * 
+             *
              * @return {Boolean}
              */
             globalAccess: function(makeGlobal, isGlobal) {
@@ -3888,7 +3888,7 @@
             /**
              * @param {String} mainScript
              * @param {String} oldMainScript
-             * 
+             *
              * @return {String}
              */
             main: function(mainScript, oldMainScript) {
@@ -3897,7 +3897,7 @@
             /**
              * @param {Object} newEnvironments
              * @param {Object} oldEnvironments
-             * 
+             *
              * @return {Object<string, function>}
              */
             environments: function(newEnvironments, oldEnvironments) {
@@ -3907,7 +3907,7 @@
              * @param {String} newEnvironment
              * @param {String} oldEnvironment
              * @param {Object} System
-             * 
+             *
              * @return {String}
              */
             environment: function(newEnvironment, oldEnvironment, System) {
@@ -3921,7 +3921,7 @@
             },
             /**
              * @param {(Object|Array)} newModuleConfigs
-             * 
+             *
              * @return {Object}
              */
             modules: function(newModuleConfigs) {
@@ -3930,7 +3930,7 @@
             /**
              * @param {String} newLoaderContext
              * @param {String} oldLoaderContext
-             * 
+             *
              * @return {Object}
              */
             loaderContext: function(newLoaderContext, oldLoaderContext) {
@@ -3948,7 +3948,7 @@
              * @param {Object} newInterceptors
              * @param {Object} oldInterceptors
              * @param {Object} System
-             * 
+             *
              * @return {Object}
              */
             interceptors: function(newInterceptors, oldInterceptors, System) {

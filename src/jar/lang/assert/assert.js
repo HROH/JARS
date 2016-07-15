@@ -1,4 +1,4 @@
-JAR.module('jar.lang.assert', ['Type']).$import('System::isSet').$export(function(isSet) {
+JAR.module('jar.lang.assert', ['Type']).$import('System::isNil').$export(function(isNil) {
     'use strict';
 
     function assert(value, message, options) {
@@ -13,8 +13,8 @@ JAR.module('jar.lang.assert', ['Type']).$import('System::isSet').$export(functio
         }
     }
 
-    assert.isSet = function(val, message) {
-        assert(isSet(val), message, {
+    assert.isNotNil = function(val, message) {
+        assert(!isNil(val), message, {
             error: TypeError
         });
     };

@@ -1,13 +1,13 @@
 JAR.module('jar.lang.Array.Array-derive').$import([
     {
         '..assert': [
-            '::isSet',
+            '::isNotNil',
             'Type::isFunction'
         ]
     },
     '.!iterate',
     '..Object!derive'
-]).$export(function(assertIsSet, assertIsFunction, Arr, Obj) {
+]).$export(function(assertIsNotNil, assertIsFunction, Arr, Obj) {
     'use strict';
 
     var forEach = Arr.forEach,
@@ -37,7 +37,7 @@ JAR.module('jar.lang.Array.Array-derive').$import([
             var arr = this,
                 ret = new Arr();
 
-            assertIsSet(arr, assertionMessage);
+            assertIsNotNil(arr, assertionMessage);
 
             assertIsFunction(callback, MSG_NO_FUNCTION);
 

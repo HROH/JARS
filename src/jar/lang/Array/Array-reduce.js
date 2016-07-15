@@ -1,10 +1,10 @@
 JAR.module('jar.lang.Array.Array-reduce').$import({
     '..assert': [
         '.',
-        '::isSet',
+        '::isNotNil',
         'Type::isFunction'
     ]
-}).$export(function(assert, assertIsSet, assertIsFunction) {
+}).$export(function(assert, assertIsNotNil, assertIsFunction) {
     'use strict';
 
     var Arr = this,
@@ -27,7 +27,7 @@ JAR.module('jar.lang.Array.Array-reduce').$import({
                 idx = reduceRight ? len - 1 : 0,
                 ret;
 
-            assertIsSet(arr, assertionMessage);
+            assertIsNotNil(arr, assertionMessage);
 
             assertIsFunction(callback, MSG_NO_FUNCTION);
 

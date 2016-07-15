@@ -8,10 +8,10 @@ JAR.module('jar.lang.Array', [
     'Array-reduce'
 ]).$import({
     '.assert': [
-        '::isSet',
+        '::isNotNil',
         'Type::isFunction'
     ]
-}).$export(function(assertIsSet, assertIsFunction) {
+}).$export(function(assertIsNotNil, assertIsFunction) {
     'use strict';
 
     /**
@@ -21,7 +21,7 @@ JAR.module('jar.lang.Array', [
     var MSG_REQUIRES_ARRAYLIKE = 'Array.from requires an array-like object - not null or undefined',
         MSG_NO_FUNCTION = 'Array.from: when provided, the second argument must be a function',
         Arr = this.sandboxNativeType('Array');
-    
+
     Arr.enhance({
         // add some sugar (example: jar.lang.Array.push(arrayLike, value1, value2, ...) )
         concat: true,
@@ -57,7 +57,7 @@ JAR.module('jar.lang.Array', [
         var index = 0,
             newArray, len;
 
-        assertIsSet(arrayLike, MSG_REQUIRES_ARRAYLIKE);
+        assertIsNotNil(arrayLike, MSG_REQUIRES_ARRAYLIKE);
 
         mapFn && assertIsFunction(mapFn, MSG_NO_FUNCTION);
 

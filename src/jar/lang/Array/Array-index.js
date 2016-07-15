@@ -1,8 +1,8 @@
 JAR.module('jar.lang.Array.Array-index').$import([
-    '..assert::isSet',
+    '..assert::isNotNil',
     '..Object!derive',
     '.!find'
-]).$export(function(assertIsSet, Obj, Arr) {
+]).$export(function(assertIsNotNil, Obj, Arr) {
     'use strict';
 
     Arr.enhance({
@@ -20,7 +20,7 @@ JAR.module('jar.lang.Array.Array-index').$import([
             findIndexMethod = Arr['find' + (last ? 'Last' : '') + 'Index'];
 
         return function(searchElement, fromIndex) {
-            assertIsSet(this, assertionMessage);
+            assertIsNotNil(this, assertionMessage);
 
             return findIndexMethod(this, equalsSearchElement, searchElement, fromIndex);
         };

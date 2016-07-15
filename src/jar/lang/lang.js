@@ -20,13 +20,11 @@ JAR.module('jar.lang', [
     {
         System: [
             '::env',
-            '::isSet',
-            '::isFunction',
             '::isString',
             '!'
         ]
     }
-]).$export(function(getCurrentModuleData, env, isSet, isFunction, isString, config) {
+]).$export(function(getCurrentModuleData, env, isString, config) {
     'use strict';
 
     var sandboxes = {},
@@ -46,9 +44,9 @@ JAR.module('jar.lang', [
     lang = {
         /**
          * @access public
-         * 
+         *
          * @memberof jar.lang
-         * 
+         *
          * @param {string} typeString
          *
          * @return {Object}
@@ -64,11 +62,11 @@ JAR.module('jar.lang', [
         },
         /**
          * @access public
-         * 
+         *
          * @memberof jar.lang
-         * 
+         *
          * @param {String} formatString
-         * 
+         *
          * @return {String}
          */
         generateHash: function(formatString) {
@@ -77,11 +75,11 @@ JAR.module('jar.lang', [
 
         /**
          * @access public
-         * 
+         *
          * @memberOf jar.lang
-         * 
+         *
          * @param {String} domain
-         * 
+         *
          * @return {jar.lang~Sandbox}
          */
         sandbox: function(domain) {
@@ -91,19 +89,19 @@ JAR.module('jar.lang', [
 
     /**
      * @access private
-     * 
+     *
      * @memberOf jar.lang
      * @inner
-     * 
+     *
      * @param {Function} methodName
-     * 
+     *
      * @return {function(*):*}
      */
     function createDelegate(method) {
         /**
          *
          * @param {*} targetObject
-         * 
+         *
          * @return {*}
          */
         function delegater(targetObject) {
@@ -122,10 +120,10 @@ JAR.module('jar.lang', [
 
     /**
      * @access private
-     * 
+     *
      * @memberOf jar.lang
      * @inner
-     * 
+     *
      * @param {HTMLDocument} sandboxDoc
      * @param {string} scriptText
      */
@@ -143,21 +141,21 @@ JAR.module('jar.lang', [
      * We save the native object in an iframe as a property of the window object
      * and then access this property for example to extend the <code>Object.prototype</code>
      * The <code>Object.prototype</code> of the current document won't be affected by this.</p>
-     * 
+     *
      * <p>Note: the iframe has to be open all the time to make sure
      * that the current document has access to the native copies in some browsers.</p>
-     * 
+     *
      * <p>You can read more about this {@link http://dean.edwards.name/weblog/2006/11/hooray/|here}</p>
-     * 
+     *
      * @todo check browser support (should work in all legacy browsers)
-     * 
+     *
      * @access private
-     * 
+     *
      * @memberof jar.lang
      * @inner
-     * 
+     *
      * @class Sandbox
-     * 
+     *
      * @param {string} domain
      */
     function Sandbox(domain) {
@@ -185,12 +183,12 @@ JAR.module('jar.lang', [
 
     /**
      * @access public
-     * 
+     *
      * @method add
      * @memberof jar.lang~Sandbox#
-     * 
+     *
      * @param {string} value
-     * 
+     *
      * @return {*}
      */
     Sandbox.prototype.add = function(value) {
@@ -213,10 +211,10 @@ JAR.module('jar.lang', [
 
     /**
      * @access public
-     * 
+     *
      * @method remove
      * @memberof jar.lang~Sandbox#
-     * 
+     *
      * @param {string} value
      */
     Sandbox.prototype.remove = function(value) {
@@ -237,12 +235,12 @@ JAR.module('jar.lang', [
 
     /**
      * @access private
-     * 
+     *
      * @memberof jar.lang
      * @inner
-     * 
+     *
      * @param {String} typeString
-     * 
+     *
      * @return {Object}
      */
     function getNativeType(typeString) {
@@ -283,10 +281,10 @@ JAR.module('jar.lang', [
 
     /**
      * @access private
-     * 
+     *
      * @memberof jar.lang
      * @inner
-     * 
+     *
      * @param {String} typeString
      * @param {Object} Type
      */
@@ -319,10 +317,10 @@ JAR.module('jar.lang', [
 
     /**
      * @access private
-     * 
+     *
      * @memberOf jar.lang
      * @inner
-     * 
+     *
      * @return {String}
      */
     function randomHex() {
