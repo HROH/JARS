@@ -1879,10 +1879,7 @@
                      */
                     request: function(requestBundle) {
                         var module = this,
-                            isWaiting = module.isState(requestBundle ? MODULE_BUNDLE_WAITING : MODULE_WAITING, requestBundle),
-                            isLoaded = isWaiting ? false : module.isState(requestBundle ? MODULE_BUNDLE_LOADED : MODULE_LOADED, requestBundle),
-                            loadedMsgID = requestBundle ? MSG_BUNDLE_ALREADY_LOADED : MSG_MODULE_ALREADY_LOADED,
-                            loadingMsgID = requestBundle ? MSG_BUNDLE_ALREADY_LOADING : MSG_MODULE_ALREADY_LOADING;
+                            isWaiting = module.isState(requestBundle ? MODULE_BUNDLE_WAITING : MODULE_WAITING, requestBundle);
 
                         module.log(requestBundle ? MSG_BUNDLE_REQUESTED : MSG_MODULE_REQUESTED, requestBundle);
 
@@ -1890,10 +1887,25 @@
                             module['load' + (requestBundle ? 'Bundle' : '')]();
                         }
                         else {
-                            module.log(isLoaded ? loadedMsgID : (!requestBundle && module.isState(MODULE_LOADED_MANUAL)) ? MSG_MODULE_ALREADY_LOADED_MANUAL : loadingMsgID, requestBundle);
+                            module.logRequestState(requestBundle);
                         }
 
                         return module;
+                    },
+                    /**
+                     * @access public
+                     *
+                     * @memberof JAR~LoaderManager~Loader~Module#
+                     *
+                     * @param {Boolean} requestBundle
+                     */
+                    logRequestState: function(requestBundle) {
+                        var module = this,
+                            isLoaded = module.isState(requestBundle ? MODULE_BUNDLE_LOADED : MODULE_LOADED, requestBundle),
+                            loadedMsgID = requestBundle ? MSG_BUNDLE_ALREADY_LOADED : MSG_MODULE_ALREADY_LOADED,
+                            loadingMsgID = requestBundle ? MSG_BUNDLE_ALREADY_LOADING : MSG_MODULE_ALREADY_LOADING;
+
+                        module.log(isLoaded ? loadedMsgID : (!requestBundle && module.isState(MODULE_LOADED_MANUAL)) ? MSG_MODULE_ALREADY_LOADED_MANUAL : loadingMsgID, requestBundle);
                     },
                     /**
                      * @access public
