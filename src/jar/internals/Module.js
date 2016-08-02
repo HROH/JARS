@@ -106,7 +106,7 @@ JAR.internal('Module', function moduleSetup(InternalsManager) {
             var module = this;
 
             if(Resolver.isRootName(module.name)) {
-                module.bundleConfig = new Config(module, true);
+                module.config = module.bundleConfig = new Config(module, true);
             }
             else {
                 module.bundleConfig = new Config(module, true, module.loader.getModule(module.dep || Resolver.getRootName()).bundleConfig);
@@ -177,7 +177,7 @@ JAR.internal('Module', function moduleSetup(InternalsManager) {
          * @param {Boolean} [updateBundleConfig]
          */
         updateConfig: function(newConfig, updateBundleConfig) {
-            this[updateBundleConfig || Resolver.isRootName(this.name) ? 'bundleConfig' : 'config'].update(newConfig);
+            this[updateBundleConfig ? 'bundleConfig' : 'config'].update(newConfig);
         },
         /**
          * @access public
