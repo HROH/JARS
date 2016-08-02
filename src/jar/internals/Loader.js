@@ -24,80 +24,68 @@ JAR.internal('Loader', function loaderSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @alias JAR~Loader
-         *
-         * @memberof JAR~Loader#
-         */
-        constructor: Loader,
-        /**
-         * @access public
-         *
-         * @memberof JAR~Loader#
+         * @memberof JAR~Loader
          *
          * @param {String} loaderContext
          *
          * @return {Boolean}
          */
         flush: function(loaderContext) {
-            var loader = this;
-
             // TODO remove refs in modules with given loaderContext
-            loader.eachModules(function(module) {
+            Loader.eachModules(function(module) {
                 //module.abort(true);
             });
 
-            loader.getLogger().info('Successfully flushed Loader with context "${0}"', [loaderContext]);
+            Loader.getLogger().info('Successfully flushed Loader with context "${0}"', [loaderContext]);
 
             return flushSuccessful;
         },
         /**
          * @access public
          *
-         * @memberof JAR~Loader#
+         * @memberof JAR~Loader
          *
          * @param {Object} newConfig
          */
         setModuleConfig: function(newConfig) {
-            var loader = this,
-                System = loader.getSystem(),
+            var System = Loader.getSystem(),
                 modules;
 
             if (System.isArray(newConfig)) {
                 arrayEach(newConfig, function setModuleConfig(config) {
-                    loader.setModuleConfig(config);
+                    Loader.setModuleConfig(config);
                 });
             }
             else {
                 modules = newConfig.restrict ? Resolver.resolve(newConfig.restrict) : [Resolver.getRootName()];
 
                 arrayEach(modules, function updateModuleConfig(moduleName) {
-                    loader.getModule(moduleName).updateConfig(newConfig, Resolver.isBundle(moduleName));
+                    Loader.getModule(moduleName).updateConfig(newConfig, Resolver.isBundle(moduleName));
                 });
             }
 
-            return loader.getRoot().bundleConfig;
+            return Loader.getRoot().bundleConfig;
         },
         /**
          * @access public
          *
-         * @memberof JAR~Loader#
+         * @memberof JAR~Loader
          *
          * @param {String} moduleName
          */
         setCurrentModuleName: function(moduleName) {
-            this.currentModuleName = moduleName;
+            Loader.currentModuleName = moduleName;
         },
         /**
          * @access public
          *
-         * @memberof JAR~Loader#
+         * @memberof JAR~Loader
          *
          * @return {Object}
          */
         getCurrentModuleData: function() {
-            var loader = this,
-                moduleName = loader.currentModuleName,
-                module = loader.getModule(moduleName);
+            var moduleName = Loader.currentModuleName,
+                module = Loader.getModule(moduleName);
 
             return {
                 moduleName: moduleName,
@@ -108,37 +96,37 @@ JAR.internal('Loader', function loaderSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Loader#
+         * @memberof JAR~Loader
          *
          * @return {Object}
          */
         getRoot: function() {
-            return this.getModuleRef(Resolver.getRootName());
+            return Loader.getModuleRef(Resolver.getRootName());
         },
         /**
          * @access public
          *
-         * @memberof JAR~Loader#
+         * @memberof JAR~Loader
          *
          * @return {Object}
          */
         getSystem: function() {
-            return this.getModuleRef('System');
+            return Loader.getModuleRef('System');
         },
         /**
          * @access public
          *
-         * @memberof JAR~Loader#
+         * @memberof JAR~Loader
          *
          * @return {Object}
          */
         getLogger: function() {
-            return this.getModuleRef('System.Logger');
+            return Loader.getModuleRef('System.Logger');
         },
         /**
          * @access public
          *
-         * @memberof JAR~Loader#
+         * @memberof JAR~Loader
          *
          * @param {String} moduleName
          *
@@ -150,7 +138,7 @@ JAR.internal('Loader', function loaderSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Loader#
+         * @memberof JAR~Loader
          *
          * @param {String} moduleName
          *
@@ -169,7 +157,7 @@ JAR.internal('Loader', function loaderSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Loader#
+         * @memberof JAR~Loader
          *
          * @param {String} moduleName
          *
@@ -181,7 +169,7 @@ JAR.internal('Loader', function loaderSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Loader#
+         * @memberof JAR~Loader
          *
          * @param {Function(JAR~Module)} callback
          */
@@ -191,7 +179,7 @@ JAR.internal('Loader', function loaderSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Loader#
+         * @memberof JAR~Loader
          *
          * @param {String} moduleName
          * @param {Array} bundle
@@ -215,7 +203,7 @@ JAR.internal('Loader', function loaderSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Loader#
+         * @memberof JAR~Loader
          *
          * @param {String} listeningModuleName
          * @param {Array<string>} dependencies
@@ -232,7 +220,7 @@ JAR.internal('Loader', function loaderSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Loader#
+         * @memberof JAR~Loader
          *
          * @param {(Object|Array|String)} moduleNames
          * @param {Function(...*)} callback
