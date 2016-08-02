@@ -2,6 +2,7 @@
     'use strict';
 
     var InternalsManager = (function internalsManagerSetup() {
+        // TODO change INTERNALS_PATH to be more dynamic
         var INTERNALS_PATH = '../src/jar/internals/',
             internalsToLoad = [
                 'CircularDepsChecker',
