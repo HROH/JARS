@@ -1,4 +1,4 @@
-JAR.internal('CircularDepsChecker', function circularDepsCheckerSetup(InternalsManager) {
+JARS.internal('CircularDepsChecker', function circularDepsCheckerSetup(InternalsManager) {
         var utils = InternalsManager.get('utils'),
             hasOwnProp = utils.hasOwnProp,
             arrayEach = utils.arrayEach,
@@ -8,9 +8,9 @@ JAR.internal('CircularDepsChecker', function circularDepsCheckerSetup(InternalsM
         /**
          * @access public
          *
-         * @memberof JAR~CircularDepsChecker
+         * @memberof JARS~CircularDepsChecker
          *
-         * @param {JAR~Module} module
+         * @param {JARS~Module} module
          *
          * @return {Boolean}
          */
@@ -28,9 +28,9 @@ JAR.internal('CircularDepsChecker', function circularDepsCheckerSetup(InternalsM
         /**
          * @access public
          *
-         * @memberof JAR~CircularDepsChecker
+         * @memberof JARS~CircularDepsChecker
          *
-         * @param {JAR~Module} module
+         * @param {JARS~Module} module
          * @param {Object} [traversedModules]
          *
          * @return {Array}

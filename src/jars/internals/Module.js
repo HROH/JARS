@@ -1,4 +1,4 @@
-JAR.internal('Module', function moduleSetup(InternalsManager) {
+JARS.internal('Module', function moduleSetup(InternalsManager) {
     var QUEUE_SUCCESS = 0,
         QUEUE_ERROR = 1,
         arrayEach = InternalsManager.get('utils').arrayEach,
@@ -11,7 +11,7 @@ JAR.internal('Module', function moduleSetup(InternalsManager) {
     /**
      * @callback successCallback
      *
-     * @memberof JAR~Module
+     * @memberof JARS~Module
      * @inner
      *
      * @param {String} moduleName
@@ -21,7 +21,7 @@ JAR.internal('Module', function moduleSetup(InternalsManager) {
     /**
      * @callback failCallback
      *
-     * @memberof JAR~Module
+     * @memberof JARS~Module
      * @inner
      *
      * @param {String} moduleName
@@ -30,7 +30,7 @@ JAR.internal('Module', function moduleSetup(InternalsManager) {
     /**
      * @callback factoryCallback
      *
-     * @memberof JAR~Module
+     * @memberof JARS~Module
      * @inner
      *
      * @param {...*} dependencyRefs
@@ -43,10 +43,10 @@ JAR.internal('Module', function moduleSetup(InternalsManager) {
      *
      * @constructor Module
      *
-     * @memberof JAR
+     * @memberof JARS
      * @inner
      *
-     * @param {JAR~Loader} loader
+     * @param {JARS~Loader} loader
      * @param {String} moduleName
      */
     function Module(loader, moduleName) {
@@ -74,9 +74,9 @@ JAR.internal('Module', function moduleSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @alias JAR~Module
+         * @alias JARS~Module
          *
-         * @memberof JAR~Module#
+         * @memberof JARS~Module#
          */
         constructor: Module,
         /**
@@ -85,7 +85,7 @@ JAR.internal('Module', function moduleSetup(InternalsManager) {
          * @type {Number}
          * @default
          *
-         * @memberof JAR~Module#
+         * @memberof JARS~Module#
          */
         depsCounter: 0,
         /**
@@ -94,13 +94,13 @@ JAR.internal('Module', function moduleSetup(InternalsManager) {
          * @type {Number}
          * @default
          *
-         * @memberof JAR~Module#
+         * @memberof JARS~Module#
          */
         bundleCounter: 0,
         /**
          * @access public
          *
-         * @memberof JAR~Module#
+         * @memberof JARS~Module#
          */
         initConfig: function() {
             var module = this;
@@ -116,7 +116,7 @@ JAR.internal('Module', function moduleSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Module#
+         * @memberof JARS~Module#
          *
          * @return {Array}
          */
@@ -132,7 +132,7 @@ JAR.internal('Module', function moduleSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Module#
+         * @memberof JARS~Module#
          *
          * @param {String} fileType
          *
@@ -147,7 +147,7 @@ JAR.internal('Module', function moduleSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Module#
+         * @memberof JARS~Module#
          *
          * @return {String}
          */
@@ -159,7 +159,7 @@ JAR.internal('Module', function moduleSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Module#
+         * @memberof JARS~Module#
          *
          * @param {String} [fileType]
          *
@@ -171,7 +171,7 @@ JAR.internal('Module', function moduleSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Module#
+         * @memberof JARS~Module#
          *
          * @param {Object} newConfig
          * @param {Boolean} [updateBundleConfig]
@@ -182,7 +182,7 @@ JAR.internal('Module', function moduleSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Module#
+         * @memberof JARS~Module#
          */
         depsLoaded: function() {
             var module = this,
@@ -198,7 +198,7 @@ JAR.internal('Module', function moduleSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Module#
+         * @memberof JARS~Module#
          */
         bundleLoaded: function() {
             var module = this,
@@ -212,7 +212,7 @@ JAR.internal('Module', function moduleSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Module#
+         * @memberof JARS~Module#
          *
          * @param {Array<string>} moduleNames
          * @param {Boolean} [asBundle]
@@ -245,7 +245,7 @@ JAR.internal('Module', function moduleSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Module#
+         * @memberof JARS~Module#
          *
          * @param {Number} count
          * @param {Boolean} forBundle
@@ -270,11 +270,11 @@ JAR.internal('Module', function moduleSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Module#
+         * @memberof JARS~Module#
          *
          * @param {Boolean} requestBundle
          *
-         * @return {JAR~Module}
+         * @return {JARS~Module}
          */
         request: function(requestBundle) {
             var module = this,
@@ -295,7 +295,7 @@ JAR.internal('Module', function moduleSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Module#
+         * @memberof JARS~Module#
          */
         loadBundle: function() {
             var module = this;
@@ -321,10 +321,10 @@ JAR.internal('Module', function moduleSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Module#
+         * @memberof JARS~Module#
          *
-         * @param {JAR~Module~successCallback} callback
-         * @param {JAR~Module~failCallback} errback
+         * @param {JARS~Module~successCallback} callback
+         * @param {JARS~Module~failCallback} errback
          * @param {Boolean} loadBundle
          */
         onLoad: function(callback, errback, loadBundle) {
@@ -340,7 +340,7 @@ JAR.internal('Module', function moduleSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Module#
+         * @memberof JARS~Module#
          */
         load: function() {
             var module = this;
@@ -356,7 +356,7 @@ JAR.internal('Module', function moduleSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Module#
+         * @memberof JARS~Module#
          *
          * @return {Boolean}
          */
@@ -398,7 +398,7 @@ JAR.internal('Module', function moduleSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Module#
+         * @memberof JARS~Module#
          *
          * @param {Boolean} [abortBundle]
          * @param {String} [dependency]
@@ -440,7 +440,7 @@ JAR.internal('Module', function moduleSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Module#
+         * @memberof JARS~Module#
          *
          * @param {Boolean} forBundle
          *
@@ -454,7 +454,7 @@ JAR.internal('Module', function moduleSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Module#
+         * @memberof JARS~Module#
          *
          * @param {Boolean} forBundle
          *
@@ -466,10 +466,10 @@ JAR.internal('Module', function moduleSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Module#
+         * @memberof JARS~Module#
          *
-         * @param {JAR~Module~successCallback} callback
-         * @param {JAR~Module~failCallback} errback
+         * @param {JARS~Module~successCallback} callback
+         * @param {JARS~Module~failCallback} errback
          * @param {Boolean} enqueueBundle
          */
         enqueue: function(callback, errback, enqueueBundle) {
@@ -478,7 +478,7 @@ JAR.internal('Module', function moduleSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Module#
+         * @memberof JARS~Module#
          *
          * @param {Number} queueType
          * @param {Boolean} dequeueBundle
@@ -501,7 +501,7 @@ JAR.internal('Module', function moduleSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Module#
+         * @memberof JARS~Module#
          *
          * @param {(Object|Array|String)} dependencies
          */
@@ -517,9 +517,9 @@ JAR.internal('Module', function moduleSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Module#
+         * @memberof JARS~Module#
          *
-         * @param {JAR~Module~factoryCallback} factory
+         * @param {JARS~Module~factoryCallback} factory
          */
         $export: function(factory) {
             var module = this,
@@ -552,7 +552,7 @@ JAR.internal('Module', function moduleSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Module#
+         * @memberof JARS~Module#
          *
          * @param {Array} bundle
          */
@@ -567,7 +567,7 @@ JAR.internal('Module', function moduleSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Module#
+         * @memberof JARS~Module#
          */
         requestDeps: function() {
             var module = this,
@@ -591,7 +591,7 @@ JAR.internal('Module', function moduleSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Module#
+         * @memberof JARS~Module#
          *
          * @param {Boolean} [notifyBundle]
          */
@@ -601,7 +601,7 @@ JAR.internal('Module', function moduleSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Module#
+         * @memberof JARS~Module#
          */
         init: function() {
             var module = this,
@@ -628,7 +628,7 @@ JAR.internal('Module', function moduleSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Module#
+         * @memberof JARS~Module#
          *
          * @return {Array}
          */

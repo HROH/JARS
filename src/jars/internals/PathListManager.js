@@ -1,4 +1,4 @@
-JAR.internal('PathListManager', function pathListManagerSetup(InternalsManager) {
+JARS.internal('PathListManager', function pathListManagerSetup(InternalsManager) {
     var utils = InternalsManager.get('utils'),
         hasOwnProp = utils.hasOwnProp,
         arrayEach = utils.arrayEach,
@@ -22,7 +22,7 @@ JAR.internal('PathListManager', function pathListManagerSetup(InternalsManager) 
          *
          * @access public
          *
-         * @memberof JAR~PathListManager
+         * @memberof JARS~PathListManager
          *
          * @param {Function(array)} callback
          * @param {Boolean} forceRecompute
@@ -58,7 +58,7 @@ JAR.internal('PathListManager', function pathListManagerSetup(InternalsManager) 
     /**
      * @access private
      *
-     * @memberof JAR~PathListManager
+     * @memberof JARS~PathListManager
      * @inner
      *
      * @param {Array} modules
@@ -72,10 +72,10 @@ JAR.internal('PathListManager', function pathListManagerSetup(InternalsManager) 
     /**
      * @access private
      *
-     * @memberof JAR~PathListManager
+     * @memberof JARS~PathListManager
      * @inner
      *
-     * @param {JAR~Module} module
+     * @param {JARS~Module} module
      * @param {Boolean} [addBundle]
      */
     function addToPathList(module, addBundle) {
@@ -99,7 +99,7 @@ JAR.internal('PathListManager', function pathListManagerSetup(InternalsManager) 
     /**
      * @access private
      *
-     * @memberof JAR~PathListManager
+     * @memberof JARS~PathListManager
      * @inner
      */
     function resetModulesPathList() {

@@ -1,4 +1,4 @@
-JAR.module('System.Modules').$export(function() {
+JARS.module('System.Modules').$export(function() {
     var internals = this.$$internals,
         arrayEach = internals.get('utils').arrayEach,
         Loader = internals.get('Loader'),

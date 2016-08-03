@@ -3,7 +3,7 @@
 
     var InternalsManager = (function internalsManagerSetup() {
         // TODO change INTERNALS_PATH to be more dynamic
-        var INTERNALS_PATH = '../src/jar/internals/',
+        var INTERNALS_PATH = '../src/jars/internals/',
             internalsToLoad = [
                 'CircularDepsChecker',
                 'Config',
@@ -122,7 +122,7 @@
              * @access private
              *
              * @function
-             * @memberof JAR
+             * @memberof JARS~utils
              * @inner
              *
              * @param {Object} object
@@ -143,7 +143,7 @@
              * @access private
              *
              * @function
-             * @memberof JAR
+             * @memberof JARS~utils
              * @inner
              *
              * @param {...String} string
@@ -158,7 +158,7 @@
         /**
          * @access private
          *
-         * @memberof JAR
+         * @memberof JARS~utils
          * @inner
          *
          * @param {Object} object
@@ -179,7 +179,7 @@
         /**
          * @access private
          *
-         * @memberof JAR
+         * @memberof JARS~utils
          * @inner
          *
          * @param {Object} dest
@@ -198,7 +198,7 @@
         /**
          * @access private
          *
-         * @memberof JAR
+         * @memberof JARS~utils
          * @inner
          *
          * @param {(Array|NodeList)} array
@@ -249,7 +249,7 @@
             /**
              * @access public
              *
-             * @memberof JAR~SourceManager
+             * @memberof JARS~SourceManager
              *
              * @return {String}
              */
@@ -267,7 +267,7 @@
             /**
              * @access public
              *
-             * @memberof JAR~SourceManager
+             * @memberof JARS~SourceManager
              *
              * @param {String} moduleName
              * @param {String} path
@@ -287,7 +287,7 @@
             /**
              * @access public
              *
-             * @memberof JAR~SourceManager
+             * @memberof JARS~SourceManager
              *
              * @param {String} moduleName
              *
@@ -299,7 +299,7 @@
             /**
              * @access public
              *
-             * @memberof JAR~SourceManager
+             * @memberof JARS~SourceManager
              *
              * @param {String} moduleName
              *
@@ -321,8 +321,8 @@
     });
 
 
-    envGlobal.JAR = (function jarSetup() {
-        var previousJAR = envGlobal.JAR,
+    envGlobal.JARS = (function jarSetup() {
+        var previousJARS = envGlobal.JARS,
             moduleNamesQueue = [],
             configurators = {},
             configs = {
@@ -341,19 +341,19 @@
 
                 timeout: 5
             },
-            JAR;
+            JARS;
 
         /**
-         * @namespace JAR
+         * @namespace JARS
          */
-        JAR = {
+        JARS = {
             /**
              * @access public
              *
-             * @memberof JAR
+             * @memberof JARS
              *
              * @param {Function()} main
-             * @param {JAR~Module~failCallback} onAbort
+             * @param {JARS~Module~failCallback} onAbort
              */
             main: function(main, onAbort) {
                 var moduleNames = moduleNamesQueue;
@@ -406,7 +406,7 @@
             /**
              * @access public
              *
-             * @memberof JAR
+             * @memberof JARS
              *
              * @param {(String|Object|Array)} modules
              */
@@ -440,20 +440,20 @@
             /**
              * @access public
              *
-             * @memberof JAR
+             * @memberof JARS
              *
              * @param {String} moduleName
              * @param {Array} bundle
              */
             moduleAuto: function(moduleName, bundle) {
-                JAR.module(moduleName, bundle).$export();
+                JARS.module(moduleName, bundle).$export();
             },
 
             internal: InternalsManager.register,
             /**
              * @access public
              *
-             * @memberof JAR
+             * @memberof JARS
              *
              * @param {(Object|String)} config
              * @param {(Function)} configurator
@@ -467,7 +467,7 @@
                     }
                     else if (System.isObject(config)) {
                         InternalsManager.get('utils').objectEach(config, function addConfigurator(value, option) {
-                            JAR.addConfigurator(option, value);
+                            JARS.addConfigurator(option, value);
                         });
                     }
                 });
@@ -475,7 +475,7 @@
             /**
              * @access public
              *
-             * @memberof JAR
+             * @memberof JARS
              *
              * @param {(Object|String)} config
              * @param {*} [value]
@@ -492,7 +492,7 @@
                     }
                     else if (System.isObject(config)) {
                         InternalsManager.get('utils').objectEach(config, function configure(value, option) {
-                            JAR.configure(option, value);
+                            JARS.configure(option, value);
                         });
                     }
                 });
@@ -508,7 +508,7 @@
             /**
              * @access public
              *
-             * @memberof JAR
+             * @memberof JARS
              *
              * @param {String} context
              * @param {String} switchToContext
@@ -526,19 +526,19 @@
             /**
              * @access public
              *
-             * @memberof JAR
+             * @memberof JARS
              *
              * @return {Object}
              */
             noConflict: function() {
-                envGlobal.JAR = previousJAR;
+                envGlobal.JARS = previousJARS;
 
-                return JAR;
+                return JARS;
             },
             /**
              * @access public
              *
-             * @memberof JAR
+             * @memberof JARS
              *
              * @type {String}
              */
@@ -548,7 +548,7 @@
         /**
          * @access private
          *
-         * @memberof JAR
+         * @memberof JARS
          * @inner
          *
          * @param {Boolean} expose
@@ -556,7 +556,7 @@
         function exposeModulesGlobal(expose) {
             InternalsManager.ready(function() {
                 if (expose) {
-                    JAR.mods = InternalsManager.get('Loader').getRoot();
+                    JARS.mods = InternalsManager.get('Loader').getRoot();
                 }
             });
         }
@@ -564,10 +564,10 @@
         /**
          * @access private
          *
-         * @memberof JAR
+         * @memberof JARS
          * @inner
          */
-        function bootstrapJAR() {
+        function bootstrapJARS() {
             var basePath = './',
                 bootstrapConfig = envGlobal.jarconfig || {},
                 bootstrapModules = bootstrapConfig.modules,
@@ -590,11 +590,11 @@
 
                 bootstrapModules.unshift(defaultModuleConfig);
 
-                JAR.configure(bootstrapConfig);
+                JARS.configure(bootstrapConfig);
             });
         }
 
-        JAR.addConfigurator({
+        JARS.addConfigurator({
             debugging: function(debugConfig, oldDebugConfig, System) {
                 if (!System.isObject(debugConfig)) {
                     debugConfig = {
@@ -602,7 +602,7 @@
                     };
                 }
 
-                JAR.configure('modules', {
+                JARS.configure('modules', {
                     restrict: 'System.Logger',
 
                     config: debugConfig
@@ -619,7 +619,7 @@
                     exposeModulesGlobal(!isGlobal);
                 }
                 else {
-                    delete JAR.mods;
+                    delete JARS.mods;
                 }
 
                 return !!makeGlobal;
@@ -653,7 +653,7 @@
                 var environment = configs.environments[newEnvironment];
 
                 if (newEnvironment !== oldEnvironment && System.isObject(environment)) {
-                    JAR.configure(environment);
+                    JARS.configure(environment);
                 }
 
                 return newEnvironment;
@@ -699,9 +699,9 @@
             }
         });
 
-        bootstrapJAR();
+        bootstrapJARS();
 
-        return JAR;
+        return JARS;
     })();
 
 })(this);

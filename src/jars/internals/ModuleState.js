@@ -1,4 +1,4 @@
-JAR.internal('ModuleState', function(InternalsManager) {
+JARS.internal('ModuleState', function(InternalsManager) {
     var utils = InternalsManager.get('utils'),
         concatString = utils.concatString,
         SEPERATOR = '", "',
@@ -11,7 +11,7 @@ JAR.internal('ModuleState', function(InternalsManager) {
          * @type {Number}
          * @default
          *
-         * @memberof JAR~Module
+         * @memberof JARS~ModuleState
          * @inner
          */
         MSG_BUNDLE_ABORTED = 0,
@@ -22,7 +22,7 @@ JAR.internal('ModuleState', function(InternalsManager) {
          * @type {Number}
          * @default
          *
-         * @memberof JAR~Module
+         * @memberof JARS~ModuleState
          * @inner
          */
         MSG_BUNDLE_ALREADY_LOADED = 1,
@@ -33,7 +33,7 @@ JAR.internal('ModuleState', function(InternalsManager) {
          * @type {Number}
          * @default
          *
-         * @memberof JAR~Module
+         * @memberof JARS~ModuleState
          * @inner
          */
         MSG_BUNDLE_ALREADY_LOADING = 2,
@@ -44,7 +44,7 @@ JAR.internal('ModuleState', function(InternalsManager) {
          * @type {Number}
          * @default
          *
-         * @memberof JAR~Module
+         * @memberof JARS~ModuleState
          * @inner
          */
         MSG_BUNDLE_FOUND = 3,
@@ -55,7 +55,7 @@ JAR.internal('ModuleState', function(InternalsManager) {
          * @type {Number}
          * @default
          *
-         * @memberof JAR~Module
+         * @memberof JARS~ModuleState
          * @inner
          */
         MSG_BUNDLE_LOADED = 4,
@@ -66,7 +66,7 @@ JAR.internal('ModuleState', function(InternalsManager) {
          * @type {Number}
          * @default
          *
-         * @memberof JAR~Module
+         * @memberof JARS~ModuleState
          * @inner
          */
         MSG_BUNDLE_LOADING = 5,
@@ -77,7 +77,7 @@ JAR.internal('ModuleState', function(InternalsManager) {
          * @type {Number}
          * @default
          *
-         * @memberof JAR~Module
+         * @memberof JARS~ModuleState
          * @inner
          */
         MSG_BUNDLE_NOT_DEFINED = 6,
@@ -88,7 +88,7 @@ JAR.internal('ModuleState', function(InternalsManager) {
          * @type {Number}
          * @default
          *
-         * @memberof JAR~Module
+         * @memberof JARS~ModuleState
          * @inner
          */
         MSG_BUNDLE_NOTIFIED = 7,
@@ -99,7 +99,7 @@ JAR.internal('ModuleState', function(InternalsManager) {
          * @type {Number}
          * @default
          *
-         * @memberof JAR~Module
+         * @memberof JARS~ModuleState
          * @inner
          */
         MSG_BUNDLE_REQUESTED = 8,
@@ -110,7 +110,7 @@ JAR.internal('ModuleState', function(InternalsManager) {
          * @type {Number}
          * @default
          *
-         * @memberof JAR~Module
+         * @memberof JARS~ModuleState
          * @inner
          */
         MSG_BUNDLE_SUBSCRIBED = 9,
@@ -121,7 +121,7 @@ JAR.internal('ModuleState', function(InternalsManager) {
          * @type {Number}
          * @default
          *
-         * @memberof JAR~Module
+         * @memberof JARS~ModuleState
          * @inner
          */
         MSG_CIRCULAR_DEPENDENCIES_FOUND = 10,
@@ -132,7 +132,7 @@ JAR.internal('ModuleState', function(InternalsManager) {
          * @type {Number}
          * @default
          *
-         * @memberof JAR~Module
+         * @memberof JARS~ModuleState
          * @inner
          */
         MSG_DEPENDENCIES_FOUND = 11,
@@ -143,7 +143,7 @@ JAR.internal('ModuleState', function(InternalsManager) {
          * @type {Number}
          * @default
          *
-         * @memberof JAR~Module
+         * @memberof JARS~ModuleState
          * @inner
          */
         MSG_DEPENDENCY_FOUND = 12,
@@ -154,7 +154,7 @@ JAR.internal('ModuleState', function(InternalsManager) {
          * @type {Number}
          * @default
          *
-         * @memberof JAR~Module
+         * @memberof JARS~ModuleState
          * @inner
          */
         MSG_INTERCEPTION_ERROR = 13,
@@ -165,7 +165,7 @@ JAR.internal('ModuleState', function(InternalsManager) {
          * @type {Number}
          * @default
          *
-         * @memberof JAR~Module
+         * @memberof JARS~ModuleState
          * @inner
          */
         MSG_MODULE_ALREADY_LOADED = 14,
@@ -176,7 +176,7 @@ JAR.internal('ModuleState', function(InternalsManager) {
          * @type {Number}
          * @default
          *
-         * @memberof JAR~Module
+         * @memberof JARS~ModuleState
          * @inner
          */
         MSG_MODULE_ALREADY_LOADED_MANUAL = 15,
@@ -187,7 +187,7 @@ JAR.internal('ModuleState', function(InternalsManager) {
          * @type {Number}
          * @default
          *
-         * @memberof JAR~Module
+         * @memberof JARS~ModuleState
          * @inner
          */
         MSG_MODULE_ALREADY_LOADING = 16,
@@ -198,7 +198,7 @@ JAR.internal('ModuleState', function(InternalsManager) {
          * @type {Number}
          * @default
          *
-         * @memberof JAR~Module
+         * @memberof JARS~ModuleState
          * @inner
          */
         MSG_MODULE_ALREADY_REGISTERED = 17,
@@ -209,7 +209,7 @@ JAR.internal('ModuleState', function(InternalsManager) {
          * @type {Number}
          * @default
          *
-         * @memberof JAR~Module
+         * @memberof JARS~ModuleState
          * @inner
          */
         MSG_MODULE_LOADED = 18,
@@ -220,7 +220,7 @@ JAR.internal('ModuleState', function(InternalsManager) {
          * @type {Number}
          * @default
          *
-         * @memberof JAR~Module
+         * @memberof JARS~ModuleState
          * @inner
          */
         MSG_MODULE_LOADED_MANUAL = 19,
@@ -231,7 +231,7 @@ JAR.internal('ModuleState', function(InternalsManager) {
          * @type {Number}
          * @default
          *
-         * @memberof JAR~Module
+         * @memberof JARS~ModuleState
          * @inner
          */
         MSG_MODULE_LOADING = 20,
@@ -242,7 +242,7 @@ JAR.internal('ModuleState', function(InternalsManager) {
          * @type {Number}
          * @default
          *
-         * @memberof JAR~Module
+         * @memberof JARS~ModuleState
          * @inner
          */
         MSG_MODULE_NOTIFIED = 21,
@@ -253,7 +253,7 @@ JAR.internal('ModuleState', function(InternalsManager) {
          * @type {Number}
          * @default
          *
-         * @memberof JAR~Module
+         * @memberof JARS~ModuleState
          * @inner
          */
         MSG_MODULE_RECOVERING = 22,
@@ -264,7 +264,7 @@ JAR.internal('ModuleState', function(InternalsManager) {
          * @type {Number}
          * @default
          *
-         * @memberof JAR~Module
+         * @memberof JARS~ModuleState
          * @inner
          */
         MSG_MODULE_REGISTERING = 23,
@@ -275,7 +275,7 @@ JAR.internal('ModuleState', function(InternalsManager) {
          * @type {Number}
          * @default
          *
-         * @memberof JAR~Module
+         * @memberof JARS~ModuleState
          * @inner
          */
         MSG_MODULE_REQUESTED = 24,
@@ -286,7 +286,7 @@ JAR.internal('ModuleState', function(InternalsManager) {
          * @type {Number}
          * @default
          *
-         * @memberof JAR~Module
+         * @memberof JARS~ModuleState
          * @inner
          */
         MSG_MODULE_SUBSCRIBED = 25,
@@ -297,7 +297,7 @@ JAR.internal('ModuleState', function(InternalsManager) {
          * @type {Number}
          * @default
          *
-         * @memberof JAR~Module
+         * @memberof JARS~ModuleState
          * @inner
          */
         MSG_MODULE_TIMEOUT = 26,
@@ -312,7 +312,7 @@ JAR.internal('ModuleState', function(InternalsManager) {
          * @type {Number}
          * @default
          *
-         * @memberof JAR~Module
+         * @memberof JARS~ModuleState
          * @inner
          */
         MODULE_WAITING = 1,
@@ -323,7 +323,7 @@ JAR.internal('ModuleState', function(InternalsManager) {
          * @type {Number}
          * @default
          *
-         * @memberof JAR~Module
+         * @memberof JARS~ModuleState
          * @inner
          */
         MODULE_LOADING = 2,
@@ -334,7 +334,7 @@ JAR.internal('ModuleState', function(InternalsManager) {
          * @type {Number}
          * @default
          *
-         * @memberof JAR~Module
+         * @memberof JARS~ModuleState
          * @inner
          */
         MODULE_LOADED = 3,
@@ -345,7 +345,7 @@ JAR.internal('ModuleState', function(InternalsManager) {
          * @type {Number}
          * @default
          *
-         * @memberof JAR~Module
+         * @memberof JARS~ModuleState
          * @inner
          */
         MODULE_REGISTERED = 4,
@@ -356,7 +356,7 @@ JAR.internal('ModuleState', function(InternalsManager) {
          * @type {Number}
          * @default
          *
-         * @memberof JAR~Module
+         * @memberof JARS~ModuleState
          * @inner
          */
         MODULE_LOADED_MANUAL = 5,
@@ -369,7 +369,7 @@ JAR.internal('ModuleState', function(InternalsManager) {
          * @type {Number}
          * @default
          *
-         * @memberof JAR~Module
+         * @memberof JARS~ModuleState
          * @inner
          */
         MODULE_BUNDLE_WAITING = 0,
@@ -380,7 +380,7 @@ JAR.internal('ModuleState', function(InternalsManager) {
          * @type {Number}
          * @default
          *
-         * @memberof JAR~Module
+         * @memberof JARS~ModuleState
          * @inner
          */
         MODULE_BUNDLE_LOADING = 1,
@@ -391,7 +391,7 @@ JAR.internal('ModuleState', function(InternalsManager) {
          * @type {Number}
          * @default
          *
-         * @memberof JAR~Module
+         * @memberof JARS~ModuleState
          * @inner
          */
         MODULE_BUNDLE_REQUESTED = 2,
@@ -402,7 +402,7 @@ JAR.internal('ModuleState', function(InternalsManager) {
          * @type {Number}
          * @default
          *
-         * @memberof JAR~Module
+         * @memberof JARS~ModuleState
          * @inner
          */
         MODULE_BUNDLE_LOADED = 3,
@@ -593,7 +593,7 @@ JAR.internal('ModuleState', function(InternalsManager) {
          * @access public
          *
          * @function
-         * @memberof JAR~Module#
+         * @memberof JARS~ModuleState#
          *
          * @param {Number} messageType
          * @param {Boolean} logBundle
@@ -690,7 +690,7 @@ JAR.internal('ModuleState', function(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~ModuleState#
+         * @memberof JARS~ModuleState#
          *
          * @param {Object} interceptorInfo
          * @param {(String|Error)} error

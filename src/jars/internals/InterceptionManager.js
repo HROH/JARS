@@ -1,4 +1,4 @@
-JAR.internal('InterceptionManager', function(InternalsManager) {
+JARS.internal('InterceptionManager', function(InternalsManager) {
     var utils = InternalsManager.get('utils'),
         hasOwnProp = utils.hasOwnProp,
         objectEach = utils.objectEach,
@@ -11,7 +11,7 @@ JAR.internal('InterceptionManager', function(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~InterceptionManager
+         * @memberof JARS~InterceptionManager
          *
          * @param {Function(object)} interceptor
          */
@@ -25,7 +25,7 @@ JAR.internal('InterceptionManager', function(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~InterceptionManager
+         * @memberof JARS~InterceptionManager
          *
          * @return {Object}
          */
@@ -35,7 +35,7 @@ JAR.internal('InterceptionManager', function(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~InterceptionManager
+         * @memberof JARS~InterceptionManager
          *
          * @param {String} moduleName
          *
@@ -47,14 +47,14 @@ JAR.internal('InterceptionManager', function(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~InterceptionManager
+         * @memberof JARS~InterceptionManager
          *
          * @param {String} listeningModuleName
          * @param {String} interceptedModuleName
-         * @param {JAR~Module~successCallback} callback
-         * @param {JAR~Module~failCallback} errback
+         * @param {JARS~Module~successCallback} callback
+         * @param {JARS~Module~failCallback} errback
          *
-         * @return {JAR~Module~successCallback}
+         * @return {JARS~Module~successCallback}
          */
         intercept: function(loader, listeningModuleName, interceptedModuleName, callback, errback) {
             var interceptorInfo = extractInterceptorInfo(interceptedModuleName),
@@ -69,7 +69,7 @@ JAR.internal('InterceptionManager', function(InternalsManager) {
     /**
      * @access private
      *
-     * @memberof JAR~InterceptionManager
+     * @memberof JARS~InterceptionManager
      * @inner
      *
      * @param {String} moduleName

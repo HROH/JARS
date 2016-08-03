@@ -1,4 +1,4 @@
-JAR.internal('Loader', function loaderSetup(InternalsManager) {
+JARS.internal('Loader', function loaderSetup(InternalsManager) {
     var utils = InternalsManager.get('utils'),
         objectEach = utils.objectEach,
         arrayEach = utils.arrayEach,
@@ -12,7 +12,7 @@ JAR.internal('Loader', function loaderSetup(InternalsManager) {
      *
      * @namespace Loader
      *
-     * @memberof JAR
+     * @memberof JARS
      * @inner
      */
     Loader = {
@@ -24,7 +24,7 @@ JAR.internal('Loader', function loaderSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Loader
+         * @memberof JARS~Loader
          *
          * @param {String} loaderContext
          *
@@ -43,7 +43,7 @@ JAR.internal('Loader', function loaderSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Loader
+         * @memberof JARS~Loader
          *
          * @param {Object} newConfig
          */
@@ -69,7 +69,7 @@ JAR.internal('Loader', function loaderSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Loader
+         * @memberof JARS~Loader
          *
          * @param {String} moduleName
          */
@@ -79,7 +79,7 @@ JAR.internal('Loader', function loaderSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Loader
+         * @memberof JARS~Loader
          *
          * @return {Object}
          */
@@ -96,7 +96,7 @@ JAR.internal('Loader', function loaderSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Loader
+         * @memberof JARS~Loader
          *
          * @return {Object}
          */
@@ -106,7 +106,7 @@ JAR.internal('Loader', function loaderSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Loader
+         * @memberof JARS~Loader
          *
          * @return {Object}
          */
@@ -116,7 +116,7 @@ JAR.internal('Loader', function loaderSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Loader
+         * @memberof JARS~Loader
          *
          * @return {Object}
          */
@@ -126,7 +126,7 @@ JAR.internal('Loader', function loaderSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Loader
+         * @memberof JARS~Loader
          *
          * @param {String} moduleName
          *
@@ -138,11 +138,11 @@ JAR.internal('Loader', function loaderSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Loader
+         * @memberof JARS~Loader
          *
          * @param {String} moduleName
          *
-         * @return {JAR~Module}
+         * @return {JARS~Module}
          */
         getModule: function(moduleName) {
             if (Resolver.isBundle(moduleName)) {
@@ -157,11 +157,11 @@ JAR.internal('Loader', function loaderSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Loader
+         * @memberof JARS~Loader
          *
          * @param {String} moduleName
          *
-         * @return {JAR~Module}
+         * @return {JARS~Module}
          */
         createModule: function(moduleName) {
             return (Loader.modules[moduleName] = new Module(Loader, moduleName));
@@ -169,9 +169,9 @@ JAR.internal('Loader', function loaderSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Loader
+         * @memberof JARS~Loader
          *
-         * @param {Function(JAR~Module)} callback
+         * @param {Function(JARS~Module)} callback
          */
         eachModules: function(callback) {
             objectEach(Loader.modules, callback);
@@ -179,7 +179,7 @@ JAR.internal('Loader', function loaderSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Loader
+         * @memberof JARS~Loader
          *
          * @param {String} moduleName
          * @param {Array} bundle
@@ -203,12 +203,12 @@ JAR.internal('Loader', function loaderSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Loader
+         * @memberof JARS~Loader
          *
          * @param {String} listeningModuleName
          * @param {Array<string>} dependencies
-         * @param {JAR~Module~successCallback} callback
-         * @param {JAR~Module~failCallback} errback
+         * @param {JARS~Module~successCallback} callback
+         * @param {JARS~Module~failCallback} errback
          */
         subscribe: function(listeningModuleName, dependencies, callback, errback) {
             arrayEach(dependencies, function subscribe(dependency) {
@@ -220,11 +220,11 @@ JAR.internal('Loader', function loaderSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Loader
+         * @memberof JARS~Loader
          *
          * @param {(Object|Array|String)} moduleNames
          * @param {Function(...*)} callback
-         * @param {JAR~Module~failCallback} errback
+         * @param {JARS~Module~failCallback} errback
          * @param {Function(string)} progressback
          */
         $import: function(moduleNames, callback, errback, progressback) {

@@ -1,4 +1,4 @@
-JAR.internal('System', function systemSetup(InternalsManager) {
+JARS.internal('System', function systemSetup(InternalsManager) {
     var utils = InternalsManager.get('utils'),
         envGlobal = utils.global,
         arrayEach = utils.arrayEach,
@@ -176,7 +176,7 @@ JAR.internal('System', function systemSetup(InternalsManager) {
          *
          * @memberof System
          *
-         * @param {JAR~Interception} pluginRequest
+         * @param {JARS~Interception} pluginRequest
          */
         $plugIn: function(pluginRequest) {
             var module = pluginRequest.loader.getModule(pluginRequest.listener);

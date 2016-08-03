@@ -1,4 +1,4 @@
-JAR.internal('Interception', function interceptionSetup(InternalsManager) {
+JARS.internal('Interception', function interceptionSetup(InternalsManager) {
     var Resolver = InternalsManager.get('Resolver');
 
     /**
@@ -6,14 +6,14 @@ JAR.internal('Interception', function interceptionSetup(InternalsManager) {
      *
      * @constructor Interception
      *
-     * @memberof JAR
+     * @memberof JARS
      * @inner
      *
-     * @param {JAR~Loader} loader
+     * @param {JARS~Loader} loader
      * @param {String} listener
      * @param {Object} interceptorInfo
-     * @param {JAR~Module~successCallback} callback
-     * @param {JAR~Module~failCallback} errback
+     * @param {JARS~Module~successCallback} callback
+     * @param {JARS~Module~failCallback} errback
      */
     function Interception(loader, listener, interceptorInfo, callback, errback) {
         var interception = this;
@@ -29,9 +29,9 @@ JAR.internal('Interception', function interceptionSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @alias JAR~Interception
+         * @alias JARS~Interception
          *
-         * @memberof JAR~Interception#
+         * @memberof JARS~Interception#
          */
         constructor: Interception,
         /**
@@ -41,7 +41,7 @@ JAR.internal('Interception', function interceptionSetup(InternalsManager) {
          *
          * @return {String}
          *
-         * @memberof JAR~Interception#
+         * @memberof JARS~Interception#
          */
         getFilePath: function(fileType) {
             return !Resolver.isRootName(this.listener) && this.loader.getModule(this.listener).getFullPath(fileType);
@@ -51,10 +51,10 @@ JAR.internal('Interception', function interceptionSetup(InternalsManager) {
          *
          * @param {Array} moduleNames
          * @param {Function()} callback
-         * @param {JAR~Module~failCallback} errback
+         * @param {JARS~Module~failCallback} errback
          * @param {Function()} progressback
          *
-         * @memberof JAR~Interception#
+         * @memberof JARS~Interception#
          */
         $import: function(moduleNames, callback, errback, progressback) {
             this.loader.$import(moduleNames, callback, errback, progressback);
@@ -64,10 +64,10 @@ JAR.internal('Interception', function interceptionSetup(InternalsManager) {
          *
          * @param {Array} moduleNames
          * @param {Function()} callback
-         * @param {JAR~Module~failCallback} [errback]
+         * @param {JARS~Module~failCallback} [errback]
          * @param {Function()} [progressback]
          *
-         * @memberof JAR~Interception#
+         * @memberof JARS~Interception#
          */
         $importAndLink: function(moduleNames, callback, errback, progressback) {
             var interceptorDeps;
@@ -86,7 +86,7 @@ JAR.internal('Interception', function interceptionSetup(InternalsManager) {
          *
          * @param {*} data
          *
-         * @memberof JAR~Interception#
+         * @memberof JARS~Interception#
          */
         success: function(data) {
             var info = this.info;
@@ -98,7 +98,7 @@ JAR.internal('Interception', function interceptionSetup(InternalsManager) {
          *
          * @param {String} error
          *
-         * @memberof JAR~Interception#
+         * @memberof JARS~Interception#
          */
         fail: function(error) {
             var info = this.info,

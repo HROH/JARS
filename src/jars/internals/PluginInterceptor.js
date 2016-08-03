@@ -1,4 +1,4 @@
-JAR.internal('PluginInterceptor', function pluginInterceptorSetup() {
+JARS.internal('PluginInterceptor', function pluginInterceptorSetup() {
     var PluginInterceptor = {
         intercept: function(moduleRef, interception) {
             if (interception.loader.getSystem().isFunction(moduleRef.$plugIn)) {

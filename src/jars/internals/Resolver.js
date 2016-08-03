@@ -1,4 +1,4 @@
-JAR.internal('Resolver', function resolverSetup(InternalsManager) {
+JARS.internal('Resolver', function resolverSetup(InternalsManager) {
     var ROOT_MODULE_NAME = '*',
         BUNDLE_SUFFIX = '.*',
         RESOLVE_DEPS = 0,
@@ -37,14 +37,14 @@ JAR.internal('Resolver', function resolverSetup(InternalsManager) {
      *
      * @namespace Resolver
      *
-     * @memberof JAR
+     * @memberof JARS
      * @inner
      */
     Resolver = {
         /**
          * @access public
          *
-         * @memberof JAR~Resolver
+         * @memberof JARS~Resolver
          *
          * @param {String} moduleName
          *
@@ -56,7 +56,7 @@ JAR.internal('Resolver', function resolverSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Resolver
+         * @memberof JARS~Resolver
          *
          * @return {String}
          */
@@ -66,7 +66,7 @@ JAR.internal('Resolver', function resolverSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Resolver
+         * @memberof JARS~Resolver
          *
          * @param {String} moduleName
          *
@@ -92,7 +92,7 @@ JAR.internal('Resolver', function resolverSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Resolver
+         * @memberof JARS~Resolver
          *
          * @param {String} path
          *
@@ -104,7 +104,7 @@ JAR.internal('Resolver', function resolverSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Resolver
+         * @memberof JARS~Resolver
          *
          * @param {String} moduleName
          *
@@ -116,7 +116,7 @@ JAR.internal('Resolver', function resolverSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Resolver
+         * @memberof JARS~Resolver
          *
          * @param {String} moduleName
          *
@@ -138,7 +138,7 @@ JAR.internal('Resolver', function resolverSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Resolver
+         * @memberof JARS~Resolver
          *
          * @param {String} moduleName
          *
@@ -150,7 +150,7 @@ JAR.internal('Resolver', function resolverSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Resolver
+         * @memberof JARS~Resolver
          *
          * @param {String} moduleName
          * @param {String} version
@@ -163,7 +163,7 @@ JAR.internal('Resolver', function resolverSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Resolver
+         * @memberof JARS~Resolver
          *
          * @param {String} moduleName
          *
@@ -175,7 +175,7 @@ JAR.internal('Resolver', function resolverSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Resolver
+         * @memberof JARS~Resolver
          *
          * @param {String} moduleName
          *
@@ -187,7 +187,7 @@ JAR.internal('Resolver', function resolverSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Resolver
+         * @memberof JARS~Resolver
          *
          * @param {(String|Object|Array)} modules
          * @param {String} referenceModuleName
@@ -203,7 +203,7 @@ JAR.internal('Resolver', function resolverSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Resolver
+         * @memberof JARS~Resolver
          *
          * @param {(String|Object|Array)} modules
          * @param {String} referenceModuleName
@@ -218,14 +218,14 @@ JAR.internal('Resolver', function resolverSetup(InternalsManager) {
     /**
      * @access private
      *
-     * @memberof JAR~Resolver
+     * @memberof JARS~Resolver
      * @inner
      */
     ResolutionStrategies = {
         /**
          * @access public
          *
-         * @memberof JAR~ResolutionStrategies
+         * @memberof JARS~ResolutionStrategies
          *
          * @param {Array} modulesOrNested
          * @param {String} baseModuleName
@@ -245,7 +245,7 @@ JAR.internal('Resolver', function resolverSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~ResolutionStrategies
+         * @memberof JARS~ResolutionStrategies
          *
          * @param {Object} modulesOrNested
          * @param {String} baseModuleName
@@ -269,7 +269,7 @@ JAR.internal('Resolver', function resolverSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~ResolutionStrategies
+         * @memberof JARS~ResolutionStrategies
          *
          * @param {String} moduleName
          * @param {String} baseModuleName
@@ -311,7 +311,7 @@ JAR.internal('Resolver', function resolverSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~ResolutionStrategies
+         * @memberof JARS~ResolutionStrategies
          *
          * @return {Array<string>}
          */
@@ -321,7 +321,7 @@ JAR.internal('Resolver', function resolverSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~ResolutionStrategies
+         * @memberof JARS~ResolutionStrategies
          *
          * @param {String} moduleName
          * @param {String} baseModuleName
@@ -356,7 +356,7 @@ JAR.internal('Resolver', function resolverSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~ResolutionStrategies
+         * @memberof JARS~ResolutionStrategies
          *
          * @param {String} moduleName
          * @param {String} baseModuleName
@@ -379,7 +379,7 @@ JAR.internal('Resolver', function resolverSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~ResolutionStrategies
+         * @memberof JARS~ResolutionStrategies
          *
          * @param {String} moduleName
          * @param {String} baseModuleName
@@ -394,7 +394,7 @@ JAR.internal('Resolver', function resolverSetup(InternalsManager) {
     /**
      * @access private
      *
-     * @memberof JAR~Resolver
+     * @memberof JARS~Resolver
      * @inner
      *
      * @param {String} baseModuleName
@@ -411,7 +411,7 @@ JAR.internal('Resolver', function resolverSetup(InternalsManager) {
     /**
      * @access private
      *
-     * @memberof JAR~Resolver
+     * @memberof JARS~Resolver
      * @inner
      *
      * @param {String} moduleName

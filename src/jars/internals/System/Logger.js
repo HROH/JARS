@@ -1,4 +1,4 @@
-JAR.module('System.Logger').$import([
+JARS.module('System.Logger').$import([
     '.!',
     '.::isArray',
     '.::isFunction',

@@ -1,4 +1,4 @@
-JAR.internal('Config', function configSetup(InternalsManager) {
+JARS.internal('Config', function configSetup(InternalsManager) {
     var MIN_TIMEOUT = 0.5,
         STRING_CHECK = 'String',
         OBJECT_CHECK = 'Object',
@@ -60,12 +60,12 @@ JAR.internal('Config', function configSetup(InternalsManager) {
      *
      * @constructor Config
      *
-     * @memberof JAR
+     * @memberof JARS
      * @inner
      *
-     * @param {JAR~Module} module
+     * @param {JARS~Module} module
      * @param {Boolean} isBundleConfig
-     * @param {JAR~Config} parentConfig
+     * @param {JARS~Config} parentConfig
      */
     function Config(module, isBundleConfig, parentConfig) {
         this.module = module;
@@ -79,15 +79,15 @@ JAR.internal('Config', function configSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @alias JAR~Config
+         * @alias JARS~Config
          *
-         * @memberof JAR~Config#
+         * @memberof JARS~Config#
          */
         constructor: Config,
         /**
          * @access public
          *
-         * @memberof JAR~Config#
+         * @memberof JARS~Config#
          *
          * @param {Object} newOptions
          *
@@ -122,7 +122,7 @@ JAR.internal('Config', function configSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Config#
+         * @memberof JARS~Config#
          *
          * @param {String} option
          * @param {String} skipUntil
@@ -153,11 +153,11 @@ JAR.internal('Config', function configSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JAR~Config#
+         * @memberof JARS~Config#
          *
          * @param {String} moduleName
          *
-         * @return {JAR~ConfigOptions}
+         * @return {JARS~ConfigOptions}
          */
         inheritOptions: function() {
             return create(ConfigOptions, this.options);
@@ -169,18 +169,18 @@ JAR.internal('Config', function configSetup(InternalsManager) {
      *
      * @access private
      *
-     * @memberof JAR~Config
+     * @memberof JARS~Config
      * @inner
      *
      * @param {*} configValue
-     * @param {JAR~Module} [module]
+     * @param {JARS~Module} [module]
      * @param {Boolean} [forBundle]
      */
 
     /**
      * @access private
      *
-     * @memberof JAR~Config
+     * @memberof JARS~Config
      * @inner
      *
      * @param {String} configKey
@@ -210,7 +210,7 @@ JAR.internal('Config', function configSetup(InternalsManager) {
     /**
      * @access private
      *
-     * @memberof JAR~Config
+     * @memberof JARS~Config
      * @inner
      */
     function ConfigOptions() {
@@ -220,7 +220,7 @@ JAR.internal('Config', function configSetup(InternalsManager) {
     /**
      * @access private
      *
-     * @memberof JAR~Config
+     * @memberof JARS~Config
      * @inner
      */
     function PublicConfig() {}
