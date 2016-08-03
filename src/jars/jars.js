@@ -1,16 +1,16 @@
-(function globalSetup(envGlobal, undef) {
+(function globalSetup(envGlobal) {
     'use strict';
 
     var InternalsManager = (function internalsManagerSetup() {
-        // TODO change INTERNALS_PATH to be more dynamic
-        var INTERNALS_PATH = '../src/jars/internals/',
+        var INTERNALS_PATH = 'jars/internals/',
             internalsToLoad = [
                 'CircularDepsChecker',
-                'Config',
+                'ConfigsManager',
                 'Interception',
                 'InterceptionManager',
                 'Loader',
                 'Module',
+                'ModuleConfig',
                 'ModuleState',
                 'PartialModuleInterceptor',
                 'PathListManager',
@@ -66,8 +66,11 @@
         };
 
         function setupInternals() {
-            var InterceptionManager = InternalsManager.get('InterceptionManager'),
+            var SourceManager = InternalsManager.get('SourceManager'),
                 Loader = InternalsManager.get('Loader'),
+                System = InternalsManager.get('System'),
+                InterceptionManager = InternalsManager.get('InterceptionManager'),
+                basePath = SourceManager.getBasePath(),
                 systemModule;
 
             InterceptionManager.addInterceptor(InternalsManager.get('PluginInterceptor'));
@@ -81,16 +84,24 @@
             systemModule.$export(function systemFactory() {
                 // TODO maybe calling the internal factory for System is the better option
                 // to isolate System on a per context basis but right now this is enough
-                return InternalsManager.get('System');
+                return System;
             });
 
-            systemModule.updateConfig({
-                basePath: INTERNALS_PATH,
+            InternalsManager.get('ConfigsManager').update({
+                modules: [{
+                    basePath: basePath,
 
-                timeout: 10,
+                    cache: true,
 
-                cache: true
-            }, true);
+                    minified: false,
+
+                    timeout: 5
+                }, {
+                    restrict: 'System.*',
+
+                    basePath: basePath + INTERNALS_PATH
+                }]
+            });
 
             systemModule.request(true);
 
@@ -106,7 +117,9 @@
         }
 
         function loadInternal(internalName) {
-            InternalsManager.get('SourceManager').loadSource('internal:' + internalName, INTERNALS_PATH + internalName + '.js');
+            var SourceManager = InternalsManager.get('SourceManager');
+
+            SourceManager.loadSource('internal:' + internalName, SourceManager.getBasePath() + INTERNALS_PATH + internalName + '.js');
         }
 
         return InternalsManager;
@@ -231,10 +244,12 @@
     });
 
     InternalsManager.register('SourceManager', function sourceManagerSetup(InternalsManager) {
-        var arrayEach = InternalsManager.get('utils').arrayEach,
+        var SELF_PATH = 'jars/jars.js',
+            arrayEach = InternalsManager.get('utils').arrayEach,
             doc = envGlobal.document,
             head = doc.getElementsByTagName('head')[0],
-            scripts = {}, SourceManager;
+            scripts = {},
+            basePath, SourceManager;
 
 
         /**
@@ -263,6 +278,28 @@
                 });
 
                 return main;
+            },
+            /**
+             * @access public
+             *
+             * @memberof JARS~SourceManager
+             *
+             * @return {String}
+             */
+            getBasePath: function() {
+                var src;
+
+                if(!basePath) {
+                    arrayEach(doc.getElementsByTagName('script'), function findSelf(script) {
+                        src = script.src;
+
+                        return src.indexOf(SELF_PATH) > -1;
+                    });
+
+                    basePath = src.substring(0, src.lastIndexOf(SELF_PATH));
+                }
+
+                return basePath;
             },
             /**
              * @access public
@@ -320,27 +357,9 @@
         return SourceManager;
     });
 
-
     envGlobal.JARS = (function jarSetup() {
         var previousJARS = envGlobal.JARS,
             moduleNamesQueue = [],
-            configurators = {},
-            configs = {
-                environment: undef,
-
-                environments: {},
-
-                globalAccess: false,
-
-                supressErrors: false
-            },
-            defaultModuleConfig = {
-                cache: true,
-
-                minified: false,
-
-                timeout: 5
-            },
             JARS;
 
         /**
@@ -382,7 +401,7 @@
                         }
 
                         function onImport() {
-                            if (configs.supressErrors) {
+                            if (InternalsManager.get('ConfigsManager').get('supressErrors')) {
                                 try {
                                     Logger.log('Start executing main...');
                                     main.apply(root, arguments);
@@ -456,45 +475,11 @@
              * @memberof JARS
              *
              * @param {(Object|String)} config
-             * @param {(Function)} configurator
-             */
-            addConfigurator: function(config, configurator) {
-                InternalsManager.ready(function() {
-                    var System = InternalsManager.get('System');
-
-                    if (System.isString(config) && !InternalsManager.get('utils').hasOwnProp(configurators, config) && System.isFunction(configurator)) {
-                        configurators[config] = configurator;
-                    }
-                    else if (System.isObject(config)) {
-                        InternalsManager.get('utils').objectEach(config, function addConfigurator(value, option) {
-                            JARS.addConfigurator(option, value);
-                        });
-                    }
-                });
-            },
-            /**
-             * @access public
-             *
-             * @memberof JARS
-             *
-             * @param {(Object|String)} config
              * @param {*} [value]
              */
             configure: function(config, value) {
                 InternalsManager.ready(function() {
-                    var System = InternalsManager.get('System'),
-                        configurator;
-
-                    if (System.isString(config)) {
-                        configurator = configurators[config];
-
-                        configs[config] = System.isFunction(configurator) ? configurator(value, configs[config], System) : value;
-                    }
-                    else if (System.isObject(config)) {
-                        InternalsManager.get('utils').objectEach(config, function configure(value, option) {
-                            JARS.configure(option, value);
-                        });
-                    }
+                    InternalsManager.get('ConfigsManager').update(config, value);
                 });
 
                 return this;
@@ -517,10 +502,9 @@
              */
             flush: function(context, switchToContext) {
                 InternalsManager.ready(function() {
-                    InternalsManager.get('Loader').flush(context, switchToContext);
+                    InternalsManager.get('Loader').flush(context);
 
-                    exposeModulesGlobal(configs.globalAccess);
-
+                    JAR.configure('loaderContext', switchToContext);
                 });
             },
             /**
@@ -550,154 +534,29 @@
          *
          * @memberof JARS
          * @inner
-         *
-         * @param {Boolean} expose
-         */
-        function exposeModulesGlobal(expose) {
-            InternalsManager.ready(function() {
-                if (expose) {
-                    JARS.mods = InternalsManager.get('Loader').getRoot();
-                }
-            });
-        }
-
-        /**
-         * @access private
-         *
-         * @memberof JARS
-         * @inner
          */
         function bootstrapJARS() {
-            var basePath = './',
-                bootstrapConfig = envGlobal.jarconfig || {},
-                bootstrapModules = bootstrapConfig.modules,
-                main = InternalsManager.get('SourceManager').getMain();
+            var SourceManager = InternalsManager.get('SourceManager'),
+                main = SourceManager.getMain(),
+                bootstrapConfig = envGlobal.jarsConfig;
 
-            if (main) {
-                basePath = main.substring(0, main.lastIndexOf('/')) || basePath;
-
-                if (!bootstrapConfig.main) {
+            if(main) {
+                if(bootstrapConfig && !bootstrapConfig.main) {
                     bootstrapConfig.main = main;
                 }
-
-                defaultModuleConfig.basePath = basePath;
-            }
-
-            InternalsManager.ready(function() {
-                if (!InternalsManager.get('System').isArray(bootstrapModules)) {
-                    bootstrapModules = bootstrapConfig.modules = bootstrapModules ? [bootstrapModules] : [];
-                }
-
-                bootstrapModules.unshift(defaultModuleConfig);
-
-                JARS.configure(bootstrapConfig);
-            });
-        }
-
-        JARS.addConfigurator({
-            debugging: function(debugConfig, oldDebugConfig, System) {
-                if (!System.isObject(debugConfig)) {
-                    debugConfig = {
-                        debug: debugConfig
+                else {
+                    bootstrapConfig = {
+                        main: main
                     };
                 }
-
-                JARS.configure('modules', {
-                    restrict: 'System.Logger',
-
-                    config: debugConfig
-                });
-            },
-            /**
-             * @param {Boolean} makeGlobal
-             * @param {Boolean} isGlobal
-             *
-             * @return {Boolean}
-             */
-            globalAccess: function(makeGlobal, isGlobal) {
-                if (makeGlobal) {
-                    exposeModulesGlobal(!isGlobal);
-                }
-                else {
-                    delete JARS.mods;
-                }
-
-                return !!makeGlobal;
-            },
-            /**
-             * @param {String} mainScript
-             * @param {String} oldMainScript
-             *
-             * @return {String}
-             */
-            main: function(mainScript, oldMainScript) {
-                return oldMainScript || (mainScript && InternalsManager.get('SourceManager').loadSource('main', mainScript + '.js'));
-            },
-            /**
-             * @param {Object} newEnvironments
-             * @param {Object} oldEnvironments
-             *
-             * @return {Object<string, function>}
-             */
-            environments: function(newEnvironments, oldEnvironments) {
-                return InternalsManager.get('utils').objectMerge(oldEnvironments, newEnvironments);
-            },
-            /**
-             * @param {String} newEnvironment
-             * @param {String} oldEnvironment
-             * @param {Object} System
-             *
-             * @return {String}
-             */
-            environment: function(newEnvironment, oldEnvironment, System) {
-                var environment = configs.environments[newEnvironment];
-
-                if (newEnvironment !== oldEnvironment && System.isObject(environment)) {
-                    JARS.configure(environment);
-                }
-
-                return newEnvironment;
-            },
-            /**
-             * @param {(Object|Array)} newModuleConfigs
-             *
-             * @return {Object}
-             */
-            modules: function(newModuleConfigs) {
-                return InternalsManager.get('Loader').setModuleConfig(newModuleConfigs);
-            },
-            /**
-             * @param {String} newLoaderContext
-             * @param {String} oldLoaderContext
-             *
-             * @return {Object}
-             */
-            loaderContext: function(newLoaderContext, oldLoaderContext) {
-                if (newLoaderContext !== oldLoaderContext) {
-                    newLoaderContext = InternalsManager.get('Loader').setLoaderContext(newLoaderContext);
-
-                    exposeModulesGlobal(configs.globalAccess);
-                }
-
-                return newLoaderContext;
-            },
-            /**
-             * @param {Object} newInterceptors
-             * @param {Object} oldInterceptors
-             * @param {Object} System
-             *
-             * @return {Object}
-             */
-            interceptors: function(newInterceptors, oldInterceptors, System) {
-                var InterceptionManager = InternalsManager.get('InterceptionManager');
-
-                if (System.isObject(newInterceptors)) {
-                    InternalsManager.get('utils').objectEach(newInterceptors, InterceptionManager.addInterceptor);
-                }
-
-                return InterceptionManager.getInterceptors();
             }
-        });
+
+            if(bootstrapConfig) {
+                InternalsManager.ready(function() {
+                    InternalsManager.get('ConfigsManager').update(bootstrapConfig);
+                });
+            }
+        }
 
         bootstrapJARS();
 

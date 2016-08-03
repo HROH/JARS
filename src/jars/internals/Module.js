@@ -5,7 +5,7 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
         SourceManager = InternalsManager.get('SourceManager'),
         Resolver = InternalsManager.get('Resolver'),
         CircularDepsChecker = InternalsManager.get('CircularDepsChecker'),
-        Config = InternalsManager.get('Config'),
+        ModuleConfig = InternalsManager.get('ModuleConfig'),
         ModuleState = InternalsManager.get('ModuleState');
 
     /**
@@ -106,11 +106,11 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
             var module = this;
 
             if(Resolver.isRootName(module.name)) {
-                module.config = module.bundleConfig = new Config(module, true);
+                module.config = module.bundleConfig = new ModuleConfig(module, true);
             }
             else {
-                module.bundleConfig = new Config(module, true, module.loader.getModule(module.dep || Resolver.getRootName()).bundleConfig);
-                module.config = new Config(module, false, module.bundleConfig);
+                module.bundleConfig = new ModuleConfig(module, true, module.loader.getModule(module.dep || Resolver.getRootName()).bundleConfig);
+                module.config = new ModuleConfig(module, false, module.bundleConfig);
             }
         },
         /**

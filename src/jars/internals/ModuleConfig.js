@@ -1,4 +1,4 @@
-JARS.internal('Config', function configSetup(InternalsManager) {
+JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
     var MIN_TIMEOUT = 0.5,
         STRING_CHECK = 'String',
         OBJECT_CHECK = 'Object',
@@ -58,36 +58,36 @@ JARS.internal('Config', function configSetup(InternalsManager) {
     /**
      * @access private
      *
-     * @constructor Config
+     * @constructor ModuleConfig
      *
      * @memberof JARS
      * @inner
      *
      * @param {JARS~Module} module
      * @param {Boolean} isBundleConfig
-     * @param {JARS~Config} parentConfig
+     * @param {JARS~ModuleConfig} parentConfig
      */
-    function Config(module, isBundleConfig, parentConfig) {
+    function ModuleConfig(module, isBundleConfig, parentConfig) {
         this.module = module;
         this.isBundleConfig = isBundleConfig;
         this.defaultOptions = Resolver.getPathOptions(module.name);
         this.parentConfig = parentConfig;
-        this.options = parentConfig ? parentConfig.inheritOptions() : new ConfigOptions();
+        this.options = parentConfig ? parentConfig.inheritOptions() : new ModuleConfigOptions();
     }
 
-    Config.prototype = {
+    ModuleConfig.prototype = {
         /**
          * @access public
          *
-         * @alias JARS~Config
+         * @alias JARS~ModuleConfig
          *
-         * @memberof JARS~Config#
+         * @memberof JARS~ModuleConfig#
          */
-        constructor: Config,
+        constructor: ModuleConfig,
         /**
          * @access public
          *
-         * @memberof JARS~Config#
+         * @memberof JARS~ModuleConfig#
          *
          * @param {Object} newOptions
          *
@@ -122,7 +122,7 @@ JARS.internal('Config', function configSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JARS~Config#
+         * @memberof JARS~ModuleConfig#
          *
          * @param {String} option
          * @param {String} skipUntil
@@ -153,14 +153,14 @@ JARS.internal('Config', function configSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @memberof JARS~Config#
+         * @memberof JARS~ModuleConfig#
          *
          * @param {String} moduleName
          *
          * @return {JARS~ConfigOptions}
          */
         inheritOptions: function() {
-            return create(ConfigOptions, this.options);
+            return create(ModuleConfigOptions, this.options);
         }
     };
 
@@ -169,7 +169,7 @@ JARS.internal('Config', function configSetup(InternalsManager) {
      *
      * @access private
      *
-     * @memberof JARS~Config
+     * @memberof JARS~ModuleConfig
      * @inner
      *
      * @param {*} configValue
@@ -180,7 +180,7 @@ JARS.internal('Config', function configSetup(InternalsManager) {
     /**
      * @access private
      *
-     * @memberof JARS~Config
+     * @memberof JARS~ModuleConfig
      * @inner
      *
      * @param {String} configKey
@@ -210,20 +210,20 @@ JARS.internal('Config', function configSetup(InternalsManager) {
     /**
      * @access private
      *
-     * @memberof JARS~Config
+     * @memberof JARS~ModuleConfig
      * @inner
      */
-    function ConfigOptions() {
-        this.config = create(PublicConfig, this.config);
+    function ModuleConfigOptions() {
+        this.config = create(PublicModuleConfig, this.config);
     }
 
     /**
      * @access private
      *
-     * @memberof JARS~Config
+     * @memberof JARS~ModuleConfig
      * @inner
      */
-    function PublicConfig() {}
+    function PublicModuleConfig() {}
 
-    return Config;
+    return ModuleConfig;
 });
