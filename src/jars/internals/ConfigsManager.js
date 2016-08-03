@@ -1,4 +1,6 @@
 JARS.internal('ConfigsManager', function configsManagerSetup(InternalsManager) {
+    'use strict';
+
     var utils = InternalsManager.get('utils'),
         objectEach = utils.objectEach,
         objectMerge = utils.objectMerge,

@@ -1,4 +1,6 @@
 JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
+    'use strict';
+
     var MIN_TIMEOUT = 0.5,
         STRING_CHECK = 'String',
         OBJECT_CHECK = 'Object',

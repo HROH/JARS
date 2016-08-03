@@ -1,4 +1,6 @@
 JARS.internal('ModuleState', function(InternalsManager) {
+    'use strict';
+
     var utils = InternalsManager.get('utils'),
         concatString = utils.concatString,
         SEPERATOR = '", "',

@@ -1,8 +1,10 @@
 JARS.internal('CircularDepsChecker', function circularDepsCheckerSetup(InternalsManager) {
-        var utils = InternalsManager.get('utils'),
-            hasOwnProp = utils.hasOwnProp,
-            arrayEach = utils.arrayEach,
-            CircularDepsChecker;
+    'use strict';
+
+    var utils = InternalsManager.get('utils'),
+        hasOwnProp = utils.hasOwnProp,
+        arrayEach = utils.arrayEach,
+        CircularDepsChecker;
 
     CircularDepsChecker = {
         /**

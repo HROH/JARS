@@ -1,4 +1,6 @@
 JARS.internal('Module', function moduleSetup(InternalsManager) {
+    'use strict';
+
     var QUEUE_SUCCESS = 0,
         QUEUE_ERROR = 1,
         arrayEach = InternalsManager.get('utils').arrayEach,

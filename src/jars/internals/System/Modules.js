@@ -1,4 +1,6 @@
 JARS.module('System.Modules').$export(function() {
+    'use strict';
+
     var internals = this.$$internals,
         arrayEach = internals.get('utils').arrayEach,
         Loader = internals.get('Loader'),

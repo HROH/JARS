@@ -1,4 +1,6 @@
 JARS.internal('Resolver', function resolverSetup(InternalsManager) {
+    'use strict';
+
     var ROOT_MODULE_NAME = '*',
         BUNDLE_SUFFIX = '.*',
         RESOLVE_DEPS = 0,

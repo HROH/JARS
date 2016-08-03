@@ -1,4 +1,6 @@
 JARS.internal('InterceptionManager', function(InternalsManager) {
+    'use strict';
+
     var utils = InternalsManager.get('utils'),
         hasOwnProp = utils.hasOwnProp,
         objectEach = utils.objectEach,

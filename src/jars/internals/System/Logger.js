@@ -7,6 +7,8 @@ JARS.module('System.Logger').$import([
     '.::isString',
     '.::format'
 ]).$export(function(config, isArray, isFunction, isNumber, isObject, isString, format) {
+    'use strict';
+
     var internals = this.$$internals,
         utils = internals.get('utils'),
         hasOwnProp = utils.hasOwnProp,

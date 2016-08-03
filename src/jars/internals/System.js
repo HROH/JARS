@@ -1,4 +1,6 @@
 JARS.internal('System', function systemSetup(InternalsManager) {
+    'use strict';
+
     var utils = InternalsManager.get('utils'),
         envGlobal = utils.global,
         arrayEach = utils.arrayEach,

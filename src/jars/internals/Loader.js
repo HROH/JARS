@@ -1,4 +1,6 @@
 JARS.internal('Loader', function loaderSetup(InternalsManager) {
+    'use strict';
+
     var utils = InternalsManager.get('utils'),
         objectEach = utils.objectEach,
         arrayEach = utils.arrayEach,

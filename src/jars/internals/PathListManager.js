@@ -1,4 +1,6 @@
 JARS.internal('PathListManager', function pathListManagerSetup(InternalsManager) {
+    'use strict';
+
     var utils = InternalsManager.get('utils'),
         hasOwnProp = utils.hasOwnProp,
         arrayEach = utils.arrayEach,

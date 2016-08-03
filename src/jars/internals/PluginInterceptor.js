@@ -1,4 +1,6 @@
 JARS.internal('PluginInterceptor', function pluginInterceptorSetup() {
+    'use strict';
+
     var PluginInterceptor = {
         intercept: function(moduleRef, interception) {
             if (interception.loader.getSystem().isFunction(moduleRef.$plugIn)) {

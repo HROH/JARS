@@ -1,4 +1,6 @@
 JARS.internal('Interception', function interceptionSetup(InternalsManager) {
+    'use strict';
+
     var Resolver = InternalsManager.get('Resolver');
 
     /**
