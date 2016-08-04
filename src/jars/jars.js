@@ -15,6 +15,7 @@
                 'PartialModuleInterceptor',
                 'PathListManager',
                 'PluginInterceptor',
+                'ResolutionStrategies',
                 'Resolver',
                 'System'
             ],
