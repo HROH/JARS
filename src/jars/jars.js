@@ -360,7 +360,8 @@
     envGlobal.JARS = (function jarSetup() {
         var previousJARS = envGlobal.JARS,
             moduleNamesQueue = [],
-            JARS;
+            JARS_MAIN_LOGCONTEXT = 'JARS:main',
+            mainLogger, JARS;
 
         /**
          * @namespace JARS
@@ -383,13 +384,14 @@
                     var Loader = InternalsManager.get('Loader'),
                         root = Loader.getRoot();
 
+                    // TODO when mainLogger is defined skip this Loader.$import call
                     Loader.$import('System.*', function(System) {
-                        var Logger = System.Logger;
+                        mainLogger = mainLogger || new System.Logger(JARS_MAIN_LOGCONTEXT);
 
                         if (System.isFunction(main)) {
                             if (moduleNames.length) {
                                 Loader.$import(moduleNames, onImport, System.isFunction(onAbort) ? onAbort : function globalErrback(abortedModuleName) {
-                                    Logger.error('Import of "' + abortedModuleName + '" failed!');
+                                    mainLogger.error('Import of "' + abortedModuleName + '" failed!');
                                 });
                             }
                             else {
@@ -397,20 +399,20 @@
                             }
                         }
                         else {
-                            Logger.error('No main function provided');
+                            mainLogger.error('No main function provided');
                         }
 
                         function onImport() {
                             if (InternalsManager.get('ConfigsManager').get('supressErrors')) {
                                 try {
-                                    Logger.log('Start executing main...');
+                                    mainLogger.log('Start executing main...');
                                     main.apply(root, arguments);
                                 }
                                 catch (e) {
-                                    Logger.error((e.stack || e.message || '\n\tError in JavaScript-code: ' + e) + '\nexiting...');
+                                    mainLogger.error((e.stack || e.message || '\n\tError in JavaScript-code: ' + e) + '\nexiting...');
                                 }
                                 finally {
-                                    Logger.log('...done executing main');
+                                    mainLogger.log('...done executing main');
                                 }
                             }
                             else {

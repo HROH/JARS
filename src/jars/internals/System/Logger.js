@@ -5,8 +5,9 @@ JARS.module('System.Logger').$import([
     '.::isNumber',
     '.::isObject',
     '.::isString',
-    '.::format'
-]).$export(function(config, isArray, isFunction, isNumber, isObject, isString, format) {
+    '.::format',
+    '.Modules::getCurrentModuleData'
+]).$export(function(config, isArray, isFunction, isNumber, isObject, isString, format, getCurrentModuleData) {
     'use strict';
 
     var internals = this.$$internals,
@@ -19,7 +20,7 @@ JARS.module('System.Logger').$import([
         debuggers = {},
         loggerCache = {},
         stdLevels = 'log debug info warn error'.split(' '),
-        ROOT_LOGCONTEXT = 'JAR';
+        ROOT_LOGCONTEXT = getCurrentModuleData().moduleName;
 
     /**
      * @access private
