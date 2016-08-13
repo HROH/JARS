@@ -3,6 +3,7 @@ JARS.internal('ConfigsManager', function configsManagerSetup(InternalsManager) {
 
     var utils = InternalsManager.get('utils'),
         objectEach = utils.objectEach,
+        arrayEach = utils.arrayEach,
         objectMerge = utils.objectMerge,
         System = InternalsManager.get('System'),
         Loader = InternalsManager.get('Loader'),
@@ -102,13 +103,13 @@ JARS.internal('ConfigsManager', function configsManagerSetup(InternalsManager) {
                 return newLoaderContext;
             },
             /**
-             * @param {Object} newInterceptors
+             * @param {JARS~InterceptionManager~Interceptor[]} newInterceptors
              *
-             * @return {Object}
+             * @return {Object<String, JARS~InterceptionManager~Interceptor>}
              */
             interceptors: function(newInterceptors) {
-                if (System.isObject(newInterceptors)) {
-                    objectEach(newInterceptors, InterceptionManager.addInterceptor);
+                if (System.isArray(newInterceptors)) {
+                    arrayEach(newInterceptors, InterceptionManager.addInterceptor);
                 }
 
                 return InterceptionManager.getInterceptors();
@@ -116,7 +117,23 @@ JARS.internal('ConfigsManager', function configsManagerSetup(InternalsManager) {
         },
         ConfigsManager;
 
+    /**
+    * @access public
+    *
+    * @namespace ConfigsManager
+    *
+    * @memberof JARS
+    * @inner
+    */
     ConfigsManager = {
+        /**
+        * @access public
+        *
+        * @memberof JARS~ConfigsManager
+        *
+        * @param {(Object|String)} config
+        * @param {*} value
+        */
         update: function(config, value) {
             var configHook = configHooks[config];
 
@@ -124,14 +141,22 @@ JARS.internal('ConfigsManager', function configsManagerSetup(InternalsManager) {
                 configs[config] = System.isFunction(configHook) ? configHook(value, configs[config]) : value;
             }
             else if (System.isObject(config)) {
-                objectEach(config, function configure(value, option) {
+                objectEach(config, function update(value, option) {
                     ConfigsManager.update(option, value);
                 });
             }
         },
-
-        get: function(config) {
-            return configs[config];
+        /**
+        * @access public
+        *
+        * @memberof JARS~ConfigsManager
+        *
+        * @param {String} option
+        *
+        * @return {*}
+        */
+        get: function(option) {
+            return configs[option];
         }
     };
 
