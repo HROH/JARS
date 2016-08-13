@@ -108,7 +108,7 @@ JARS.module('System.Logger').$import([
      * @inner
      *
      * @param {String} context
-     * @param {(Array|String)} contextList
+     * @param {(String[]|String)} contextList
      *
      * @return {Boolean}
      */

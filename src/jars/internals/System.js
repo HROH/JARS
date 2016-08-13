@@ -3,7 +3,6 @@ JARS.internal('System', function systemSetup(InternalsManager) {
 
     var utils = InternalsManager.get('utils'),
         envGlobal = utils.global,
-        arrayEach = utils.arrayEach,
         hasOwnProp = utils.hasOwnProp,
         types = 'Null Undefined String Number Boolean Array Arguments Object Function Date RegExp'.split(' '),
         RE_TEMPLATE_KEY = /\$\{(.*?)\}/g,
@@ -131,26 +130,13 @@ JARS.internal('System', function systemSetup(InternalsManager) {
          *
          * @memberof System
          *
-         * @param {Object} instance
-         * @param {(Function|Array<function>)} Class
+         * @param {*} instance
+         * @param {Function} Class
          *
          * @return {Boolean}
          */
         isA: function(instance, Class) {
-            var isInstanceOf = false;
-
-            if (System.isArray(Class)) {
-                arrayEach(Class, function isA(OneClass) {
-                    isInstanceOf = System.isA(instance, OneClass);
-
-                    return isInstanceOf;
-                });
-            }
-            else {
-                isInstanceOf = instance instanceof Class;
-            }
-
-            return isInstanceOf;
+            return instance instanceof Class;
         },
         /**
          * @access public
@@ -158,7 +144,7 @@ JARS.internal('System', function systemSetup(InternalsManager) {
          * @memberof System
          *
          * @param {String} message
-         * @param {(Object|Array)} data
+         * @param {(Object<String, String>|String[])} data
          *
          * @return {String}
          */
@@ -317,7 +303,7 @@ JARS.internal('System', function systemSetup(InternalsManager) {
         };
     }
 
-    arrayEach(types, function createTypeValidator(type) {
+    utils.arrayEach(types, function createTypeValidator(type) {
         System['is' + type] = typeValidatorSetup(type);
     });
 
