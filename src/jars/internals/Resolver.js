@@ -60,7 +60,7 @@ JARS.internal('Resolver', function resolverSetup(InternalsManager) {
                 fileName = options.fileName = pathParts.pop(),
                 firstLetterFileName = fileName.charAt(0);
 
-            versionParts[1] && (options.versionDir = Resolver.ensureEndsWithSlash(versionParts[1]));
+            options.versionDir = versionParts[1] ? Resolver.ensureEndsWithSlash(versionParts[1]) : '';
 
             if (firstLetterFileName === firstLetterFileName.toLowerCase()) {
                 pathParts.push(fileName);
@@ -170,11 +170,11 @@ JARS.internal('Resolver', function resolverSetup(InternalsManager) {
          *
          * @memberof JARS~Resolver
          *
-         * @param {(String|Object|Array)} modules
+         * @param {JARS~Module~DependencyDefinition} modules
          * @param {String} referenceModuleName
          * @param {Number} resolveType
          *
-         * @return {Array<string>}
+         * @return {String[]}
          */
         resolve: function(modules, referenceModuleName, resolveType) {
             var resolutionStrategy = ResolutionStrategies[System.getType(modules)];
@@ -186,10 +186,10 @@ JARS.internal('Resolver', function resolverSetup(InternalsManager) {
          *
          * @memberof JARS~Resolver
          *
-         * @param {(String|Object|Array)} modules
+         * @param {JARS~Module~BundleDefinition} modules
          * @param {String} referenceModuleName
          *
-         * @return {Array<string>}
+         * @return {String[]}
          */
         resolveBundle: function(modules, referenceModuleName) {
             return Resolver.resolve(modules, referenceModuleName, ResolutionStrategies.RESOLVE_BUNDLE);

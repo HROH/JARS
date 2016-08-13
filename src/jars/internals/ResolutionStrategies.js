@@ -45,7 +45,7 @@ JARS.internal('ResolutionStrategies', function(InternalsManager) {
          * @param {String} baseModuleName
          * @param {Number} resolveType
          *
-         * @return {Array<string>}
+         * @return {String[]}
          */
         array: function(modulesOrNested, baseModuleName, resolveType) {
             var resolvedModules = [];
@@ -65,7 +65,7 @@ JARS.internal('ResolutionStrategies', function(InternalsManager) {
          * @param {String} baseModuleName
          * @param {Number} resolveType
          *
-         * @return {Array<string>}
+         * @return {String[]}
          */
         object: function(modulesOrNested, baseModuleName, resolveType) {
             var resolvedModules = [];
@@ -89,7 +89,7 @@ JARS.internal('ResolutionStrategies', function(InternalsManager) {
          * @param {String} baseModuleName
          * @param {Number} resolveType
          *
-         * @return {Array<string>}
+         * @return {String[]}
          */
         string: function(moduleName, baseModuleName, resolveType) {
             var isRelative = isRelativeModuleName(moduleName),
@@ -127,7 +127,7 @@ JARS.internal('ResolutionStrategies', function(InternalsManager) {
          *
          * @memberof JARS~ResolutionStrategies
          *
-         * @return {Array<string>}
+         * @return {String[]}
          */
         undefined: function() {
             return [];
