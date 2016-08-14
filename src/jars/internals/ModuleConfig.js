@@ -52,13 +52,13 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
     });
 
     addConfigTransform('timeout', 'Number', function timeoutTransform(timeout) {
-        return (timeout > MIN_TIMEOUT ? timeout : MIN_TIMEOUT) * 1000;
+        return (timeout > MIN_TIMEOUT ? timeout : MIN_TIMEOUT);
     });
 
     addConfigTransform('versionDir', STRING_CHECK, Resolver.ensureEndsWithSlash);
 
     /**
-     * @access private
+     * @access public
      *
      * @constructor ModuleConfig
      *
@@ -66,8 +66,8 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
      * @inner
      *
      * @param {JARS~Module} module
-     * @param {Boolean} isBundleConfig
-     * @param {JARS~ModuleConfig} parentConfig
+     * @param {Boolean} [isBundleConfig = false]
+     * @param {JARS~ModuleConfig} [parentConfig]
      */
     function ModuleConfig(module, isBundleConfig, parentConfig) {
         this.module = module;
@@ -92,8 +92,6 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
          * @memberof JARS~ModuleConfig#
          *
          * @param {Object} newOptions
-         *
-         * @return {Object}
          */
         update: function(newOptions) {
             var config = this,
@@ -157,9 +155,7 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
          *
          * @memberof JARS~ModuleConfig#
          *
-         * @param {String} moduleName
-         *
-         * @return {JARS~ConfigOptions}
+         * @return {JARS~ModuleConfig~ModuleConfigOptions}
          */
         inheritOptions: function() {
             return create(ModuleConfigOptions, this.options);
@@ -167,7 +163,7 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
     };
 
     /**
-     * @callback transformFunction
+     * @callback TransformFunction
      *
      * @access private
      *
@@ -187,7 +183,7 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
      *
      * @param {String} configKey
      * @param {String} typeCheck
-     * @param {transformFunction} [transform]
+     * @param {TransformFunction} [transform]
      */
     function addConfigTransform(configKey, typeCheck, transform) {
         configTransforms[configKey] = {
@@ -197,6 +193,17 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
         };
     }
 
+    /**
+     * @access private
+     *
+     * @memberof JARS~ModuleConfig
+     * @inner
+     *
+     * @param {Function()} Constructor
+     * @param {Object} [newProto]
+     *
+     * @return {Object}
+     */
     function create(Constructor, newProto) {
         var oldProto = Constructor.prototype, object;
 
@@ -210,7 +217,9 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
     }
 
     /**
-     * @access private
+     * @access public
+     *
+     * @constructor ModuleConfigOptions
      *
      * @memberof JARS~ModuleConfig
      * @inner
@@ -220,7 +229,9 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
     }
 
     /**
-     * @access private
+     * @access public
+     *
+     * @constructor PublicModuleConfig
      *
      * @memberof JARS~ModuleConfig
      * @inner

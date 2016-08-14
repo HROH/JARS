@@ -6,16 +6,24 @@ JARS.internal('InterceptionManager', function(InternalsManager) {
         objectEach = utils.objectEach,
         Interception = InternalsManager.get('Interception'),
         interceptors = {},
-        interceptorInfoCache = {},
+        interceptionInfoCache = {},
         InterceptionManager;
 
+    /**
+    * @access public
+    *
+    * @namespace InterceptionManager
+    *
+    * @memberof JARS
+    * @inner
+    */
     InterceptionManager = {
         /**
          * @access public
          *
          * @memberof JARS~InterceptionManager
          *
-         * @param {Function(object)} interceptor
+         * @param {JARS~InterceptionManager~Interceptor} interceptor
          */
         addInterceptor: function(interceptor) {
             var interceptorType =  interceptor.type;
@@ -29,7 +37,7 @@ JARS.internal('InterceptionManager', function(InternalsManager) {
          *
          * @memberof JARS~InterceptionManager
          *
-         * @return {Object}
+         * @return {Object<String, JARS~InterceptionManager~Interceptor>}
          */
         getInterceptors: function() {
             return interceptors;
@@ -44,7 +52,7 @@ JARS.internal('InterceptionManager', function(InternalsManager) {
          * @return {String}
          */
         removeInterceptionData: function(moduleName) {
-            return extractInterceptorInfo(moduleName).moduleName;
+            return extractInterceptionInfo(moduleName).moduleName;
         },
         /**
          * @access public
@@ -53,13 +61,13 @@ JARS.internal('InterceptionManager', function(InternalsManager) {
          *
          * @param {String} listeningModuleName
          * @param {String} interceptedModuleName
-         * @param {JARS~Module~successCallback} callback
-         * @param {JARS~Module~failCallback} errback
+         * @param {JARS~Module~SuccessCallback} callback
+         * @param {JARS~Module~FailCallback} errback
          *
-         * @return {JARS~Module~successCallback}
+         * @return {JARS~Module~SuccessCallback}
          */
         intercept: function(loader, listeningModuleName, interceptedModuleName, callback, errback) {
-            var interceptorInfo = extractInterceptorInfo(interceptedModuleName),
+            var interceptorInfo = extractInterceptionInfo(interceptedModuleName),
                 interceptor = interceptors[interceptorInfo.type];
 
             return interceptor ? function interceptorListener(moduleName) {
@@ -76,18 +84,18 @@ JARS.internal('InterceptionManager', function(InternalsManager) {
      *
      * @param {String} moduleName
      *
-     * @return {Object}
+     * @return {JARS~InterceptionManager~InterceptionInfo}
      */
-    function extractInterceptorInfo(moduleName) {
-        var interceptorInfo = interceptorInfoCache[moduleName],
+    function extractInterceptionInfo(moduleName) {
+        var interceptionInfo = interceptionInfoCache[moduleName],
             moduleParts;
 
-        if (!interceptorInfo) {
+        if (!interceptionInfo) {
             objectEach(interceptors, function findInterceptor(interceptor, interceptorType) {
                 if (moduleName.indexOf(interceptorType) > -1) {
                     moduleParts = moduleName.split(interceptorType);
 
-                    interceptorInfo = {
+                    interceptionInfo = {
                         moduleName: moduleParts.shift(),
 
                         type: interceptorType,
@@ -99,13 +107,46 @@ JARS.internal('InterceptionManager', function(InternalsManager) {
                 }
             });
 
-            interceptorInfo = interceptorInfoCache[moduleName] = interceptorInfo || {
+            interceptionInfo = interceptionInfoCache[moduleName] = interceptionInfo || {
                 moduleName: moduleName
             };
         }
 
-        return interceptorInfo;
+        return interceptionInfo;
     }
+
+    /**
+     * @typedef InterceptionInfo
+     *
+     * @memberof JARS~InterceptionManager
+     * @inner
+     *
+     * @property {String} moduleName
+     * @property {String} type
+     * @property {String} data
+     */
+
+    /**
+     * @access public
+     *
+     * @interface Interceptor
+     *
+     * @memberof JARS~InterceptionManager
+     * @inner
+     */
+
+    /**
+     * @member {String} JARS~InterceptionManager~Interceptor#type
+     */
+
+     /**
+     * @method intercept
+     *
+     * @memberof JARS~InterceptionManager~Interceptor#
+     *
+     * @param {*} moduleRef
+     * @param {JARS~Interception} interception
+     */
 
     return InterceptionManager;
 });

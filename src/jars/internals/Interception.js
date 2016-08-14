@@ -1,10 +1,12 @@
 JARS.internal('Interception', function interceptionSetup(InternalsManager) {
     'use strict';
 
-    var Resolver = InternalsManager.get('Resolver');
+    var Resolver = InternalsManager.get('Resolver'),
+        ModuleLogger = InternalsManager.get('ModuleLogger'),
+        MSG_INTERCEPTION_ERROR = ModuleLogger.addError('error in interception of this module by interceptor "${type}" with data "${data}"');
 
     /**
-     * @access private
+     * @access public
      *
      * @constructor Interception
      *
@@ -13,15 +15,15 @@ JARS.internal('Interception', function interceptionSetup(InternalsManager) {
      *
      * @param {JARS~Loader} loader
      * @param {String} listener
-     * @param {Object} interceptorInfo
-     * @param {JARS~Module~successCallback} callback
-     * @param {JARS~Module~failCallback} errback
+     * @param {JARS~InterceptionManager~InterceptionInfo} interceptionInfo
+     * @param {JARS~Module~SuccessCallback} callback
+     * @param {JARS~Module~FailCallback} errback
      */
-    function Interception(loader, listener, interceptorInfo, callback, errback) {
+    function Interception(loader, listener, interceptionInfo, callback, errback) {
         var interception = this;
 
         interception.listener = listener;
-        interception.info = interceptorInfo;
+        interception.info = interceptionInfo;
         interception.loader = loader;
         interception._callback = callback;
         interception._errback = errback;
@@ -39,11 +41,11 @@ JARS.internal('Interception', function interceptionSetup(InternalsManager) {
         /**
          * @access public
          *
+         * @memberof JARS~Interception#
+         *
          * @param {String} fileType
          *
          * @return {String}
-         *
-         * @memberof JARS~Interception#
          */
         getFilePath: function(fileType) {
             return !Resolver.isRootName(this.listener) && this.loader.getModule(this.listener).getFullPath(fileType);
@@ -51,12 +53,12 @@ JARS.internal('Interception', function interceptionSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @param {Array} moduleNames
-         * @param {Function()} callback
-         * @param {JARS~Module~failCallback} errback
-         * @param {Function()} progressback
-         *
          * @memberof JARS~Interception#
+         *
+         * @param {JARS~Module~DependencyDefinition} moduleNames
+         * @param {Function()} callback
+         * @param {JARS~Module~FailCallback} [errback]
+         * @param {Function()} [progressback]
          */
         $import: function(moduleNames, callback, errback, progressback) {
             this.loader.$import(moduleNames, callback, errback, progressback);
@@ -64,12 +66,12 @@ JARS.internal('Interception', function interceptionSetup(InternalsManager) {
         /**
          * @access public
          *
+         * @memberof JARS~Interception#
+         *
          * @param {Array} moduleNames
          * @param {Function()} callback
-         * @param {JARS~Module~failCallback} [errback]
+         * @param {JARS~Module~FailCallback} [errback]
          * @param {Function()} [progressback]
-         *
-         * @memberof JARS~Interception#
          */
         $importAndLink: function(moduleNames, callback, errback, progressback) {
             var interceptorDeps;
@@ -86,9 +88,9 @@ JARS.internal('Interception', function interceptionSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @param {*} data
-         *
          * @memberof JARS~Interception#
+         *
+         * @param {*} data
          */
         success: function(data) {
             var info = this.info;
@@ -98,15 +100,15 @@ JARS.internal('Interception', function interceptionSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @param {String} error
-         *
          * @memberof JARS~Interception#
+         *
+         * @param {(String|Error)} error
          */
         fail: function(error) {
             var info = this.info,
                 dependency = info.moduleName;
 
-            this.loader.getModule(dependency).state.logInterceptorError(info, error);
+            this.loader.getModule(dependency).logger.log(error || MSG_INTERCEPTION_ERROR, info);
 
             this._errback(info.moduleName + info.type + info.data);
         }

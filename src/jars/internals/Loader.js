@@ -10,7 +10,7 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
         Loader;
 
     /**
-     * @access private
+     * @access public
      *
      * @namespace Loader
      *
@@ -110,7 +110,7 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
          *
          * @memberof JARS~Loader
          *
-         * @return {Object}
+         * @return {System}
          */
         getSystem: function() {
             return Loader.getModuleRef('System');
@@ -120,7 +120,7 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
          *
          * @memberof JARS~Loader
          *
-         * @return {Object}
+         * @return {System.Logger}
          */
         getLogger: function() {
             return Loader.getModuleRef('System.Logger');
@@ -208,9 +208,9 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
          * @memberof JARS~Loader
          *
          * @param {String} listeningModuleName
-         * @param {Array<string>} dependencies
-         * @param {JARS~Module~successCallback} callback
-         * @param {JARS~Module~failCallback} errback
+         * @param {String[]} dependencies
+         * @param {JARS~Module~SuccessCallback} callback
+         * @param {JARS~Module~FailCallback} errback
          */
         subscribe: function(listeningModuleName, dependencies, callback, errback) {
             arrayEach(dependencies, function subscribe(dependency) {
@@ -224,9 +224,9 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
          *
          * @memberof JARS~Loader
          *
-         * @param {(Object|Array|String)} moduleNames
+         * @param {JARS~Module~DependencyDefinition} moduleNames
          * @param {Function(...*)} callback
-         * @param {JARS~Module~failCallback} errback
+         * @param {JARS~Module~FailCallback} errback
          * @param {Function(string)} progressback
          */
         $import: function(moduleNames, callback, errback, progressback) {
