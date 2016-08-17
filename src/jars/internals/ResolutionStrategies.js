@@ -3,7 +3,6 @@ JARS.internal('ResolutionStrategies', function(InternalsManager) {
 
     var utils = InternalsManager.get('utils'),
         objectEach = utils.objectEach,
-        concatString = utils.concatString,
         arrayEach = utils.arrayEach,
         resolveTypeToStrategyMap = [],
         resolutionErrorTemplates = [],
@@ -15,15 +14,15 @@ JARS.internal('ResolutionStrategies', function(InternalsManager) {
         RESOLVE_BUNDLE = 1,
         RESOLVE_NESTED = 2,
         RE_LEADING_DOT = /^\./,
-        DEFAULT_RESOLUTION_ERROR_MESSAGE = 'Could not resolve "${0}" relative to "${1}":',
+        DEFAULT_RESOLUTION_ERROR_MESSAGE = 'Could not resolve "${0}" relative to "${1}": ',
         MUST_NOT_START_WITH_DOT = 'a bundle modulename must not start with a "."',
         ResolutionStrategies, Resolver;
 
-    resolutionErrorTemplates[RESOLVE_DEPS] = concatString(DEFAULT_RESOLUTION_ERROR_MESSAGE, 'a dependency modulename must be absolute or relative to the current module.');
+    resolutionErrorTemplates[RESOLVE_DEPS] = createResolutionErrorMessage('a dependency modulename must be absolute or relative to the current module.');
     resolveTypeToStrategyMap[RESOLVE_DEPS] = 'deps';
-    resolutionErrorTemplates[RESOLVE_BUNDLE] = concatString(DEFAULT_RESOLUTION_ERROR_MESSAGE, MUST_NOT_START_WITH_DOT, '.');
+    resolutionErrorTemplates[RESOLVE_BUNDLE] = createResolutionErrorMessage(MUST_NOT_START_WITH_DOT + '.');
     resolveTypeToStrategyMap[RESOLVE_BUNDLE] = 'bundle';
-    resolutionErrorTemplates[RESOLVE_NESTED] = concatString(DEFAULT_RESOLUTION_ERROR_MESSAGE, MUST_NOT_START_WITH_DOT, 'or only contain it as a special symbol.');
+    resolutionErrorTemplates[RESOLVE_NESTED] = createResolutionErrorMessage(MUST_NOT_START_WITH_DOT + ' or only contain it as a special symbol.');
     resolveTypeToStrategyMap[RESOLVE_NESTED] = 'nested';
 
     /**
@@ -246,6 +245,10 @@ JARS.internal('ResolutionStrategies', function(InternalsManager) {
      */
     function getResolver() {
         return Resolver || (Resolver = InternalsManager.get('Resolver'));
+    }
+
+    function createResolutionErrorMessage(message) {
+        return DEFAULT_RESOLUTION_ERROR_MESSAGE + message;
     }
 
     return ResolutionStrategies;
