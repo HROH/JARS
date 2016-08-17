@@ -7,6 +7,9 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
         Resolver = InternalsManager.get('Resolver'),
         Module = InternalsManager.get('Module'),
         InterceptionManager = InternalsManager.get('InterceptionManager'),
+        modulesRegistry = {},
+        currentModuleName = Resolver.getRootName(),
+        currentLoaderContext = 'default',
         Loader;
 
     /**
@@ -18,11 +21,6 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
      * @inner
      */
     Loader = {
-        context: 'default',
-
-        modules: {},
-
-        currentModuleName: Resolver.getRootName(),
         /**
          * @access public
          *
@@ -33,14 +31,22 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
          * @return {Boolean}
          */
         flush: function(loaderContext) {
+            var flushSuccessful = false;
+
             // TODO remove refs in modules with given loaderContext
             Loader.eachModules(function(module) {
-                //module.abort(true);
+                flushSuccessful = module.flush(loaderContext);
+
+                return !flushSuccessful;
             });
 
             Loader.getLogger().info('Successfully flushed Loader with context "${0}"', [loaderContext]);
 
             return flushSuccessful;
+        },
+
+        setLoaderContext: function(newLoaderContext) {
+            currentLoaderContext = newLoaderContext;
         },
         /**
          * @access public
@@ -76,7 +82,7 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
          * @param {String} moduleName
          */
         setCurrentModuleName: function(moduleName) {
-            Loader.currentModuleName = moduleName;
+            currentModuleName = moduleName;
         },
         /**
          * @access public
@@ -86,7 +92,7 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
          * @return {Object}
          */
         getCurrentModuleData: function() {
-            var moduleName = Loader.currentModuleName,
+            var moduleName = currentModuleName,
                 module = Loader.getModule(moduleName);
 
             return {
@@ -154,7 +160,7 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
                 moduleName = InterceptionManager.removeInterceptionData(moduleName);
             }
 
-            return Loader.modules[moduleName] || Loader.createModule(moduleName);
+            return modulesRegistry[moduleName] || Loader.createModule(moduleName);
         },
         /**
          * @access public
@@ -166,7 +172,7 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
          * @return {JARS~Module}
          */
         createModule: function(moduleName) {
-            return (Loader.modules[moduleName] = new Module(Loader, moduleName));
+            return (modulesRegistry[moduleName] = new Module(Loader, moduleName));
         },
         /**
          * @access public
@@ -176,7 +182,7 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
          * @param {Function(JARS~Module)} callback
          */
         eachModules: function(callback) {
-            objectEach(Loader.modules, callback);
+            objectEach(modulesRegistry, callback);
         },
         /**
          * @access public
@@ -194,7 +200,7 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
             if(moduleName) {
                 module = Loader.getModule(moduleName);
 
-                bundle && module.defineBundle(bundle);
+                module.defineBundle(bundle);
             }
             else {
                 Loader.getLogger().error('No modulename provided');
@@ -230,7 +236,7 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
          * @param {Function(string)} progressback
          */
         $import: function(moduleNames, callback, errback, progressback) {
-            var moduleName = Loader.currentModuleName,
+            var moduleName = currentModuleName,
                 System = Loader.getSystem(),
                 refs = [],
                 refsIndexLookUp = {},
