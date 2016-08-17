@@ -1,317 +1,13 @@
 JARS.internal('ModuleState', function(InternalsManager) {
     'use strict';
 
-    var utils = InternalsManager.get('utils'),
-        concatString = utils.concatString,
-        SEPERATOR = '", "',
-
-        // Module message indices
-        /**
-         * @access private
-         *
-         * @constant
-         * @type {Number}
-         * @default
-         *
-         * @memberof JARS~ModuleState
-         * @inner
-         */
-        MSG_BUNDLE_ABORTED = 0,
-        /**
-         * @access private
-         *
-         * @constant
-         * @type {Number}
-         * @default
-         *
-         * @memberof JARS~ModuleState
-         * @inner
-         */
-        MSG_BUNDLE_ALREADY_LOADED = 1,
-        /**
-         * @access private
-         *
-         * @constant
-         * @type {Number}
-         * @default
-         *
-         * @memberof JARS~ModuleState
-         * @inner
-         */
-        MSG_BUNDLE_ALREADY_LOADING = 2,
-        /**
-         * @access private
-         *
-         * @constant
-         * @type {Number}
-         * @default
-         *
-         * @memberof JARS~ModuleState
-         * @inner
-         */
-        MSG_BUNDLE_FOUND = 3,
-        /**
-         * @access private
-         *
-         * @constant
-         * @type {Number}
-         * @default
-         *
-         * @memberof JARS~ModuleState
-         * @inner
-         */
-        MSG_BUNDLE_LOADED = 4,
-        /**
-         * @access private
-         *
-         * @constant
-         * @type {Number}
-         * @default
-         *
-         * @memberof JARS~ModuleState
-         * @inner
-         */
-        MSG_BUNDLE_LOADING = 5,
-        /**
-         * @access private
-         *
-         * @constant
-         * @type {Number}
-         * @default
-         *
-         * @memberof JARS~ModuleState
-         * @inner
-         */
-        MSG_BUNDLE_NOT_DEFINED = 6,
-        /**
-         * @access private
-         *
-         * @constant
-         * @type {Number}
-         * @default
-         *
-         * @memberof JARS~ModuleState
-         * @inner
-         */
-        MSG_BUNDLE_NOTIFIED = 7,
-        /**
-         * @access private
-         *
-         * @constant
-         * @type {Number}
-         * @default
-         *
-         * @memberof JARS~ModuleState
-         * @inner
-         */
-        MSG_BUNDLE_REQUESTED = 8,
-        /**
-         * @access private
-         *
-         * @constant
-         * @type {Number}
-         * @default
-         *
-         * @memberof JARS~ModuleState
-         * @inner
-         */
-        MSG_BUNDLE_SUBSCRIBED = 9,
-        /**
-         * @access private
-         *
-         * @constant
-         * @type {Number}
-         * @default
-         *
-         * @memberof JARS~ModuleState
-         * @inner
-         */
-        MSG_CIRCULAR_DEPENDENCIES_FOUND = 10,
-        /**
-         * @access private
-         *
-         * @constant
-         * @type {Number}
-         * @default
-         *
-         * @memberof JARS~ModuleState
-         * @inner
-         */
-        MSG_DEPENDENCIES_FOUND = 11,
-        /**
-         * @access private
-         *
-         * @constant
-         * @type {Number}
-         * @default
-         *
-         * @memberof JARS~ModuleState
-         * @inner
-         */
-        MSG_DEPENDENCY_FOUND = 12,
-        /**
-         * @access private
-         *
-         * @constant
-         * @type {Number}
-         * @default
-         *
-         * @memberof JARS~ModuleState
-         * @inner
-         */
-        MSG_INTERCEPTION_ERROR = 13,
-        /**
-         * @access private
-         *
-         * @constant
-         * @type {Number}
-         * @default
-         *
-         * @memberof JARS~ModuleState
-         * @inner
-         */
-        MSG_MODULE_ALREADY_LOADED = 14,
-        /**
-         * @access private
-         *
-         * @constant
-         * @type {Number}
-         * @default
-         *
-         * @memberof JARS~ModuleState
-         * @inner
-         */
-        MSG_MODULE_ALREADY_LOADED_MANUAL = 15,
-        /**
-         * @access private
-         *
-         * @constant
-         * @type {Number}
-         * @default
-         *
-         * @memberof JARS~ModuleState
-         * @inner
-         */
-        MSG_MODULE_ALREADY_LOADING = 16,
-        /**
-         * @access private
-         *
-         * @constant
-         * @type {Number}
-         * @default
-         *
-         * @memberof JARS~ModuleState
-         * @inner
-         */
-        MSG_MODULE_ALREADY_REGISTERED = 17,
-        /**
-         * @access private
-         *
-         * @constant
-         * @type {Number}
-         * @default
-         *
-         * @memberof JARS~ModuleState
-         * @inner
-         */
-        MSG_MODULE_LOADED = 18,
-        /**
-         * @access private
-         *
-         * @constant
-         * @type {Number}
-         * @default
-         *
-         * @memberof JARS~ModuleState
-         * @inner
-         */
-        MSG_MODULE_LOADED_MANUAL = 19,
-        /**
-         * @access private
-         *
-         * @constant
-         * @type {Number}
-         * @default
-         *
-         * @memberof JARS~ModuleState
-         * @inner
-         */
-        MSG_MODULE_LOADING = 20,
-        /**
-         * @access private
-         *
-         * @constant
-         * @type {Number}
-         * @default
-         *
-         * @memberof JARS~ModuleState
-         * @inner
-         */
-        MSG_MODULE_NOTIFIED = 21,
-        /**
-         * @access private
-         *
-         * @constant
-         * @type {Number}
-         * @default
-         *
-         * @memberof JARS~ModuleState
-         * @inner
-         */
-        MSG_MODULE_RECOVERING = 22,
-        /**
-         * @access private
-         *
-         * @constant
-         * @type {Number}
-         * @default
-         *
-         * @memberof JARS~ModuleState
-         * @inner
-         */
-        MSG_MODULE_REGISTERING = 23,
-        /**
-         * @access private
-         *
-         * @constant
-         * @type {Number}
-         * @default
-         *
-         * @memberof JARS~ModuleState
-         * @inner
-         */
-        MSG_MODULE_REQUESTED = 24,
-        /**
-         * @access private
-         *
-         * @constant
-         * @type {Number}
-         * @default
-         *
-         * @memberof JARS~ModuleState
-         * @inner
-         */
-        MSG_MODULE_SUBSCRIBED = 25,
-        /**
-         * @access private
-         *
-         * @constant
-         * @type {Number}
-         * @default
-         *
-         * @memberof JARS~ModuleState
-         * @inner
-         */
-        MSG_MODULE_TIMEOUT = 26,
-
-        MSG_DEPENDENCY_ABORTED = 27,
+    var ModuleLogger = InternalsManager.get('ModuleLogger'),
 
         // Module states
         /**
          * @access private
          *
-         * @constant
-         * @type {Number}
+         * @constant {Number}
          * @default
          *
          * @memberof JARS~ModuleState
@@ -321,8 +17,7 @@ JARS.internal('ModuleState', function(InternalsManager) {
         /**
          * @access private
          *
-         * @constant
-         * @type {Number}
+         * @constant {Number}
          * @default
          *
          * @memberof JARS~ModuleState
@@ -332,8 +27,7 @@ JARS.internal('ModuleState', function(InternalsManager) {
         /**
          * @access private
          *
-         * @constant
-         * @type {Number}
+         * @constant {Number}
          * @default
          *
          * @memberof JARS~ModuleState
@@ -343,8 +37,7 @@ JARS.internal('ModuleState', function(InternalsManager) {
         /**
          * @access private
          *
-         * @constant
-         * @type {Number}
+         * @constant {Number}
          * @default
          *
          * @memberof JARS~ModuleState
@@ -354,8 +47,7 @@ JARS.internal('ModuleState', function(InternalsManager) {
         /**
          * @access private
          *
-         * @constant
-         * @type {Number}
+         * @constant {Number}
          * @default
          *
          * @memberof JARS~ModuleState
@@ -367,8 +59,7 @@ JARS.internal('ModuleState', function(InternalsManager) {
         /**
          * @access private
          *
-         * @constant
-         * @type {Number}
+         * @constant {Number}
          * @default
          *
          * @memberof JARS~ModuleState
@@ -378,8 +69,7 @@ JARS.internal('ModuleState', function(InternalsManager) {
         /**
          * @access private
          *
-         * @constant
-         * @type {Number}
+         * @constant {Number}
          * @default
          *
          * @memberof JARS~ModuleState
@@ -389,8 +79,7 @@ JARS.internal('ModuleState', function(InternalsManager) {
         /**
          * @access private
          *
-         * @constant
-         * @type {Number}
+         * @constant {Number}
          * @default
          *
          * @memberof JARS~ModuleState
@@ -400,328 +89,341 @@ JARS.internal('ModuleState', function(InternalsManager) {
         /**
          * @access private
          *
-         * @constant
-         * @type {Number}
+         * @constant {Number}
          * @default
          *
          * @memberof JARS~ModuleState
          * @inner
          */
         MODULE_BUNDLE_LOADED = 3,
-        messageTemplates = [],
-        messageTypes = {},
+        WAITING_STATES = [MODULE_WAITING, MODULE_BUNDLE_WAITING],
+        LOADING_STATES = [MODULE_LOADING, MODULE_BUNDLE_LOADING],
+        LOADED_STATES = [MODULE_LOADED, MODULE_BUNDLE_LOADED],
+        LOADED_MANUAL_STATES = [MODULE_LOADED_MANUAL],
+        REGISTERED_STATES = [MODULE_REGISTERED],
+        REQUESTED_STATES = [null, MODULE_BUNDLE_REQUESTED],
         MODULE = 'module',
         BUNDLE = 'bundle',
         LOADING = 'loading',
         LOADED = 'loaded',
-        MANUAL = 'manual',
-        REQUESTED = 'requested',
-        START_LOAD = concatString('started', LOADING),
-        END_LOAD = concatString('finished', LOADING),
-        FOUND = 'found',
-        SUBSCRIBED_TO = 'subscribed to "${subs}"',
-        NOTIFIED_BY = 'was notified by "${pub}"',
-        ATTEMPTED_TO = 'attempted to',
-        ATTEMPTED_TO_LOAD = concatString(ATTEMPTED_TO, 'load'),
-        BUT_ALREADY = 'but is already',
-        BUT_ALREADY_LOADING = concatString(BUT_ALREADY, LOADING),
-        BUT_ALREADY_LOADED = concatString(BUT_ALREADY, LOADED),
-        ATTEMPTED_TO_LOAD_MODULE = concatString(ATTEMPTED_TO_LOAD, MODULE),
-        ATTEMPTED_TO_LOAD_BUNDLE = concatString(ATTEMPTED_TO_LOAD, BUNDLE),
-        ABORTED_LOADING = concatString('aborted', LOADING);
+        MANUAL = ' manual',
+        STARTED_LOADING = 'started ' + LOADING,
+        FINISHED_LOADING = 'finished ' + LOADING,
+        ATTEMPTED_TO = 'attempted to ',
+        ATTEMPTED_TO_LOAD = ATTEMPTED_TO + 'load ',
+        BUT_ALREADY = ' but is already ',
+        ABORTED_LOADING = 'aborted ' + LOADING + ' ',
+        PROBLEMS_WITH = ' because of problems with ',
+        // Error when module or bundle is aborted
+        MSG_MODULE_ABORTED = addAbortionMessage('given path "${path}" after ${sec} second(s) - file may not exist'),
+        MSG_MODULE_DEPENDENCY_ABORTED = addAbortionMessage('dependency "${dep}"'),
+        MSG_BUNDLE_ABORTED = addAbortionMessage('parent "${dep}"', true),
+        MSG_BUNDLE_SUBMODULE_ABORTED = addAbortionMessage('submodule "${dep}"', true),
+        // Show module or bundle is requested
+        MSG_MODULE_REQUESTED = addRequestMessage(),
+        MSG_BUNDLE_REQUESTED = addRequestMessage(true),
+        // Show loading progress for module or bundle
+        MSG_MODULE_LOADED = addLoadingMessage(),
+        MSG_MODULE_LOADING = addLoadingMessage(true),
+        MSG_BUNDLE_LOADED = addLoadingMessage(false, true),
+        MSG_BUNDLE_LOADING = addLoadingMessage(true, true),
+        // Info when loading is already in progress or done
+        MSG_MODULE_ALREADY_LOADED = addLoadAttemptMessage(LOADED),
+        MSG_MODULE_ALREADY_LOADED_MANUAL = addLoadAttemptMessage(LOADED + MANUAL),
+        MSG_MODULE_ALREADY_LOADING = addLoadAttemptMessage(LOADING),
+        MSG_BUNDLE_ALREADY_LOADED = addLoadAttemptMessage(LOADED, true),
+        MSG_BUNDLE_ALREADY_LOADING = addLoadAttemptMessage(LOADING, true),
+        // Warning when a module is registered twice
+        MSG_MODULE_ALREADY_REGISTERED = ModuleLogger.addWarning(ATTEMPTED_TO + 'register ' + MODULE + BUT_ALREADY + ' registered'),
+        // Show special cases for module
+        MSG_MODULE_LOADED_MANUAL = ModuleLogger.addDebug(MODULE + ' was ' + LOADED, MANUAL),
+        MSG_MODULE_RECOVERING = ModuleLogger.addDebug(MODULE + ' failed to load and tries to recover...'),
+        MSG_MODULE_REGISTERING = ModuleLogger.addDebug(MODULE + ' registering...');
 
-    setLogLevelForMessageTypes([
-        MSG_BUNDLE_FOUND,
-        MSG_BUNDLE_LOADED,
-        MSG_BUNDLE_LOADING,
-        MSG_BUNDLE_NOTIFIED,
-        MSG_BUNDLE_REQUESTED,
-        MSG_BUNDLE_SUBSCRIBED,
-        MSG_DEPENDENCIES_FOUND,
-        MSG_DEPENDENCY_FOUND,
-        MSG_MODULE_LOADED,
-        MSG_MODULE_LOADED_MANUAL,
-        MSG_MODULE_LOADING,
-        MSG_MODULE_NOTIFIED,
-        MSG_MODULE_REGISTERING,
-        MSG_MODULE_REQUESTED,
-        MSG_MODULE_SUBSCRIBED
-    ], 'debug');
-
-    setLogLevelForMessageTypes([
-        MSG_BUNDLE_ALREADY_LOADED,
-        MSG_BUNDLE_ALREADY_LOADING,
-        MSG_MODULE_ALREADY_LOADED,
-        MSG_MODULE_ALREADY_LOADING
-    ], 'info');
-
-    setLogLevelForMessageTypes([
-        MSG_BUNDLE_NOT_DEFINED,
-        MSG_MODULE_ALREADY_LOADED_MANUAL,
-        MSG_MODULE_ALREADY_REGISTERED,
-        MSG_MODULE_RECOVERING
-    ], 'warn');
-
-    setLogLevelForMessageTypes([
-        MSG_BUNDLE_ABORTED,
-        MSG_CIRCULAR_DEPENDENCIES_FOUND,
-        MSG_INTERCEPTION_ERROR,
-        MSG_MODULE_TIMEOUT,
-        MSG_DEPENDENCY_ABORTED
-    ], 'error');
-
-    messageTemplates[MSG_BUNDLE_ABORTED] = concatString(ABORTED_LOADING, BUNDLE);
-    messageTemplates[MSG_BUNDLE_ALREADY_LOADED] = concatString(ATTEMPTED_TO_LOAD_BUNDLE, BUT_ALREADY_LOADED);
-    messageTemplates[MSG_BUNDLE_ALREADY_LOADING] = concatString(ATTEMPTED_TO_LOAD_BUNDLE, BUT_ALREADY_LOADING);
-    messageTemplates[MSG_BUNDLE_FOUND] = concatString(FOUND, 'bundlemodules "${bundle}" for', BUNDLE);
-    messageTemplates[MSG_BUNDLE_LOADED] = concatString(END_LOAD, BUNDLE);
-    messageTemplates[MSG_BUNDLE_LOADING] = concatString(START_LOAD, BUNDLE);
-    messageTemplates[MSG_BUNDLE_NOT_DEFINED] = concatString(ATTEMPTED_TO_LOAD_BUNDLE, 'but', BUNDLE, 'is not defined');
-    messageTemplates[MSG_BUNDLE_NOTIFIED] = concatString(BUNDLE, NOTIFIED_BY);
-    messageTemplates[MSG_BUNDLE_REQUESTED] = concatString(BUNDLE, REQUESTED);
-    messageTemplates[MSG_BUNDLE_SUBSCRIBED] = concatString(BUNDLE, SUBSCRIBED_TO);
-
-    messageTemplates[MSG_CIRCULAR_DEPENDENCIES_FOUND] = concatString(FOUND, 'circular dependencies "${deps}" for', MODULE);
-
-    messageTemplates[MSG_DEPENDENCIES_FOUND] = concatString(FOUND, 'explicit dependencie(s) "${deps}" for', MODULE);
-    messageTemplates[MSG_DEPENDENCY_FOUND] = concatString(FOUND, 'implicit dependency "${dep}" for', MODULE);
-
-    messageTemplates[MSG_INTERCEPTION_ERROR] = concatString('error in interception of this', MODULE, 'by interceptor "${type}" with data "${data}"');
-
-    messageTemplates[MSG_MODULE_ALREADY_LOADED] = concatString(ATTEMPTED_TO_LOAD_MODULE, BUT_ALREADY_LOADED);
-    messageTemplates[MSG_MODULE_ALREADY_LOADED_MANUAL] = concatString(ATTEMPTED_TO_LOAD_MODULE, BUT_ALREADY_LOADED, MANUAL);
-    messageTemplates[MSG_MODULE_ALREADY_LOADING] = concatString(ATTEMPTED_TO_LOAD_MODULE, BUT_ALREADY_LOADING);
-
-    messageTemplates[MSG_MODULE_ALREADY_REGISTERED] = concatString(ATTEMPTED_TO, 'register', MODULE, BUT_ALREADY, 'registered');
-
-    messageTemplates[MSG_MODULE_LOADED] = concatString(END_LOAD, MODULE);
-    messageTemplates[MSG_MODULE_LOADED_MANUAL] = concatString(MODULE, 'was', LOADED, MANUAL);
-    messageTemplates[MSG_MODULE_LOADING] = concatString(START_LOAD, MODULE, 'from path "${path}"');
-
-    messageTemplates[MSG_MODULE_NOTIFIED] = concatString(MODULE, NOTIFIED_BY);
-    messageTemplates[MSG_MODULE_RECOVERING] = concatString(MODULE, 'failed to load and tries to recover...');
-    messageTemplates[MSG_MODULE_REGISTERING] = concatString(MODULE, 'registering...');
-    messageTemplates[MSG_MODULE_REQUESTED] = concatString(MODULE, REQUESTED);
-    messageTemplates[MSG_MODULE_SUBSCRIBED] = concatString(MODULE, SUBSCRIBED_TO);
-
-    messageTemplates[MSG_MODULE_TIMEOUT] = concatString(ABORTED_LOADING, MODULE, 'after ${sec} second(s) - file may not be available on path "${path}"');
-    messageTemplates[MSG_DEPENDENCY_ABORTED] = concatString(ABORTED_LOADING, MODULE, 'because of problems with "${dep}"');
-
+    /**
+    * @access public
+    *
+    * @constructor ModuleState
+    *
+    * @memberof JARS
+    * @inner
+    *
+    * @param {JARS~Module} module
+    */
     function ModuleState(module) {
         var moduleState = this;
 
-        moduleState.module = module;
+        moduleState._module = module;
 
-        moduleState.state = MODULE_WAITING;
-        moduleState.bundleState = MODULE_BUNDLE_WAITING;
+        moduleState.setWaiting();
+        moduleState.setWaiting(true);
     }
 
     ModuleState.prototype = {
-        get: function(bundleState) {
-            return this[bundleState ? 'bundleState' : 'state'];
+        /**
+         * @access public
+         *
+         * @alias JARS~ModuleState
+         *
+         * @memberof JARS~ModuleState#
+         */
+         constructor: ModuleState,
+        /**
+         * @access private
+         *
+         * @memberof JARS~ModuleState#
+         *
+         * @param {Boolean} compareBundleState
+         * @param {Number[]} states
+         */
+        _compareState: function(compareBundleState, states) {
+            return this[getStateProp(compareBundleState)] === states[compareBundleState ? 1 : 0];
         },
-
-        set: function(bundleState, newState) {
-            this[bundleState ? 'bundleState' : 'state'] = newState;
-        },
-
-        isWaiting: function(bundleState) {
-            var compareState = bundleState ? MODULE_BUNDLE_WAITING : MODULE_WAITING;
-
-            return this.get(bundleState) === compareState;
-        },
-
-        isBundleRequested: function() {
-            return this.get(true) === MODULE_BUNDLE_REQUESTED;
-        },
-
-        isLoading: function(bundleState) {
-            var compareState = bundleState ? MODULE_BUNDLE_LOADING : MODULE_LOADING;
-
-            return this.get(bundleState) === compareState;
-        },
-
-        isRegistered: function() {
-            var state = this.get();
-
-            return state === MODULE_REGISTERED || state === MODULE_LOADED_MANUAL || state === MODULE_LOADED;
-        },
-
-        isLoadedManual: function() {
-            return this.get() === MODULE_LOADED_MANUAL;
-        },
-
-        isLoaded: function(bundleState) {
-            var compareState = bundleState ? MODULE_BUNDLE_LOADED : MODULE_LOADED;
-
-            return this.get(bundleState) === compareState;
-        },
-
-        setWaiting: function() {
-
-        },
-
-        setBundleRequested: function() {
-            this.set(true, MODULE_BUNDLE_REQUESTED);
-        },
-
-        setLoading: function(bundleState) {
-            var state = this;
-
-            state.set(bundleState, bundleState ? MODULE_BUNDLE_LOADING : MODULE_LOADING);
-            state.log(bundleState ? MSG_BUNDLE_LOADING : MSG_MODULE_LOADING, bundleState, {
-                path: state.module.getFullPath()
-            });
-        },
-
-        setRegistered: function() {
-            this.set(false, MODULE_REGISTERED);
-            this.log(MSG_MODULE_REGISTERING);
-        },
-
-        setLoadedManual: function() {
-            this.set(false, MODULE_LOADED_MANUAL);
-            this.log(MSG_MODULE_LOADED_MANUAL);
-        },
-
-        setLoaded: function(bundleState) {
-            var moduleState = this;
-
-            moduleState.set(bundleState, bundleState ? MODULE_BUNDLE_LOADED : MODULE_LOADED);
-
-            moduleState.log(bundleState ? (moduleState.module.bundle.length ? MSG_BUNDLE_LOADED : MSG_BUNDLE_NOT_DEFINED) : MSG_MODULE_LOADED);
+        /**
+         * @access private
+         *
+         * @memberof JARS~ModuleState#
+         *
+         * @param {Boolean} setBundleState
+         * @param {Number[]} states
+         */
+        _set: function(setBundleState, states) {
+            this[getStateProp(setBundleState)] = states[setBundleState ? 1 : 0];
         },
         /**
          * @access public
          *
-         * @function
          * @memberof JARS~ModuleState#
          *
-         * @param {Number} messageType
-         * @param {Boolean} logBundle
-         * @param {Object} values
+         * @param {Boolean} isBundleState
          */
-        log: function(messageType, logBundle, values) {
-            var module = this.module,
-                moduleName = module.getName(logBundle),
-                context = (logBundle ? 'Bundle' : 'Module') + ':' + moduleName,
-                Logger = module.loader.getLogger(),
-                level = messageTypes[messageType] || 'error';
+        isWaiting: function(isBundleState) {
+            return this._compareState(isBundleState, WAITING_STATES);
+        },
+        /**
+         * @access public
+         *
+         * @memberof JARS~ModuleState#
+         */
+        isBundleRequested: function() {
+            return this._compareState(true, REQUESTED_STATES);
+        },
+        /**
+         * @access public
+         *
+         * @memberof JARS~ModuleState#
+         *
+         * @param {Boolean} isBundleState
+         */
+        isLoading: function(isBundleState) {
+            return this._compareState(isBundleState, LOADING_STATES);
+        },
+        /**
+         * @access public
+         *
+         * @memberof JARS~ModuleState#
+         */
+        isRegistered: function() {
+            return this._compareState(false, REGISTERED_STATES) || this.isLoadedManual() || this.isLoaded();
+        },
+        /**
+         * @access public
+         *
+         * @memberof JARS~ModuleState#
+         */
+        isLoadedManual: function() {
+            return this._compareState(false, LOADED_MANUAL_STATES);
+        },
+        /**
+         * @access public
+         *
+         * @memberof JARS~ModuleState#
+         *
+         * @param {Boolean} setBundleState
+         */
+        isLoaded: function(isBundleState) {
+            return this._compareState(isBundleState, LOADED_STATES);
+        },
+        /**
+         * @access public
+         *
+         * @memberof JARS~ModuleState#
+         *
+         * @param {Boolean} setBundleState
+         */
+        setWaiting: function(setBundleState) {
+            this._set(setBundleState, WAITING_STATES);
+        },
+        /**
+         * @access public
+         *
+         * @memberof JARS~ModuleState#
+         *
+         * @param {Boolean} setBundleState
+         */
+        setLoading: function(setBundleState) {
+            var moduleState = this,
+                module = moduleState._module;
 
-            if (Logger) {
-                Logger[level + 'WithContext'](context, messageType, values, {
-                    tpl: messageTemplates
-                });
-            }
+            moduleState._set(setBundleState, LOADING_STATES);
+            module.logger.log(setBundleState ? MSG_BUNDLE_LOADING : MSG_MODULE_LOADING, {
+                path: module.getFullPath()
+            });
+        },
+        /**
+         * @access public
+         *
+         * @memberof JARS~ModuleState#
+         */
+        setRegistered: function() {
+            this._set(false, REGISTERED_STATES);
+            this._module.logger.log(MSG_MODULE_REGISTERING);
+        },
+        /**
+         * @access public
+         *
+         * @memberof JARS~ModuleState#
+         */
+        setLoadedManual: function() {
+            this._set(false, LOADED_MANUAL_STATES);
+            this._module.logger.log(MSG_MODULE_LOADED_MANUAL);
+        },
+        /**
+         * @access public
+         *
+         * @memberof JARS~ModuleState#
+         *
+         * @param {Boolean} setBundleState
+         */
+        setLoaded: function(setBundleState) {
+            var moduleState = this,
+                module = moduleState._module;
+
+            moduleState._set(setBundleState, LOADED_STATES);
+            module.logger.log(setBundleState ? MSG_BUNDLE_LOADED : MSG_MODULE_LOADED);
         },
 
-        logRequested: function(logBundle) {
-            this.log(logBundle ? MSG_BUNDLE_REQUESTED : MSG_MODULE_REQUESTED, logBundle);
-        },
+        trySetRequested: function(setBundleState) {
+            var moduleState = this,
+                logger = moduleState._module.logger,
+                isWaiting = moduleState.isWaiting(setBundleState);
 
-        logRequestProgress: function(logBundle) {
-            var state = this,
-                requestStateMsg;
+            logger.log(setBundleState ? MSG_BUNDLE_REQUESTED : MSG_MODULE_REQUESTED);
 
-            if(state.isLoaded(logBundle)) {
-                requestStateMsg = logBundle ? MSG_BUNDLE_ALREADY_LOADED : MSG_MODULE_ALREADY_LOADED;
-            }
-            else if (state.isLoadedManual()) {
-                requestStateMsg = MSG_MODULE_ALREADY_LOADED_MANUAL;
+            if(!isWaiting) {
+                logger.log(getRequestStateMessage(moduleState, setBundleState));
             }
             else {
-                requestStateMsg = logBundle ? MSG_BUNDLE_ALREADY_LOADING : MSG_MODULE_ALREADY_LOADING;
+                setBundleState ? moduleState._set(setBundleState, REQUESTED_STATES) : moduleState.setLoading();
             }
 
-            state.log(requestStateMsg, logBundle);
-        },
-
-        logBundleFound: function(bundle) {
-            this.log(MSG_BUNDLE_FOUND, true, {
-                bundle: bundle.join(SEPERATOR)
-            });
-        },
-
-        logCircularDepsFound: function(deps) {
-            this.log(MSG_CIRCULAR_DEPENDENCIES_FOUND, false, {
-                deps: deps.join(SEPERATOR)
-            });
-        },
-
-        logDepsFound: function(deps) {
-            this.log(MSG_DEPENDENCIES_FOUND, false, {
-                deps: deps.join(SEPERATOR)
-            });
-        },
-
-        logDepFound: function(dep) {
-            this.log(MSG_DEPENDENCY_FOUND, false, {
-                dep: dep
-            });
-        },
-
-        logRecovering: function() {
-            this.log(MSG_MODULE_RECOVERING);
-        },
-
-        logAbortion: function(bundleState, data) {
-            this.log(bundleState ? MSG_BUNDLE_ABORTED : MSG_MODULE_TIMEOUT, bundleState, data);
-        },
-
-        logAbortionOfDep: function(dep) {
-            this.log(MSG_DEPENDENCY_ABORTED, false, {
-                dep: dep
-            });
-        },
-
-        logSubscription: function(subs, logBundle) {
-            this.log(logBundle ? MSG_BUNDLE_SUBSCRIBED : MSG_MODULE_SUBSCRIBED, logBundle, {
-                subs: subs.join(SEPERATOR)
-            });
-        },
-
-        logNotification: function(pub, logBundle) {
-            this.log(logBundle ? MSG_BUNDLE_NOTIFIED : MSG_MODULE_NOTIFIED, logBundle, {
-                pub: pub
-            });
-        },
-
-        logAlreadyRegistered: function() {
-            this.log(MSG_MODULE_ALREADY_REGISTERED);
+            return isWaiting;
         },
         /**
          * @access public
          *
          * @memberof JARS~ModuleState#
          *
-         * @param {Object} interceptorInfo
-         * @param {(String|Error)} error
+         * @return {Boolean}
          */
-        logInterceptorError: function(interceptorInfo, error) {
-            var state = this,
-                System = state.module.loader.getSystem();
+        trySetRegistered: function() {
+            var moduleState = this,
+                registered = false;
 
-            if (!error) {
-                error = MSG_INTERCEPTION_ERROR;
+            if (!moduleState.isRegistered()) {
+                if (moduleState.isLoading()) {
+                    moduleState.setRegistered();
+                }
+                else {
+                    moduleState.setLoadedManual();
+                }
+
+                registered = true;
             }
-            else if (System.isA(error, Error)) {
-                error = error.message;
+            else {
+                moduleState._module.logger.log(MSG_MODULE_ALREADY_REGISTERED);
             }
 
-            state.log(error, false, interceptorInfo);
+            return registered;
         },
+
+        trySetAborted: function(setBundleState, abortionInfo) {
+            var moduleState = this,
+                module = moduleState._module,
+                aborted = false,
+                abortionMessage;
+
+            if (moduleState.isLoading(setBundleState)) {
+                moduleState.setWaiting(setBundleState);
+
+                if (setBundleState || !module.findRecover()) {
+                    aborted = true;
+                    abortionMessage = setBundleState ? MSG_BUNDLE_SUBMODULE_ABORTED : MSG_MODULE_ABORTED;
+                }
+            }
+            else if (moduleState.isRegistered()) {
+                aborted = true;
+                abortionMessage = setBundleState ? MSG_BUNDLE_ABORTED : MSG_MODULE_DEPENDENCY_ABORTED;
+            }
+
+            aborted && module.logger.log(abortionMessage, abortionInfo);
+
+            return aborted;
+        },
+        /**
+         * @access public
+         *
+         * @memberof JARS~ModuleState#
+         */
+        logRecovering: function() {
+            this._module.logger.log(MSG_MODULE_RECOVERING);
+        }
     };
 
     /**
      * @access private
      *
-     * @param {Array<number>} messages
-     * @param {String} logLevel
+     * @memberof JARS~ModuleState
+     * @inner
+     *
+     * @param {Boolean} isBundleState
+     *
+     * @return {String}
      */
-    function setLogLevelForMessageTypes(messages, logLevel) {
-        utils.arrayEach(messages, function setLogLevelForMessageType(message) {
-            messageTypes[message] = logLevel;
-        });
+    function getStateProp(isBundleState) {
+        return isBundleState ? '_bundleState' : '_state';
+    }
+
+    function getRequestStateMessage(moduleState, setBundleState) {
+        var requestStateMsg;
+
+        if(moduleState.isLoaded(setBundleState)) {
+            requestStateMsg = setBundleState ? MSG_BUNDLE_ALREADY_LOADED : MSG_MODULE_ALREADY_LOADED;
+        }
+        else if (moduleState.isLoadedManual()) {
+            requestStateMsg = MSG_MODULE_ALREADY_LOADED_MANUAL;
+        }
+        else {
+            requestStateMsg = setBundleState ? MSG_BUNDLE_ALREADY_LOADING : MSG_MODULE_ALREADY_LOADING;
+        }
+
+        return requestStateMsg;
+    }
+
+    function addRequestMessage(forBundle) {
+        return ModuleLogger.addDebug((forBundle ? BUNDLE : MODULE) + ' requested', forBundle);
+    }
+
+    function addLoadingMessage(start, forBundle) {
+        return ModuleLogger.addInfo((start ? STARTED_LOADING : FINISHED_LOADING) + (forBundle ? BUNDLE : MODULE), forBundle);
+    }
+
+    function addLoadAttemptMessage(loadingProgress, forBundle) {
+        return ModuleLogger.addInfo(ATTEMPTED_TO_LOAD + (forBundle ? BUNDLE : MODULE) + BUT_ALREADY + loadingProgress, forBundle);
+    }
+
+    function addAbortionMessage(abortionReason, forBundle) {
+        return ModuleLogger.addError(ABORTED_LOADING + (forBundle ? BUNDLE : MODULE) + PROBLEMS_WITH + abortionReason, forBundle);
     }
 
     return ModuleState;

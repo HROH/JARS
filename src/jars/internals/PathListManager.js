@@ -13,10 +13,10 @@ JARS.internal('PathListManager', function pathListManagerSetup(InternalsManager)
 
     PathListManager = {
         /**
-         * <p>Computes an array of all the loaded modules
+         * <p>Computes an array of paths for all the loaded modules
          * in the order they are dependending on each other.
          * This method can be used to create a custom build
-         * preferable with grunt and phantomjs.</p>
+         * preferable with a build tool and phantomjs.</p>
          *
          * <p>It is possible to recompute the list.
          * This is only for aesthetics.
@@ -63,10 +63,10 @@ JARS.internal('PathListManager', function pathListManagerSetup(InternalsManager)
      * @memberof JARS~PathListManager
      * @inner
      *
-     * @param {Array} modules
+     * @param {Array} [modules = []]
      */
     function addModules(modules) {
-        modules && arrayEach(modules, function addToPathList(moduleName) {
+        arrayEach(modules || [], function addModuleToPathList(moduleName) {
             addToPathList(Loader.getModule(moduleName), Resolver.isBundle(moduleName));
         });
     }
@@ -78,11 +78,11 @@ JARS.internal('PathListManager', function pathListManagerSetup(InternalsManager)
      * @inner
      *
      * @param {JARS~Module} module
-     * @param {Boolean} [addBundle]
+     * @param {Boolean} [addBundle = false]
      */
     function addToPathList(module, addBundle) {
         var moduleName = module.name,
-            dependencies = module.getAllDeps();
+            dependencies = module.deps.getAll(true);
 
         if (module.state.isLoaded()) {
             if (!hasOwnProp(sortedModules, moduleName)) {

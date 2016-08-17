@@ -1,16 +1,21 @@
 (function globalSetup(envGlobal) {
     'use strict';
 
-    var InternalsManager = (function internalsManagerSetup() {
+    var InternalsManager, registerInternal, internalsReady, getInternal;
+
+    InternalsManager = (function internalsManagerSetup() {
         var INTERNALS_PATH = 'jars/internals/',
             internalsToLoad = [
-                'CircularDepsChecker',
                 'ConfigsManager',
                 'Interception',
                 'InterceptionManager',
                 'Loader',
                 'Module',
+                'ModuleBundle',
                 'ModuleConfig',
+                'ModuleDependencies',
+                'ModuleLogger',
+                'ModuleQueue',
                 'ModuleState',
                 'PartialModuleInterceptor',
                 'PathListManager',
@@ -54,31 +59,22 @@
                 }
             },
 
-            get: function(internalName) {
-                var internal = internals[internalName],
-                    object;
-
-                if(internal){
-                    object = internal.object || (internal.object = internal.factory(InternalsManager));
-                }
-
-                return object;
-            }
+            get: getInternal
         };
 
         function setupInternals() {
-            var SourceManager = InternalsManager.get('SourceManager'),
-                Loader = InternalsManager.get('Loader'),
-                System = InternalsManager.get('System'),
-                InterceptionManager = InternalsManager.get('InterceptionManager'),
+            var SourceManager = getInternal('SourceManager'),
+                Loader = getInternal('Loader'),
+                System = getInternal('System'),
+                InterceptionManager = getInternal('InterceptionManager'),
                 basePath = SourceManager.getBasePath(),
                 systemModule;
 
-            InterceptionManager.addInterceptor(InternalsManager.get('PluginInterceptor'));
+            InterceptionManager.addInterceptor(getInternal('PluginInterceptor'));
 
-            InterceptionManager.addInterceptor(InternalsManager.get('PartialModuleInterceptor'));
+            InterceptionManager.addInterceptor(getInternal('PartialModuleInterceptor'));
 
-            Loader.registerModule(InternalsManager.get('Resolver').getRootName()).$export();
+            Loader.registerModule(getInternal('Resolver').getRootName()).$export();
 
             systemModule = Loader.registerModule('System', ['Logger', 'Modules']);
 
@@ -88,7 +84,7 @@
                 return System;
             });
 
-            InternalsManager.get('ConfigsManager').update({
+            getInternal('ConfigsManager').update({
                 modules: [{
                     basePath: basePath,
 
@@ -113,12 +109,23 @@
             internalsReady = true;
         }
 
+        function getInternal(internalName) {
+            var internal = internals[internalName],
+                object;
+
+            if(internal){
+                object = internal.object || (internal.object = internal.factory(InternalsManager));
+            }
+
+            return object;
+        }
+
         function loadInternals() {
-            InternalsManager.get('utils').arrayEach(internalsToLoad, loadInternal);
+            getInternal('utils').arrayEach(internalsToLoad, loadInternal);
         }
 
         function loadInternal(internalName) {
-            var SourceManager = InternalsManager.get('SourceManager');
+            var SourceManager = getInternal('SourceManager');
 
             SourceManager.loadSource('internal:' + internalName, SourceManager.getBasePath() + INTERNALS_PATH + internalName + '.js');
         }
@@ -126,8 +133,12 @@
         return InternalsManager;
     })();
 
-    InternalsManager.register('utils', function() {
-        var hasOwnProp, concatString;
+    registerInternal = InternalsManager.register;
+    internalsReady = InternalsManager.ready;
+    getInternal = InternalsManager.get;
+
+    registerInternal('utils', function() {
+        var hasOwnProp;
 
         hasOwnProp = (function hasOwnPropSetup() {
             var hasOwn = ({}).hasOwnProperty;
@@ -146,26 +157,6 @@
              */
             return function hasOwnProp(object, prop) {
                 return hasOwn.call(object, prop);
-            };
-        })();
-
-        concatString = (function concatStringSetup() {
-            var join = [].join,
-                SPACE = ' ';
-
-            /**
-             * @access private
-             *
-             * @function
-             * @memberof JARS~utils
-             * @inner
-             *
-             * @param {...String} string
-             *
-             * @return {String}
-             */
-            return function concatString() {
-                return join.call(arguments, SPACE);
             };
         })();
 
@@ -232,8 +223,6 @@
         return {
             hasOwnProp: hasOwnProp,
 
-            concatString: concatString,
-
             objectEach: objectEach,
 
             objectMerge: objectMerge,
@@ -244,7 +233,7 @@
         };
     });
 
-    InternalsManager.register('SourceManager', function sourceManagerSetup(InternalsManager) {
+    registerInternal('SourceManager', function sourceManagerSetup(InternalsManager) {
         var SELF_PATH = 'jars/jars.js',
             arrayEach = InternalsManager.get('utils').arrayEach,
             doc = envGlobal.document,
@@ -345,11 +334,15 @@
              */
             removeSource: function(moduleName) {
                 var script = scripts[moduleName],
-                    path = script.src;
+                    path;
 
-                head.removeChild(script);
+                if(script) {
+                        path = script.src;
 
-                delete scripts[moduleName];
+                    head.removeChild(script);
+
+                    delete scripts[moduleName];
+                }
 
                 return path;
             }
@@ -358,7 +351,7 @@
         return SourceManager;
     });
 
-    envGlobal.JARS = (function jarSetup() {
+    envGlobal.JARS = (function jarsSetup() {
         var previousJARS = envGlobal.JARS,
             moduleNamesQueue = [],
             JARS_MAIN_LOGCONTEXT = 'JARS:main',
@@ -374,15 +367,15 @@
              * @memberof JARS
              *
              * @param {Function()} main
-             * @param {JARS~Module~failCallback} onAbort
+             * @param {JARS~Module~FailCallback} onAbort
              */
             main: function(main, onAbort) {
                 var moduleNames = moduleNamesQueue;
 
                 moduleNamesQueue = [];
 
-                InternalsManager.ready(function() {
-                    var Loader = InternalsManager.get('Loader'),
+                internalsReady(function() {
+                    var Loader = getInternal('Loader'),
                         root = Loader.getRoot();
 
                     // TODO when mainLogger is defined skip this Loader.$import call
@@ -404,7 +397,7 @@
                         }
 
                         function onImport() {
-                            if (InternalsManager.get('ConfigsManager').get('supressErrors')) {
+                            if (getInternal('ConfigsManager').get('supressErrors')) {
                                 try {
                                     mainLogger.log('Start executing main...');
                                     main.apply(root, arguments);
@@ -439,22 +432,22 @@
             },
 
             module: function(moduleName, bundle) {
-                InternalsManager.ready(function() {
-                    InternalsManager.get('Loader').registerModule(moduleName, bundle);
+                internalsReady(function() {
+                    getInternal('Loader').registerModule(moduleName, bundle);
                 });
 
                 return {
                     $import: function(dependencies) {
-                        InternalsManager.ready(function() {
-                            InternalsManager.get('Loader').getModule(moduleName).$import(dependencies);
+                        internalsReady(function() {
+                            getInternal('Loader').getModule(moduleName).$import(dependencies);
                         });
 
                         return this;
                     },
 
                     $export: function(factory) {
-                        InternalsManager.ready(function() {
-                            InternalsManager.get('Loader').getModule(moduleName).$export(factory);
+                        internalsReady(function() {
+                            getInternal('Loader').getModule(moduleName).$export(factory);
                         });
                     }
                 };
@@ -471,7 +464,7 @@
                 JARS.module(moduleName, bundle).$export();
             },
 
-            internal: InternalsManager.register,
+            internal: registerInternal,
             /**
              * @access public
              *
@@ -481,16 +474,16 @@
              * @param {*} [value]
              */
             configure: function(config, value) {
-                InternalsManager.ready(function() {
-                    InternalsManager.get('ConfigsManager').update(config, value);
+                internalsReady(function() {
+                    getInternal('ConfigsManager').update(config, value);
                 });
 
                 return this;
             },
 
             computeSortedPathList: function(callback, forceRecompute) {
-                InternalsManager.ready(function() {
-                    InternalsManager.get('PathListManager').computeSortedPathList(callback, forceRecompute);
+                internalsReady(function() {
+                    getInternal('PathListManager').computeSortedPathList(callback, forceRecompute);
                 });
             },
             /**
@@ -504,10 +497,10 @@
              * @return {Boolean}
              */
             flush: function(context, switchToContext) {
-                InternalsManager.ready(function() {
-                    InternalsManager.get('Loader').flush(context);
+                internalsReady(function() {
+                    getInternal('Loader').flush(context);
 
-                    JAR.configure('loaderContext', switchToContext);
+                    getInternal('ConfigsManager').update('loaderContext', switchToContext);
                 });
             },
             /**
@@ -532,38 +525,29 @@
             version: '0.3.0'
         };
 
-        /**
-         * @access private
-         *
-         * @memberof JARS
-         * @inner
-         */
-        function bootstrapJARS() {
-            var SourceManager = InternalsManager.get('SourceManager'),
-                main = SourceManager.getMain(),
-                bootstrapConfig = envGlobal.jarsConfig;
-
-            if(main) {
-                if(bootstrapConfig && !bootstrapConfig.main) {
-                    bootstrapConfig.main = main;
-                }
-                else {
-                    bootstrapConfig = {
-                        main: main
-                    };
-                }
-            }
-
-            if(bootstrapConfig) {
-                InternalsManager.ready(function() {
-                    InternalsManager.get('ConfigsManager').update(bootstrapConfig);
-                });
-            }
-        }
-
-        bootstrapJARS();
-
         return JARS;
     })();
 
+    (function bootstrapJARS() {
+        var SourceManager = getInternal('SourceManager'),
+            main = SourceManager.getMain(),
+            bootstrapConfig = envGlobal.jarsConfig;
+
+        if(main) {
+            if(bootstrapConfig && !bootstrapConfig.main) {
+                bootstrapConfig.main = main;
+            }
+            else {
+                bootstrapConfig = {
+                    main: main
+                };
+            }
+        }
+
+        if(bootstrapConfig) {
+            internalsReady(function() {
+                getInternal('ConfigsManager').update(bootstrapConfig);
+            });
+        }
+    })();
 })(this);
