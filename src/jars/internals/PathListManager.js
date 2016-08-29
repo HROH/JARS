@@ -31,18 +31,18 @@ JARS.internal('PathListManager', function pathListManagerSetup(InternalsManager)
          */
         computeSortedPathList: function(callback, forceRecompute) {
             var modulesToLoad = [],
-                modulesLoading = 0;
+                modulesLoading = false;
 
             Loader.eachModules(function addModuleToLoad(module) {
                 if (module.state.isLoading()) {
                     modulesToLoad.push(module.name);
-                    modulesLoading++;
+                    modulesLoading = true;
                 }
             });
 
             if (modulesLoading) {
-                Loader.subscribe(Resolver.getRootName(), modulesToLoad, function() {
-                    --modulesLoading || PathListManager.computeSortedPathList(callback, forceRecompute);
+                Loader.$import(modulesToLoad, function computeSortedPathList() {
+                    PathListManager.computeSortedPathList(callback, forceRecompute);
                 });
             }
             else {
