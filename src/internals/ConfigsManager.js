@@ -6,7 +6,6 @@ JARS.internal('ConfigsManager', function configsManagerSetup(InternalsManager) {
         arrayEach = utils.arrayEach,
         objectMerge = utils.objectMerge,
         System = InternalsManager.get('System'),
-        Loader = InternalsManager.get('Loader'),
         InterceptionManager = InternalsManager.get('InterceptionManager'),
         SourceManager = InternalsManager.get('SourceManager'),
         configs = {
@@ -85,7 +84,7 @@ JARS.internal('ConfigsManager', function configsManagerSetup(InternalsManager) {
              * @return {Object}
              */
             modules: function(newModuleConfigs) {
-                return Loader.setModuleConfig(newModuleConfigs);
+                return getLoader().setModuleConfig(newModuleConfigs);
             },
             /**
              * @param {String} newLoaderContext
@@ -95,7 +94,7 @@ JARS.internal('ConfigsManager', function configsManagerSetup(InternalsManager) {
              */
             loaderContext: function(newLoaderContext, oldLoaderContext) {
                 if (newLoaderContext !== oldLoaderContext) {
-                    newLoaderContext = Loader.setLoaderContext(newLoaderContext);
+                    newLoaderContext = getLoader().setLoaderContext(newLoaderContext);
 
                     exposeModulesGlobal(configs.globalAccess);
                 }
@@ -170,8 +169,12 @@ JARS.internal('ConfigsManager', function configsManagerSetup(InternalsManager) {
      */
     function exposeModulesGlobal(expose) {
         if (expose) {
-            JARS.mods = Loader.getRoot();
+            JARS.mods = getLoader().getRoot();
         }
+    }
+
+    function getLoader() {
+        return InternalsManager.get('Loader');
     }
 
     return ConfigsManager;
