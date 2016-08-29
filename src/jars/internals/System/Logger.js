@@ -7,7 +7,7 @@ JARS.module('System.Logger').$import([
     '.::isString',
     '.::format',
     '.Modules::getCurrentModuleData'
-]).$export(function(config, isArray, isFunction, isNumber, isObject, isString, format, getCurrentModuleData) {
+]).$export(function systemLoggerFactory(config, isArray, isFunction, isNumber, isObject, isString, format, getCurrentModuleData) {
     'use strict';
 
     var internals = this.$$internals,
@@ -161,15 +161,16 @@ JARS.module('System.Logger').$import([
     /**
      * @access private
      *
-     * @memberof System.Logger#
+     * @memberof System.Logger
+     * @inner
      *
+     * @param {System.Logger} logger
      * @param {String} level
      * @param {*} message
      * @param {(Object|Array)} values
      */
-    Logger.prototype._out = function(level, message, values) {
-        var logger = this,
-            context = logger.context,
+    function output(logger, level, message, values) {
+        var context = logger.context,
             options = logger.options,
             currentDebugger = getActiveDebugger(options.mode || config.mode),
             debuggerMethod = currentDebugger[level] ? level : 'log';
@@ -185,7 +186,8 @@ JARS.module('System.Logger').$import([
                 meta: values
             });
         }
-    };
+    }
+
     /**
      * @access public
      *
@@ -212,7 +214,7 @@ JARS.module('System.Logger').$import([
             Logger.logLevels[levelConst] = isNumber(priority) ? priority : Logger.logLevels.ALL;
 
             Logger.prototype[level] = function loggerFn(data, values) {
-                this._out(level, data, values);
+                output(this, level, data, values);
             };
 
             Logger[level] = function staticLoggerFn(data, values) {
@@ -252,11 +254,11 @@ JARS.module('System.Logger').$import([
     Logger.$plugIn = function(pluginRequest) {
         var data = pluginRequest.data.split(':');
 
-        pluginRequest.$importAndLink(data[1], function(Debugger) {
+        pluginRequest.$importAndLink(data[1], function addDebugger(Debugger) {
             Logger.addDebugger(data[0], Debugger.setup);
 
             pluginRequest.success(Logger);
-        }, function(abortedModuleName) {
+        }, function abortDebuggerLoading(abortedModuleName) {
             pluginRequest.fail(abortedModuleName);
         });
     };
