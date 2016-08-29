@@ -332,29 +332,14 @@
 
     envGlobal.JARS = (function jarsSetup() {
         var previousJARS = envGlobal.JARS,
-            moduleNamesQueue = [],
             JARS;
 
         /**
          * @namespace JARS
          */
         JARS = {
-            /**
-             * @access public
-             *
-             * @memberof JARS
-             *
-             * @param {Function()} main
-             * @param {JARS~Module~FailCallback} onAbort
-             */
             main: delegateToInternal('ExternalBootstrapper', 'main', getJARS),
-            /**
-             * @access public
-             *
-             * @memberof JARS
-             *
-             * @param {(String|Object|Array)} modules
-             */
+
             $import: delegateToInternal('ExternalBootstrapper', '$import', getJARS),
 
             module: delegateToInternal('Loader', 'registerModule', function returnModuleWrapper(moduleName) {
@@ -388,27 +373,11 @@
             },
 
             internal: registerInternal,
-            /**
-             * @access public
-             *
-             * @memberof JARS
-             *
-             * @param {(Object|String)} config
-             * @param {*} [value]
-             */
+
             configure: delegateToInternal('ConfigsManager', 'update', getJARS),
 
             computeSortedPathList: delegateToInternal('PathListManager', 'computeSortedPathList', getJARS),
-            /**
-             * @access public
-             *
-             * @memberof JARS
-             *
-             * @param {String} context
-             * @param {String} switchToContext
-             *
-             * @return {Boolean}
-             */
+
             flush: delegateToInternal('Loader', 'flush', getJARS),
             /**
              * @access public
