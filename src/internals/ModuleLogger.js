@@ -39,10 +39,11 @@ JARS.internal('ModuleLogger', function moduleLoggerSetup() {
          * @param {Object} [values]
          */
         log: function(messageType, values) {
-            var Logger = module.loader.getLogger();
+            var module = this._module,
+                Logger = module.loader.getLogger();
 
             if (Logger) {
-                Logger[getLogMethod(messageType)](getLogContext(this._module, messageType), messageType, values, loggerOptions);
+                Logger[getLogMethod(messageType)](getLogContext(module, messageType), messageType, values, loggerOptions);
             }
         },
 

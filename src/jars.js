@@ -326,7 +326,7 @@
                 internal[methodName].apply(internal, args);
             });
 
-            return returnFn.apply(null, args);
+            return returnFn && returnFn.apply(null, args);
         };
     }
 
@@ -347,7 +347,7 @@
                     ModuleWrapper;
 
                 registerInternal(dynamicInternalName, function internalModuleSetup() {
-                    return getInternal('Loader').getMoule(moduleName);
+                    return getInternal('Loader').getModule(moduleName);
                 });
 
                 ModuleWrapper = {
