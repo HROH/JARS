@@ -6,6 +6,7 @@
     InternalsManager = (function internalsManagerSetup() {
         var INTERNALS_PATH = 'jars/internals/',
             internalsToLoad = [
+                'Bootstrapper',
                 'ConfigsManager',
                 'Interception',
                 'InterceptionManager',
@@ -63,44 +64,7 @@
         };
 
         function setupInternals() {
-            var SourceManager = getInternal('SourceManager'),
-                Loader = getInternal('Loader'),
-                System = getInternal('System'),
-                InterceptionManager = getInternal('InterceptionManager'),
-                basePath = SourceManager.getBasePath(),
-                systemModule;
-
-            InterceptionManager.addInterceptor(getInternal('PluginInterceptor'));
-
-            InterceptionManager.addInterceptor(getInternal('PartialModuleInterceptor'));
-
-            Loader.registerModule(getInternal('Resolver').getRootName()).$export();
-
-            systemModule = Loader.registerModule('System', ['Logger', 'Modules']);
-
-            systemModule.$export(function systemFactory() {
-                // TODO maybe calling the internal factory for System is the better option
-                // to isolate System on a per context basis but right now this is enough
-                return System;
-            });
-
-            getInternal('ConfigsManager').update({
-                modules: [{
-                    basePath: basePath,
-
-                    cache: true,
-
-                    minified: false,
-
-                    timeout: 5
-                }, {
-                    restrict: 'System.*',
-
-                    basePath: basePath + INTERNALS_PATH
-                }]
-            });
-
-            systemModule.request(true);
+            getInternal('Bootstrapper').bootstrapInternals(INTERNALS_PATH);
 
             while(readyCallbacks.length) {
                 readyCallbacks.shift()();
@@ -137,7 +101,7 @@
     internalsReady = InternalsManager.ready;
     getInternal = InternalsManager.get;
 
-    registerInternal('utils', function() {
+    registerInternal('utils', function utilsSetup() {
         var hasOwnProp;
 
         hasOwnProp = (function hasOwnPropSetup() {
@@ -354,8 +318,7 @@
     envGlobal.JARS = (function jarsSetup() {
         var previousJARS = envGlobal.JARS,
             moduleNamesQueue = [],
-            JARS_MAIN_LOGCONTEXT = 'JARS:main',
-            mainLogger, JARS;
+            JARS;
 
         /**
          * @namespace JARS
@@ -374,46 +337,8 @@
 
                 moduleNamesQueue = [];
 
-                internalsReady(function() {
-                    var Loader = getInternal('Loader'),
-                        root = Loader.getRoot();
-
-                    // TODO when mainLogger is defined skip this Loader.$import call
-                    Loader.$import('System.*', function(System) {
-                        mainLogger = mainLogger || new System.Logger(JARS_MAIN_LOGCONTEXT);
-
-                        if (System.isFunction(main)) {
-                            if (moduleNames.length) {
-                                Loader.$import(moduleNames, onImport, System.isFunction(onAbort) ? onAbort : function globalErrback(abortedModuleName) {
-                                    mainLogger.error('Import of "' + abortedModuleName + '" failed!');
-                                });
-                            }
-                            else {
-                                onImport();
-                            }
-                        }
-                        else {
-                            mainLogger.error('No main function provided');
-                        }
-
-                        function onImport() {
-                            if (getInternal('ConfigsManager').get('supressErrors')) {
-                                try {
-                                    mainLogger.log('Start executing main...');
-                                    main.apply(root, arguments);
-                                }
-                                catch (e) {
-                                    mainLogger.error((e.stack || e.message || '\n\tError in JavaScript-code: ' + e) + '\nexiting...');
-                                }
-                                finally {
-                                    mainLogger.log('...done executing main');
-                                }
-                            }
-                            else {
-                                main.apply(root, arguments);
-                            }
-                        }
-                    });
+                internalsReady(function bootstrapMain() {
+                    getInternal('Bootstrapper').bootstrapMain(moduleNames, main, onAbort);
                 });
 
                 return this;
@@ -432,13 +357,13 @@
             },
 
             module: function(moduleName, bundle) {
-                internalsReady(function() {
+                internalsReady(function registerModule() {
                     getInternal('Loader').registerModule(moduleName, bundle);
                 });
 
                 return {
                     $import: function(dependencies) {
-                        internalsReady(function() {
+                        internalsReady(function $importDependencies() {
                             getInternal('Loader').getModule(moduleName).$import(dependencies);
                         });
 
@@ -446,7 +371,7 @@
                     },
 
                     $export: function(factory) {
-                        internalsReady(function() {
+                        internalsReady(function $exportFactory() {
                             getInternal('Loader').getModule(moduleName).$export(factory);
                         });
                     }
@@ -474,7 +399,7 @@
              * @param {*} [value]
              */
             configure: function(config, value) {
-                internalsReady(function() {
+                internalsReady(function configure() {
                     getInternal('ConfigsManager').update(config, value);
                 });
 
@@ -482,7 +407,7 @@
             },
 
             computeSortedPathList: function(callback, forceRecompute) {
-                internalsReady(function() {
+                internalsReady(function computeSortedPathList() {
                     getInternal('PathListManager').computeSortedPathList(callback, forceRecompute);
                 });
             },
@@ -497,7 +422,7 @@
              * @return {Boolean}
              */
             flush: function(context, switchToContext) {
-                internalsReady(function() {
+                internalsReady(function flush() {
                     getInternal('Loader').flush(context);
 
                     getInternal('ConfigsManager').update('loaderContext', switchToContext);
@@ -531,22 +456,15 @@
     (function bootstrapJARS() {
         var SourceManager = getInternal('SourceManager'),
             main = SourceManager.getMain(),
-            bootstrapConfig = envGlobal.jarsConfig;
+            config = envGlobal.jarsConfig || main && {};
 
-        if(main) {
-            if(bootstrapConfig && !bootstrapConfig.main) {
-                bootstrapConfig.main = main;
+        if(config) {
+            if(main && !config.main) {
+                config.main = main;
             }
-            else {
-                bootstrapConfig = {
-                    main: main
-                };
-            }
-        }
 
-        if(bootstrapConfig) {
-            internalsReady(function() {
-                getInternal('ConfigsManager').update(bootstrapConfig);
+            internalsReady(function bootstrapConfig() {
+                getInternal('ConfigsManager').update(config);
             });
         }
     })();
