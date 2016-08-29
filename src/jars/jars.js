@@ -315,6 +315,20 @@
         return SourceManager;
     });
 
+    function delegateToInternal(internalName, methodName, returnFn) {
+        return function internalDelegator() {
+            var args = Array.prototype.slice.call(arguments);
+
+            internalsReady(function () {
+                var internal = getInternal(internalName);
+
+                internal[methodName].apply(internal, args);
+            });
+
+            return returnFn.apply(null, args);
+        };
+    }
+
     envGlobal.JARS = (function jarsSetup() {
         var previousJARS = envGlobal.JARS,
             moduleNamesQueue = [],
@@ -356,27 +370,24 @@
                 return this;
             },
 
-            module: function(moduleName, bundle) {
-                internalsReady(function registerModule() {
-                    getInternal('Loader').registerModule(moduleName, bundle);
+            module: delegateToInternal('Loader', 'registerModule', function returnModuleWrapper(moduleName) {
+                var internalModuleName = 'Loader:' + moduleName,
+                    ModuleWrapper;
+
+                registerInternal(internalModuleName, function internalModuleSetup() {
+                    return getInternal('Loader').getMoule(moduleName);
                 });
 
-                return {
-                    $import: function(dependencies) {
-                        internalsReady(function $importDependencies() {
-                            getInternal('Loader').getModule(moduleName).$import(dependencies);
-                        });
+                ModuleWrapper = {
+                    $import: delegateToInternal(internalModuleName, '$import', function returnSelf() {
+                        return ModuleWrapper;
+                    }),
 
-                        return this;
-                    },
-
-                    $export: function(factory) {
-                        internalsReady(function $exportFactory() {
-                            getInternal('Loader').getModule(moduleName).$export(factory);
-                        });
-                    }
+                    $export: delegateToInternal(internalModuleName, '$export')
                 };
-            },
+
+                return ModuleWrapper;
+            }),
             /**
              * @access public
              *
@@ -398,19 +409,11 @@
              * @param {(Object|String)} config
              * @param {*} [value]
              */
-            configure: function(config, value) {
-                internalsReady(function configure() {
-                    getInternal('ConfigsManager').update(config, value);
-                });
+            configure: delegateToInternal('ConfigsManager', 'update', function getJARS() {
+                return JARS;
+            }),
 
-                return this;
-            },
-
-            computeSortedPathList: function(callback, forceRecompute) {
-                internalsReady(function computeSortedPathList() {
-                    getInternal('PathListManager').computeSortedPathList(callback, forceRecompute);
-                });
-            },
+            computeSortedPathList: delegateToInternal('PathListManager', 'computeSortedPathList'),
             /**
              * @access public
              *
@@ -421,13 +424,7 @@
              *
              * @return {Boolean}
              */
-            flush: function(context, switchToContext) {
-                internalsReady(function flush() {
-                    getInternal('Loader').flush(context);
-
-                    getInternal('ConfigsManager').update('loaderContext', switchToContext);
-                });
-            },
+            flush: delegateToInternal('Loader', 'flush'),
             /**
              * @access public
              *
