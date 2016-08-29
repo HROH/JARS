@@ -4,7 +4,7 @@
     var InternalsManager, registerInternal, internalsReady, getInternal;
 
     InternalsManager = (function internalsManagerSetup() {
-        var INTERNALS_PATH = 'jars/internals/',
+        var INTERNALS_PATH = 'internals/',
             internalsToLoad = [
                 'ConfigsManager',
                 'ExternalBootstrapper',
@@ -199,7 +199,7 @@
     });
 
     registerInternal('SourceManager', function sourceManagerSetup(InternalsManager) {
-        var SELF_PATH = 'jars/jars.js',
+        var SELF_PATH = 'jars.js',
             arrayEach = InternalsManager.get('utils').arrayEach,
             doc = envGlobal.document,
             head = doc.getElementsByTagName('head')[0],
