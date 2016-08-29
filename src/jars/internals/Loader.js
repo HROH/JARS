@@ -7,6 +7,7 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
         Resolver = InternalsManager.get('Resolver'),
         Module = InternalsManager.get('Module'),
         InterceptionManager = InternalsManager.get('InterceptionManager'),
+        ConfigsManager = InternalsManager.get('ConfigsManager'),
         modulesRegistry = {},
         currentModuleName = Resolver.getRootName(),
         currentLoaderContext = 'default',
@@ -27,22 +28,19 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
          * @memberof JARS~Loader
          *
          * @param {String} loaderContext
+         * @param {String} switchToContext
          *
          * @return {Boolean}
          */
-        flush: function(loaderContext) {
-            var flushSuccessful = false;
-
+        flush: function(loaderContext, switchToContext) {
             // TODO remove refs in modules with given loaderContext
             Loader.eachModules(function flushModule(module) {
-                flushSuccessful = module.flush(loaderContext);
-
-                return !flushSuccessful;
+                module.flush(loaderContext);
             });
 
             Loader.getLogger().info('Successfully flushed Loader with context "${0}"', [loaderContext]);
 
-            return flushSuccessful;
+            ConfigsManager.update('loaderContext', switchToContext);
         },
 
         setLoaderContext: function(newLoaderContext) {
