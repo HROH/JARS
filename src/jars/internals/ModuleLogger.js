@@ -1,4 +1,4 @@
-JARS.internal('ModuleLogger', function() {
+JARS.internal('ModuleLogger', function moduleLoggerSetup() {
     'use strict';
 
     var logLevelMap = {},
@@ -39,19 +39,24 @@ JARS.internal('ModuleLogger', function() {
          * @param {Object} [values]
          */
         log: function(messageType, values) {
-            var module = this._module,
-                logBundle = isBundleMap[messageType],
-                moduleName = module.getName(logBundle),
-                context = (logBundle ? 'Bundle' : 'Module') + ':' + moduleName,
-                Logger = module.loader.getLogger(),
-                level = logLevelMap[messageType] || 'error';
+            var Logger = module.loader.getLogger();
 
             if (Logger) {
-                Logger[level + 'WithContext'](context, messageType, values, loggerOptions);
+                Logger[getLogMethod(messageType)](getLogContext(this._module, messageType), messageType, values, loggerOptions);
             }
         },
 
     };
+
+    function getLogMethod(messageType) {
+        return (logLevelMap[messageType] || 'error') + 'WithContext';
+    }
+
+    function getLogContext(module, messageType) {
+        var logBundle = isBundleMap[messageType];
+
+        return (logBundle ? 'Bundle' : 'Module') + ':' + module.getName(logBundle);
+    }
 
     function addMessage(logLevel, message, isBundleMessage) {
         var messageType = messageTemplates.push(message) - 1;
