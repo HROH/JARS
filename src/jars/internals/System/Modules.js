@@ -1,4 +1,4 @@
-JARS.module('System.Modules').$export(function() {
+JARS.module('System.Modules').$export(function systemModulesFactory() {
     'use strict';
 
     var internals = this.$$internals,
@@ -31,18 +31,8 @@ JARS.module('System.Modules').$export(function() {
 
             return refs;
         },
-        /**
-         * @access public
-         *
-         * @memberof System.Modules
-         *
-         * @param {String} moduleName
-         *
-         * @return {*}
-         */
-        use: function(moduleName) {
-            return Loader.getModuleRef(moduleName);
-        },
+        
+        use: Loader.getModuleRef,
 
         $import: Loader.$import,
 
