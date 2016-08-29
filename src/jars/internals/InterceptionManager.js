@@ -1,4 +1,4 @@
-JARS.internal('InterceptionManager', function(InternalsManager) {
+JARS.internal('InterceptionManager', function interceptionManagerSetup(InternalsManager) {
     'use strict';
 
     var utils = InternalsManager.get('utils'),

@@ -1,4 +1,4 @@
-JARS.internal('ModuleBundle', function(InternalsManager) {
+JARS.internal('ModuleBundle', function moduleBundleSetup(InternalsManager) {
     'use strict';
 
     var Resolver = InternalsManager.get('Resolver'),

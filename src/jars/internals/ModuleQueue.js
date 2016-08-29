@@ -1,4 +1,4 @@
-JARS.internal('ModuleQueue', function() {
+JARS.internal('ModuleQueue', function moduleQueueSetup() {
     'use strict';
 
     var QUEUE_SUCCESS = 0,

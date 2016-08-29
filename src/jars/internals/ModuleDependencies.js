@@ -1,4 +1,4 @@
-JARS.internal('ModuleDependencies', function(InternalsManager) {
+JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsManager) {
     'use strict';
 
     var utils = InternalsManager.get('utils'),

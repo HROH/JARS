@@ -34,7 +34,7 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
             var flushSuccessful = false;
 
             // TODO remove refs in modules with given loaderContext
-            Loader.eachModules(function(module) {
+            Loader.eachModules(function flushModule(module) {
                 flushSuccessful = module.flush(loaderContext);
 
                 return !flushSuccessful;
@@ -236,13 +236,12 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
          * @param {Function(string)} progressback
          */
         $import: function(moduleNames, callback, errback, progressback) {
-            var moduleName = currentModuleName,
-                System = Loader.getSystem(),
+            var System = Loader.getSystem(),
                 refs = [],
                 refsIndexLookUp = {},
                 ref, counter, moduleCount;
 
-            moduleNames = Resolver.resolve(moduleNames, moduleName);
+            moduleNames = Resolver.resolve(moduleNames, currentModuleName);
             counter = moduleCount = moduleNames.length;
 
             arrayEach(moduleNames, function addToLookUp(moduleName, moduleIndex) {
@@ -251,7 +250,7 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
 
             System.isFunction(progressback) || (progressback = false);
 
-            Loader.subscribe(moduleName, moduleNames, function publishLazy(publishingModuleName, data) {
+            Loader.subscribe(currentModuleName, moduleNames, function publishLazy(publishingModuleName, data) {
                 ref = System.isNil(data) ? Loader.getModuleRef(publishingModuleName) : data;
                 refs[refsIndexLookUp[publishingModuleName]] = ref;
 
