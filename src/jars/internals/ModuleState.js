@@ -1,4 +1,4 @@
-JARS.internal('ModuleState', function(InternalsManager) {
+JARS.internal('ModuleState', function moduleStateSetup(InternalsManager) {
     'use strict';
 
     var ModuleLogger = InternalsManager.get('ModuleLogger'),
@@ -173,10 +173,10 @@ JARS.internal('ModuleState', function(InternalsManager) {
          *
          * @memberof JARS~ModuleState#
          *
-         * @param {Boolean} compareBundleState
          * @param {Number[]} states
+         * @param {Boolean} compareBundleState
          */
-        _compareState: function(compareBundleState, states) {
+        _compareState: function(states, compareBundleState) {
             return this[getStateProp(compareBundleState)] === states[compareBundleState ? 1 : 0];
         },
         /**
@@ -184,10 +184,10 @@ JARS.internal('ModuleState', function(InternalsManager) {
          *
          * @memberof JARS~ModuleState#
          *
-         * @param {Boolean} setBundleState
          * @param {Number[]} states
+         * @param {Boolean} setBundleState
          */
-        _set: function(setBundleState, states) {
+        _set: function(states, setBundleState) {
             this[getStateProp(setBundleState)] = states[setBundleState ? 1 : 0];
         },
         /**
@@ -198,7 +198,7 @@ JARS.internal('ModuleState', function(InternalsManager) {
          * @param {Boolean} isBundleState
          */
         isWaiting: function(isBundleState) {
-            return this._compareState(isBundleState, WAITING_STATES);
+            return this._compareState(WAITING_STATES, isBundleState);
         },
         /**
          * @access public
@@ -206,7 +206,7 @@ JARS.internal('ModuleState', function(InternalsManager) {
          * @memberof JARS~ModuleState#
          */
         isBundleRequested: function() {
-            return this._compareState(true, REQUESTED_STATES);
+            return this._compareState(REQUESTED_STATES, true);
         },
         /**
          * @access public
@@ -216,7 +216,7 @@ JARS.internal('ModuleState', function(InternalsManager) {
          * @param {Boolean} isBundleState
          */
         isLoading: function(isBundleState) {
-            return this._compareState(isBundleState, LOADING_STATES);
+            return this._compareState(LOADING_STATES, isBundleState);
         },
         /**
          * @access public
@@ -224,7 +224,7 @@ JARS.internal('ModuleState', function(InternalsManager) {
          * @memberof JARS~ModuleState#
          */
         isRegistered: function() {
-            return this._compareState(false, REGISTERED_STATES) || this.isLoadedManual() || this.isLoaded();
+            return this._compareState(REGISTERED_STATES) || this.isLoadedManual() || this.isLoaded();
         },
         /**
          * @access public
@@ -232,7 +232,7 @@ JARS.internal('ModuleState', function(InternalsManager) {
          * @memberof JARS~ModuleState#
          */
         isLoadedManual: function() {
-            return this._compareState(false, LOADED_MANUAL_STATES);
+            return this._compareState(LOADED_MANUAL_STATES);
         },
         /**
          * @access public
@@ -242,7 +242,7 @@ JARS.internal('ModuleState', function(InternalsManager) {
          * @param {Boolean} setBundleState
          */
         isLoaded: function(isBundleState) {
-            return this._compareState(isBundleState, LOADED_STATES);
+            return this._compareState(LOADED_STATES, isBundleState);
         },
         /**
          * @access public
@@ -252,7 +252,7 @@ JARS.internal('ModuleState', function(InternalsManager) {
          * @param {Boolean} setBundleState
          */
         setWaiting: function(setBundleState) {
-            this._set(setBundleState, WAITING_STATES);
+            this._set(WAITING_STATES, setBundleState);
         },
         /**
          * @access public
@@ -265,7 +265,7 @@ JARS.internal('ModuleState', function(InternalsManager) {
             var moduleState = this,
                 module = moduleState._module;
 
-            moduleState._set(setBundleState, LOADING_STATES);
+            moduleState._set(LOADING_STATES, setBundleState);
             module.logger.log(setBundleState ? MSG_BUNDLE_LOADING : MSG_MODULE_LOADING, {
                 path: module.getFullPath()
             });
@@ -276,7 +276,7 @@ JARS.internal('ModuleState', function(InternalsManager) {
          * @memberof JARS~ModuleState#
          */
         setRegistered: function() {
-            this._set(false, REGISTERED_STATES);
+            this._set(REGISTERED_STATES);
             this._module.logger.log(MSG_MODULE_REGISTERING);
         },
         /**
@@ -285,7 +285,7 @@ JARS.internal('ModuleState', function(InternalsManager) {
          * @memberof JARS~ModuleState#
          */
         setLoadedManual: function() {
-            this._set(false, LOADED_MANUAL_STATES);
+            this._set(LOADED_MANUAL_STATES);
             this._module.logger.log(MSG_MODULE_LOADED_MANUAL);
         },
         /**
@@ -299,7 +299,7 @@ JARS.internal('ModuleState', function(InternalsManager) {
             var moduleState = this,
                 module = moduleState._module;
 
-            moduleState._set(setBundleState, LOADED_STATES);
+            moduleState._set(LOADED_STATES, setBundleState);
             module.logger.log(setBundleState ? MSG_BUNDLE_LOADED : MSG_MODULE_LOADED);
         },
 
@@ -314,7 +314,7 @@ JARS.internal('ModuleState', function(InternalsManager) {
                 logger.log(getRequestStateMessage(moduleState, setBundleState));
             }
             else {
-                setBundleState ? moduleState._set(setBundleState, REQUESTED_STATES) : moduleState.setLoading();
+                setBundleState ? moduleState._set(REQUESTED_STATES, setBundleState) : moduleState.setLoading();
             }
 
             return isWaiting;
@@ -410,20 +410,24 @@ JARS.internal('ModuleState', function(InternalsManager) {
         return requestStateMsg;
     }
 
+    function getModuleOrBundleString(forBundle) {
+        return forBundle ? BUNDLE : MODULE;
+    }
+
     function addRequestMessage(forBundle) {
-        return ModuleLogger.addDebug((forBundle ? BUNDLE : MODULE) + ' requested', forBundle);
+        return ModuleLogger.addDebug(getModuleOrBundleString(forBundle) + ' requested', forBundle);
     }
 
     function addLoadingMessage(start, forBundle) {
-        return ModuleLogger.addInfo((start ? STARTED_LOADING : FINISHED_LOADING) + (forBundle ? BUNDLE : MODULE), forBundle);
+        return ModuleLogger.addInfo((start ? STARTED_LOADING : FINISHED_LOADING) + getModuleOrBundleString(forBundle), forBundle);
     }
 
     function addLoadAttemptMessage(loadingProgress, forBundle) {
-        return ModuleLogger.addInfo(ATTEMPTED_TO_LOAD + (forBundle ? BUNDLE : MODULE) + BUT_ALREADY + loadingProgress, forBundle);
+        return ModuleLogger.addInfo(ATTEMPTED_TO_LOAD + getModuleOrBundleString(forBundle) + BUT_ALREADY + loadingProgress, forBundle);
     }
 
     function addAbortionMessage(abortionReason, forBundle) {
-        return ModuleLogger.addError(ABORTED_LOADING + (forBundle ? BUNDLE : MODULE) + PROBLEMS_WITH + abortionReason, forBundle);
+        return ModuleLogger.addError(ABORTED_LOADING + getModuleOrBundleString(forBundle) + PROBLEMS_WITH + abortionReason, forBundle);
     }
 
     return ModuleState;
