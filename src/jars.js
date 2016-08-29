@@ -1,7 +1,7 @@
 (function globalSetup(envGlobal) {
     'use strict';
 
-    var InternalsManager, registerInternal, internalsReady, getInternal;
+    var InternalsManager, delegateToInternal, registerInternal, getInternal;
 
     InternalsManager = (function internalsManagerSetup() {
         var INTERNALS_PATH = 'internals/',
@@ -34,18 +34,30 @@
             InternalsManager;
 
         InternalsManager = {
-            ready: function(readyCallback) {
-                if(!internalsReady) {
-                    if(!internalsInitialized) {
-                        internalsInitialized = true;
-                        loadInternals();
+            createDelegate: function(internalName, methodName, returnFn) {
+                return function internalDelegator() {
+                    var args = Array.prototype.slice.call(arguments);
+
+                    function readyCallback() {
+                        var internal = getInternal(internalName);
+
+                        internal[methodName].apply(internal, args);
                     }
 
-                    readyCallbacks.push(readyCallback);
-                }
-                else {
-                    readyCallback();
-                }
+                    if(!internalsReady) {
+                        if(!internalsInitialized) {
+                            internalsInitialized = true;
+                            loadInternals();
+                        }
+
+                        readyCallbacks.push(readyCallback);
+                    }
+                    else {
+                        readyCallback();
+                    }
+
+                    return returnFn && returnFn.apply(null, args);
+                };
             },
 
             register: function(internalName, factory) {
@@ -98,8 +110,8 @@
         return InternalsManager;
     })();
 
+    delegateToInternal = InternalsManager.createDelegate;
     registerInternal = InternalsManager.register;
-    internalsReady = InternalsManager.ready;
     getInternal = InternalsManager.get;
 
     registerInternal('utils', function utilsSetup() {
@@ -316,20 +328,6 @@
         return SourceManager;
     });
 
-    function delegateToInternal(internalName, methodName, returnFn) {
-        return function internalDelegator() {
-            var args = Array.prototype.slice.call(arguments);
-
-            internalsReady(function () {
-                var internal = getInternal(internalName);
-
-                internal[methodName].apply(internal, args);
-            });
-
-            return returnFn && returnFn.apply(null, args);
-        };
-    }
-
     envGlobal.JARS = (function jarsSetup() {
         var previousJARS = envGlobal.JARS,
             JARS;
@@ -418,9 +416,7 @@
                 config.main = main;
             }
 
-            internalsReady(function bootstrapConfig() {
-                getInternal('ConfigsManager').update(config);
-            });
+            JARS.configure(config);
         }
     })();
 })(this);
