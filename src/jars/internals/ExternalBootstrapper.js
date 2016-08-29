@@ -1,54 +1,23 @@
-JARS.internal('Bootstrapper', function bootstrapperSetup(InternalsManager) {
+JARS.internal('ExternalBootstrapper', function externalBootstrapperSetup(InternalsManager) {
     'use strict';
 
     var getInternal = InternalsManager.get,
         Loader = getInternal('Loader'),
         ConfigsManager = getInternal('ConfigsManager'),
         JARS_MAIN_LOGCONTEXT = 'JARS:main',
-        mainLogger, Bootstrapper;
+        moduleNamesQueue = [],
+        mainLogger, ExternalBootstrapper;
 
-    Bootstrapper = {
-        bootstrapInternals: function(internalsPath) {
-            var SourceManager = getInternal('SourceManager'),
-                System = getInternal('System'),
-                InterceptionManager = getInternal('InterceptionManager'),
-                basePath = SourceManager.getBasePath(),
-                systemModule;
-
-            InterceptionManager.addInterceptor(getInternal('PluginInterceptor'));
-
-            InterceptionManager.addInterceptor(getInternal('PartialModuleInterceptor'));
-
-            Loader.registerModule(getInternal('Resolver').getRootName()).$export();
-
-            systemModule = Loader.registerModule('System', ['Logger', 'Modules']);
-
-            systemModule.$export(function systemFactory() {
-                // TODO maybe calling the internal factory for System is the better option
-                // to isolate System on a per context basis but right now this is enough
-                return System;
-            });
-
-            ConfigsManager.update({
-                modules: [{
-                    basePath: basePath,
-
-                    cache: true,
-
-                    minified: false,
-
-                    timeout: 5
-                }, {
-                    restrict: 'System.*',
-
-                    basePath: basePath + internalsPath
-                }]
-            });
-
-            systemModule.request(true);
+    ExternalBootstrapper = {
+        $import: function(modules) {
+            moduleNamesQueue = moduleNamesQueue.concat(modules);
         },
 
-        bootstrapMain: function(moduleNames, main, onAbort) {
+        main: function(main, onAbort) {
+            var moduleNames = moduleNamesQueue;
+
+            moduleNamesQueue = [];
+
             // TODO when mainLogger is defined skip this Loader.$import call
             Loader.$import('System.*', function setupMainLogger(System) {
                 mainLogger = mainLogger || new System.Logger(JARS_MAIN_LOGCONTEXT);
@@ -96,5 +65,5 @@ JARS.internal('Bootstrapper', function bootstrapperSetup(InternalsManager) {
         mainLogger.error('Import of "${0}" failed!', [abortedModuleName]);
     }
 
-    return Bootstrapper;
+    return ExternalBootstrapper;
 });

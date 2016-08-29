@@ -6,10 +6,11 @@
     InternalsManager = (function internalsManagerSetup() {
         var INTERNALS_PATH = 'jars/internals/',
             internalsToLoad = [
-                'Bootstrapper',
                 'ConfigsManager',
+                'ExternalBootstrapper',
                 'Interception',
                 'InterceptionManager',
+                'InternalBootstrapper',
                 'Loader',
                 'Module',
                 'ModuleBundle',
@@ -64,7 +65,7 @@
         };
 
         function setupInternals() {
-            getInternal('Bootstrapper').bootstrapInternals(INTERNALS_PATH);
+            getInternal('InternalBootstrapper').bootstrap(INTERNALS_PATH);
 
             while(readyCallbacks.length) {
                 readyCallbacks.shift()();
@@ -346,17 +347,7 @@
              * @param {Function()} main
              * @param {JARS~Module~FailCallback} onAbort
              */
-            main: function(main, onAbort) {
-                var moduleNames = moduleNamesQueue;
-
-                moduleNamesQueue = [];
-
-                internalsReady(function bootstrapMain() {
-                    getInternal('Bootstrapper').bootstrapMain(moduleNames, main, onAbort);
-                });
-
-                return this;
-            },
+            main: delegateToInternal('ExternalBootstrapper', 'main', getJARS),
             /**
              * @access public
              *
@@ -364,26 +355,22 @@
              *
              * @param {(String|Object|Array)} modules
              */
-            $import: function(modules) {
-                moduleNamesQueue = moduleNamesQueue.concat(modules);
-
-                return this;
-            },
+            $import: delegateToInternal('ExternalBootstrapper', '$import', getJARS),
 
             module: delegateToInternal('Loader', 'registerModule', function returnModuleWrapper(moduleName) {
-                var internalModuleName = 'Loader:' + moduleName,
+                var dynamicInternalName = 'Loader:' + moduleName,
                     ModuleWrapper;
 
-                registerInternal(internalModuleName, function internalModuleSetup() {
+                registerInternal(dynamicInternalName, function internalModuleSetup() {
                     return getInternal('Loader').getMoule(moduleName);
                 });
 
                 ModuleWrapper = {
-                    $import: delegateToInternal(internalModuleName, '$import', function returnSelf() {
+                    $import: delegateToInternal(dynamicInternalName, '$import', function returnSelf() {
                         return ModuleWrapper;
                     }),
 
-                    $export: delegateToInternal(internalModuleName, '$export')
+                    $export: delegateToInternal(dynamicInternalName, '$export')
                 };
 
                 return ModuleWrapper;
@@ -409,11 +396,9 @@
              * @param {(Object|String)} config
              * @param {*} [value]
              */
-            configure: delegateToInternal('ConfigsManager', 'update', function getJARS() {
-                return JARS;
-            }),
+            configure: delegateToInternal('ConfigsManager', 'update', getJARS),
 
-            computeSortedPathList: delegateToInternal('PathListManager', 'computeSortedPathList'),
+            computeSortedPathList: delegateToInternal('PathListManager', 'computeSortedPathList', getJARS),
             /**
              * @access public
              *
@@ -424,7 +409,7 @@
              *
              * @return {Boolean}
              */
-            flush: delegateToInternal('Loader', 'flush'),
+            flush: delegateToInternal('Loader', 'flush', getJARS),
             /**
              * @access public
              *
@@ -446,6 +431,10 @@
              */
             version: '0.3.0'
         };
+
+        function getJARS() {
+            return JARS;
+        }
 
         return JARS;
     })();
