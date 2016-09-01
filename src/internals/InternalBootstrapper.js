@@ -11,8 +11,7 @@ JARS.internal('InternalBootstrapper', function(InternalsManager) {
                 Loader = getInternal('Loader'),
                 ConfigsManager = getInternal('ConfigsManager'),
                 InterceptionManager = getInternal('InterceptionManager'),
-                basePath = SourceManager.getBasePath(),
-                systemModule;
+                basePath = SourceManager.getBasePath();
 
             InterceptionManager.addInterceptor(getInternal('PluginInterceptor'));
 
@@ -20,9 +19,7 @@ JARS.internal('InternalBootstrapper', function(InternalsManager) {
 
             Loader.registerModule(getInternal('Resolver').getRootName()).$export();
 
-            systemModule = Loader.registerModule('System', ['Logger', 'Modules']);
-
-            systemModule.$export(function systemFactory() {
+            Loader.registerModule('System', ['Logger', 'Modules']).$export(function systemFactory() {
                 // TODO maybe calling the internal factory for System is the better option
                 // to isolate System on a per context basis but right now this is enough
                 return System;
@@ -43,8 +40,6 @@ JARS.internal('InternalBootstrapper', function(InternalsManager) {
                     basePath: basePath + internalsPath
                 }]
             });
-
-            systemModule.request(true);
         }
     };
 
