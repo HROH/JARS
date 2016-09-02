@@ -9,6 +9,7 @@ JARS.internal('Resolver', function resolverSetup(InternalsManager) {
         RE_VERSION_WITHOUT_PATCH = /(\d+\.\d+\.)\d+.+/,
         RE_END_SLASH = /\/$/,
         RE_BUNDLE = /\.\*$/,
+        DEFAULT_EXTENSION = 'js',
         System = InternalsManager.get('System'),
         ResolutionStrategies = InternalsManager.get('ResolutionStrategies'),
         Resolver;
@@ -54,7 +55,9 @@ JARS.internal('Resolver', function resolverSetup(InternalsManager) {
          * @return {Object}
          */
         getPathOptions: function(moduleName) {
-            var options = {},
+            var options = {
+                    extension: DEFAULT_EXTENSION
+                },
                 versionParts = moduleName.split(VERSION_DELIMITER),
                 pathParts = versionParts[0].split(DOT),
                 fileName = options.fileName = pathParts.pop(),

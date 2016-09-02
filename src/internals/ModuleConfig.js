@@ -26,6 +26,8 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
 
     addConfigTransform('dirPath', STRING_CHECK, Resolver.ensureEndsWithSlash);
 
+    addConfigTransform('extension', STRING_CHECK);
+
     addConfigTransform('fileName', STRING_CHECK);
 
     addConfigTransform('minified', BOOLEAN_CHECK, function minTransform(loadMin) {
