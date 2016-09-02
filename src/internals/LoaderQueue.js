@@ -15,14 +15,14 @@ JARS.internal('LoaderQueue', function(InternalsManager) {
         MSG_BUNDLE_NOTIFIED = ModuleLogger.addDebug(BUNDLE + NOTIFIED_BY, true),
         MSG_BUNDLE_SUBSCRIBED = ModuleLogger.addDebug(BUNDLE + SUBSCRIBED_TO, true);
 
-    function LoaderQueue(module, isBundleQueue, callback, progressback, errback) {
+    function LoaderQueue(module, isBundleQueue, onModulesLoaded, onModuleLoaded, onModuleAborted) {
         this._module = module;
         this._isBundleQueue = isBundleQueue;
         this._counter = 0;
         this._total = 0;
-        this._callback = callback;
-        this._progressback = progressback;
-        this._errback = errback || function onModuleAborted(abortedModuleName) {
+        this._onModulesLoaded = onModulesLoaded;
+        this._onModuleLoaded = onModuleLoaded || function onModuleLoaded() {};
+        this._onModuleAborted = onModuleAborted || function onModuleAborted(abortedModuleName) {
             module.isRoot() || module.abort(isBundleQueue, abortedModuleName);
         };
     }
@@ -54,19 +54,19 @@ JARS.internal('LoaderQueue', function(InternalsManager) {
                         pub: publishingModuleName
                     });
 
-                    loaderQueue._progressback(publishingModuleName, data, percentageLoaded);
-                    loaderQueue._callIfReady();
-                }, loaderQueue._errback), loaderQueue._errback, isBundle);
+                    loaderQueue._onModuleLoaded(publishingModuleName, data, percentageLoaded);
+                    loaderQueue._callIfLoaded();
+                }, loaderQueue._onModuleAborted), loaderQueue._onModuleAborted, isBundle);
             });
 
-            !loaderQueue._total && loaderQueue._callIfReady();
+            !loaderQueue._total && loaderQueue._callIfLoaded();
         },
 
-        _callIfReady: function() {
+        _callIfLoaded: function() {
             var loaderQueue = this;
 
             if(loaderQueue._counter === loaderQueue._total) {
-                loaderQueue._callback();
+                loaderQueue._onModulesLoaded();
             }
         }
     };
