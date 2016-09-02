@@ -3,7 +3,6 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
 
     var SourceManager = InternalsManager.get('SourceManager'),
         Resolver = InternalsManager.get('Resolver'),
-        LoaderQueue = InternalsManager.get('LoaderQueue'),
         ModuleQueue = InternalsManager.get('ModuleQueue'),
         ModuleDependencies = InternalsManager.get('ModuleDependencies'),
         ModuleBundle = InternalsManager.get('ModuleBundle'),
@@ -80,9 +79,6 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
         module.logger = new ModuleLogger(module);
         module.state = new ModuleState(module);
 
-        module.interceptorData = {};
-        module.interceptorDeps = [];
-
         module.initConfig();
     }
 
@@ -155,36 +151,6 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
          *
          * @memberof JARS~Module#
          *
-         * @param {String[]} moduleNames
-         * @param {Boolean} [asBundle]
-         */
-        subscribe: function(moduleNames, asBundle) {
-            var module = this,
-                state = module.state,
-                loader = module.loader,
-                System = loader.getSystem();
-
-            new LoaderQueue(module, asBundle, function onModulesLoaded() {
-                if(asBundle && module.state.isBundleRequested()) {
-                    module.bundle.subscribe();
-                }
-                else if ((asBundle || state.isRegistered()) && !state.isLoaded(asBundle)) {
-                    asBundle || module.init();
-
-                    state.setLoaded(asBundle);
-                    module.queue.notify(asBundle);
-                }
-            }, function onModuleLoaded(publishingModuleName, data) {
-                if (!System.isNil(data)) {
-                    module.interceptorData[publishingModuleName] = data;
-                }
-            }).loadModules(moduleNames);
-        },
-        /**
-         * @access public
-         *
-         * @memberof JARS~Module#
-         *
          * @param {Boolean} requestBundle
          *
          * @return {JARS~Module}
@@ -194,7 +160,7 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
 
             if (module.state.trySetRequested(requestBundle)) {
                 if(requestBundle) {
-                    module.subscribe([module.name], requestBundle);
+                    module.bundle.request();
                 }
                 else {
                     module.setupAutoAbort();

@@ -3,6 +3,7 @@ JARS.internal('ModuleBundle', function moduleBundleSetup(InternalsManager) {
 
     var Resolver = InternalsManager.get('Resolver'),
         ModuleLogger = InternalsManager.get('ModuleLogger'),
+        LoaderQueue = InternalsManager.get('LoaderQueue'),
         SEPERATOR = '", "',
         MSG_BUNDLE_DEFINED = ModuleLogger.addDebug('defined submodules "${bundle}" for bundle', true),
         MSG_BUNDLE_NOT_DEFINED = ModuleLogger.addWarning('there are no submodules defined for this bundle', true);
@@ -26,16 +27,25 @@ JARS.internal('ModuleBundle', function moduleBundleSetup(InternalsManager) {
             moduleBundle._bundle = resolvedBundle;
         },
 
-        subscribe: function() {
+        request: function() {
             var moduleBundle = this,
                 module = moduleBundle._module,
-                bundle = moduleBundle._bundle;
+                state = module.state;
 
-            bundle.length || module.logger.log(MSG_BUNDLE_NOT_DEFINED);
+            new LoaderQueue(module, true, function onModulesLoaded() {
+                var bundle = moduleBundle._bundle;
 
-            module.state.setLoading(true);
+                bundle.length || module.logger.log(MSG_BUNDLE_NOT_DEFINED);
 
-            module.subscribe(bundle, true);
+                state.setLoading(true);
+
+                new LoaderQueue(module, true, function onModulesLoaded() {
+                    if (!state.isLoaded(true)) {
+                        state.setLoaded(true);
+                        module.queue.notify(true);
+                    }
+                }).loadModules(bundle);
+            }).loadModules([module.name]);
         }
     };
 

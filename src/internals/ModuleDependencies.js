@@ -6,6 +6,8 @@ JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsMa
         arrayEach = utils.arrayEach,
         Resolver = InternalsManager.get('Resolver'),
         ModuleLogger = InternalsManager.get('ModuleLogger'),
+        LoaderQueue = InternalsManager.get('LoaderQueue'),
+        System = InternalsManager.get('System'),
         SEPERATOR = '", "',
         FOUND = 'found ',
         FOR_MODULE = ' for module',
@@ -28,6 +30,9 @@ JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsMa
 
         moduleDependencies._module = module;
         moduleDependencies._deps = [];
+
+        moduleDependencies._interceptorData = {};
+        moduleDependencies._interceptorDeps = [];
     }
 
     ModuleDependencies.prototype = {
@@ -84,14 +89,13 @@ JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsMa
          * @return {Array}
          */
         getRefs: function() {
-            var module = this._module,
-                loader = module.loader,
-                System = loader.getSystem(),
+            var moduleDependencies = this,
+                module = this._module,
                 depRefs = [];
 
-            arrayEach(this._deps, function getDepRef(dependencyName) {
-                var data = module.interceptorData[dependencyName];
-                depRefs.push(System.isNil(data) ? loader.getModuleRef(dependencyName) : data);
+            arrayEach(moduleDependencies._deps, function getDepRef(dependencyName) {
+                var data = moduleDependencies._interceptorData[dependencyName];
+                depRefs.push(System.isNil(data) ? module.loader.getModuleRef(dependencyName) : data);
             });
 
             return depRefs;
@@ -113,7 +117,7 @@ JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsMa
             var moduleDependencies = this,
                 dependencies = moduleDependencies._deps;
 
-            getDynamic && (dependencies = dependencies.concat(moduleDependencies._module.interceptorDeps));
+            getDynamic && (dependencies = dependencies.concat(moduleDependencies._interceptorDeps));
             moduleDependencies._hasParent() && (dependencies = [moduleDependencies.getParentName()].concat(dependencies));
 
             return dependencies;
@@ -130,6 +134,14 @@ JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsMa
 
             moduleDependencies._deps = moduleDependencies._deps.concat(Resolver.resolve(dependencies, moduleDependencies._module.name));
         },
+
+        requestAndLink: function(interceptorDependencies, callback, errback, progressback) {
+            var moduleDependencies = this;
+
+            moduleDependencies._interceptorDeps = moduleDependencies._interceptorDeps.concat(interceptorDependencies);
+
+            new LoaderQueue(moduleDependencies._module, false, callback, progressback, errback).loadModules(interceptorDependencies);
+        },
         /**
          * @access public
          *
@@ -137,7 +149,9 @@ JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsMa
          */
         request: function() {
             var moduleDependencies = this,
-                logger = this._module.logger,
+                module = moduleDependencies._module,
+                state = module.state,
+                logger = module.logger,
                 dependencies = moduleDependencies._deps;
 
             if (dependencies.length) {
@@ -148,7 +162,18 @@ JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsMa
                 logger.log(MSG_DEPENDENCY_FOUND, {dep: moduleDependencies.getParentName()});
             }
 
-            moduleDependencies._module.subscribe(moduleDependencies.getAll());
+            new LoaderQueue(module, false, function onModulesLoaded() {
+                if (state.isRegistered() && !state.isLoaded()) {
+                    module.init();
+
+                    state.setLoaded();
+                    module.queue.notify();
+                }
+            }, function onModuleLoaded(publishingModuleName, data) {
+                if (!System.isNil(data)) {
+                    moduleDependencies._interceptorData[publishingModuleName] = data;
+                }
+            }).loadModules(moduleDependencies.getAll());
         },
         /**
          * @access public
