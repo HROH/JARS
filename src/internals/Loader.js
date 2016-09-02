@@ -213,11 +213,11 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
          * @memberof JARS~Loader
          *
          * @param {JARS~Module~DependencyDefinition} moduleNames
-         * @param {Function(...*)} callback
-         * @param {JARS~Module~FailCallback} errback
-         * @param {Function(string)} progressback
+         * @param {Function(...*)} onModulesImported
+         * @param {JARS~Module~FailCallback} onModuleAborted
+         * @param {Function(string)} onModuleImported
          */
-        $import: function(moduleNames, callback, errback, progressback) {
+        $import: function(moduleNames, onModulesImported, onModuleAborted, onModuleImported) {
             var System = Loader.getSystem(),
                 refs = [],
                 refsIndexLookUp = {};
@@ -228,17 +228,17 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
                 refsIndexLookUp[moduleName] = moduleIndex;
             });
 
-            System.isFunction(progressback) || (progressback = false);
+            System.isFunction(onModuleImported) || (onModuleImported = false);
 
             new LoaderQueue(Loader.getModule(currentModuleName), false, function onModulesLoaded() {
-                callback.apply(null, refs);
+                onModulesImported.apply(null, refs);
             }, function onModuleLoaded(publishingModuleName, data, percentageLoaded) {
                 var ref = System.isNil(data) ? Loader.getModuleRef(publishingModuleName) : data;
 
                 refs[refsIndexLookUp[publishingModuleName]] = ref;
 
-                progressback && progressback(ref, percentageLoaded);
-            }, errback).loadModules(moduleNames);
+                onModuleImported && onModuleImported(ref, percentageLoaded);
+            }, onModuleAborted).loadModules(moduleNames);
         }
     };
 
