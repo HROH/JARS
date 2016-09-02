@@ -151,15 +151,15 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
          *
          * @memberof JARS~Module#
          *
-         * @param {Boolean} requestBundle
+         * @param {Boolean} loadBundle
          *
          * @return {JARS~Module}
          */
-        request: function(requestBundle) {
+        load: function(loadBundle) {
             var module = this;
 
-            if (module.state.trySetRequested(requestBundle)) {
-                if(requestBundle) {
+            if (module.state.trySetRequested(loadBundle)) {
+                if(loadBundle) {
                     module.bundle.request();
                 }
                 else {
@@ -178,16 +178,18 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
          *
          * @param {JARS~Module~SuccessCallback} callback
          * @param {JARS~Module~FailCallback} errback
-         * @param {Boolean} loadBundle
+         * @param {Boolean} requestBundle
          */
-        onLoad: function(callback, errback, loadBundle) {
+        request: function(callback, errback, requestBundle) {
             var module = this;
 
-            if (!module.state.isLoaded(loadBundle)) {
-                module.queue.add(callback, errback, loadBundle);
+            module.load(requestBundle);
+
+            if (!module.state.isLoaded(requestBundle)) {
+                module.queue.add(callback, errback, requestBundle);
             }
             else {
-                callback(module.getName(loadBundle));
+                callback(module.getName(requestBundle));
             }
         },
         /**
@@ -224,7 +226,7 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
 
                 module.state.logRecovering();
 
-                module.request();
+                module.load();
             }
             else {
                 module.nextRecover = false;
@@ -342,8 +344,6 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
             var module = this,
                 loader = module.loader,
                 moduleName = module.name,
-                factory = module.factory,
-                rootName = Resolver.getRootName(),
                 dependencies = module.deps,
                 parentRef;
 
@@ -355,9 +355,9 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
 
                 loader.setCurrentModuleName(moduleName);
 
-                module.ref = parentRef[Resolver.getPathOptions(moduleName).fileName] = factory.apply(parentRef, dependencies.getRefs()) || {};
+                module.ref = parentRef[Resolver.getPathOptions(moduleName).fileName] = module.factory.apply(parentRef, dependencies.getRefs()) || {};
 
-                loader.setCurrentModuleName(rootName);
+                loader.setCurrentModuleName(Resolver.getRootName());
             }
         }
     };

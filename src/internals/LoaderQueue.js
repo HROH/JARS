@@ -45,9 +45,9 @@ JARS.internal('LoaderQueue', function(InternalsManager) {
                 loaderQueue._total += modulesToLoad;
 
                 arrayEach(moduleNames, function loadModule(moduleName) {
-                    var isBundle = Resolver.isBundle(moduleName);
+                    var requestBundle = Resolver.isBundle(moduleName);
 
-                    module.loader.getModule(moduleName).request(isBundle).onLoad(InterceptionManager.intercept(module, moduleName, function onModuleLoaded(publishingModuleName, data) {
+                    module.loader.getModule(moduleName).request(InterceptionManager.intercept(module, moduleName, function onModuleLoaded(publishingModuleName, data) {
                         var percentageLoaded = Number((loaderQueue._counter++/loaderQueue._total).toFixed(2));
 
                         logger.log(isBundleQueue ? MSG_BUNDLE_NOTIFIED : MSG_MODULE_NOTIFIED, {
@@ -56,7 +56,7 @@ JARS.internal('LoaderQueue', function(InternalsManager) {
 
                         loaderQueue._onModuleLoaded(publishingModuleName, data, percentageLoaded);
                         loaderQueue._callIfLoaded();
-                    }, loaderQueue._onModuleAborted), loaderQueue._onModuleAborted, isBundle);
+                    }, loaderQueue._onModuleAborted), loaderQueue._onModuleAborted, requestBundle);
                 });
             }
             else {
