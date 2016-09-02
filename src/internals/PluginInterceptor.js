@@ -20,7 +20,7 @@ JARS.internal('PluginInterceptor', function pluginInterceptorSetup() {
          * @param {JARS~Intereption} interception
          */
         intercept: function(moduleRef, interception) {
-            if (interception.loader.getSystem().isFunction(moduleRef.$plugIn)) {
+            if (interception.listeningModule.loader.getSystem().isFunction(moduleRef.$plugIn)) {
                 moduleRef.$plugIn(interception);
             }
             else {

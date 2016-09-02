@@ -252,15 +252,13 @@ JARS.module('System.Logger').$import([
      * @param {Object} pluginRequest
      */
     Logger.$plugIn = function(pluginRequest) {
-        var data = pluginRequest.data.split(':');
+        var data = pluginRequest.info.data.split(':');
 
         pluginRequest.$importAndLink(data[1], function addDebugger(Debugger) {
             Logger.addDebugger(data[0], Debugger.setup);
 
             pluginRequest.success(Logger);
-        }, function abortDebuggerLoading(abortedModuleName) {
-            pluginRequest.fail(abortedModuleName);
-        });
+        }, pluginRequest.fail);
     };
 
     /**

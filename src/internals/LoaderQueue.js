@@ -34,9 +34,7 @@ JARS.internal('LoaderQueue', function(InternalsManager) {
             var loaderQueue = this,
                 module = loaderQueue._module,
                 logger = module.logger,
-                loader = module.loader,
                 isBundleQueue = loaderQueue._isBundleQueue,
-                listenerName = module.getName(isBundleQueue),
                 modulesToLoad = moduleNames.length;
 
             if(modulesToLoad) {
@@ -49,7 +47,7 @@ JARS.internal('LoaderQueue', function(InternalsManager) {
                 arrayEach(moduleNames, function loadModule(moduleName) {
                     var isBundle = Resolver.isBundle(moduleName);
 
-                    loader.getModule(moduleName).request(isBundle).onLoad(InterceptionManager.intercept(loader, listenerName, moduleName, function onModuleLoaded(publishingModuleName, data) {
+                    module.loader.getModule(moduleName).request(isBundle).onLoad(InterceptionManager.intercept(module, moduleName, function onModuleLoaded(publishingModuleName, data) {
                         var percentageLoaded = Number((loaderQueue._counter++/loaderQueue._total).toFixed(2));
 
                         logger.log(isBundleQueue ? MSG_BUNDLE_NOTIFIED : MSG_MODULE_NOTIFIED, {

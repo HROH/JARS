@@ -167,9 +167,7 @@ JARS.internal('System', function systemSetup(InternalsManager) {
          * @param {JARS~Interception} pluginRequest
          */
         $plugIn: function(pluginRequest) {
-            var module = pluginRequest.loader.getModule(pluginRequest.listener);
-
-            pluginRequest.success(module.config.get('config'));
+            pluginRequest.success(pluginRequest.listeningModule.config.get('config'));
         }
     };
 
