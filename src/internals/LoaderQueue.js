@@ -36,30 +36,34 @@ JARS.internal('LoaderQueue', function(InternalsManager) {
                 logger = module.logger,
                 loader = module.loader,
                 isBundleQueue = loaderQueue._isBundleQueue,
-                listenerName = module.getName(isBundleQueue);
+                listenerName = module.getName(isBundleQueue),
+                modulesToLoad = moduleNames.length;
 
-            logger.log(isBundleQueue ? MSG_BUNDLE_SUBSCRIBED : MSG_MODULE_SUBSCRIBED, {
-                subs: moduleNames.join(SEPERATOR)
-            });
+            if(modulesToLoad) {
+                logger.log(isBundleQueue ? MSG_BUNDLE_SUBSCRIBED : MSG_MODULE_SUBSCRIBED, {
+                    subs: moduleNames.join(SEPERATOR)
+                });
 
-            loaderQueue._total += moduleNames.length;
+                loaderQueue._total += modulesToLoad;
 
-            arrayEach(moduleNames, function loadModule(moduleName) {
-                var isBundle = Resolver.isBundle(moduleName);
+                arrayEach(moduleNames, function loadModule(moduleName) {
+                    var isBundle = Resolver.isBundle(moduleName);
 
-                loader.getModule(moduleName).request(isBundle).onLoad(InterceptionManager.intercept(loader, listenerName, moduleName, function onModuleLoaded(publishingModuleName, data) {
-                    var percentageLoaded = Number((loaderQueue._counter++/loaderQueue._total).toFixed(2));
+                    loader.getModule(moduleName).request(isBundle).onLoad(InterceptionManager.intercept(loader, listenerName, moduleName, function onModuleLoaded(publishingModuleName, data) {
+                        var percentageLoaded = Number((loaderQueue._counter++/loaderQueue._total).toFixed(2));
 
-                    logger.log(isBundleQueue ? MSG_BUNDLE_NOTIFIED : MSG_MODULE_NOTIFIED, {
-                        pub: publishingModuleName
-                    });
+                        logger.log(isBundleQueue ? MSG_BUNDLE_NOTIFIED : MSG_MODULE_NOTIFIED, {
+                            pub: publishingModuleName
+                        });
 
-                    loaderQueue._onModuleLoaded(publishingModuleName, data, percentageLoaded);
-                    loaderQueue._callIfLoaded();
-                }, loaderQueue._onModuleAborted), loaderQueue._onModuleAborted, isBundle);
-            });
-
-            !loaderQueue._total && loaderQueue._callIfLoaded();
+                        loaderQueue._onModuleLoaded(publishingModuleName, data, percentageLoaded);
+                        loaderQueue._callIfLoaded();
+                    }, loaderQueue._onModuleAborted), loaderQueue._onModuleAborted, isBundle);
+                });
+            }
+            else {
+                loaderQueue._callIfLoaded();
+            }
         },
 
         _callIfLoaded: function() {
