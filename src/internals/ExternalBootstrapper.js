@@ -2,11 +2,23 @@ JARS.internal('ExternalBootstrapper', function externalBootstrapperSetup(Interna
     'use strict';
 
     var getInternal = InternalsManager.get,
+        arrayEach = getInternal('utils').arrayEach,
         Loader = getInternal('Loader'),
         ConfigsManager = getInternal('ConfigsManager'),
         JARS_MAIN_LOGCONTEXT = 'JARS:main',
         moduleNamesQueue = [],
+        mainReadyQueue = [],
         mainLogger, ExternalBootstrapper;
+
+    Loader.$import('System.*', function setupMainLogger(System) {
+        mainLogger = new System.Logger(JARS_MAIN_LOGCONTEXT);
+
+        arrayEach(mainReadyQueue, function bootstrapMainFromQueue(queueData) {
+            bootstrapMain(System, queueData[0], queueData[1], queueData[2]);
+        });
+
+        mainReadyQueue = null;
+    });
 
     ExternalBootstrapper = {
         $import: function(modules) {
@@ -18,12 +30,12 @@ JARS.internal('ExternalBootstrapper', function externalBootstrapperSetup(Interna
 
             moduleNamesQueue = [];
 
-            // TODO when mainLogger is defined skip this Loader.$import call
-            Loader.$import('System.*', function setupMainLogger(System) {
-                mainLogger = mainLogger || new System.Logger(JARS_MAIN_LOGCONTEXT);
-
-                bootstrapMain(System, moduleNames, main, onAbort);
-            });
+            if(!mainLogger) {
+                mainReadyQueue.push([moduleNames, main, onAbort]);
+            }
+            else {
+                bootstrapMain(getInternal('System'), moduleNames, main, onAbort);
+            }
         }
     };
 
