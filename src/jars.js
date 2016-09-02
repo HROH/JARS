@@ -12,6 +12,7 @@
                 'InterceptionManager',
                 'InternalBootstrapper',
                 'Loader',
+                'LoaderQueue',
                 'Module',
                 'ModuleBundle',
                 'ModuleConfig',

@@ -3,21 +3,13 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
 
     var SourceManager = InternalsManager.get('SourceManager'),
         Resolver = InternalsManager.get('Resolver'),
+        LoaderQueue = InternalsManager.get('LoaderQueue'),
         ModuleQueue = InternalsManager.get('ModuleQueue'),
         ModuleDependencies = InternalsManager.get('ModuleDependencies'),
         ModuleBundle = InternalsManager.get('ModuleBundle'),
         ModuleConfig = InternalsManager.get('ModuleConfig'),
         ModuleLogger = InternalsManager.get('ModuleLogger'),
-        ModuleState = InternalsManager.get('ModuleState'),
-        SEPERATOR = '", "',
-        MODULE = 'module ',
-        BUNDLE = 'bundle ',
-        SUBSCRIBED_TO = 'subscribed to "${subs}"',
-        NOTIFIED_BY = 'was notified by "${pub}"',
-        MSG_MODULE_NOTIFIED = ModuleLogger.addDebug(MODULE + NOTIFIED_BY),
-        MSG_MODULE_SUBSCRIBED = ModuleLogger.addDebug(MODULE + SUBSCRIBED_TO),
-        MSG_BUNDLE_NOTIFIED = ModuleLogger.addDebug(BUNDLE + NOTIFIED_BY, true),
-        MSG_BUNDLE_SUBSCRIBED = ModuleLogger.addDebug(BUNDLE + SUBSCRIBED_TO, true);
+        ModuleState = InternalsManager.get('ModuleState');
 
     /**
      * @callback SuccessCallback
@@ -106,24 +98,6 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
         /**
          * @access public
          *
-         * @type {Number}
-         * @default
-         *
-         * @memberof JARS~Module#
-         */
-        depsCounter: 0,
-        /**
-         * @access public
-         *
-         * @type {Number}
-         * @default
-         *
-         * @memberof JARS~Module#
-         */
-        bundleCounter: 0,
-        /**
-         * @access public
-         *
          * @memberof JARS~Module#
          *
          * @return {Boolean}
@@ -186,62 +160,25 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
          */
         subscribe: function(moduleNames, asBundle) {
             var module = this,
-                logger = module.logger,
+                state = module.state,
                 loader = module.loader,
-                moduleCount = moduleNames.length,
                 System = loader.getSystem();
 
-            if (!module.setLoadedIfReady(moduleCount, asBundle) && moduleCount) {
-                logger.log(asBundle ? MSG_BUNDLE_SUBSCRIBED : MSG_MODULE_SUBSCRIBED, {
-                    subs: moduleNames.join(SEPERATOR)
-                });
-
-                loader.subscribe(module.getName(asBundle), moduleNames, function onModuleLoaded(publishingModuleName, data) {
-                    logger.log(asBundle ? MSG_BUNDLE_NOTIFIED : MSG_MODULE_NOTIFIED, {
-                        pub: publishingModuleName
-                    });
-
-                    if (!System.isNil(data)) {
-                        module.interceptorData[publishingModuleName] = data;
-                    }
-
-                    asBundle && module.state.isBundleRequested() && module.bundle.subscribe();
-
-                    module.setLoadedIfReady(-1, asBundle);
-                }, function onModuleAborted(dependency) {
-                    module.abort(asBundle, dependency);
-                });
-            }
-        },
-        /**
-         * @access public
-         *
-         * @memberof JARS~Module#
-         *
-         * @param {Number} count
-         * @param {Boolean} forBundle
-         *
-         * @return {Boolean}
-         */
-        setLoadedIfReady: function(count, forBundle) {
-            var module = this,
-                state = module.state,
-                depsBundleCounter = (forBundle ? 'bundle' : 'deps') + 'Counter',
-                isReady;
-
-            module[depsBundleCounter] += count;
-            isReady = !module[depsBundleCounter];
-
-            if (isReady) {
-                if ((forBundle || state.isRegistered()) && !state.isLoaded(forBundle)) {
-                    forBundle || module.init();
-
-                    state.setLoaded(forBundle);
-                    module.queue.notify(forBundle);
+            new LoaderQueue(module, asBundle, function onModulesLoaded() {
+                if(asBundle && module.state.isBundleRequested()) {
+                    module.bundle.subscribe();
                 }
-            }
+                else if ((asBundle || state.isRegistered()) && !state.isLoaded(asBundle)) {
+                    asBundle || module.init();
 
-            return isReady;
+                    state.setLoaded(asBundle);
+                    module.queue.notify(asBundle);
+                }
+            }, function onModuleLoaded(publishingModuleName, data) {
+                if (!System.isNil(data)) {
+                    module.interceptorData[publishingModuleName] = data;
+                }
+            }).loadModules(moduleNames);
         },
         /**
          * @access public

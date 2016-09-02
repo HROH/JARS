@@ -6,6 +6,7 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
         arrayEach = utils.arrayEach,
         Resolver = InternalsManager.get('Resolver'),
         Module = InternalsManager.get('Module'),
+        LoaderQueue = InternalsManager.get('LoaderQueue'),
         InterceptionManager = InternalsManager.get('InterceptionManager'),
         ConfigsManager = InternalsManager.get('ConfigsManager'),
         modulesRegistry = {},
@@ -211,23 +212,6 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
          *
          * @memberof JARS~Loader
          *
-         * @param {String} listeningModuleName
-         * @param {String[]} dependencies
-         * @param {JARS~Module~SuccessCallback} callback
-         * @param {JARS~Module~FailCallback} errback
-         */
-        subscribe: function(listeningModuleName, dependencies, callback, errback) {
-            arrayEach(dependencies, function subscribe(dependency) {
-                var isBundle = Resolver.isBundle(dependency);
-
-                Loader.getModule(dependency).request(isBundle).onLoad(InterceptionManager.intercept(Loader, listeningModuleName, dependency, callback, errback), errback, isBundle);
-            });
-        },
-        /**
-         * @access public
-         *
-         * @memberof JARS~Loader
-         *
          * @param {JARS~Module~DependencyDefinition} moduleNames
          * @param {Function(...*)} callback
          * @param {JARS~Module~FailCallback} errback
@@ -236,11 +220,9 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
         $import: function(moduleNames, callback, errback, progressback) {
             var System = Loader.getSystem(),
                 refs = [],
-                refsIndexLookUp = {},
-                ref, counter, moduleCount;
+                refsIndexLookUp = {};
 
             moduleNames = Resolver.resolve(moduleNames, currentModuleName);
-            counter = moduleCount = moduleNames.length;
 
             arrayEach(moduleNames, function addToLookUp(moduleName, moduleIndex) {
                 refsIndexLookUp[moduleName] = moduleIndex;
@@ -248,16 +230,15 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
 
             System.isFunction(progressback) || (progressback = false);
 
-            Loader.subscribe(currentModuleName, moduleNames, function publishLazy(publishingModuleName, data) {
-                ref = System.isNil(data) ? Loader.getModuleRef(publishingModuleName) : data;
+            new LoaderQueue(Loader.getModule(currentModuleName), false, function onModulesLoaded() {
+                callback.apply(null, refs);
+            }, function onModuleLoaded(publishingModuleName, data, percentageLoaded) {
+                var ref = System.isNil(data) ? Loader.getModuleRef(publishingModuleName) : data;
+
                 refs[refsIndexLookUp[publishingModuleName]] = ref;
 
-                counter--;
-
-                progressback && progressback(ref, Number((1 - counter / moduleCount).toFixed(2)));
-
-                counter || callback.apply(null, refs);
-            }, errback);
+                progressback && progressback(ref, percentageLoaded);
+            }, errback).loadModules(moduleNames);
         }
     };
 
