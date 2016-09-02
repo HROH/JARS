@@ -137,7 +137,6 @@ JARS.internal('ModuleState', function moduleStateSetup(InternalsManager) {
         MSG_MODULE_ALREADY_REGISTERED = ModuleLogger.addWarning(ATTEMPTED_TO + 'register ' + MODULE + BUT_ALREADY + ' registered'),
         // Show special cases for module
         MSG_MODULE_LOADED_MANUAL = ModuleLogger.addDebug(MODULE + ' was ' + LOADED, MANUAL),
-        MSG_MODULE_RECOVERING = ModuleLogger.addDebug(MODULE + ' failed to load and tries to recover...'),
         MSG_MODULE_REGISTERING = ModuleLogger.addDebug(MODULE + ' registering...');
 
     /**
@@ -369,14 +368,6 @@ JARS.internal('ModuleState', function moduleStateSetup(InternalsManager) {
             aborted && module.logger.log(abortionMessage, abortionInfo);
 
             return aborted;
-        },
-        /**
-         * @access public
-         *
-         * @memberof JARS~ModuleState#
-         */
-        logRecovering: function() {
-            this._module.logger.log(MSG_MODULE_RECOVERING);
         }
     };
 

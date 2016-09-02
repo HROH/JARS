@@ -8,7 +8,8 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
         ModuleBundle = InternalsManager.get('ModuleBundle'),
         ModuleConfig = InternalsManager.get('ModuleConfig'),
         ModuleLogger = InternalsManager.get('ModuleLogger'),
-        ModuleState = InternalsManager.get('ModuleState');
+        ModuleState = InternalsManager.get('ModuleState'),
+        MSG_MODULE_RECOVERING = ModuleLogger.addDebug('module failed to load and tries to recover...');
 
     /**
      * @callback SuccessCallback
@@ -224,7 +225,7 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
                 // Restore module recover association
                 foundRecover.restrict = recoverModuleName;
 
-                module.state.logRecovering();
+                module.logger.log(MSG_MODULE_RECOVERING);
 
                 module.load();
             }
