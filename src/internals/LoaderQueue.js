@@ -16,13 +16,16 @@ JARS.internal('LoaderQueue', function(InternalsManager) {
         MSG_BUNDLE_SUBSCRIBED = ModuleLogger.addDebug(BUNDLE + SUBSCRIBED_TO, true);
 
     function LoaderQueue(module, isBundleQueue, onModulesLoaded, onModuleLoaded, onModuleAborted) {
-        this._module = module;
-        this._isBundleQueue = isBundleQueue;
-        this._counter = 0;
-        this._total = 0;
-        this._onModulesLoaded = onModulesLoaded;
-        this._onModuleLoaded = onModuleLoaded || function onModuleLoaded() {};
-        this._onModuleAborted = onModuleAborted || function onModuleAborted(abortedModuleName) {
+        var loaderQueue = this;
+
+        loaderQueue._module = module;
+        loaderQueue._refs = [];
+        loaderQueue._isBundleQueue = isBundleQueue;
+        loaderQueue._counter = 0;
+        loaderQueue._total = 0;
+        loaderQueue._onModulesLoaded = onModulesLoaded;
+        loaderQueue._onModuleLoaded = onModuleLoaded || onModuleLoadedNoop;
+        loaderQueue._onModuleAborted =  onModuleAborted || function onModuleAbortedDefault(abortedModuleName) {
             module.isRoot() || module.abort(isBundleQueue, abortedModuleName);
         };
     }
@@ -33,9 +36,11 @@ JARS.internal('LoaderQueue', function(InternalsManager) {
         loadModules: function(moduleNames) {
             var loaderQueue = this,
                 module = loaderQueue._module,
+                loader = module.loader,
                 logger = module.logger,
                 isBundleQueue = loaderQueue._isBundleQueue,
-                modulesToLoad = moduleNames.length;
+                modulesToLoad = moduleNames.length,
+                refsIndexLookUp = {};
 
             if(modulesToLoad) {
                 logger.log(isBundleQueue ? MSG_BUNDLE_SUBSCRIBED : MSG_MODULE_SUBSCRIBED, {
@@ -44,17 +49,22 @@ JARS.internal('LoaderQueue', function(InternalsManager) {
 
                 loaderQueue._total += modulesToLoad;
 
-                arrayEach(moduleNames, function loadModule(moduleName) {
+                arrayEach(moduleNames, function loadModule(moduleName, moduleIndex) {
                     var requestBundle = Resolver.isBundle(moduleName);
 
-                    module.loader.getModule(moduleName).request(InterceptionManager.intercept(module, moduleName, function onModuleLoaded(publishingModuleName, data) {
-                        var percentageLoaded = Number((loaderQueue._counter++/loaderQueue._total).toFixed(2));
+                    refsIndexLookUp[moduleName] = loaderQueue._total - modulesToLoad + moduleIndex;
+
+                    loader.getModule(moduleName).request(InterceptionManager.intercept(module, moduleName, function onModuleLoaded(publishingModuleName, data) {
+                        var percentageLoaded = Number((loaderQueue._counter++/loaderQueue._total).toFixed(2)),
+                            ref = loader.getSystem().isNil(data) ? loader.getModuleRef(publishingModuleName) : data;
+
+                        loaderQueue._refs[refsIndexLookUp[publishingModuleName]] = ref;
 
                         logger.log(isBundleQueue ? MSG_BUNDLE_NOTIFIED : MSG_MODULE_NOTIFIED, {
                             pub: publishingModuleName
                         });
 
-                        loaderQueue._onModuleLoaded(publishingModuleName, data, percentageLoaded);
+                        loaderQueue._onModuleLoaded(moduleName, ref, percentageLoaded);
                         loaderQueue._callIfLoaded();
                     }, loaderQueue._onModuleAborted), loaderQueue._onModuleAborted, requestBundle);
                 });
@@ -68,10 +78,12 @@ JARS.internal('LoaderQueue', function(InternalsManager) {
             var loaderQueue = this;
 
             if(loaderQueue._counter === loaderQueue._total) {
-                loaderQueue._onModulesLoaded();
+                loaderQueue._onModulesLoaded(loaderQueue._refs);
             }
         }
     };
+    
+    function onModuleLoadedNoop() {}
 
     return LoaderQueue;
 });

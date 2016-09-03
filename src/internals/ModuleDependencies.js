@@ -31,7 +31,6 @@ JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsMa
         moduleDependencies._module = module;
         moduleDependencies._deps = [];
 
-        moduleDependencies._interceptorData = {};
         moduleDependencies._interceptorDeps = [];
     }
 
@@ -66,39 +65,10 @@ JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsMa
          *
          * @memberof JARS~ModuleDependencies#
          *
-         * @return {*}
-         */
-        getParentRef: function() {
-            return this.getParent().ref;
-        },
-        /**
-         * @access public
-         *
-         * @memberof JARS~ModuleDependencies#
-         *
          * @return {String}
          */
         getParentName: function() {
             return this.getParent().name;
-        },
-        /**
-         * @access public
-         *
-         * @memberof JARS~ModuleDependencies#
-         *
-         * @return {Array}
-         */
-        getRefs: function() {
-            var moduleDependencies = this,
-                module = this._module,
-                depRefs = [];
-
-            arrayEach(moduleDependencies._deps, function getDepRef(dependencyName) {
-                var data = moduleDependencies._interceptorData[dependencyName];
-                depRefs.push(System.isNil(data) ? module.loader.getModuleRef(dependencyName) : data);
-            });
-
-            return depRefs;
         },
 
         exist: function() {
@@ -162,16 +132,15 @@ JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsMa
                 logger.log(MSG_DEPENDENCY_FOUND, {dep: moduleDependencies.getParentName()});
             }
 
-            new LoaderQueue(module, false, function onModulesLoaded() {
+            new LoaderQueue(module, false, function onModulesLoaded(refs) {
+                var parent = moduleDependencies.getParent();
+
                 if (state.isRegistered() && !state.isLoaded()) {
-                    module.init();
+                    parent.isRoot() && refs.unshift(parent.ref);
+                    module.init(refs);
 
                     state.setLoaded();
                     module.queue.notify();
-                }
-            }, function onModuleLoaded(publishingModuleName, data) {
-                if (!System.isNil(data)) {
-                    moduleDependencies._interceptorData[publishingModuleName] = data;
                 }
             }).loadModules(moduleDependencies.getAll());
         },

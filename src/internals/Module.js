@@ -341,22 +341,21 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
          *
          * @memberof JARS~Module#
          */
-        init: function() {
+        init: function(refs) {
             var module = this,
                 loader = module.loader,
                 moduleName = module.name,
-                dependencies = module.deps,
                 parentRef;
 
             if(module.isRoot()) {
                 module.ref = {};
             }
             else {
-                parentRef = dependencies.getParentRef();
+                parentRef = refs.shift();
 
                 loader.setCurrentModuleName(moduleName);
 
-                module.ref = parentRef[Resolver.getPathOptions(moduleName).fileName] = module.factory.apply(parentRef, dependencies.getRefs()) || {};
+                module.ref = parentRef[Resolver.getPathOptions(moduleName).fileName] = module.factory.apply(parentRef, refs) || {};
 
                 loader.setCurrentModuleName(Resolver.getRootName());
             }
