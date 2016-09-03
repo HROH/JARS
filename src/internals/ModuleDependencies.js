@@ -7,7 +7,6 @@ JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsMa
         Resolver = InternalsManager.get('Resolver'),
         ModuleLogger = InternalsManager.get('ModuleLogger'),
         LoaderQueue = InternalsManager.get('LoaderQueue'),
-        System = InternalsManager.get('System'),
         SEPERATOR = '", "',
         FOUND = 'found ',
         FOR_MODULE = ' for module',
