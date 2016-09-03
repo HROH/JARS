@@ -132,7 +132,7 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
                 config = module.config,
                 cache = config.get('cache') ? '' : '?_=' + new Date().getTime(),
                 path = config.get('basePath') + config.get('dirPath') + config.get('versionDir'),
-                fileName = config.get('fileName') + config.get('minified') + '.' + (fileType || config.get('extension')) + cache;
+                fileName = config.get('fileName') + config.get('minified') + (fileType || config.get('extension')) + cache;
 
             return path + fileName;
         },

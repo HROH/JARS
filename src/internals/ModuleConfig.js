@@ -26,7 +26,9 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
 
     addConfigTransform('dirPath', STRING_CHECK, Resolver.ensureEndsWithSlash);
 
-    addConfigTransform('extension', STRING_CHECK);
+    addConfigTransform('extension', STRING_CHECK, function extensionTransform(extension) {
+        return '.' + extension;
+    });
 
     addConfigTransform('fileName', STRING_CHECK);
 
