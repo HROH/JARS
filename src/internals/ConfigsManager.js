@@ -1,13 +1,15 @@
 JARS.internal('ConfigsManager', function configsManagerSetup(InternalsManager) {
     'use strict';
 
-    var utils = InternalsManager.get('utils'),
+    var getInternal = InternalsManager.get,
+        utils = getInternal('utils'),
         objectEach = utils.objectEach,
         arrayEach = utils.arrayEach,
         objectMerge = utils.objectMerge,
-        System = InternalsManager.get('System'),
-        InterceptionManager = InternalsManager.get('InterceptionManager'),
-        SourceManager = InternalsManager.get('SourceManager'),
+        System = getInternal('System'),
+        Resolver = getInternal('Resolver'),
+        InterceptionManager = getInternal('InterceptionManager'),
+        SourceManager = getInternal('SourceManager'),
         configs = {
             environments: {},
 
@@ -83,8 +85,24 @@ JARS.internal('ConfigsManager', function configsManagerSetup(InternalsManager) {
              *
              * @return {Object}
              */
-            modules: function(newModuleConfigs) {
-                return getLoader().setModuleConfig(newModuleConfigs);
+            modules: function setModuleConfigs(newModuleConfigs) {
+                var loader = getLoader(),
+                    modules;
+
+                if (System.isArray(newModuleConfigs)) {
+                    arrayEach(newModuleConfigs, function setModuleConfig(config) {
+                        setModuleConfigs(config);
+                    });
+                }
+                else {
+                    modules = newModuleConfigs.restrict ? Resolver.resolve(newModuleConfigs.restrict) : [Resolver.getRootName()];
+
+                    arrayEach(modules, function updateModuleConfig(moduleName) {
+                        loader.getModule(moduleName).updateConfig(newModuleConfigs, Resolver.isBundle(moduleName));
+                    });
+                }
+
+                return loader.getModule(Resolver.getRootName()).bundleConfig;
             },
             /**
              * @param {String} newLoaderContext
@@ -174,7 +192,7 @@ JARS.internal('ConfigsManager', function configsManagerSetup(InternalsManager) {
     }
 
     function getLoader() {
-        return InternalsManager.get('Loader');
+        return getInternal('Loader');
     }
 
     return ConfigsManager;

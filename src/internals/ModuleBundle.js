@@ -1,9 +1,10 @@
 JARS.internal('ModuleBundle', function moduleBundleSetup(InternalsManager) {
     'use strict';
 
-    var Resolver = InternalsManager.get('Resolver'),
-        ModuleLogger = InternalsManager.get('ModuleLogger'),
-        LoaderQueue = InternalsManager.get('LoaderQueue'),
+    var getInternal = InternalsManager.get,
+        Resolver = getInternal('Resolver'),
+        ModuleLogger = getInternal('ModuleLogger'),
+        LoaderQueue = getInternal('LoaderQueue'),
         SEPERATOR = '", "',
         MSG_BUNDLE_DEFINED = ModuleLogger.addDebug('defined submodules "${bundle}" for bundle', true),
         MSG_BUNDLE_NOT_DEFINED = ModuleLogger.addWarning('there are no submodules defined for this bundle', true);

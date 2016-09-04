@@ -1,14 +1,16 @@
 JARS.internal('Module', function moduleSetup(InternalsManager) {
     'use strict';
 
-    var SourceManager = InternalsManager.get('SourceManager'),
-        Resolver = InternalsManager.get('Resolver'),
-        ModuleQueue = InternalsManager.get('ModuleQueue'),
-        ModuleDependencies = InternalsManager.get('ModuleDependencies'),
-        ModuleBundle = InternalsManager.get('ModuleBundle'),
-        ModuleConfig = InternalsManager.get('ModuleConfig'),
-        ModuleLogger = InternalsManager.get('ModuleLogger'),
-        ModuleState = InternalsManager.get('ModuleState'),
+    var getInternal = InternalsManager.get,
+        System = getInternal('System'),
+        SourceManager = getInternal('SourceManager'),
+        Resolver = getInternal('Resolver'),
+        ModuleQueue = getInternal('ModuleQueue'),
+        ModuleDependencies = getInternal('ModuleDependencies'),
+        ModuleBundle = getInternal('ModuleBundle'),
+        ModuleConfig = getInternal('ModuleConfig'),
+        ModuleLogger = getInternal('ModuleLogger'),
+        ModuleState = getInternal('ModuleState'),
         MSG_MODULE_RECOVERING = ModuleLogger.addDebug('module failed to load and tries to recover...');
 
     /**
@@ -261,7 +263,7 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
         setupAutoAbort: function() {
             var module = this;
 
-            module.timeoutID = module.loader.getSystem().env.global.setTimeout(function abortModule() {
+            module.timeoutID = System.env.global.setTimeout(function abortModule() {
                 module.abort();
             }, module.config.get('timeout') * 1000);
         },
@@ -269,7 +271,7 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
         clearAutoAbort: function() {
             var module = this;
 
-            module.timeoutID && module.loader.getSystem().env.global.clearTimeout(module.timeoutID);
+            module.timeoutID && System.env.global.clearTimeout(module.timeoutID);
         },
         /**
          * @access public
@@ -355,7 +357,7 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
 
                 loader.setCurrentModuleName(moduleName);
 
-                module.ref = parentRef[Resolver.getPathOptions(moduleName).fileName] = module.factory.apply(parentRef, refs) || {};
+                module.ref = parentRef[Resolver.getModuleTail(moduleName)] = module.factory.apply(parentRef, refs) || {};
 
                 loader.setCurrentModuleName(Resolver.getRootName());
             }

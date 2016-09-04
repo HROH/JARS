@@ -1,7 +1,8 @@
-JARS.internal('ModuleQueue', function moduleQueueSetup() {
+JARS.internal('ModuleQueue', function moduleQueueSetup(InternalsManager) {
     'use strict';
 
-    var QUEUE_SUCCESS = 0,
+    var System = InternalsManager.get('System'),
+        QUEUE_SUCCESS = 0,
         QUEUE_ERROR = 1;
 
     /**
@@ -55,7 +56,6 @@ JARS.internal('ModuleQueue', function moduleQueueSetup() {
             var moduleQueue = this,
                 module = moduleQueue._module,
                 name = module.getName(callBundle),
-                System = module.loader.getSystem(),
                 callbacks = moduleQueue._getCallbacks(callBundle),
                 callback;
 

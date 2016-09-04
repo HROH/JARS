@@ -1,10 +1,12 @@
 JARS.internal('LoaderQueue', function(InternalsManager) {
     'use strict';
 
-    var arrayEach = InternalsManager.get('utils').arrayEach,
-        Resolver = InternalsManager.get('Resolver'),
-        InterceptionManager = InternalsManager.get('InterceptionManager'),
-        ModuleLogger = InternalsManager.get('ModuleLogger'),
+    var getInternal = InternalsManager.get,
+        arrayEach = getInternal('utils').arrayEach,
+        System = getInternal('System'),
+        Resolver = getInternal('Resolver'),
+        InterceptionManager = getInternal('InterceptionManager'),
+        ModuleLogger = getInternal('ModuleLogger'),
         SEPERATOR = '", "',
         MODULE = 'module ',
         BUNDLE = 'bundle ',
@@ -56,7 +58,7 @@ JARS.internal('LoaderQueue', function(InternalsManager) {
 
                     loader.getModule(moduleName).request(InterceptionManager.intercept(module, moduleName, function onModuleLoaded(publishingModuleName, data) {
                         var percentageLoaded = Number((loaderQueue._counter++/loaderQueue._total).toFixed(2)),
-                            ref = loader.getSystem().isNil(data) ? loader.getModuleRef(publishingModuleName) : data;
+                            ref = System.isNil(data) ? loader.getModuleRef(publishingModuleName) : data;
 
                         loaderQueue._refs[refsIndexLookUp[publishingModuleName]] = ref;
 
@@ -82,7 +84,7 @@ JARS.internal('LoaderQueue', function(InternalsManager) {
             }
         }
     };
-    
+
     function onModuleLoadedNoop() {}
 
     return LoaderQueue;

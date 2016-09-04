@@ -1,5 +1,8 @@
-JARS.internal('PluginInterceptor', function pluginInterceptorSetup() {
+JARS.internal('PluginInterceptor', function pluginInterceptorSetup(InternalsManager) {
     'use strict';
+
+    var System = InternalsManager.get('System'),
+        PluginInterceptor;
 
     /**
     * @access public
@@ -10,7 +13,7 @@ JARS.internal('PluginInterceptor', function pluginInterceptorSetup() {
     * @memberof JARS
     * @inner
     */
-    var PluginInterceptor = {
+    PluginInterceptor = {
         /**
          * @access public
          *
@@ -20,7 +23,7 @@ JARS.internal('PluginInterceptor', function pluginInterceptorSetup() {
          * @param {JARS~Intereption} interception
          */
         intercept: function(moduleRef, interception) {
-            if (interception.listeningModule.loader.getSystem().isFunction(moduleRef.$plugIn)) {
+            if (System.isFunction(moduleRef.$plugIn)) {
                 moduleRef.$plugIn(interception);
             }
             else {

@@ -1,11 +1,12 @@
 JARS.internal('PathListManager', function pathListManagerSetup(InternalsManager) {
     'use strict';
 
-    var utils = InternalsManager.get('utils'),
+    var getInternal = InternalsManager.get,
+        utils = getInternal('utils'),
         hasOwnProp = utils.hasOwnProp,
         arrayEach = utils.arrayEach,
-        Loader = InternalsManager.get('Loader'),
-        Resolver = InternalsManager.get('Resolver'),
+        Loader = getInternal('Loader'),
+        Resolver = getInternal('Resolver'),
         excludedModules = [Resolver.getRootName(), 'System', 'System.Logger', 'System.Modules'],
         sortedModules = {},
         pathList = [],

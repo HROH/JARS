@@ -1,14 +1,13 @@
 JARS.internal('Loader', function loaderSetup(InternalsManager) {
     'use strict';
 
-    var utils = InternalsManager.get('utils'),
-        objectEach = utils.objectEach,
-        arrayEach = utils.arrayEach,
-        Resolver = InternalsManager.get('Resolver'),
-        Module = InternalsManager.get('Module'),
-        LoaderQueue = InternalsManager.get('LoaderQueue'),
-        InterceptionManager = InternalsManager.get('InterceptionManager'),
-        ConfigsManager = InternalsManager.get('ConfigsManager'),
+    var getInternal = InternalsManager.get,
+        objectEach = getInternal('utils').objectEach,
+        Resolver = getInternal('Resolver'),
+        Module = getInternal('Module'),
+        LoaderQueue = getInternal('LoaderQueue'),
+        InterceptionManager = getInternal('InterceptionManager'),
+        ConfigsManager = getInternal('ConfigsManager'),
         modulesRegistry = {},
         currentModuleName = Resolver.getRootName(),
         currentLoaderContext = 'default',
@@ -52,32 +51,6 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
          *
          * @memberof JARS~Loader
          *
-         * @param {Object} newConfig
-         */
-        setModuleConfig: function(newConfig) {
-            var System = Loader.getSystem(),
-                modules;
-
-            if (System.isArray(newConfig)) {
-                arrayEach(newConfig, function setModuleConfig(config) {
-                    Loader.setModuleConfig(config);
-                });
-            }
-            else {
-                modules = newConfig.restrict ? Resolver.resolve(newConfig.restrict) : [Resolver.getRootName()];
-
-                arrayEach(modules, function updateModuleConfig(moduleName) {
-                    Loader.getModule(moduleName).updateConfig(newConfig, Resolver.isBundle(moduleName));
-                });
-            }
-
-            return Loader.getRoot().bundleConfig;
-        },
-        /**
-         * @access public
-         *
-         * @memberof JARS~Loader
-         *
          * @param {String} moduleName
          */
         setCurrentModuleName: function(moduleName) {
@@ -109,16 +82,6 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
          */
         getRoot: function() {
             return Loader.getModuleRef(Resolver.getRootName());
-        },
-        /**
-         * @access public
-         *
-         * @memberof JARS~Loader
-         *
-         * @return {System}
-         */
-        getSystem: function() {
-            return Loader.getModuleRef('System');
         },
         /**
          * @access public

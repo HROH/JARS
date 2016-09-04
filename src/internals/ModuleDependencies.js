@@ -1,12 +1,13 @@
 JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsManager) {
     'use strict';
 
-    var utils = InternalsManager.get('utils'),
+    var getInternal = InternalsManager.get,
+        utils = getInternal('utils'),
         hasOwnProp = utils.hasOwnProp,
         arrayEach = utils.arrayEach,
-        Resolver = InternalsManager.get('Resolver'),
-        ModuleLogger = InternalsManager.get('ModuleLogger'),
-        LoaderQueue = InternalsManager.get('LoaderQueue'),
+        Resolver = getInternal('Resolver'),
+        ModuleLogger = getInternal('ModuleLogger'),
+        LoaderQueue = getInternal('LoaderQueue'),
         SEPERATOR = '", "',
         FOUND = 'found ',
         FOR_MODULE = ' for module',

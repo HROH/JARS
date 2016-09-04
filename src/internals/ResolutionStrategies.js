@@ -1,7 +1,8 @@
 JARS.internal('ResolutionStrategies', function resolutionStrategiesSetup(InternalsManager) {
     'use strict';
 
-    var utils = InternalsManager.get('utils'),
+    var getInternal = InternalsManager.get,
+        utils = getInternal('utils'),
         objectEach = utils.objectEach,
         arrayEach = utils.arrayEach,
         resolveTypeToStrategyMap = [],
@@ -16,7 +17,7 @@ JARS.internal('ResolutionStrategies', function resolutionStrategiesSetup(Interna
         RE_LEADING_DOT = /^\./,
         DEFAULT_RESOLUTION_ERROR_MESSAGE = 'Could not resolve "${0}" relative to "${1}": ',
         MUST_NOT_START_WITH_DOT = 'modulename must not start with a "."',
-        ResolutionStrategies, Resolver;
+        ResolutionStrategies;
 
     resolutionErrorTemplates[RESOLVE_DEPS] = createResolutionErrorMessage('a dependency modulename must be absolute or relative to the current module.');
     resolveTypeToStrategyMap[RESOLVE_DEPS] = 'deps';
@@ -110,7 +111,7 @@ JARS.internal('ResolutionStrategies', function resolutionStrategiesSetup(Interna
             }
 
             if (isInvalidModuleName) {
-                Logger = InternalsManager.get('Loader').getLogger();
+                Logger = getInternal('Loader').getLogger();
                 Logger.errorWithContext('Resolution', resolveType, [moduleName, baseModuleName], resolutionLoggerOptions);
 
                 resolvedModules = [];
@@ -216,7 +217,7 @@ JARS.internal('ResolutionStrategies', function resolutionStrategiesSetup(Interna
      * @return {Boolean}
      */
     function makeAbsoluteModuleName(baseModuleName, moduleName) {
-        var separator = InternalsManager.get('InterceptionManager').removeInterceptionData(moduleName) ? DOT : '';
+        var separator = getInternal('InterceptionManager').removeInterceptionData(moduleName) ? DOT : '';
 
         return [baseModuleName, moduleName].join(separator);
     }
@@ -244,7 +245,7 @@ JARS.internal('ResolutionStrategies', function resolutionStrategiesSetup(Interna
      * @return {JARS~Resolver}
      */
     function getResolver() {
-        return Resolver || (Resolver = InternalsManager.get('Resolver'));
+        return getInternal('Resolver');
     }
 
     function createResolutionErrorMessage(message) {
