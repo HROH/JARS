@@ -106,7 +106,7 @@ JARS.internal('ModuleState', function moduleStateSetup(InternalsManager) {
         BUNDLE = 'bundle',
         LOADING = 'loading',
         LOADED = 'loaded',
-        MANUAL = ' manual',
+        LOADED_MANUAL = LOADED + ' manual',
         STARTED_LOADING = 'started ' + LOADING + ' ',
         FINISHED_LOADING = 'finished ' + LOADING + ' ',
         ATTEMPTED_TO = 'attempted to ',
@@ -129,14 +129,14 @@ JARS.internal('ModuleState', function moduleStateSetup(InternalsManager) {
         MSG_BUNDLE_LOADING = addLoadingMessage(true, true),
         // Info when loading is already in progress or done
         MSG_MODULE_ALREADY_LOADED = addLoadAttemptMessage(LOADED),
-        MSG_MODULE_ALREADY_LOADED_MANUAL = addLoadAttemptMessage(LOADED + MANUAL),
+        MSG_MODULE_ALREADY_LOADED_MANUAL = addLoadAttemptMessage(LOADED_MANUAL),
         MSG_MODULE_ALREADY_LOADING = addLoadAttemptMessage(LOADING),
         MSG_BUNDLE_ALREADY_LOADED = addLoadAttemptMessage(LOADED, true),
         MSG_BUNDLE_ALREADY_LOADING = addLoadAttemptMessage(LOADING, true),
         // Warning when a module is registered twice
         MSG_MODULE_ALREADY_REGISTERED = ModuleLogger.addWarning(ATTEMPTED_TO + 'register ' + MODULE + BUT_ALREADY + ' registered'),
         // Show special cases for module
-        MSG_MODULE_LOADED_MANUAL = ModuleLogger.addDebug(MODULE + ' was ' + LOADED, MANUAL),
+        MSG_MODULE_LOADED_MANUAL = ModuleLogger.addDebug(MODULE + ' was ' + LOADED_MANUAL),
         MSG_MODULE_REGISTERING = ModuleLogger.addDebug(MODULE + ' registering...');
 
     /**
