@@ -86,7 +86,7 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
         moduleConfig._isBundleConfig = isBundleConfig;
         moduleConfig._parentConfig = parentConfig;
         moduleConfig._options = parentConfig ? parentConfig.inheritOptions() : new ModuleConfigOptions();
-        moduleConfig._defaultOptions = {};
+        moduleConfig._defaultOptions = new ModuleConfigOptions();
 
         transformAndUpdateOptions(moduleConfig._defaultOptions, getDefaultOptions(module.name), module, isBundleConfig);
     }
