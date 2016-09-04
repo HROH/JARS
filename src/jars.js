@@ -99,13 +99,11 @@
         }
 
         function loadInternals() {
-            getInternal('utils').arrayEach(internalsToLoad, loadInternal);
-        }
-
-        function loadInternal(internalName) {
             var SourceManager = getInternal('SourceManager');
 
-            SourceManager.loadSource('internal:' + internalName, SourceManager.getBasePath() + INTERNALS_PATH + internalName + '.js');
+            getInternal('utils').arrayEach(internalsToLoad, function loadInternal(internalName) {
+                SourceManager.loadSource('internal:' + internalName, SourceManager.getBasePath() + INTERNALS_PATH + internalName + '.js');
+            });
         }
 
         return InternalsManager;
