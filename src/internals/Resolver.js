@@ -3,19 +3,18 @@ JARS.internal('Resolver', function resolverSetup(InternalsManager) {
 
     var ROOT_MODULE_NAME = '*',
         BUNDLE_SUFFIX = '.*',
+        EMPTY_STRING = '',
         DOT = '.',
-        SLASH = '/',
         VERSION_DELIMITER = '@',
-        RE_VERSION_WITHOUT_PATCH = /(\d+\.\d+\.)\d+.+/,
-        RE_END_SLASH = /\/$/,
+        VERSION_WITH_ZERO_PATCH = '$10',
+        RE_VERSION_WITHOUT_PATCH_NUMBER = /(\d+\.\d+\.)\d+.+/,
         RE_BUNDLE = /\.\*$/,
-        DEFAULT_EXTENSION = 'js',
         System = InternalsManager.get('System'),
         ResolutionStrategies = InternalsManager.get('ResolutionStrategies'),
         Resolver;
 
     /**
-     * @access private
+     * @access public
      *
      * @namespace Resolver
      *
@@ -52,46 +51,6 @@ JARS.internal('Resolver', function resolverSetup(InternalsManager) {
          *
          * @param {String} moduleName
          *
-         * @return {Object}
-         */
-        getPathOptions: function(moduleName) {
-            var options = {
-                    extension: DEFAULT_EXTENSION
-                },
-                versionParts = moduleName.split(VERSION_DELIMITER),
-                pathParts = versionParts[0].split(DOT),
-                fileName = options.fileName = pathParts.pop(),
-                firstLetterFileName = fileName.charAt(0);
-
-            options.versionDir = versionParts[1] ? Resolver.ensureEndsWithSlash(versionParts[1]) : '';
-
-            if (firstLetterFileName === firstLetterFileName.toLowerCase()) {
-                pathParts.push(fileName);
-            }
-
-            options.dirPath = pathParts.length ? Resolver.ensureEndsWithSlash(pathParts.join(SLASH)) : '';
-
-            return options;
-        },
-        /**
-         * @access public
-         *
-         * @memberof JARS~Resolver
-         *
-         * @param {String} path
-         *
-         * @return {String}
-         */
-        ensureEndsWithSlash: function(path) {
-            return (!path || RE_END_SLASH.test(path)) ? path : path + SLASH;
-        },
-        /**
-         * @access public
-         *
-         * @memberof JARS~Resolver
-         *
-         * @param {String} moduleName
-         *
          * @return {String}
          */
         getBundleName: function(moduleName) {
@@ -107,17 +66,26 @@ JARS.internal('Resolver', function resolverSetup(InternalsManager) {
          * @return {String}
          */
         getImplicitDependencyName: function(moduleName) {
-            var versionParts = moduleName.split(VERSION_DELIMITER),
-                version = versionParts[1];
+            var version = Resolver.getVersion(moduleName);
 
-            moduleName = versionParts[0];
+            moduleName = Resolver.getModuleNameWithoutVersion(moduleName);
             moduleName = moduleName.substr(0, moduleName.lastIndexOf(DOT));
 
-            versionParts[0] = moduleName;
-
-            version && (version = version.replace(RE_VERSION_WITHOUT_PATCH, '$10'));
+            version && (version = version.replace(RE_VERSION_WITHOUT_PATCH_NUMBER, VERSION_WITH_ZERO_PATCH));
 
             return Resolver.appendVersion(moduleName, version);
+        },
+        /**
+         * @access public
+         *
+         * @memberof JARS~Resolver
+         *
+         * @param {String} moduleName
+         *
+         * @return {String}
+         */
+        getModuleTail: function(moduleName) {
+            return Resolver.getModuleNameWithoutVersion(moduleName).split(DOT).pop();
         },
         /**
          * @access public
@@ -130,6 +98,30 @@ JARS.internal('Resolver', function resolverSetup(InternalsManager) {
          */
         isVersionedModule: function(moduleName) {
             return moduleName.indexOf(VERSION_DELIMITER) > -1;
+        },
+        /**
+         * @access public
+         *
+         * @memberof JARS~Resolver
+         *
+         * @param {String} moduleName
+         *
+         * @return {String}
+         */
+        getModuleNameWithoutVersion: function(moduleName) {
+            return moduleName.split(VERSION_DELIMITER)[0];
+        },
+        /**
+         * @access public
+         *
+         * @memberof JARS~Resolver
+         *
+         * @param {String} moduleName
+         *
+         * @return {String}
+         */
+        getVersion: function(moduleName) {
+            return moduleName.split(VERSION_DELIMITER)[1] || EMPTY_STRING;
         },
         /**
          * @access public
@@ -154,7 +146,7 @@ JARS.internal('Resolver', function resolverSetup(InternalsManager) {
          * @return {String}
          */
         extractModuleNameFromBundle: function(moduleName) {
-            return moduleName.replace(RE_BUNDLE, '');
+            return moduleName.replace(RE_BUNDLE, EMPTY_STRING);
         },
         /**
          * @access public
