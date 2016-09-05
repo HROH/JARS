@@ -37,8 +37,6 @@ JARS.internal('ModuleBundle', function moduleBundleSetup(InternalsManager) {
 
                 bundle.length || module.logger.warn(MSG_BUNDLE_NOT_DEFINED, true);
 
-                state.setLoading(true);
-
                 new LoaderQueue(module, true, function onModulesLoaded() {
                     if (!state.isLoaded(true)) {
                         state.setLoaded(true);

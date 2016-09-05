@@ -154,25 +154,14 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
          *
          * @memberof JARS~Module#
          *
-         * @param {Boolean} loadBundle
-         *
          * @return {JARS~Module}
          */
-        load: function(loadBundle) {
+        load: function() {
             var module = this;
 
-            if (module.state.trySetRequested(loadBundle)) {
-                if(loadBundle) {
-                    module.bundle.request();
-                }
-                else {
-                    module.setupAutoAbort();
+            module.setupAutoAbort();
 
-                    SourceManager.loadSource(module.name, module.getFullPath());
-                }
-            }
-
-            return module;
+            SourceManager.loadSource(module.name, module.getFullPath());
         },
         /**
          * @access public
@@ -186,14 +175,16 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
         request: function(callback, errback, requestBundle) {
             var module = this;
 
-            module.load(requestBundle);
+            if (module.state.trySetRequested(requestBundle)) {
+                if(requestBundle) {
+                    module.bundle.request();
+                }
+                else {
+                    module.load();
+                }
+            }
 
-            if (!module.state.isLoaded(requestBundle)) {
-                module.queue.add(callback, errback, requestBundle);
-            }
-            else {
-                callback(module.getName(requestBundle));
-            }
+            module.queue.add(callback, errback, requestBundle);
         },
         /**
          * @access public
@@ -300,8 +291,6 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
             if (!module.state.isRegistered()) {
                 module.deps.add(dependencies);
             }
-
-            return module;
         },
         /**
          * @access public

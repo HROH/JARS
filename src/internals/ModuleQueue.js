@@ -97,7 +97,15 @@ JARS.internal('ModuleQueue', function moduleQueueSetup(InternalsManager) {
          * @param {Boolean} addBundle
          */
         add: function(callback, errback, addBundle) {
-            this._getCallbacks(addBundle).push([callback, errback]);
+            var moduleQueue = this,
+                module = moduleQueue._module;
+
+            if(module.state.isLoaded(addBundle)) {
+                callback(module.getName(addBundle));
+            }
+            else {
+                moduleQueue._getCallbacks(addBundle).push([callback, errback]);
+            }
         }
     };
 

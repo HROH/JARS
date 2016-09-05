@@ -77,17 +77,7 @@ JARS.internal('ModuleState', function moduleStateSetup() {
          * @memberof JARS~ModuleState
          * @inner
          */
-        REGISTERED_STATE = 5,
-        /**
-         * @access private
-         *
-         * @constant {Number}
-         * @default
-         *
-         * @memberof JARS~ModuleState
-         * @inner
-         */
-        REQUESTED_STATE = 6;
+        REGISTERED_STATE = 5;
 
     /**
     * @access public
@@ -148,14 +138,6 @@ JARS.internal('ModuleState', function moduleStateSetup() {
          */
         isWaiting: function(isBundleState) {
             return this._compareState(WAITING_STATE, isBundleState);
-        },
-        /**
-         * @access public
-         *
-         * @memberof JARS~ModuleState#
-         */
-        isBundleRequested: function() {
-            return this._compareState(REQUESTED_STATE, true);
         },
         /**
          * @access public
@@ -263,7 +245,7 @@ JARS.internal('ModuleState', function moduleStateSetup() {
                 logger.info(getRequestStateMessage(moduleState, setBundleState));
             }
             else {
-                setBundleState ? moduleState._set(REQUESTED_STATE, setBundleState) : moduleState.setLoading();
+                moduleState.setLoading(setBundleState);
             }
 
             return isWaiting;
@@ -302,17 +284,14 @@ JARS.internal('ModuleState', function moduleStateSetup() {
                 aborted = false,
                 abortionMessage;
 
-            if (moduleState.isLoading(setBundleState)) {
+            if (moduleState.isLoading(setBundleState) && (setBundleState || !module.findRecover())) {
                 moduleState.setWaiting(setBundleState);
-
-                if (setBundleState || !module.findRecover()) {
-                    aborted = true;
-                    abortionMessage = setBundleState ? MSG_BUNDLE_SUBMODULE_ABORTED : MSG_MODULE_ABORTED;
-                }
+                aborted = true;
+                abortionMessage = setBundleState ? (moduleState.isRegistered() ? MSG_BUNDLE_SUBMODULE_ABORTED : MSG_BUNDLE_ABORTED) : MSG_MODULE_ABORTED;
             }
             else if (moduleState.isRegistered()) {
                 aborted = true;
-                abortionMessage = setBundleState ? MSG_BUNDLE_ABORTED : MSG_MODULE_DEPENDENCY_ABORTED;
+                abortionMessage = setBundleState ? MSG_BUNDLE_SUBMODULE_ABORTED : MSG_MODULE_DEPENDENCY_ABORTED;
             }
 
             aborted && module.logger.error(abortionMessage, setBundleState, abortionInfo);
