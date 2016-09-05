@@ -1,7 +1,33 @@
-JARS.internal('ModuleState', function moduleStateSetup(InternalsManager) {
+JARS.internal('ModuleState', function moduleStateSetup() {
     'use strict';
 
-    var ModuleLogger = InternalsManager.get('ModuleLogger'),
+    var LOADING = 'loading',
+        LOADED = 'loaded',
+        LOADED_MANUAL = LOADED + ' manual',
+        ATTEMPTED_TO = 'attempted to ',
+        ATTEMPTED_TO_LOAD = ATTEMPTED_TO + 'load',
+        BUT_ALREADY = ' but is already ',
+        ABORTED_LOADING = 'aborted ' + LOADING + ' because of problems with ',
+        // Error when module or bundle is aborted
+        MSG_MODULE_ABORTED = createAbortionMessage('given path "${path}" after ${sec} second(s) - file may not exist'),
+        MSG_MODULE_DEPENDENCY_ABORTED = createAbortionMessage('dependency "${dep}"'),
+        MSG_BUNDLE_ABORTED = createAbortionMessage('parent "${dep}"'),
+        MSG_BUNDLE_SUBMODULE_ABORTED = createAbortionMessage('submodule "${dep}"'),
+        // Show module or bundle is requested
+        MSG_REQUESTED = 'was requested',
+        // Show loading progress for module or bundle
+        MSG_LOADED = createLoadingMessage('finished'),
+        MSG_LOADING = createLoadingMessage('started'),
+        // Info when loading is already in progress or done
+        MSG_ALREADY_LOADED = createLoadAttemptMessage(LOADED),
+        MSG_ALREADY_LOADED_MANUAL = createLoadAttemptMessage(LOADED_MANUAL),
+        MSG_ALREADY_LOADING = createLoadAttemptMessage(LOADING),
+        // Warning when a module is registered twice
+        MSG_ALREADY_REGISTERED = ATTEMPTED_TO + 'register' + BUT_ALREADY + 'registered',
+        // Show special cases for module
+        MSG_LOADED_MANUAL = 'was ' + LOADED_MANUAL,
+        MSG_REGISTERING = 'is registering...',
+        // Module/bundle states
         /**
          * @access private
          *
@@ -61,43 +87,7 @@ JARS.internal('ModuleState', function moduleStateSetup(InternalsManager) {
          * @memberof JARS~ModuleState
          * @inner
          */
-        REQUESTED_STATE = 6,
-        MODULE = 'module',
-        BUNDLE = 'bundle',
-        LOADING = 'loading',
-        LOADED = 'loaded',
-        LOADED_MANUAL = LOADED + ' manual',
-        STARTED_LOADING = 'started ' + LOADING + ' ',
-        FINISHED_LOADING = 'finished ' + LOADING + ' ',
-        ATTEMPTED_TO = 'attempted to ',
-        ATTEMPTED_TO_LOAD = ATTEMPTED_TO + 'load ',
-        BUT_ALREADY = ' but is already ',
-        ABORTED_LOADING = 'aborted ' + LOADING + ' ',
-        PROBLEMS_WITH = ' because of problems with ',
-        // Error when module or bundle is aborted
-        MSG_MODULE_ABORTED = addAbortionMessage('given path "${path}" after ${sec} second(s) - file may not exist'),
-        MSG_MODULE_DEPENDENCY_ABORTED = addAbortionMessage('dependency "${dep}"'),
-        MSG_BUNDLE_ABORTED = addAbortionMessage('parent "${dep}"', true),
-        MSG_BUNDLE_SUBMODULE_ABORTED = addAbortionMessage('submodule "${dep}"', true),
-        // Show module or bundle is requested
-        MSG_MODULE_REQUESTED = addRequestMessage(),
-        MSG_BUNDLE_REQUESTED = addRequestMessage(true),
-        // Show loading progress for module or bundle
-        MSG_MODULE_LOADED = addLoadingMessage(),
-        MSG_MODULE_LOADING = addLoadingMessage(true),
-        MSG_BUNDLE_LOADED = addLoadingMessage(false, true),
-        MSG_BUNDLE_LOADING = addLoadingMessage(true, true),
-        // Info when loading is already in progress or done
-        MSG_MODULE_ALREADY_LOADED = addLoadAttemptMessage(LOADED),
-        MSG_MODULE_ALREADY_LOADED_MANUAL = addLoadAttemptMessage(LOADED_MANUAL),
-        MSG_MODULE_ALREADY_LOADING = addLoadAttemptMessage(LOADING),
-        MSG_BUNDLE_ALREADY_LOADED = addLoadAttemptMessage(LOADED, true),
-        MSG_BUNDLE_ALREADY_LOADING = addLoadAttemptMessage(LOADING, true),
-        // Warning when a module is registered twice
-        MSG_MODULE_ALREADY_REGISTERED = ModuleLogger.addWarning(ATTEMPTED_TO + 'register ' + MODULE + BUT_ALREADY + ' registered'),
-        // Show special cases for module
-        MSG_MODULE_LOADED_MANUAL = ModuleLogger.addDebug(MODULE + ' was ' + LOADED_MANUAL),
-        MSG_MODULE_REGISTERING = ModuleLogger.addDebug(MODULE + ' registering...');
+        REQUESTED_STATE = 6;
 
     /**
     * @access public
@@ -225,7 +215,7 @@ JARS.internal('ModuleState', function moduleStateSetup(InternalsManager) {
                 module = moduleState._module;
 
             moduleState._set(LOADING_STATE, setBundleState);
-            module.logger.log(setBundleState ? MSG_BUNDLE_LOADING : MSG_MODULE_LOADING, {
+            module.logger.info(MSG_LOADING, setBundleState, {
                 path: module.getFullPath()
             });
         },
@@ -236,7 +226,7 @@ JARS.internal('ModuleState', function moduleStateSetup(InternalsManager) {
          */
         setRegistered: function() {
             this._set(REGISTERED_STATE);
-            this._module.logger.log(MSG_MODULE_REGISTERING);
+            this._module.logger.debug(MSG_REGISTERING);
         },
         /**
          * @access public
@@ -245,7 +235,7 @@ JARS.internal('ModuleState', function moduleStateSetup(InternalsManager) {
          */
         setLoadedManual: function() {
             this._set(LOADED_MANUAL_STATE);
-            this._module.logger.log(MSG_MODULE_LOADED_MANUAL);
+            this._module.logger.debug(MSG_LOADED_MANUAL);
         },
         /**
          * @access public
@@ -259,7 +249,7 @@ JARS.internal('ModuleState', function moduleStateSetup(InternalsManager) {
                 module = moduleState._module;
 
             moduleState._set(LOADED_STATE, setBundleState);
-            module.logger.log(setBundleState ? MSG_BUNDLE_LOADED : MSG_MODULE_LOADED);
+            module.logger.info(MSG_LOADED, setBundleState);
         },
 
         trySetRequested: function(setBundleState) {
@@ -267,10 +257,10 @@ JARS.internal('ModuleState', function moduleStateSetup(InternalsManager) {
                 logger = moduleState._module.logger,
                 isWaiting = moduleState.isWaiting(setBundleState);
 
-            logger.log(setBundleState ? MSG_BUNDLE_REQUESTED : MSG_MODULE_REQUESTED);
+            logger.debug(MSG_REQUESTED, setBundleState);
 
             if(!isWaiting) {
-                logger.log(getRequestStateMessage(moduleState, setBundleState));
+                logger.info(getRequestStateMessage(moduleState, setBundleState));
             }
             else {
                 setBundleState ? moduleState._set(REQUESTED_STATE, setBundleState) : moduleState.setLoading();
@@ -300,7 +290,7 @@ JARS.internal('ModuleState', function moduleStateSetup(InternalsManager) {
                 registered = true;
             }
             else {
-                moduleState._module.logger.log(MSG_MODULE_ALREADY_REGISTERED);
+                moduleState._module.logger.warn(MSG_ALREADY_REGISTERED);
             }
 
             return registered;
@@ -325,7 +315,7 @@ JARS.internal('ModuleState', function moduleStateSetup(InternalsManager) {
                 abortionMessage = setBundleState ? MSG_BUNDLE_ABORTED : MSG_MODULE_DEPENDENCY_ABORTED;
             }
 
-            aborted && module.logger.log(abortionMessage, abortionInfo);
+            aborted && module.logger.error(abortionMessage, setBundleState, abortionInfo);
 
             return aborted;
         }
@@ -349,36 +339,28 @@ JARS.internal('ModuleState', function moduleStateSetup(InternalsManager) {
         var requestStateMsg;
 
         if(moduleState.isLoaded(setBundleState)) {
-            requestStateMsg = setBundleState ? MSG_BUNDLE_ALREADY_LOADED : MSG_MODULE_ALREADY_LOADED;
+            requestStateMsg = MSG_ALREADY_LOADED;
         }
         else if (moduleState.isLoadedManual()) {
-            requestStateMsg = MSG_MODULE_ALREADY_LOADED_MANUAL;
+            requestStateMsg = MSG_ALREADY_LOADED_MANUAL;
         }
         else {
-            requestStateMsg = setBundleState ? MSG_BUNDLE_ALREADY_LOADING : MSG_MODULE_ALREADY_LOADING;
+            requestStateMsg = MSG_ALREADY_LOADING;
         }
 
         return requestStateMsg;
     }
 
-    function getModuleOrBundleString(forBundle) {
-        return forBundle ? BUNDLE : MODULE;
+    function createLoadingMessage(loadingProgress) {
+        return loadingProgress + ' ' + LOADING;
     }
 
-    function addRequestMessage(forBundle) {
-        return ModuleLogger.addDebug(getModuleOrBundleString(forBundle) + ' requested', forBundle);
+    function createLoadAttemptMessage(loadingProgress) {
+        return ATTEMPTED_TO_LOAD + BUT_ALREADY + loadingProgress;
     }
 
-    function addLoadingMessage(start, forBundle) {
-        return ModuleLogger.addInfo((start ? STARTED_LOADING : FINISHED_LOADING) + getModuleOrBundleString(forBundle), forBundle);
-    }
-
-    function addLoadAttemptMessage(loadingProgress, forBundle) {
-        return ModuleLogger.addInfo(ATTEMPTED_TO_LOAD + getModuleOrBundleString(forBundle) + BUT_ALREADY + loadingProgress, forBundle);
-    }
-
-    function addAbortionMessage(abortionReason, forBundle) {
-        return ModuleLogger.addError(ABORTED_LOADING + getModuleOrBundleString(forBundle) + PROBLEMS_WITH + abortionReason, forBundle);
+    function createAbortionMessage(abortionReason) {
+        return ABORTED_LOADING + abortionReason;
     }
 
     return ModuleState;

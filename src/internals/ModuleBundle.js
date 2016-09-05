@@ -3,11 +3,10 @@ JARS.internal('ModuleBundle', function moduleBundleSetup(InternalsManager) {
 
     var getInternal = InternalsManager.get,
         Resolver = getInternal('Resolver'),
-        ModuleLogger = getInternal('ModuleLogger'),
         LoaderQueue = getInternal('LoaderQueue'),
         SEPERATOR = '", "',
-        MSG_BUNDLE_DEFINED = ModuleLogger.addDebug('defined submodules "${bundle}" for bundle', true),
-        MSG_BUNDLE_NOT_DEFINED = ModuleLogger.addWarning('there are no submodules defined for this bundle', true);
+        MSG_BUNDLE_DEFINED = 'defined submodules "${bundle}"',
+        MSG_BUNDLE_NOT_DEFINED = 'there are no submodules defined';
 
     function ModuleBundle(module) {
         this._module = module;
@@ -21,7 +20,7 @@ JARS.internal('ModuleBundle', function moduleBundleSetup(InternalsManager) {
                 module = moduleBundle._module,
                 resolvedBundle = Resolver.resolveBundle(bundle, module.name);
 
-            resolvedBundle.length && module.logger.log(MSG_BUNDLE_DEFINED, {
+            resolvedBundle.length && module.logger.debug(MSG_BUNDLE_DEFINED, true, {
                 bundle: resolvedBundle.join(SEPERATOR)
             });
 
@@ -36,7 +35,7 @@ JARS.internal('ModuleBundle', function moduleBundleSetup(InternalsManager) {
             new LoaderQueue(module, true, function onModulesLoaded() {
                 var bundle = moduleBundle._bundle;
 
-                bundle.length || module.logger.log(MSG_BUNDLE_NOT_DEFINED);
+                bundle.length || module.logger.warn(MSG_BUNDLE_NOT_DEFINED, true);
 
                 state.setLoading(true);
 

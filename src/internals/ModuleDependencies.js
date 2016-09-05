@@ -6,14 +6,12 @@ JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsMa
         hasOwnProp = utils.hasOwnProp,
         arrayEach = utils.arrayEach,
         Resolver = getInternal('Resolver'),
-        ModuleLogger = getInternal('ModuleLogger'),
         LoaderQueue = getInternal('LoaderQueue'),
         SEPERATOR = '", "',
         FOUND = 'found ',
-        FOR_MODULE = ' for module',
-        MSG_DEPENDENCY_FOUND = ModuleLogger.addDebug(createFoundMessage('implicit dependency "${dep}"')),
-        MSG_DEPENDENCIES_FOUND = ModuleLogger.addDebug(createFoundMessage('explicit dependencie(s) "${deps}"')),
-        MSG_CIRCULAR_DEPENDENCIES_FOUND = ModuleLogger.addError(createFoundMessage('circular dependencies "${deps}"'));
+        MSG_DEPENDENCY_FOUND = createFoundMessage('implicit dependency "${dep}"'),
+        MSG_DEPENDENCIES_FOUND = createFoundMessage('explicit dependencie(s) "${deps}"'),
+        MSG_CIRCULAR_DEPENDENCIES_FOUND = createFoundMessage('circular dependencies "${deps}"');
 
     /**
      * @access public
@@ -125,11 +123,11 @@ JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsMa
                 dependencies = moduleDependencies._deps;
 
             if (dependencies.length) {
-                logger.log(MSG_DEPENDENCIES_FOUND, {deps: dependencies.join(SEPERATOR)});
+                logger.debug(MSG_DEPENDENCIES_FOUND, false, {deps: dependencies.join(SEPERATOR)});
             }
 
             if (moduleDependencies._hasParent()) {
-                logger.log(MSG_DEPENDENCY_FOUND, {dep: moduleDependencies.getParentName()});
+                logger.debug(MSG_DEPENDENCY_FOUND, false, {dep: moduleDependencies.getParentName()});
             }
 
             new LoaderQueue(module, false, function onModulesLoaded(refs) {
@@ -162,7 +160,7 @@ JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsMa
                 hasCircularDependencies = !! circularDependencies.length;
             }
 
-            hasCircularDependencies && module.logger.log(MSG_CIRCULAR_DEPENDENCIES_FOUND, {deps: circularDependencies.join(SEPERATOR)});
+            hasCircularDependencies && module.logger.error(MSG_CIRCULAR_DEPENDENCIES_FOUND, false, {deps: circularDependencies.join(SEPERATOR)});
 
             return hasCircularDependencies;
         },
@@ -207,7 +205,7 @@ JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsMa
     };
 
     function createFoundMessage(message) {
-        return FOUND + message + FOR_MODULE;
+        return FOUND + message;
     }
 
     return ModuleDependencies;

@@ -6,16 +6,9 @@ JARS.internal('LoaderQueue', function(InternalsManager) {
         System = getInternal('System'),
         Resolver = getInternal('Resolver'),
         InterceptionManager = getInternal('InterceptionManager'),
-        ModuleLogger = getInternal('ModuleLogger'),
         SEPERATOR = '", "',
-        MODULE = 'module ',
-        BUNDLE = 'bundle ',
-        SUBSCRIBED_TO = 'subscribed to "${subs}"',
-        NOTIFIED_BY = 'was notified by "${pub}"',
-        MSG_MODULE_NOTIFIED = ModuleLogger.addDebug(MODULE + NOTIFIED_BY),
-        MSG_MODULE_SUBSCRIBED = ModuleLogger.addDebug(MODULE + SUBSCRIBED_TO),
-        MSG_BUNDLE_NOTIFIED = ModuleLogger.addDebug(BUNDLE + NOTIFIED_BY, true),
-        MSG_BUNDLE_SUBSCRIBED = ModuleLogger.addDebug(BUNDLE + SUBSCRIBED_TO, true);
+        MSG_SUBSCRIBED_TO = 'subscribed to "${subs}"',
+        MSG_NOTIFIED_BY = 'was notified by "${pub}"';
 
     function LoaderQueue(module, isBundleQueue, onModulesLoaded, onModuleLoaded, onModuleAborted) {
         var loaderQueue = this;
@@ -45,7 +38,7 @@ JARS.internal('LoaderQueue', function(InternalsManager) {
                 refsIndexLookUp = {};
 
             if(modulesToLoad) {
-                logger.log(isBundleQueue ? MSG_BUNDLE_SUBSCRIBED : MSG_MODULE_SUBSCRIBED, {
+                logger.debug(MSG_SUBSCRIBED_TO, isBundleQueue, {
                     subs: moduleNames.join(SEPERATOR)
                 });
 
@@ -62,7 +55,7 @@ JARS.internal('LoaderQueue', function(InternalsManager) {
 
                         loaderQueue._refs[refsIndexLookUp[publishingModuleName]] = ref;
 
-                        logger.log(isBundleQueue ? MSG_BUNDLE_NOTIFIED : MSG_MODULE_NOTIFIED, {
+                        logger.debug(MSG_NOTIFIED_BY, isBundleQueue, {
                             pub: publishingModuleName
                         });
 

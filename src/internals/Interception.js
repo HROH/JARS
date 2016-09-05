@@ -2,8 +2,7 @@ JARS.internal('Interception', function interceptionSetup(InternalsManager) {
     'use strict';
 
     var Resolver = InternalsManager.get('Resolver'),
-        ModuleLogger = InternalsManager.get('ModuleLogger'),
-        MSG_INTERCEPTION_ERROR = ModuleLogger.addError('error in interception of this module by interceptor "${type}" with data "${data}"');
+        MSG_INTERCEPTION_ERROR = 'error in interception of this module by interceptor "${type}" with data "${data}"';
 
     /**
      * @access public
@@ -30,7 +29,7 @@ JARS.internal('Interception', function interceptionSetup(InternalsManager) {
         };
 
         interception.fail = function(error) {
-            listeningModule.loader.getModule(interceptionInfo.moduleName).logger.log(error || MSG_INTERCEPTION_ERROR, interceptionInfo);
+            listeningModule.loader.getModule(interceptionInfo.moduleName).logger.error(error || MSG_INTERCEPTION_ERROR, interceptionInfo);
 
             onFail(interceptedModuleName);
         };
