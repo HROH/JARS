@@ -3,7 +3,7 @@ JARS.internal('ModuleState', function moduleStateSetup() {
 
     var LOADING = 'loading',
         LOADED = 'loaded',
-        LOADED_MANUAL = LOADED + ' manual',
+        LOADED_MANUALLY = LOADED + ' manually',
         ATTEMPTED_TO = 'attempted to ',
         ATTEMPTED_TO_LOAD = ATTEMPTED_TO + 'load',
         BUT_ALREADY = ' but is already ',
@@ -20,12 +20,12 @@ JARS.internal('ModuleState', function moduleStateSetup() {
         MSG_LOADING = createLoadingMessage('started'),
         // Info when loading is already in progress or done
         MSG_ALREADY_LOADED = createLoadAttemptMessage(LOADED),
-        MSG_ALREADY_LOADED_MANUAL = createLoadAttemptMessage(LOADED_MANUAL),
+        MSG_ALREADY_LOADED_MANUAL = createLoadAttemptMessage(LOADED_MANUALLY),
         MSG_ALREADY_LOADING = createLoadAttemptMessage(LOADING),
         // Warning when a module is registered twice
         MSG_ALREADY_REGISTERED = ATTEMPTED_TO + 'register' + BUT_ALREADY + 'registered',
         // Show special cases for module
-        MSG_LOADED_MANUAL = 'was ' + LOADED_MANUAL,
+        MSG_LOADED_MANUALLY = 'was ' + LOADED_MANUALLY,
         MSG_REGISTERING = 'is registering...',
         // Module/bundle states
         /**
@@ -67,7 +67,7 @@ JARS.internal('ModuleState', function moduleStateSetup() {
          * @memberof JARS~ModuleState
          * @inner
          */
-        LOADED_MANUAL_STATE = 4,
+        LOADED_MANUALLY_STATE = 4,
         /**
          * @access private
          *
@@ -94,8 +94,8 @@ JARS.internal('ModuleState', function moduleStateSetup() {
 
         moduleState._module = module;
 
-        moduleState.setWaiting();
-        moduleState.setWaiting(true);
+        moduleState._set(WAITING_STATE);
+        moduleState._set(WAITING_STATE, true);
     }
 
     ModuleState.prototype = {
@@ -106,7 +106,7 @@ JARS.internal('ModuleState', function moduleStateSetup() {
          *
          * @memberof JARS~ModuleState#
          */
-         constructor: ModuleState,
+        constructor: ModuleState,
         /**
          * @access private
          *
@@ -136,16 +136,6 @@ JARS.internal('ModuleState', function moduleStateSetup() {
          *
          * @param {Boolean} isBundleState
          */
-        isWaiting: function(isBundleState) {
-            return this._compareState(WAITING_STATE, isBundleState);
-        },
-        /**
-         * @access public
-         *
-         * @memberof JARS~ModuleState#
-         *
-         * @param {Boolean} isBundleState
-         */
         isLoading: function(isBundleState) {
             return this._compareState(LOADING_STATE, isBundleState);
         },
@@ -155,15 +145,9 @@ JARS.internal('ModuleState', function moduleStateSetup() {
          * @memberof JARS~ModuleState#
          */
         isRegistered: function() {
-            return this._compareState(REGISTERED_STATE) || this.isLoadedManual() || this.isLoaded();
-        },
-        /**
-         * @access public
-         *
-         * @memberof JARS~ModuleState#
-         */
-        isLoadedManual: function() {
-            return this._compareState(LOADED_MANUAL_STATE);
+            var moduleState = this;
+
+            return moduleState._compareState(REGISTERED_STATE) || moduleState._compareState(LOADED_MANUALLY_STATE) || moduleState.isLoaded();
         },
         /**
          * @access public
@@ -174,50 +158,6 @@ JARS.internal('ModuleState', function moduleStateSetup() {
          */
         isLoaded: function(isBundleState) {
             return this._compareState(LOADED_STATE, isBundleState);
-        },
-        /**
-         * @access public
-         *
-         * @memberof JARS~ModuleState#
-         *
-         * @param {Boolean} setBundleState
-         */
-        setWaiting: function(setBundleState) {
-            this._set(WAITING_STATE, setBundleState);
-        },
-        /**
-         * @access public
-         *
-         * @memberof JARS~ModuleState#
-         *
-         * @param {Boolean} setBundleState
-         */
-        setLoading: function(setBundleState) {
-            var moduleState = this,
-                module = moduleState._module;
-
-            moduleState._set(LOADING_STATE, setBundleState);
-            module.logger.info(MSG_LOADING, setBundleState, {
-                path: module.getFullPath()
-            });
-        },
-        /**
-         * @access public
-         *
-         * @memberof JARS~ModuleState#
-         */
-        setRegistered: function() {
-            this._set(REGISTERED_STATE);
-            this._module.logger.debug(MSG_REGISTERING);
-        },
-        /**
-         * @access public
-         *
-         * @memberof JARS~ModuleState#
-         */
-        setLoadedManual: function() {
-            this._set(LOADED_MANUAL_STATE);
-            this._module.logger.debug(MSG_LOADED_MANUAL);
         },
         /**
          * @access public
@@ -237,7 +177,7 @@ JARS.internal('ModuleState', function moduleStateSetup() {
         trySetRequested: function(setBundleState) {
             var moduleState = this,
                 logger = moduleState._module.logger,
-                isWaiting = moduleState.isWaiting(setBundleState);
+                isWaiting = moduleState._compareState(WAITING_STATE, setBundleState);
 
             logger.debug(MSG_REQUESTED, setBundleState);
 
@@ -245,7 +185,10 @@ JARS.internal('ModuleState', function moduleStateSetup() {
                 logger.info(getRequestStateMessage(moduleState, setBundleState));
             }
             else {
-                moduleState.setLoading(setBundleState);
+                moduleState._set(LOADING_STATE, setBundleState);
+                module.logger.info(MSG_LOADING, setBundleState, {
+                    path: module.getFullPath()
+                });
             }
 
             return isWaiting;
@@ -259,20 +202,18 @@ JARS.internal('ModuleState', function moduleStateSetup() {
          */
         trySetRegistered: function() {
             var moduleState = this,
-                registered = false;
+                module = moduleState._module,
+                registered = false,
+                isLoading = moduleState.isLoading();
 
             if (!moduleState.isRegistered()) {
-                if (moduleState.isLoading()) {
-                    moduleState.setRegistered();
-                }
-                else {
-                    moduleState.setLoadedManual();
-                }
+                moduleState._set(isLoading ? REGISTERED_STATE : LOADED_MANUALLY_STATE);
+                module.logger.debug(isLoading ? MSG_REGISTERING : MSG_LOADED_MANUALLY);
 
                 registered = true;
             }
             else {
-                moduleState._module.logger.warn(MSG_ALREADY_REGISTERED);
+                module.logger.warn(MSG_ALREADY_REGISTERED);
             }
 
             return registered;
@@ -285,7 +226,7 @@ JARS.internal('ModuleState', function moduleStateSetup() {
                 abortionMessage;
 
             if (moduleState.isLoading(setBundleState) && (setBundleState || !module.findRecover())) {
-                moduleState.setWaiting(setBundleState);
+                moduleState._set(WAITING_STATE, setBundleState);
                 aborted = true;
                 abortionMessage = setBundleState ? (moduleState.isRegistered() ? MSG_BUNDLE_SUBMODULE_ABORTED : MSG_BUNDLE_ABORTED) : MSG_MODULE_ABORTED;
             }
@@ -320,7 +261,7 @@ JARS.internal('ModuleState', function moduleStateSetup() {
         if(moduleState.isLoaded(setBundleState)) {
             requestStateMsg = MSG_ALREADY_LOADED;
         }
-        else if (moduleState.isLoadedManual()) {
+        else if (moduleState._compareState(LOADED_MANUALLY_STATE)) {
             requestStateMsg = MSG_ALREADY_LOADED_MANUAL;
         }
         else {
