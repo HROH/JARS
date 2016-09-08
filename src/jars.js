@@ -114,99 +114,91 @@
     getInternal = InternalsManager.get;
 
     registerInternal('utils', function utilsSetup() {
-        var hasOwnProp;
+        var hasOwn = ({}).hasOwnProperty,
+            utils;
 
-        hasOwnProp = (function hasOwnPropSetup() {
-            var hasOwn = ({}).hasOwnProperty;
-
+        /**
+         * @access public
+         *
+         * @namespace utils
+         *
+         * @memberof JARS
+         * @inner
+         */
+        utils = {
             /**
-             * @access private
+             * @access public
              *
              * @function
              * @memberof JARS~utils
-             * @inner
              *
              * @param {Object} object
              * @param {String} prop
              *
              * @return {Boolean}
              */
-            return function hasOwnProp(object, prop) {
+            hasOwnProp: function(object, prop) {
                 return hasOwn.call(object, prop);
-            };
-        })();
+            },
+            /**
+             * @access public
+             *
+             * @memberof JARS~utils
+             *
+             * @param {Object} object
+             * @param {Function()} callback
+             */
+            objectEach: function(object, callback) {
+                var property;
 
-        /**
-         * @access private
-         *
-         * @memberof JARS~utils
-         * @inner
-         *
-         * @param {Object} object
-         * @param {Function()} callback
-         */
-        function objectEach(object, callback) {
-            var property;
+                for (property in object) {
+                    if (utils.hasOwnProp(object, property)) {
+                        if (callback(object[property], property)) {
+                            break;
+                        }
+                    }
+                }
+            },
+            /**
+             * @access public
+             *
+             * @memberof JARS~utils
+             *
+             * @param {Object} dest
+             * @param {Object} source
+             *
+             * @return {Object}
+             */
+            objectMerge: function(dest, source) {
+                utils.objectEach(source, function mergeValue(value, key) {
+                    dest[key] = value;
+                });
 
-            for (property in object) {
-                if (hasOwnProp(object, property)) {
-                    if (callback(object[property], property)) {
+                return dest;
+            },
+            /**
+             * @access public
+             *
+             * @memberof JARS~utils
+             *
+             * @param {(Array|NodeList)} array
+             * @param {Function()} callback
+             */
+            arrayEach: function(array, callback) {
+                var index = 0,
+                    length = array.length;
+
+                for (; index < length; index++) {
+                    if (callback(array[index], index)) {
                         break;
                     }
                 }
-            }
-        }
-
-        /**
-         * @access private
-         *
-         * @memberof JARS~utils
-         * @inner
-         *
-         * @param {Object} dest
-         * @param {Object} source
-         *
-         * @return {Object}
-         */
-        function objectMerge(dest, source) {
-            objectEach(source, function mergeValue(value, key) {
-                dest[key] = value;
-            });
-
-            return dest;
-        }
-
-        /**
-         * @access private
-         *
-         * @memberof JARS~utils
-         * @inner
-         *
-         * @param {(Array|NodeList)} array
-         * @param {Function()} callback
-         */
-        function arrayEach(array, callback) {
-            var index = 0,
-                length = array.length;
-
-            for (; index < length; index++) {
-                if (callback(array[index], index)) {
-                    break;
-                }
-            }
-        }
-
-        return {
-            hasOwnProp: hasOwnProp,
-
-            objectEach: objectEach,
-
-            objectMerge: objectMerge,
-
-            arrayEach: arrayEach,
+            },
 
             global: envGlobal
         };
+
+        return utils;
     });
 
     registerInternal('SourceManager', function sourceManagerSetup(InternalsManager) {
@@ -381,7 +373,7 @@
              *
              * @memberof JARS
              *
-             * @return {Object}
+             * @return {JARS}
              */
             noConflict: function() {
                 envGlobal.JARS = previousJARS;
