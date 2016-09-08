@@ -176,7 +176,8 @@ JARS.internal('ModuleState', function moduleStateSetup() {
 
         trySetRequested: function(setBundleState) {
             var moduleState = this,
-                logger = moduleState._module.logger,
+                module = moduleState._module,
+                logger = module.logger,
                 isWaiting = moduleState._compareState(WAITING_STATE, setBundleState);
 
             logger.debug(MSG_REQUESTED, setBundleState);
@@ -186,7 +187,7 @@ JARS.internal('ModuleState', function moduleStateSetup() {
             }
             else {
                 moduleState._set(LOADING_STATE, setBundleState);
-                module.logger.info(MSG_LOADING, setBundleState, {
+                logger.info(MSG_LOADING, setBundleState, {
                     path: module.getFullPath()
                 });
             }
@@ -202,18 +203,18 @@ JARS.internal('ModuleState', function moduleStateSetup() {
          */
         trySetRegistered: function() {
             var moduleState = this,
-                module = moduleState._module,
+                logger = moduleState._module.logger,
                 registered = false,
                 isLoading = moduleState.isLoading();
 
             if (!moduleState.isRegistered()) {
                 moduleState._set(isLoading ? REGISTERED_STATE : LOADED_MANUALLY_STATE);
-                module.logger.debug(isLoading ? MSG_REGISTERING : MSG_LOADED_MANUALLY);
+                logger.debug(isLoading ? MSG_REGISTERING : MSG_LOADED_MANUALLY);
 
                 registered = true;
             }
             else {
-                module.logger.warn(MSG_ALREADY_REGISTERED);
+                logger.warn(MSG_ALREADY_REGISTERED);
             }
 
             return registered;
