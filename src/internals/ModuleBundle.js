@@ -4,12 +4,14 @@ JARS.internal('ModuleBundle', function moduleBundleSetup(InternalsManager) {
     var getInternal = InternalsManager.get,
         Resolver = getInternal('Resolver'),
         LoaderQueue = getInternal('LoaderQueue'),
+        ModuleQueue = getInternal('ModuleQueue'),
         SEPERATOR = '", "',
         MSG_BUNDLE_DEFINED = 'defined submodules "${bundle}"',
         MSG_BUNDLE_NOT_DEFINED = 'there are no submodules defined';
 
     function ModuleBundle(module) {
         this._module = module;
+        this._queue = new ModuleQueue(module, true);
     }
 
     ModuleBundle.prototype = {
@@ -27,23 +29,39 @@ JARS.internal('ModuleBundle', function moduleBundleSetup(InternalsManager) {
             moduleBundle._bundle = resolvedBundle;
         },
 
-        request: function() {
+        request: function(callback, errback) {
             var moduleBundle = this,
+                bundleQueue = moduleBundle._queue,
                 module = moduleBundle._module,
                 state = module.state;
 
-            new LoaderQueue(module, true, function onModulesLoaded() {
-                var bundle = moduleBundle._bundle;
-
-                bundle.length || module.logger.warn(MSG_BUNDLE_NOT_DEFINED, true);
-
+            if(state.trySetRequested(true)) {
                 new LoaderQueue(module, true, function onModulesLoaded() {
-                    if (!state.isLoaded(true)) {
-                        state.setLoaded(true);
-                        module.queue.notify(true);
-                    }
-                }).loadModules(bundle);
-            }).loadModules([module.name]);
+                    var bundle = moduleBundle._bundle;
+
+                    bundle.length || module.logger.warn(MSG_BUNDLE_NOT_DEFINED, true);
+
+                    new LoaderQueue(module, true, function onModulesLoaded() {
+                        if (!state.isLoaded(true)) {
+                            state.setLoaded(true);
+                            bundleQueue.notify();
+                        }
+                    }).loadModules(bundle);
+                }).loadModules([module.name]);
+            }
+
+            bundleQueue.add(callback, errback);
+        },
+
+        abort: function(bundleDependency) {
+            var moduleBundle = this,
+                abortionInfo = {
+                    dep: bundleDependency
+                };
+
+            if (moduleBundle._module.state.trySetAborted(true, abortionInfo)) {
+                moduleBundle._queue.notifyError();
+            }
         }
     };
 

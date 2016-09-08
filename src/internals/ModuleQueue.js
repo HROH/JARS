@@ -14,13 +14,14 @@ JARS.internal('ModuleQueue', function moduleQueueSetup(InternalsManager) {
      * @inner
      *
      * @param {JARS~Module} module
+     * @param {Boolean} isBundleQueue
      */
-    function ModuleQueue(module) {
+    function ModuleQueue(module, isBundleQueue) {
         var moduleQueue = this;
 
         moduleQueue._module = module;
-        moduleQueue._depsCallbacks = [];
-        moduleQueue._bundleCallbacks = [];
+        moduleQueue._isBundleQueue = isBundleQueue;
+        moduleQueue._callbacks = [];
     }
 
     ModuleQueue.prototype = {
@@ -37,26 +38,13 @@ JARS.internal('ModuleQueue', function moduleQueueSetup(InternalsManager) {
          *
          * @memberof JARS~ModuleQueue#
          *
-         * @param {Boolean} forBundle
-         *
-         * @return {Array}
-         */
-        _getCallbacks: function(forBundle) {
-            return this[(forBundle ? '_bundle' : '_deps') + 'Callbacks'];
-        },
-        /**
-         * @access private
-         *
-         * @memberof JARS~ModuleQueue#
-         *
          * @param {Number} callbackType
-         * @param {Boolean} callBundle
          */
-        _call: function(callbackType, callBundle) {
+        _call: function(callbackType) {
             var moduleQueue = this,
                 module = moduleQueue._module,
-                name = module.getName(callBundle),
-                callbacks = moduleQueue._getCallbacks(callBundle),
+                name = module.getName(moduleQueue._isBundleQueue),
+                callbacks = moduleQueue._callbacks,
                 callback;
 
             while (callbacks.length) {
@@ -71,21 +59,17 @@ JARS.internal('ModuleQueue', function moduleQueueSetup(InternalsManager) {
          * @access public
          *
          * @memberof JARS~ModuleQueue#
-         *
-         * @param {Boolean} callBundle
          */
-        notify: function(callBundle) {
-            this._call(QUEUE_SUCCESS, callBundle);
+        notify: function() {
+            this._call(QUEUE_SUCCESS);
         },
         /**
          * @access public
          *
          * @memberof JARS~ModuleQueue#
-         *
-         * @param {Boolean} callBundle
          */
-        notifyError: function(callBundle) {
-            this._call(QUEUE_ERROR, callBundle);
+        notifyError: function() {
+            this._call(QUEUE_ERROR);
         },
         /**
          * @access public
@@ -94,17 +78,17 @@ JARS.internal('ModuleQueue', function moduleQueueSetup(InternalsManager) {
          *
          * @param {JARS~Module~SuccessCallback} callback
          * @param {JARS~Module~FailCallback} errback
-         * @param {Boolean} addBundle
          */
-        add: function(callback, errback, addBundle) {
+        add: function(callback, errback) {
             var moduleQueue = this,
+                isBundleQueue = moduleQueue._isBundleQueue,
                 module = moduleQueue._module;
 
-            if(module.state.isLoaded(addBundle)) {
-                callback(module.getName(addBundle));
+            if(module.state.isLoaded(isBundleQueue)) {
+                callback(module.getName(isBundleQueue));
             }
             else {
-                moduleQueue._getCallbacks(addBundle).push([callback, errback]);
+                moduleQueue._callbacks.push([callback, errback]);
             }
         }
     };

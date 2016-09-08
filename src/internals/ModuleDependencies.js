@@ -115,10 +115,9 @@ JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsMa
          *
          * @memberof JARS~ModuleDependencies#
          */
-        request: function() {
+        request: function(callback) {
             var moduleDependencies = this,
                 module = moduleDependencies._module,
-                state = module.state,
                 logger = module.logger,
                 dependencies = moduleDependencies._deps;
 
@@ -133,13 +132,9 @@ JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsMa
             new LoaderQueue(module, false, function onModulesLoaded(refs) {
                 var parent = moduleDependencies.getParent();
 
-                if (state.isRegistered() && !state.isLoaded()) {
-                    parent.isRoot() && refs.unshift(parent.ref);
-                    module.init(refs);
+                parent.isRoot() && refs.unshift(parent.ref);
 
-                    state.setLoaded();
-                    module.queue.notify();
-                }
+                callback(refs);
             }).loadModules(moduleDependencies.getAll());
         },
         /**

@@ -11,7 +11,8 @@ JARS.internal('LoaderQueue', function(InternalsManager) {
         MSG_NOTIFIED_BY = 'was notified by "${pub}"';
 
     function LoaderQueue(module, isBundleQueue, onModulesLoaded, onModuleLoaded, onModuleAborted) {
-        var loaderQueue = this;
+        var loaderQueue = this,
+            moduleOrBundle = isBundleQueue ? module.bundle : module;
 
         loaderQueue._module = module;
         loaderQueue._refs = [];
@@ -21,7 +22,7 @@ JARS.internal('LoaderQueue', function(InternalsManager) {
         loaderQueue._onModulesLoaded = onModulesLoaded;
         loaderQueue._onModuleLoaded = onModuleLoaded || onModuleLoadedNoop;
         loaderQueue._onModuleAborted =  onModuleAborted || function onModuleAbortedDefault(abortedModuleName) {
-            module.isRoot() || module.abort(isBundleQueue, abortedModuleName);
+            module.isRoot() || moduleOrBundle.abort(abortedModuleName);
         };
     }
 
@@ -45,11 +46,12 @@ JARS.internal('LoaderQueue', function(InternalsManager) {
                 loaderQueue._total += modulesToLoad;
 
                 arrayEach(moduleNames, function loadModule(moduleName, moduleIndex) {
-                    var requestBundle = Resolver.isBundle(moduleName);
+                    var requestedModule = loader.getModule(moduleName),
+                        requestedModuleOrBundle = Resolver.isBundle(moduleName) ? requestedModule.bundle : requestedModule;
 
                     refsIndexLookUp[moduleName] = loaderQueue._total - modulesToLoad + moduleIndex;
 
-                    loader.getModule(moduleName).request(InterceptionManager.intercept(module, moduleName, function onModuleLoaded(publishingModuleName, data) {
+                    requestedModuleOrBundle.request(InterceptionManager.intercept(module, moduleName, function onModuleLoaded(publishingModuleName, data) {
                         var percentageLoaded = Number((loaderQueue._counter++/loaderQueue._total).toFixed(2)),
                             ref = System.isNil(data) ? loader.getModuleRef(publishingModuleName) : data;
 
@@ -61,7 +63,7 @@ JARS.internal('LoaderQueue', function(InternalsManager) {
 
                         loaderQueue._onModuleLoaded(moduleName, ref, percentageLoaded);
                         loaderQueue._callIfLoaded();
-                    }, loaderQueue._onModuleAborted), loaderQueue._onModuleAborted, requestBundle);
+                    }, loaderQueue._onModuleAborted), loaderQueue._onModuleAborted);
                 });
             }
             else {

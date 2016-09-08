@@ -170,21 +170,15 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
          *
          * @param {JARS~Module~SuccessCallback} callback
          * @param {JARS~Module~FailCallback} errback
-         * @param {Boolean} requestBundle
          */
-        request: function(callback, errback, requestBundle) {
+        request: function(callback, errback) {
             var module = this;
 
-            if (module.state.trySetRequested(requestBundle)) {
-                if(requestBundle) {
-                    module.bundle.request();
-                }
-                else {
-                    module.load();
-                }
+            if (module.state.trySetRequested()) {
+                module.load();
             }
 
-            module.queue.add(callback, errback, requestBundle);
+            module.queue.add(callback, errback);
         },
         /**
          * @access public
@@ -233,10 +227,9 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
          *
          * @memberof JARS~Module#
          *
-         * @param {Boolean} [abortBundle]
          * @param {String} [dependency]
          */
-        abort: function(abortBundle, dependency) {
+        abort: function(dependency) {
             var module = this,
                 abortionInfo = {
                     dep: dependency,
@@ -246,8 +239,8 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
                     sec: module.config.get('timeout')
                 };
 
-            if (module.state.trySetAborted(abortBundle, abortionInfo)) {
-                module.queue.notifyError(abortBundle);
+            if (module.state.trySetAborted(false, abortionInfo)) {
+                module.queue.notifyError();
             }
         },
 
@@ -302,18 +295,37 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
         $export: function(factory) {
             var module = this,
                 state = module.state,
-                dependencies = module.deps;
+                dependencies = module.deps,
+                loader = module.loader,
+                moduleName = module.name,
+                parentRef;
 
             if (state.trySetRegistered()) {
-                module.factory = factory || Object;
-
                 module.clearAutoAbort();
 
                 if(!module.isRoot() && dependencies.hasCircular()) {
                     module.abort();
                 }
                 else {
-                    dependencies.request();
+                    dependencies.request(function(refs) {
+                        if (state.isRegistered() && !state.isLoaded()) {
+                            if(module.isRoot()) {
+                                module.ref = {};
+                            }
+                            else {
+                                parentRef = refs.shift();
+
+                                loader.setCurrentModuleName(moduleName);
+
+                                module.ref = parentRef[Resolver.getModuleTail(moduleName)] = factory ? factory.apply(parentRef, refs) || {} : {};
+
+                                loader.setCurrentModuleName(Resolver.getRootName());
+                            }
+
+                            state.setLoaded();
+                            module.queue.notify();
+                        }
+                    });
                 }
             }
         },
@@ -326,30 +338,6 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
          */
         defineBundle: function(bundleModules) {
             this.bundle.add(bundleModules);
-        },
-        /**
-         * @access public
-         *
-         * @memberof JARS~Module#
-         */
-        init: function(refs) {
-            var module = this,
-                loader = module.loader,
-                moduleName = module.name,
-                parentRef;
-
-            if(module.isRoot()) {
-                module.ref = {};
-            }
-            else {
-                parentRef = refs.shift();
-
-                loader.setCurrentModuleName(moduleName);
-
-                module.ref = parentRef[Resolver.getModuleTail(moduleName)] = module.factory.apply(parentRef, refs) || {};
-
-                loader.setCurrentModuleName(Resolver.getRootName());
-            }
         }
     };
 
