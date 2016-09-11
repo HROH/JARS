@@ -14,8 +14,8 @@ JARS.internal('Interception', function interceptionSetup(InternalsManager) {
      *
      * @param {JARS~Module} listeningModule
      * @param {JARS~InterceptionManager~InterceptionInfo} interceptionInfo
-     * @param {JARS~Module~SuccessCallback} onSuccess
-     * @param {JARS~Module~FailCallback} onFail
+     * @param {JARS~ModuleQueue~SuccessCallback} onSuccess
+     * @param {JARS~ModuleQueue~FailCallback} onFail
      */
     function Interception(listeningModule, interceptionInfo, onSuccess, onFail) {
         var interception = this,
@@ -64,20 +64,20 @@ JARS.internal('Interception', function interceptionSetup(InternalsManager) {
          * @memberof JARS~Interception#
          *
          * @param {Array} moduleNames
-         * @param {Function()} callback
-         * @param {JARS~Module~FailCallback} [errback]
-         * @param {Function()} [progressback]
+         * @param {JARS~LoaderQueue~ModulesLoadedCallback} onModulesLoaded
+         * @param {JARS~ModuleQueue~FailCallback} onModuleAborted
+         * @param {JARS~LoaderQueue~ModuleLoadedCallback} onModuleLoaded
          */
-        $importAndLink: function(moduleNames, callback, errback, progressback) {
+        $importAndLink: function(moduleNames, onModulesLoaded, onModuleAborted, onModuleLoaded) {
             var listeningModule = this.listeningModule;
 
             moduleNames = Resolver.resolve(moduleNames, this.info.moduleName);
 
             if (!listeningModule.isRoot()) {
-                listeningModule.deps.requestAndLink(moduleNames, callback, errback, progressback);
+                listeningModule.deps.requestAndLink(moduleNames, onModulesLoaded, onModuleAborted, onModuleLoaded);
             }
             else {
-                listeningModule.loader.$import(moduleNames, callback, errback, progressback);
+                listeningModule.loader.$import(moduleNames, onModulesLoaded, onModuleAborted, onModuleLoaded);
             }
         },
     };

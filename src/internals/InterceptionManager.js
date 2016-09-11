@@ -61,18 +61,18 @@ JARS.internal('InterceptionManager', function interceptionManagerSetup(Internals
          *
          * @param {JARS~Module} listeningModule
          * @param {String} interceptedModuleName
-         * @param {JARS~Module~SuccessCallback} callback
-         * @param {JARS~Module~FailCallback} errback
+         * @param {JARS~ModuleQueue~SuccessCallback} onModuleLoaded
+         * @param {JARS~ModuleQueue~FailCallback} onModuleAborted
          *
-         * @return {JARS~Module~SuccessCallback}
+         * @return {JARS~ModuleQueue~SuccessCallback}
          */
-        intercept: function(listeningModule, interceptedModuleName, callback, errback) {
+        intercept: function(listeningModule, interceptedModuleName, onModuleLoaded, onModuleAborted) {
             var interceptorInfo = extractInterceptionInfo(interceptedModuleName),
                 interceptor = interceptors[interceptorInfo.type];
 
             return interceptor ? function interceptorListener(moduleName) {
-                interceptor.intercept(listeningModule.loader.getModuleRef(moduleName), new Interception(listeningModule, interceptorInfo, callback, errback));
-            } : callback;
+                interceptor.intercept(listeningModule.loader.getModuleRef(moduleName), new Interception(listeningModule, interceptorInfo, onModuleLoaded, onModuleAborted));
+            } : onModuleLoaded;
         }
     };
 
