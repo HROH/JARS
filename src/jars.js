@@ -6,6 +6,7 @@
     InternalsManager = (function internalsManagerSetup() {
         var INTERNALS_PATH = 'internals/',
             internalsToLoad = [
+                'ConfigHooks',
                 'ConfigsManager',
                 'ExternalBootstrapper',
                 'Interception',
