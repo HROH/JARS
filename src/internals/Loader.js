@@ -3,11 +3,11 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
 
     var getInternal = InternalsManager.get,
         objectEach = getInternal('utils').objectEach,
+        System = getInternal('System'),
         Resolver = getInternal('Resolver'),
         Module = getInternal('Module'),
         LoaderQueue = getInternal('LoaderQueue'),
         InterceptionManager = getInternal('InterceptionManager'),
-        ConfigsManager = getInternal('ConfigsManager'),
         modulesRegistry = {},
         currentModuleName = Resolver.getRootName(),
         currentLoaderContext = 'default',
@@ -29,8 +29,6 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
          *
          * @param {String} loaderContext
          * @param {String} switchToContext
-         *
-         * @return {Boolean}
          */
         flush: function(loaderContext, switchToContext) {
             // TODO remove refs in modules with given loaderContext
@@ -38,11 +36,17 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
                 module.flush(loaderContext);
             });
 
-            Loader.getLogger().info('Successfully flushed Loader with context "${0}"', [loaderContext]);
+            System.Logger.info('Successfully flushed Loader with context "${0}"', [loaderContext]);
 
-            ConfigsManager.update('loaderContext', switchToContext);
+            getInternal('ConfigsManager').update('loaderContext', switchToContext);
         },
-
+        /**
+         * @access public
+         *
+         * @memberof JARS~Loader
+         *
+         * @param {String} newLoaderContext
+         */
         setLoaderContext: function(newLoaderContext) {
             currentLoaderContext = newLoaderContext;
         },
@@ -82,16 +86,6 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
          */
         getRoot: function() {
             return Loader.getModuleRef(Resolver.getRootName());
-        },
-        /**
-         * @access public
-         *
-         * @memberof JARS~Loader
-         *
-         * @return {System.Logger}
-         */
-        getLogger: function() {
-            return Loader.getModuleRef('System.Logger');
         },
         /**
          * @access public
@@ -152,9 +146,9 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
          * @memberof JARS~Loader
          *
          * @param {String} moduleName
-         * @param {Array} bundle
+         * @param {String[]} bundle
          *
-         * @return {ModuleWrapper}
+         * @return {JARS~Module}
          */
         registerModule: function(moduleName, bundle) {
             var module;
@@ -165,7 +159,7 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
                 module.defineBundle(bundle);
             }
             else {
-                Loader.getLogger().error('No modulename provided');
+                System.Logger.error('No modulename provided');
             }
 
             return module;
@@ -175,17 +169,15 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
          *
          * @memberof JARS~Loader
          *
-         * @param {JARS~Module~DependencyDefinition} moduleNames
-         * @param {Function(...*)} onModulesImported
-         * @param {JARS~Module~FailCallback} onModuleAborted
-         * @param {Function(string)} onModuleImported
+         * @param {JARS~ModuleDependencies~Declaration} moduleNames
+         * @param {Function(*)} onModulesImported
+         * @param {JARS~ModuleQueue~FailCallback} onModuleAborted
+         * @param {JARS~LoaderQueue~ModuleLoadedCallback} onModuleImported
          */
         $import: function(moduleNames, onModulesImported, onModuleAborted, onModuleImported) {
-            var rootName = Resolver.getRootName();
-
-            new LoaderQueue(Loader.getModule(rootName), false, function onModulesLoaded(refs) {
+            new LoaderQueue(Loader.getModule(Resolver.getRootName()), function onModulesLoaded(refs) {
                 onModulesImported.apply(null, refs);
-            }, onModuleImported, onModuleAborted).loadModules(Resolver.resolve(moduleNames, rootName));
+            }, onModuleImported, onModuleAborted).loadModules(Resolver.resolve(moduleNames));
         }
     };
 
