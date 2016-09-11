@@ -9,7 +9,6 @@ JARS.internal('Resolver', function resolverSetup(InternalsManager) {
         VERSION_WITH_ZERO_PATCH = '$10',
         RE_VERSION_WITHOUT_PATCH_NUMBER = /(\d+\.\d+\.)\d+.+/,
         RE_BUNDLE = /\.\*$/,
-        System = InternalsManager.get('System'),
         ResolutionStrategies = InternalsManager.get('ResolutionStrategies'),
         Resolver;
 
@@ -54,7 +53,7 @@ JARS.internal('Resolver', function resolverSetup(InternalsManager) {
          * @return {String}
          */
         getBundleName: function(moduleName) {
-            return moduleName + BUNDLE_SUFFIX;
+            return Resolver.appendVersion(Resolver.getModuleNameWithoutVersion(moduleName) + BUNDLE_SUFFIX, Resolver.getVersion(moduleName));
         },
         /**
          * @access public
@@ -66,14 +65,13 @@ JARS.internal('Resolver', function resolverSetup(InternalsManager) {
          * @return {String}
          */
         getImplicitDependencyName: function(moduleName) {
-            var version = Resolver.getVersion(moduleName);
-
-            moduleName = Resolver.getModuleNameWithoutVersion(moduleName);
-            moduleName = moduleName.substr(0, moduleName.lastIndexOf(DOT));
+            var version = Resolver.getVersion(moduleName),
+                moduleNameWithoutVersion = Resolver.getModuleNameWithoutVersion(moduleName),
+                implicitDependencyWithoutVersion = moduleNameWithoutVersion.substr(0, moduleNameWithoutVersion.lastIndexOf(DOT));
 
             version && (version = version.replace(RE_VERSION_WITHOUT_PATCH_NUMBER, VERSION_WITH_ZERO_PATCH));
 
-            return Resolver.appendVersion(moduleName, version);
+            return Resolver.appendVersion(implicitDependencyWithoutVersion, version);
         },
         /**
          * @access public
@@ -165,29 +163,26 @@ JARS.internal('Resolver', function resolverSetup(InternalsManager) {
          *
          * @memberof JARS~Resolver
          *
-         * @param {JARS~Module~DependencyDefinition} modules
-         * @param {String} referenceModuleName
-         * @param {Number} resolveType
+         * @param {JARS~ModuleDependencies~Declaration} modules
+         * @param {String} baseModuleName
          *
          * @return {String[]}
          */
-        resolve: function(modules, referenceModuleName, resolveType) {
-            var resolutionStrategy = ResolutionStrategies[System.getType(modules)];
-
-            return resolutionStrategy(modules, referenceModuleName || ROOT_MODULE_NAME, resolveType || ResolutionStrategies.RESOLVE_DEPS);
+        resolve: function(modules, baseModuleName) {
+            return ResolutionStrategies.any(Resolver.isRootName(baseModuleName) ? EMPTY_STRING : baseModuleName, modules, ResolutionStrategies.deps);
         },
         /**
          * @access public
          *
          * @memberof JARS~Resolver
          *
-         * @param {JARS~Module~BundleDefinition} modules
-         * @param {String} referenceModuleName
+         * @param {JARS~ModuleBundle~Declaration} modules
+         * @param {String} baseModuleName
          *
          * @return {String[]}
          */
-        resolveBundle: function(modules, referenceModuleName) {
-            return Resolver.resolve(modules, referenceModuleName, ResolutionStrategies.RESOLVE_BUNDLE);
+        resolveBundle: function(modules, baseModuleName) {
+            return ResolutionStrategies.any(baseModuleName, modules, ResolutionStrategies.bundle);
         }
     };
 
