@@ -25,53 +25,48 @@ JARS.internal('ModuleState', function moduleStateSetup() {
         MSG_REGISTERING = 'is registering...',
         // Module/bundle states
         /**
-         * @access private
+         * @private
          *
-         * @constant {Number}
+         * @constant {number}
          * @default
          *
-         * @memberof JARS~ModuleState
-         * @inner
+         * @memberof JARS.internals.ModuleState
          */
         WAITING_STATE = 1,
         /**
-         * @access private
+         * @private
          *
-         * @constant {Number}
+         * @constant {number}
          * @default
          *
-         * @memberof JARS~ModuleState
-         * @inner
+         * @memberof JARS.internals.ModuleState
          */
         LOADING_STATE = 2,
         /**
-         * @access private
+         * @private
          *
-         * @constant {Number}
+         * @constant {number}
          * @default
          *
-         * @memberof JARS~ModuleState
-         * @inner
+         * @memberof JARS.internals.ModuleState
          */
         LOADED_STATE = 3,
         /**
-         * @access private
+         * @private
          *
-         * @constant {Number}
+         * @constant {number}
          * @default
          *
-         * @memberof JARS~ModuleState
-         * @inner
+         * @memberof JARS.internals.ModuleState
          */
         LOADED_MANUALLY_STATE = 4,
         /**
-         * @access private
+         * @private
          *
-         * @constant {Number}
+         * @constant {number}
          * @default
          *
-         * @memberof JARS~ModuleState
-         * @inner
+         * @memberof JARS.internals.ModuleState
          */
         REGISTERED_STATE = 5;
 
@@ -81,14 +76,11 @@ JARS.internal('ModuleState', function moduleStateSetup() {
     stateMsgMap[REGISTERED_STATE] = MSG_REGISTERING;
 
     /**
-    * @access public
+    * @class
     *
-    * @constructor ModuleState
+    * @memberof JARS.internals
     *
-    * @memberof JARS
-    * @inner
-    *
-    * @param {JARS~ModuleLogger} logger
+    * @param {JARS.internals.ModuleLogger} logger
     */
     function ModuleState(logger) {
         var moduleState = this;
@@ -98,20 +90,11 @@ JARS.internal('ModuleState', function moduleStateSetup() {
     }
 
     ModuleState.prototype = {
-        /**
-         * @access public
-         *
-         * @alias JARS~ModuleState
-         *
-         * @memberof JARS~ModuleState#
-         */
         constructor: ModuleState,
         /**
-         * @access private
+         * @private
          *
-         * @memberof JARS~ModuleState#
-         *
-         * @param {Number} newState
+         * @param {number} newState
          * @param {Object} [info]
          */
         _setAndLog: function(newState, info) {
@@ -119,21 +102,13 @@ JARS.internal('ModuleState', function moduleStateSetup() {
             this._logger.info(stateMsgMap[newState], info);
         },
         /**
-         * @access public
-         *
-         * @memberof JARS~ModuleState#
-         *
-         * @return {Boolean}
+         * @return {boolean}
          */
         isLoading: function() {
             return this._state === LOADING_STATE;
         },
         /**
-         * @access public
-         *
-         * @memberof JARS~ModuleState#
-         *
-         * @return {Boolean}
+         * @return {boolean}
          */
         isRegistered: function() {
             var moduleState = this,
@@ -142,33 +117,21 @@ JARS.internal('ModuleState', function moduleStateSetup() {
             return state === REGISTERED_STATE || state === LOADED_MANUALLY_STATE || moduleState.isLoaded();
         },
         /**
-         * @access public
-         *
-         * @memberof JARS~ModuleState#
-         *
-         * @return {Boolean}
+         * @return {boolean}
          */
         isLoaded: function() {
             return this._state === LOADED_STATE;
         },
-        /**
-         * @access public
-         *
-         * @memberof JARS~ModuleState#
-         */
+
         setLoaded: function() {
             var moduleState = this;
 
             moduleState._setAndLog(LOADED_STATE);
         },
         /**
-         * @access public
-         *
-         * @memberof JARS~ModuleState#
-         *
          * @param {Object} requestInfo
          *
-         * @return {Boolean}
+         * @return {boolean}
          */
         trySetRequested: function(requestInfo) {
             var moduleState = this,
@@ -187,11 +150,7 @@ JARS.internal('ModuleState', function moduleStateSetup() {
             return isWaiting;
         },
         /**
-         * @access public
-         *
-         * @memberof JARS~ModuleState#
-         *
-         * @return {Boolean}
+         * @return {boolean}
          */
         trySetRegistered: function() {
             var moduleState = this,
@@ -207,11 +166,7 @@ JARS.internal('ModuleState', function moduleStateSetup() {
             return canRegister;
         },
         /**
-         * @access public
-         *
-         * @memberof JARS~ModuleState#
-         *
-         * @param {String} abortionMessage
+         * @param {string} abortionMessage
          * @param {Object} abortionInfo
          */
         setAborted: function(abortionMessage, abortionInfo) {
@@ -224,13 +179,13 @@ JARS.internal('ModuleState', function moduleStateSetup() {
     };
 
     /**
-     * @access private
+     * @private
      *
-     * @memberof JARS~ModuleState
+     * @memberof JARS.internals.ModuleState
      *
-     * @param {JARS~ModuleState} moduleState
+     * @param {JARS.internals.ModuleState} moduleState
      *
-     * @return {String}
+     * @return {string}
      */
     function getRequestStateMessage(moduleState) {
         var requestStateMsg;

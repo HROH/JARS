@@ -20,11 +20,22 @@ JARS.internal('ExternalBootstrapper', function externalBootstrapperSetup(Interna
         mainReadyQueue = null;
     });
 
+    /**
+     * @namespace
+     *
+     * @memberof JARS.internals
+     */
     ExternalBootstrapper = {
+        /**
+         * @param {JARS.ModuleDependencies.Declaration} modules
+         */
         $import: function(modules) {
             moduleNamesQueue = moduleNamesQueue.concat(modules);
         },
-
+        /**
+         * @param {function(...*)} main
+         * @param {JARS.ModuleQueue.FailCallback} [onAbort]
+         */
         main: function(main, onAbort) {
             var moduleNames = moduleNamesQueue;
 
@@ -39,6 +50,16 @@ JARS.internal('ExternalBootstrapper', function externalBootstrapperSetup(Interna
         }
     };
 
+    /**
+     * @private
+     *
+     * @memberof JARS.internals.ExternalBootstrapper
+     *
+     * @param {System} System
+     * @param {JARS.ModuleDependencies.Declaration} modules
+     * @param {function(...*)} main
+     * @param {JARS.ModuleQueue.FailCallback} [onAbort]
+     */
     function bootstrapMain(System, moduleNames, main, onAbort) {
         if (System.isFunction(main)) {
             if (moduleNames.length) {
@@ -73,6 +94,13 @@ JARS.internal('ExternalBootstrapper', function externalBootstrapperSetup(Interna
         }
     }
 
+    /**
+     * @private
+     *
+     * @memberof JARS.internals.ExternalBootstrapper
+     *
+     * @type {JARS.ModuleQueue.FailCallback}
+     */
     function defaultOnAbort(abortedModuleName) {
         mainLogger.error('Import of "${0}" failed!', [abortedModuleName]);
     }

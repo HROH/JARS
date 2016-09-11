@@ -18,24 +18,17 @@ JARS.internal('ResolutionStrategies', function resolutionStrategiesSetup(Interna
         ResolutionStrategies;
 
     /**
-     * @access public
-     *
      * @namespace
      *
-     * @memberof JARS
-     * @inner
+     * @memberof JARS.internals
      */
     ResolutionStrategies = {
         /**
-         * @access public
+         * @param {string} baseModuleName
+         * @param {(JARS.internals.ModuleDependencies.Declaration|JARS.internals.ModuleBundle.Declaration)} modules
+         * @param {JARS.internals.ResolutionStrategies.ResolutionStrategy} resolutionStrategy
          *
-         * @memberof JARS~ResolutionStrategies
-         *
-         * @param {String} baseModuleName
-         * @param {JARS~ModuleDependencies~Declaration} modules
-         * @param {Number} resolutionStrategy
-         *
-         * @return {String[]}
+         * @return {string[]}
          */
         any: function(baseModuleName, modules, resolutionStrategy) {
             var typeResolutionStrategy = ResolutionStrategies[System.getType(modules)];
@@ -43,15 +36,11 @@ JARS.internal('ResolutionStrategies', function resolutionStrategiesSetup(Interna
             return typeResolutionStrategy(baseModuleName, modules, resolutionStrategy);
         },
         /**
-         * @access public
+         * @param {string} baseModuleName
+         * @param {(JARS.internals.ModuleDependencies.Declaration[]|JARS.internals.ModuleBundle.Declaration)} modules
+         * @param {JARS.internals.ResolutionStrategies.ResolutionStrategy} resolutionStrategy
          *
-         * @memberof JARS~ResolutionStrategies
-         *
-         * @param {String} baseModuleName
-         * @param {Array} modules
-         * @param {Number} resolutionStrategy
-         *
-         * @return {String[]}
+         * @return {string[]}
          */
         array: function(baseModuleName, modules, resolutionStrategy) {
             var resolvedModules = [];
@@ -63,15 +52,11 @@ JARS.internal('ResolutionStrategies', function resolutionStrategiesSetup(Interna
             return resolvedModules;
         },
         /**
-         * @access public
+         * @param {string} baseModuleName
+         * @param {Object<string, JARS.internals.ModuleDependencies.Declaration>} modules
+         * @param {JARS.internals.ResolutionStrategies.ResolutionStrategy} resolutionStrategy
          *
-         * @memberof JARS~ResolutionStrategies
-         *
-         * @param {String} baseModuleName
-         * @param {Object} modules
-         * @param {Number} resolutionStrategy
-         *
-         * @return {String[]}
+         * @return {string[]}
          */
         object: function(baseModuleName, modules, resolutionStrategy) {
             var resolvedModules = [];
@@ -87,15 +72,11 @@ JARS.internal('ResolutionStrategies', function resolutionStrategiesSetup(Interna
             return resolvedModules;
         },
         /**
-         * @access public
+         * @param {string} baseModuleName
+         * @param {string} moduleName
+         * @param {JARS.internals.ResolutionStrategies.ResolutionStrategy} resolutionStrategy
          *
-         * @memberof JARS~ResolutionStrategies
-         *
-         * @param {String} baseModuleName
-         * @param {String} moduleName
-         * @param {Function} resolutionStrategy
-         *
-         * @return {String[]}
+         * @return {string[]}
          */
         string: function(baseModuleName, moduleName, resolutionStrategy) {
             var isRelative = isRelativeModuleName(moduleName),
@@ -126,24 +107,16 @@ JARS.internal('ResolutionStrategies', function resolutionStrategiesSetup(Interna
             return resolvedModules;
         },
         /**
-         * @access public
-         *
-         * @memberof JARS~ResolutionStrategies
-         *
-         * @return {String[]}
+         * @return {string[]}
          */
         undefined: function() {
             return [];
         },
         /**
-         * @access public
+         * @param {string} baseModuleName
+         * @param {string} moduleName
          *
-         * @memberof JARS~ResolutionStrategies
-         *
-         * @param {String} baseModuleName
-         * @param {String} moduleName
-         *
-         * @return {String}
+         * @return {string}
          */
         deps: function(baseModuleName, moduleName) {
             var baseParts, absoluteModuleName;
@@ -171,14 +144,10 @@ JARS.internal('ResolutionStrategies', function resolutionStrategiesSetup(Interna
             return absoluteModuleName;
         },
         /**
-         * @access public
+         * @param {string} baseModuleName
+         * @param {string} moduleName
          *
-         * @memberof JARS~ResolutionStrategies
-         *
-         * @param {String} baseModuleName
-         * @param {String} moduleName
-         *
-         * @return {String}
+         * @return {string}
          */
         nested: function(baseModuleName, moduleName) {
             var absoluteModuleName;
@@ -194,14 +163,10 @@ JARS.internal('ResolutionStrategies', function resolutionStrategiesSetup(Interna
             return absoluteModuleName;
         },
         /**
-         * @access public
+         * @param {string} baseModuleName
+         * @param {string} moduleName
          *
-         * @memberof JARS~ResolutionStrategies
-         *
-         * @param {String} baseModuleName
-         * @param {String} moduleName
-         *
-         * @return {String}
+         * @return {string}
          */
         bundle: function(baseModuleName, moduleName) {
             return isRelativeModuleName(moduleName) ? EMPTY_STRING : makeAbsoluteModuleName(baseModuleName, moduleName);
@@ -209,15 +174,14 @@ JARS.internal('ResolutionStrategies', function resolutionStrategiesSetup(Interna
     };
 
     /**
-     * @access private
+     * @private
      *
-     * @memberof JARS~ResolutionStrategies
-     * @inner
+     * @memberof JARS.internals.ResolutionStrategies
      *
-     * @param {String} baseModuleName
-     * @param {String} moduleName
+     * @param {string} baseModuleName
+     * @param {string} moduleName
      *
-     * @return {Boolean}
+     * @return {string}
      */
     function makeAbsoluteModuleName(baseModuleName, moduleName) {
         var separator = getInternal('InterceptionManager').removeInterceptionData(moduleName) ? DOT : EMPTY_STRING;
@@ -226,28 +190,26 @@ JARS.internal('ResolutionStrategies', function resolutionStrategiesSetup(Interna
     }
 
     /**
-     * @access private
+     * @private
      *
-     * @memberof JARS~ResolutionStrategies
-     * @inner
+     * @memberof JARS.internals.ResolutionStrategies
      *
-     * @param {String} moduleName
+     * @param {string} moduleName
      *
-     * @return {Boolean}
+     * @return {boolean}
      */
     function isRelativeModuleName(moduleName) {
         return RE_LEADING_DOT.test(moduleName);
     }
 
     /**
-     * @access private
+     * @private
      *
-     * @memberof JARS~ResolutionStrategies
-     * @inner
+     * @memberof JARS.internals.ResolutionStrategies
      *
-     * @param {String} baseModuleName
-     * @param {String} moduleName
-     * @param {Function} resolutionStrategy
+     * @param {string} baseModuleName
+     * @param {string} moduleName
+     * @param {JARS.internals.ResolutionStrategies.ResolutionStrategy} resolutionStrategy
      */
     function logResolutionError(baseModuleName, moduleName, resolutionStrategy) {
         var Logger = System.Logger,
@@ -269,6 +231,17 @@ JARS.internal('ResolutionStrategies', function resolutionStrategiesSetup(Interna
 
         Logger && Logger.errorWithContext(RESOLUTION_LOG_CONTEXT, message, [moduleName, baseModuleName]);
     }
+
+    /**
+     * @callback ResolutionStrategy
+     *
+     * @memberof JARS.internals.ResolutionStrategies
+     *
+     * @param {string} baseModuleName
+     * @param {string} moduleName
+     *
+     * @return {string[]}
+     */
 
     return ResolutionStrategies;
 });

@@ -13,56 +13,37 @@ JARS.internal('Resolver', function resolverSetup(InternalsManager) {
         Resolver;
 
     /**
-     * @access public
+     * @namespace
      *
-     * @namespace Resolver
-     *
-     * @memberof JARS
-     * @inner
+     * @memberof JARS.internals
      */
     Resolver = {
         /**
-         * @access public
+         * @param {string} moduleName
          *
-         * @memberof JARS~Resolver
-         *
-         * @param {String} moduleName
-         *
-         * @return {Boolean}
+         * @return {boolean}
          */
         isRootName: function(moduleName) {
             return ROOT_MODULE_NAME === moduleName;
         },
         /**
-         * @access public
-         *
-         * @memberof JARS~Resolver
-         *
-         * @return {String}
+         * @return {string}
          */
         getRootName: function() {
             return ROOT_MODULE_NAME;
         },
         /**
-         * @access public
+         * @param {string} moduleName
          *
-         * @memberof JARS~Resolver
-         *
-         * @param {String} moduleName
-         *
-         * @return {String}
+         * @return {string}
          */
         getBundleName: function(moduleName) {
             return Resolver.appendVersion(Resolver.getModuleNameWithoutVersion(moduleName) + BUNDLE_SUFFIX, Resolver.getVersion(moduleName));
         },
         /**
-         * @access public
+         * @param {string} moduleName
          *
-         * @memberof JARS~Resolver
-         *
-         * @param {String} moduleName
-         *
-         * @return {String}
+         * @return {string}
          */
         getImplicitDependencyName: function(moduleName) {
             var version = Resolver.getVersion(moduleName),
@@ -74,112 +55,76 @@ JARS.internal('Resolver', function resolverSetup(InternalsManager) {
             return Resolver.appendVersion(implicitDependencyWithoutVersion, version);
         },
         /**
-         * @access public
+         * @param {string} moduleName
          *
-         * @memberof JARS~Resolver
-         *
-         * @param {String} moduleName
-         *
-         * @return {String}
+         * @return {string}
          */
         getModuleTail: function(moduleName) {
             return Resolver.getModuleNameWithoutVersion(moduleName).split(DOT).pop();
         },
         /**
-         * @access public
+         * @param {string} moduleName
          *
-         * @memberof JARS~Resolver
-         *
-         * @param {String} moduleName
-         *
-         * @return {Boolean}
+         * @return {boolean}
          */
         isVersionedModule: function(moduleName) {
             return moduleName.indexOf(VERSION_DELIMITER) > -1;
         },
         /**
-         * @access public
+         * @param {string} moduleName
          *
-         * @memberof JARS~Resolver
-         *
-         * @param {String} moduleName
-         *
-         * @return {String}
+         * @return {string}
          */
         getModuleNameWithoutVersion: function(moduleName) {
             return moduleName.split(VERSION_DELIMITER)[0];
         },
         /**
-         * @access public
+         * @param {string} moduleName
          *
-         * @memberof JARS~Resolver
-         *
-         * @param {String} moduleName
-         *
-         * @return {String}
+         * @return {string}
          */
         getVersion: function(moduleName) {
             return moduleName.split(VERSION_DELIMITER)[1] || EMPTY_STRING;
         },
         /**
-         * @access public
+         * @param {string} moduleName
+         * @param {string} version
          *
-         * @memberof JARS~Resolver
-         *
-         * @param {String} moduleName
-         * @param {String} version
-         *
-         * @return {String}
+         * @return {string}
          */
         appendVersion: function(moduleName, version) {
             return (moduleName && version) ? [moduleName, version].join(VERSION_DELIMITER) : moduleName;
         },
         /**
-         * @access public
+         * @param {string} moduleName
          *
-         * @memberof JARS~Resolver
-         *
-         * @param {String} moduleName
-         *
-         * @return {String}
+         * @return {string}
          */
         extractModuleNameFromBundle: function(moduleName) {
             return moduleName.replace(RE_BUNDLE, EMPTY_STRING);
         },
         /**
-         * @access public
+         * @param {string} moduleName
          *
-         * @memberof JARS~Resolver
-         *
-         * @param {String} moduleName
-         *
-         * @return {Boolean}
+         * @return {boolean}
          */
         isBundle: function(moduleName) {
             return RE_BUNDLE.test(moduleName);
         },
         /**
-         * @access public
+         * @param {JARS.internals.ModuleDependencies.Declaration} modules
+         * @param {string} baseModuleName
          *
-         * @memberof JARS~Resolver
-         *
-         * @param {JARS~ModuleDependencies~Declaration} modules
-         * @param {String} baseModuleName
-         *
-         * @return {String[]}
+         * @return {string[]}
          */
         resolve: function(modules, baseModuleName) {
             return ResolutionStrategies.any(Resolver.isRootName(baseModuleName) ? EMPTY_STRING : baseModuleName, modules, ResolutionStrategies.deps);
         },
         /**
-         * @access public
+         * @param {JARS.internals.ModuleBundle.Declaration} modules
+         * @param {string} baseModuleName
          *
-         * @memberof JARS~Resolver
-         *
-         * @param {JARS~ModuleBundle~Declaration} modules
-         * @param {String} baseModuleName
-         *
-         * @return {String[]}
+         * @return {string[]}
          */
         resolveBundle: function(modules, baseModuleName) {
             return ResolutionStrategies.any(baseModuleName, modules, ResolutionStrategies.bundle);

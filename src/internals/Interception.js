@@ -5,17 +5,16 @@ JARS.internal('Interception', function interceptionSetup(InternalsManager) {
         MSG_INTERCEPTION_ERROR = 'error in interception of this module by interceptor "${type}" with data "${data}"';
 
     /**
-     * @access public
+     * @private
      *
-     * @constructor Interception
+     * @class
      *
-     * @memberof JARS
-     * @inner
+     * @memberof JARS.internals
      *
-     * @param {JARS~Module} listeningModule
-     * @param {JARS~InterceptionManager~InterceptionInfo} interceptionInfo
-     * @param {JARS~ModuleQueue~SuccessCallback} onSuccess
-     * @param {JARS~ModuleQueue~FailCallback} onFail
+     * @param {JARS.internals.Module} listeningModule
+     * @param {JARS.internals.InterceptionManager.InterceptionInfo} interceptionInfo
+     * @param {JARS.internals.ModuleQueue.SuccessCallback} onSuccess
+     * @param {JARS.internals.ModuleQueue.FailCallback} onFail
      */
     function Interception(listeningModule, interceptionInfo, onSuccess, onFail) {
         var interception = this,
@@ -36,22 +35,11 @@ JARS.internal('Interception', function interceptionSetup(InternalsManager) {
     }
 
     Interception.prototype = {
-        /**
-         * @access public
-         *
-         * @alias JARS~Interception
-         *
-         * @memberof JARS~Interception#
-         */
         constructor: Interception,
         /**
-         * @access public
+         * @param {string} fileType
          *
-         * @memberof JARS~Interception#
-         *
-         * @param {String} fileType
-         *
-         * @return {String}
+         * @return {string}
          */
         getFilePath: function(fileType) {
             var listeningModule = this.listeningModule;
@@ -59,14 +47,10 @@ JARS.internal('Interception', function interceptionSetup(InternalsManager) {
             return !listeningModule.isRoot() && listeningModule.getFullPath(fileType);
         },
         /**
-         * @access public
-         *
-         * @memberof JARS~Interception#
-         *
-         * @param {Array} moduleNames
-         * @param {JARS~LoaderQueue~ModulesLoadedCallback} onModulesLoaded
-         * @param {JARS~ModuleQueue~FailCallback} onModuleAborted
-         * @param {JARS~LoaderQueue~ModuleLoadedCallback} onModuleLoaded
+         * @param {JARS.internals.ModuleDependencies.Declaration} moduleNames
+         * @param {JARS.internals.LoaderQueue.ModulesLoadedCallback} onModulesLoaded
+         * @param {JARS.internals.ModuleQueue.FailCallback} onModuleAborted
+         * @param {JARS.internals.LoaderQueue.ModuleLoadedCallback} onModuleLoaded
          */
         $importAndLink: function(moduleNames, onModulesLoaded, onModuleAborted, onModuleLoaded) {
             var listeningModule = this.listeningModule;

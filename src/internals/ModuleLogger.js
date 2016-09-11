@@ -6,14 +6,11 @@ JARS.internal('ModuleLogger', function moduleLoggerSetup(InternalsManager) {
         System = getInternal('System');
 
     /**
-     * @access public
+     * @class
      *
-     * @constructor ModuleLogger
+     * @memberof JARS.internals
      *
-     * @memberof JARS
-     * @inner
-     *
-     * @param {String} moduleOrBundleName
+     * @param {string} moduleOrBundleName
      */
     function ModuleLogger(moduleOrBundleName) {
         this._moduleOrBundleName = moduleOrBundleName;
@@ -27,57 +24,49 @@ JARS.internal('ModuleLogger', function moduleLoggerSetup(InternalsManager) {
     });
 
     /**
-     * @access public
-     *
      * @method debug
      *
-     * @memberof JARS~ModuleLogger#
+     * @memberof JARS.internals.ModuleLogger#
      *
-     * @param {String} message
+     * @param {string} message
      * @param {Object} [values]
      */
 
     /**
-     * @access public
-     *
      * @method error
      *
-     * @memberof JARS~ModuleLogger#
+     * @memberof JARS.internals.ModuleLogger#
      *
-     * @param {String} message
+     * @param {string} message
      * @param {Object} [values]
      */
 
     /**
-     * @access public
-     *
      * @method info
      *
-     * @memberof JARS~ModuleLogger#
+     * @memberof JARS.internals.ModuleLogger#
      *
-     * @param {String} message
+     * @param {string} message
      * @param {Object} [values]
      */
 
     /**
-     * @access public
-     *
      * @method warn
      *
-     * @memberof JARS~ModuleLogger#
+     * @memberof JARS.internals.ModuleLogger#
      *
-     * @param {String} message
+     * @param {string} message
      * @param {Object} [values]
      */
 
     /**
-     * @access private
+     * @private
      *
-     * @memberof JARS~ModuleLogger
+     * @memberof JARS.internals.ModuleLogger
      *
-     * @param {JARS~ModuleLogger} logger
-     * @param {String} logMethod
-     * @param {String} message
+     * @param {JARS.internals.ModuleLogger} logger
+     * @param {string} logMethod
+     * @param {string} message
      * @param {Object} [values]
      */
     function log(logger, logMethod, message, values) {

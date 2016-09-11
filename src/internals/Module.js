@@ -21,8 +21,7 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
     /**
      * @callback FactoryCallback
      *
-     * @memberof JARS~Module
-     * @inner
+     * @memberof JARS.internals.Module
      *
      * @param {...*} dependencyRefs
      *
@@ -30,15 +29,12 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
      */
 
     /**
-     * @access public
+     * @class
      *
-     * @constructor Module
+     * @memberof JARS.internals
      *
-     * @memberof JARS
-     * @inner
-     *
-     * @param {JARS~Loader} loader
-     * @param {String} moduleName
+     * @param {JARS.internals.Loader} loader
+     * @param {string} moduleName
      */
     function Module(loader, moduleName) {
         var module = this,
@@ -60,32 +56,17 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
     }
 
     Module.prototype = {
-        /**
-         * @access public
-         *
-         * @alias JARS~Module
-         *
-         * @memberof JARS~Module#
-         */
         constructor: Module,
         /**
-         * @access public
-         *
-         * @memberof JARS~Module#
-         *
-         * @return {Boolean}
+         * @return {boolean}
          */
         isRoot: function() {
             return Resolver.isRootName(this.name);
         },
         /**
-         * @access public
+         * @param {string} [fileType]
          *
-         * @memberof JARS~Module#
-         *
-         * @param {String} [fileType]
-         *
-         * @return {String}
+         * @return {string}
          */
         getFullPath: function(fileType) {
             var module = this,
@@ -96,11 +77,7 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
 
             return path + fileName;
         },
-        /**
-         * @access public
-         *
-         * @memberof JARS~Module#
-         */
+
         load: function() {
             var module = this;
 
@@ -109,12 +86,8 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
             SourceManager.loadSource(module.name, module.getFullPath());
         },
         /**
-         * @access public
-         *
-         * @memberof JARS~Module#
-         *
-         * @param {JARS~ModuleQueue~SuccessCallback} onModuleLoaded
-         * @param {JARS~ModuleQueue~FailCallback} onModuleAborted
+         * @param {JARS.internals.ModuleQueue.SuccessCallback} onModuleLoaded
+         * @param {JARS.internals.ModuleQueue.FailCallback} onModuleAborted
          */
         request: function(onModuleLoaded, onModuleAborted) {
             var module = this;
@@ -128,11 +101,7 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
             module.queue.add(onModuleLoaded, onModuleAborted);
         },
         /**
-         * @access public
-         *
-         * @memberof JARS~Module#
-         *
-         * @return {Boolean}
+         * @return {boolean}
          */
         findRecover: function() {
             var module = this,
@@ -171,11 +140,7 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
             return !!foundRecover;
         },
         /**
-         * @access public
-         *
-         * @memberof JARS~Module#
-         *
-         * @param {(String|String[])} [dependencyOrArray]
+         * @param {(string|string[])} [dependencyOrArray]
          */
         abort: function(dependencyOrArray) {
             var module = this,
@@ -200,11 +165,7 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
                 module.queue.notifyError();
             }
         },
-        /**
-         * @access public
-         *
-         * @memberof JARS~Module#
-         */
+
         setupAutoAbort: function() {
             var module = this;
 
@@ -212,22 +173,14 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
                 module.abort();
             }, module.config.get('timeout') * 1000);
         },
-        /**
-         * @access public
-         *
-         * @memberof JARS~Module#
-         */
+
         clearAutoAbort: function() {
             var module = this;
 
             module.timeoutID && System.env.global.clearTimeout(module.timeoutID);
         },
         /**
-         * @access public
-         *
-         * @memberof JARS~Module#
-         *
-         * @param {JARS~ModuleDependencies~Declaration} dependencies
+         * @param {JARS.internals.ModuleDependencies.Declaration} dependencies
          */
         $import: function(dependencies) {
             var module = this;
@@ -237,11 +190,7 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
             }
         },
         /**
-         * @access public
-         *
-         * @memberof JARS~Module#
-         *
-         * @param {JARS~Module~FactoryCallback} factory
+         * @param {JARS.internals.Module.FactoryCallback} factory
          */
         $export: function(factory) {
             var module = this,
@@ -281,11 +230,7 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
             }
         },
         /**
-         * @access public
-         *
-         * @memberof JARS~Module#
-         *
-         * @param {JARS~ModuleBundle~Declaration} bundleModules
+         * @param {JARS.internals.ModuleBundle.Declaration} bundleModules
          */
         defineBundle: function(bundleModules) {
             this.bundle.add(bundleModules);

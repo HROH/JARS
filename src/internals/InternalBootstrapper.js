@@ -4,7 +4,15 @@ JARS.internal('InternalBootstrapper', function(InternalsManager) {
     var getInternal = InternalsManager.get,
         InternalBootstrapper;
 
+    /**
+     * @namespace
+     *
+     * @memberof JARS.internals
+     */
     InternalBootstrapper = {
+        /**
+         * @param {string} internalsPath
+         */
         bootstrap: function(internalsPath) {
             var SourceManager = getInternal('SourceManager'),
                 System = getInternal('System'),

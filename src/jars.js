@@ -118,35 +118,23 @@
             utils;
 
         /**
-         * @access public
+         * @namespace
          *
-         * @namespace utils
-         *
-         * @memberof JARS
-         * @inner
+         * @memberof JARS.internals
          */
         utils = {
             /**
-             * @access public
-             *
-             * @function
-             * @memberof JARS~utils
-             *
              * @param {Object} object
-             * @param {String} prop
+             * @param {string} prop
              *
-             * @return {Boolean}
+             * @return {boolean}
              */
             hasOwnProp: function(object, prop) {
                 return hasOwn.call(object, prop);
             },
             /**
-             * @access public
-             *
-             * @memberof JARS~utils
-             *
              * @param {Object} object
-             * @param {Function()} callback
+             * @param {function(*, string): boolean} callback
              */
             objectEach: function(object, callback) {
                 var property;
@@ -160,10 +148,6 @@
                 }
             },
             /**
-             * @access public
-             *
-             * @memberof JARS~utils
-             *
              * @param {Object} dest
              * @param {Object} source
              *
@@ -177,12 +161,8 @@
                 return dest;
             },
             /**
-             * @access public
-             *
-             * @memberof JARS~utils
-             *
              * @param {(Array|NodeList)} array
-             * @param {Function()} callback
+             * @param {function(*, number): boolean} callback
              */
             arrayEach: function(array, callback) {
                 var index = 0,
@@ -194,7 +174,9 @@
                     }
                 }
             },
-
+            /**
+             * @type Global
+             */
             global: envGlobal
         };
 
@@ -211,20 +193,13 @@
 
 
         /**
-         * @access private
+         * @namespace
          *
-         * @namespace SourceManager
-         *
-         * @memberof JAR
-         * @inner
+         * @memberof JARS.internals
          */
         SourceManager =  {
             /**
-             * @access public
-             *
-             * @memberof JARS~SourceManager
-             *
-             * @return {String}
+             * @return {string}
              */
             getMain: function() {
                 var main;
@@ -238,11 +213,7 @@
                 return main;
             },
             /**
-             * @access public
-             *
-             * @memberof JARS~SourceManager
-             *
-             * @return {String}
+             * @return {string}
              */
             getBasePath: function() {
                 var src;
@@ -260,12 +231,8 @@
                 return basePath;
             },
             /**
-             * @access public
-             *
-             * @memberof JARS~SourceManager
-             *
-             * @param {String} moduleName
-             * @param {String} path
+             * @param {string} moduleName
+             * @param {string} path
              */
             loadSource: function(moduleName, path) {
                 var script = doc.createElement('script');
@@ -280,25 +247,17 @@
                 scripts[moduleName] = script;
             },
             /**
-             * @access public
+             * @param {string} moduleName
              *
-             * @memberof JARS~SourceManager
-             *
-             * @param {String} moduleName
-             *
-             * @return {Boolean}
+             * @return {boolean}
              */
             findSource: function(moduleName) {
                 return doc.currentScript ? doc.currentScript.id === moduleName : !!doc.getElementById(moduleName);
             },
             /**
-             * @access public
+             * @param {string} moduleName
              *
-             * @memberof JARS~SourceManager
-             *
-             * @param {String} moduleName
-             *
-             * @return {String} path
+             * @return {string} path
              */
             removeSource: function(moduleName) {
                 var script = scripts[moduleName],
@@ -324,7 +283,8 @@
             JARS;
 
         /**
-         * @namespace JARS
+         * @namespace
+         * @global
          */
         JARS = {
             main: delegateToInternal('ExternalBootstrapper', 'main', getJARS),
@@ -350,12 +310,8 @@
                 return ModuleWrapper;
             }),
             /**
-             * @access public
-             *
-             * @memberof JARS
-             *
-             * @param {String} moduleName
-             * @param {Array} bundle
+             * @param {string} moduleName
+             * @param {JARS.internals.ModuleBundle.Declaration} bundle
              */
             moduleAuto: function(moduleName, bundle) {
                 JARS.module(moduleName, bundle).$export();
@@ -369,10 +325,6 @@
 
             flush: delegateToInternal('Loader', 'flush', getJARS),
             /**
-             * @access public
-             *
-             * @memberof JARS
-             *
              * @return {JARS}
              */
             noConflict: function() {
@@ -381,15 +333,24 @@
                 return JARS;
             },
             /**
-             * @access public
-             *
-             * @memberof JARS
-             *
-             * @type {String}
+             * @type {string}
              */
             version: '0.3.0'
         };
 
+        /**
+         * @namespace internals
+         *
+         * @memberof JARS
+         */
+
+        /**
+         * @private
+         *
+         * @memberof JARS
+         *
+         * @return {JARS}
+         */
         function getJARS() {
             return JARS;
         }

@@ -12,6 +12,11 @@ JARS.internal('PathListManager', function pathListManagerSetup(InternalsManager)
         pathList = [],
         PathListManager;
 
+    /**
+     * @namespace
+     *
+     * @memberof JARS.internals
+     */
     PathListManager = {
         /**
          * <p>Computes an array of paths for all the loaded modules
@@ -23,12 +28,8 @@ JARS.internal('PathListManager', function pathListManagerSetup(InternalsManager)
          * This is only for aesthetics.
          * Even without recomputation the list will still be valid.</p>
          *
-         * @access public
-         *
-         * @memberof JARS~PathListManager
-         *
-         * @param {Function(array)} callback
-         * @param {Boolean} forceRecompute
+         * @param {function(sting[])} callback
+         * @param {boolean} forceRecompute
          */
         computeSortedPathList: function(callback, forceRecompute) {
             var modulesToLoad = [],
@@ -59,12 +60,11 @@ JARS.internal('PathListManager', function pathListManagerSetup(InternalsManager)
     };
 
     /**
-     * @access private
+     * @private
      *
-     * @memberof JARS~PathListManager
-     * @inner
+     * @memberof JARS.internals.PathListManager
      *
-     * @param {Array} [modules = []]
+     * @param {string[]} [modules = []]
      */
     function addModules(modules) {
         arrayEach(modules || [], function addModuleToPathList(moduleName) {
@@ -73,13 +73,12 @@ JARS.internal('PathListManager', function pathListManagerSetup(InternalsManager)
     }
 
     /**
-     * @access private
+     * @private
      *
-     * @memberof JARS~PathListManager
-     * @inner
+     * @memberof JARS.internals.PathListManager
      *
-     * @param {JARS~Module} module
-     * @param {Boolean} [addBundle = false]
+     * @param {JARS.internals.Module} module
+     * @param {boolean} [addBundle = false]
      */
     function addToPathList(module, addBundle) {
         var moduleName = module.name,
@@ -100,10 +99,9 @@ JARS.internal('PathListManager', function pathListManagerSetup(InternalsManager)
     }
 
     /**
-     * @access private
+     * @private
      *
-     * @memberof JARS~PathListManager
-     * @inner
+     * @memberof JARS.internals.PathListManager
      */
     function resetModulesPathList() {
         pathList = [];

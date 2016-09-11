@@ -16,15 +16,12 @@ JARS.internal('ModuleBundle', function moduleBundleSetup(InternalsManager) {
         MSG_BUNDLE_SUBMODULE_ABORTED = 'submodule "${subModule}"';
 
     /**
-     * @access public
+     * @class
      *
-     * @constructor ModuleBundle
+     * @memberof JARS.internals
      *
-     * @memberof JARS
-     * @inner
-     *
-     * @param {String} moduleName
-     * @param {JARS~ModuleConfig} parentConfig
+     * @param {string} moduleName
+     * @param {JARS.internals.ModuleConfig} parentConfig
      */
     function ModuleBundle(moduleName, parentConfig) {
         var moduleBundle = this,
@@ -39,20 +36,9 @@ JARS.internal('ModuleBundle', function moduleBundleSetup(InternalsManager) {
     }
 
     ModuleBundle.prototype = {
-        /**
-         * @access public
-         *
-         * @alias JARS~ModuleBundle
-         *
-         * @memberof JARS~ModuleBundle#
-         */
         constructor: ModuleBundle,
         /**
-         * @access public
-         *
-         * @memberof JARS~ModuleBundle#
-         *
-         * @param {JARS~ModuleBundle~Declaration} bundle
+         * @param {JARS.internals.ModuleBundle.Declaration} bundle
          */
         add: function(bundle) {
             var moduleBundle = this,
@@ -65,12 +51,8 @@ JARS.internal('ModuleBundle', function moduleBundleSetup(InternalsManager) {
             moduleBundle._bundle = resolvedBundle;
         },
         /**
-         * @access public
-         *
-         * @memberof JARS~ModuleBundle#
-         *
-         * @param {JARS~ModuleQueue~SuccessCallback} onBundleLoaded
-         * @param {JARS~ModuleQueue~FailCallback} onBundleAborted
+         * @param {JARS.internals.ModuleQueue.SuccessCallback} onBundleLoaded
+         * @param {JARS.internals.ModuleQueue.FailCallback} onBundleAborted
          */
         request: function(onBundleLoaded, onBundleAborted) {
             var moduleBundle = this,
@@ -95,11 +77,7 @@ JARS.internal('ModuleBundle', function moduleBundleSetup(InternalsManager) {
             bundleQueue.add(onBundleLoaded, onBundleAborted);
         },
         /**
-         * @access public
-         *
-         * @memberof JARS~ModuleBundle#
-         *
-         * @param {String} parentOrSubModuleName
+         * @param {string} parentOrSubModuleName
          */
         abort: function(parentOrSubModuleName) {
             var moduleBundle = this,
@@ -119,10 +97,9 @@ JARS.internal('ModuleBundle', function moduleBundleSetup(InternalsManager) {
     };
 
    /**
-    * @typeDef {String[]} Declaration
+    * @typeDef {string[]} Declaration
     *
-    * @memberof JARS~ModuleBundle
-    * @inner
+    * @memberof JARS.internals.ModuleBundle
     */
 
     return ModuleBundle;

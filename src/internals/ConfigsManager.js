@@ -20,7 +20,7 @@ JARS.internal('ConfigsManager', function configsManagerSetup(InternalsManager) {
         },
         configHooks = {
             /**
-             * @param {(Object|Boolean)} debugConfig
+             * @param {(Object|boolean)} debugConfig
              */
             debugging: function(debugConfig) {
                 if (!System.isObject(debugConfig)) {
@@ -36,10 +36,10 @@ JARS.internal('ConfigsManager', function configsManagerSetup(InternalsManager) {
                 });
             },
             /**
-             * @param {Boolean} makeGlobal
-             * @param {Boolean} isGlobal
+             * @param {boolean} makeGlobal
+             * @param {boolean} isGlobal
              *
-             * @return {Boolean}
+             * @return {boolean}
              */
             globalAccess: function(makeGlobal, isGlobal) {
                 if (makeGlobal) {
@@ -52,10 +52,10 @@ JARS.internal('ConfigsManager', function configsManagerSetup(InternalsManager) {
                 return !!makeGlobal;
             },
             /**
-             * @param {String} mainScript
-             * @param {String} oldMainScript
+             * @param {string} mainScript
+             * @param {string} oldMainScript
              *
-             * @return {String}
+             * @return {string}
              */
             main: function(mainScript, oldMainScript) {
                 return oldMainScript || (mainScript && SourceManager.loadSource('main', mainScript + '.js'));
@@ -64,16 +64,16 @@ JARS.internal('ConfigsManager', function configsManagerSetup(InternalsManager) {
              * @param {Object} newEnvironments
              * @param {Object} oldEnvironments
              *
-             * @return {Object<string, function>}
+             * @return {Object<string, Object>}
              */
             environments: function(newEnvironments, oldEnvironments) {
                 return objectMerge(oldEnvironments, newEnvironments);
             },
             /**
-             * @param {String} newEnvironment
-             * @param {String} oldEnvironment
+             * @param {string} newEnvironment
+             * @param {string} oldEnvironment
              *
-             * @return {String}
+             * @return {string}
              */
             environment: function(newEnvironment, oldEnvironment) {
                 var environment = configs.environments[newEnvironment];
@@ -106,10 +106,10 @@ JARS.internal('ConfigsManager', function configsManagerSetup(InternalsManager) {
                 }
             },
             /**
-             * @param {String} newLoaderContext
-             * @param {String} oldLoaderContext
+             * @param {string} newLoaderContext
+             * @param {string} oldLoaderContext
              *
-             * @return {String}
+             * @return {string}
              */
             loaderContext: function(newLoaderContext, oldLoaderContext) {
                 if (newLoaderContext !== oldLoaderContext) {
@@ -121,7 +121,7 @@ JARS.internal('ConfigsManager', function configsManagerSetup(InternalsManager) {
                 return newLoaderContext;
             },
             /**
-             * @param {JARS~InterceptionManager~Interceptor[]} newInterceptors
+             * @param {JARS.internals.InterceptionManager.Interceptor[]} newInterceptors
              */
             interceptors: function(newInterceptors) {
                 if (System.isArray(newInterceptors)) {
@@ -132,22 +132,15 @@ JARS.internal('ConfigsManager', function configsManagerSetup(InternalsManager) {
         ConfigsManager;
 
     /**
-    * @access public
-    *
-    * @namespace ConfigsManager
-    *
-    * @memberof JARS
-    * @inner
-    */
+     * @namespace
+     *
+     * @memberof JARS.internals
+     */
     ConfigsManager = {
         /**
-        * @access public
-        *
-        * @memberof JARS~ConfigsManager
-        *
-        * @param {(Object|String)} optionOrConfig
-        * @param {*} [value]
-        */
+         * @param {(JARS.internals.ConfigsManager.Option|Object<JARS.internals.ConfigsManager.Option, *>)} optionOrConfig
+         * @param {*} [value]
+         */
         update: function(optionOrConfig, value) {
             var configHook;
 
@@ -162,32 +155,35 @@ JARS.internal('ConfigsManager', function configsManagerSetup(InternalsManager) {
             }
         },
         /**
-        * @access public
-        *
-        * @memberof JARS~ConfigsManager
-        *
-        * @param {String} option
-        *
-        * @return {*}
-        */
+         * @param {JARS.internals.ConfigsManager.Option} option
+         *
+         * @return {*}
+         */
         get: function(option) {
             return configs[option];
         }
     };
 
     /**
-     * @access private
+     * @private
      *
-     * @memberof JARS~ConfigsManager
-     * @inner
+     * @memberof JARS.internals.ConfigsManager
      *
-     * @param {Boolean} expose
+     * @param {boolean} expose
      */
     function exposeModulesGlobal(expose) {
         if (expose) {
             JARS.mods = Loader.getRoot();
         }
     }
+
+    /**
+     * @private
+     *
+     * @memberof JARS.internals.ConfigsManager
+     *
+     * @typedef {('debugging'|'environment'|'environments'|'globalAccess'|'interceptors'|'loaderContext'|'main'|'modules')} Option
+     */
 
     return ConfigsManager;
 });

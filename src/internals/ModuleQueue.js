@@ -6,15 +6,12 @@ JARS.internal('ModuleQueue', function moduleQueueSetup(InternalsManager) {
         QUEUE_ERROR = 1;
 
     /**
-     * @access public
+     * @class
      *
-     * @constructor ModuleQueue
+     * @memberof JARS.internals
      *
-     * @memberof JARS
-     * @inner
-     *
-     * @param {String} moduleOrBundleName
-     * @param {JARS~ModuleState} state
+     * @param {string} moduleOrBundleName
+     * @param {JARS.internals.ModuleState} state
      */
     function ModuleQueue(moduleOrBundleName, state) {
         var moduleQueue = this;
@@ -25,18 +22,9 @@ JARS.internal('ModuleQueue', function moduleQueueSetup(InternalsManager) {
     }
 
     ModuleQueue.prototype = {
-        /**
-         * @access public
-         *
-         * @alias JARS~ModuleQueue
-         *
-         * @memberof JARS~ModuleQueue#
-         */
         constructor: ModuleQueue,
         /**
-         * @access private
-         *
-         * @memberof JARS~ModuleQueue#
+         * @private
          *
          * @param {Number} callbackType
          */
@@ -54,29 +42,17 @@ JARS.internal('ModuleQueue', function moduleQueueSetup(InternalsManager) {
                 }
             }
         },
-        /**
-         * @access public
-         *
-         * @memberof JARS~ModuleQueue#
-         */
+
         notify: function() {
             this._call(QUEUE_SUCCESS);
         },
-        /**
-         * @access public
-         *
-         * @memberof JARS~ModuleQueue#
-         */
+
         notifyError: function() {
             this._call(QUEUE_ERROR);
         },
         /**
-         * @access public
-         *
-         * @memberof JARS~ModuleQueue#
-         *
-         * @param {JARS~ModuleQueue~SuccessCallback} onQueueSuccess
-         * @param {JARS~ModuleQueue~FailCallback} onQueueFail
+         * @param {JARS.internals.ModuleQueue.SuccessCallback} onQueueSuccess
+         * @param {JARS.internals.ModuleQueue.FailCallback} onQueueFail
          */
         add: function(onQueueSuccess, onQueueFail) {
             var moduleQueue = this;
@@ -93,19 +69,17 @@ JARS.internal('ModuleQueue', function moduleQueueSetup(InternalsManager) {
     /**
      * @callback SuccessCallback
      *
-     * @memberof JARS~ModuleQueue
-     * @inner
+     * @memberof JARS.internals.ModuleQueue
      *
-     * @param {String} loadedModuleName
+     * @param {string} loadedModuleName
      */
 
     /**
      * @callback FailCallback
      *
-     * @memberof JARS~ModuleQueue
-     * @inner
+     * @memberof JARS.internals.ModuleQueue
      *
-     * @param {String} abortedModuleName
+     * @param {string} abortedModuleName
      */
 
     return ModuleQueue;

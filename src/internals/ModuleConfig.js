@@ -68,15 +68,12 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
     addConfigTransform('versionDir', STRING_CHECK, ensureEndsWithSlash);
 
     /**
-     * @access public
+     * @class
      *
-     * @constructor ModuleConfig
+     * @memberof JARS.internals
      *
-     * @memberof JARS
-     * @inner
-     *
-     * @param {(JARS~Module|JARS~Bundle)} moduleOrBundle
-     * @param {JARS~ModuleConfig} [parentConfig]
+     * @param {(JARS.internals.Module|JARS.internals.ModuleBundle)} moduleOrBundle
+     * @param {JARS.internals.ModuleConfig} [parentConfig]
      */
     function ModuleConfig(moduleOrBundle, parentConfig) {
         var moduleConfig = this;
@@ -88,19 +85,8 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
     }
 
     ModuleConfig.prototype = {
-        /**
-         * @access public
-         *
-         * @alias JARS~ModuleConfig
-         *
-         * @memberof JARS~ModuleConfig#
-         */
         constructor: ModuleConfig,
         /**
-         * @access public
-         *
-         * @memberof JARS~ModuleConfig#
-         *
          * @param {Object} newOptions
          */
         update: function(newOptions) {
@@ -109,12 +95,8 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
             transformAndUpdateOptions(moduleConfig._options, newOptions, moduleConfig._moduleOrBundle);
         },
         /**
-         * @access public
-         *
-         * @memberof JARS~ModuleConfig#
-         *
-         * @param {String} option
-         * @param {String} skipUntil
+         * @param {string} option
+         * @param {string} skipUntil
          *
          * @return {*}
          */
@@ -139,11 +121,7 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
             return result;
         },
         /**
-         * @access public
-         *
-         * @memberof JARS~ModuleConfig#
-         *
-         * @return {JARS~ModuleConfig~ModuleConfigOptions}
+         * @return {JARS.internals.ModuleConfig.ModuleConfigOptions}
          */
         inheritOptions: function() {
             return create(ModuleConfigOptions, this._options);
@@ -153,24 +131,22 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
     /**
      * @callback TransformFunction
      *
-     * @access private
+     * @private
      *
-     * @memberof JARS~ModuleConfig
-     * @inner
+     * @memberof JARS.internals.ModuleConfig
      *
      * @param {*} configValue
-     * @param {(JARS~Module|JARS~Bundle)} [moduleOrBundle]
+     * @param {(JARS.internals.Module|JARS.internals.ModuleBundle)} [moduleOrBundle]
      */
 
     /**
-     * @access private
+     * @private
      *
-     * @memberof JARS~ModuleConfig
-     * @inner
+     * @memberof JARS.internals.ModuleConfig
      *
-     * @param {String} configKey
-     * @param {String} typeCheck
-     * @param {JARS~ModuleConfig~TransformFunction} [transform]
+     * @param {string} configKey
+     * @param {string} typeCheck
+     * @param {JARS.internals.ModuleConfig.TransformFunction} [transform]
      */
     function addConfigTransform(configKey, typeCheck, transform) {
         configTransforms[configKey] = {
@@ -181,28 +157,26 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
     }
 
     /**
-     * @access private
+     * @private
      *
-     * @memberof JARS~ModuleConfig
-     * @inner
+     * @memberof JARS.internals.ModuleConfig
      *
-     * @param {String} path
+     * @param {string} path
      *
-     * @return {String}
+     * @return {string}
      */
     function ensureEndsWithSlash(path) {
         return (!path || RE_END_SLASH.test(path)) ? path : path + SLASH;
     }
 
     /**
-     * @access private
+     * @private
      *
-     * @memberof JARS~ModuleConfig
-     * @inner
+     * @memberof JARS.internals.ModuleConfig
      *
-     * @param {JARS~ModuleConfig~ModuleConfigOptions} oldOptions
+     * @param {JARS.internals.ModuleConfig.internals.ModuleConfigOptions} oldOptions
      * @param {Object} newOptions
-     * @param {(JARS~Module|JARS~Bundle)} moduleOrBundle
+     * @param {(JARS.internals.Module|JARS.internals.ModuleBundle)} moduleOrBundle
      */
     function transformAndUpdateOptions(oldOptions, newOptions, moduleOrBundle) {
         objectEach(newOptions, function updateConfig(value, option) {
@@ -227,14 +201,13 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
     }
 
     /**
-     * @access private
+     * @private
      *
-     * @memberof JARS~ModuleConfig
-     * @inner
+     * @memberof JARS.internals.ModuleConfig
      *
-     * @param {(JARS~Module|JARS~Bundle)} moduleOrBundle
+     * @param {(JARS.internals.Module|JARS.internals.ModuleBundle)} moduleOrBundle
      *
-     * @return {JARS~ModuleConfig~ModuleConfigOptions}
+     * @return {JARS.internals.ModuleConfig.ModuleConfigOptions}
      */
     function getDefaultOptions(moduleOrBundle) {
         var moduleOrBundleName = moduleOrBundle.name,
@@ -261,12 +234,11 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
     }
 
     /**
-     * @access private
+     * @private
      *
-     * @memberof JARS~ModuleConfig
-     * @inner
+     * @memberof JARS.internals.ModuleConfig
      *
-     * @param {Function()} Constructor
+     * @param {Function} Constructor
      * @param {Object} [newProto]
      *
      * @return {Object}
@@ -284,24 +256,18 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
     }
 
     /**
-     * @access public
+     * @class
      *
-     * @constructor ModuleConfigOptions
-     *
-     * @memberof JARS~ModuleConfig
-     * @inner
+     * @memberof JARS.internals.ModuleConfig
      */
     function ModuleConfigOptions() {
         this.config = create(PublicModuleConfig, this.config);
     }
 
     /**
-     * @access public
+     * @class
      *
-     * @constructor PublicModuleConfig
-     *
-     * @memberof JARS~ModuleConfig
-     * @inner
+     * @memberof JARS.internals.ModuleConfig
      */
     function PublicModuleConfig() {}
 

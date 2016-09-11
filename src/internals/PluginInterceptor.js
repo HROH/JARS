@@ -5,22 +5,15 @@ JARS.internal('PluginInterceptor', function pluginInterceptorSetup(InternalsMana
         PluginInterceptor;
 
     /**
-    * @access public
+    * @namespace
+    * @implements JARS.internals.InterceptionManager.Interceptor
     *
-    * @namespace PluginInterceptor
-    * @implements JARS~InterceptionManager~Interceptor
-    *
-    * @memberof JARS
-    * @inner
+    * @memberof JARS.internals
     */
     PluginInterceptor = {
         /**
-         * @access public
-         *
-         * @memberof JARS~PluginInterceptor
-         *
          * @param {*} moduleRef
-         * @param {JARS~Intereption} interception
+         * @param {JARS.internals.Intereption} interception
          */
         intercept: function(moduleRef, interception) {
             if (System.isFunction(moduleRef.$plugIn)) {
@@ -31,11 +24,7 @@ JARS.internal('PluginInterceptor', function pluginInterceptorSetup(InternalsMana
             }
         },
         /**
-         * @access public
-         *
-         * @memberof JARS~PluginInterceptor
-         *
-         * @property {String}
+         * @type {string}
          */
         type: '!'
     };

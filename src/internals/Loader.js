@@ -14,21 +14,14 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
         Loader;
 
     /**
-     * @access public
+     * @namespace
      *
-     * @namespace Loader
-     *
-     * @memberof JARS
-     * @inner
+     * @memberof JARS.internals
      */
     Loader = {
         /**
-         * @access public
-         *
-         * @memberof JARS~Loader
-         *
-         * @param {String} loaderContext
-         * @param {String} switchToContext
+         * @param {string} loaderContext
+         * @param {string} switchToContext
          */
         flush: function(loaderContext, switchToContext) {
             // TODO remove refs in modules with given loaderContext
@@ -41,31 +34,19 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
             getInternal('ConfigsManager').update('loaderContext', switchToContext);
         },
         /**
-         * @access public
-         *
-         * @memberof JARS~Loader
-         *
-         * @param {String} newLoaderContext
+         * @param {string} newLoaderContext
          */
         setLoaderContext: function(newLoaderContext) {
             currentLoaderContext = newLoaderContext;
         },
         /**
-         * @access public
-         *
-         * @memberof JARS~Loader
-         *
-         * @param {String} moduleName
+         * @param {string} moduleName
          */
         setCurrentModuleName: function(moduleName) {
             currentModuleName = moduleName;
         },
         /**
-         * @access public
-         *
-         * @memberof JARS~Loader
-         *
-         * @return {Object}
+         * @return {{moduleName: string, path: string}}
          */
         getCurrentModuleData: function() {
             var moduleName = currentModuleName,
@@ -78,21 +59,13 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
             };
         },
         /**
-         * @access public
-         *
-         * @memberof JARS~Loader
-         *
          * @return {Object}
          */
         getRoot: function() {
             return Loader.getModuleRef(Resolver.getRootName());
         },
         /**
-         * @access public
-         *
-         * @memberof JARS~Loader
-         *
-         * @param {String} moduleName
+         * @param {string} moduleName
          *
          * @return {*}
          */
@@ -100,13 +73,9 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
             return Loader.getModule(moduleName).ref;
         },
         /**
-         * @access public
+         * @param {string} moduleName
          *
-         * @memberof JARS~Loader
-         *
-         * @param {String} moduleName
-         *
-         * @return {JARS~Module}
+         * @return {JARS.internals.Module}
          */
         getModule: function(moduleName) {
             if (Resolver.isBundle(moduleName)) {
@@ -119,36 +88,24 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
             return modulesRegistry[moduleName] || Loader.createModule(moduleName);
         },
         /**
-         * @access public
+         * @param {string} moduleName
          *
-         * @memberof JARS~Loader
-         *
-         * @param {String} moduleName
-         *
-         * @return {JARS~Module}
+         * @return {JARS.internals.Module}
          */
         createModule: function(moduleName) {
             return (modulesRegistry[moduleName] = new Module(Loader, moduleName));
         },
         /**
-         * @access public
-         *
-         * @memberof JARS~Loader
-         *
-         * @param {Function(JARS~Module)} callback
+         * @param {function(JARS.internals.Module, string)} callback
          */
         eachModules: function(callback) {
             objectEach(modulesRegistry, callback);
         },
         /**
-         * @access public
+         * @param {string} moduleName
+         * @param {JARS.internals.ModuleBundle.Declaration} bundle
          *
-         * @memberof JARS~Loader
-         *
-         * @param {String} moduleName
-         * @param {String[]} bundle
-         *
-         * @return {JARS~Module}
+         * @return {JARS.internals.Module}
          */
         registerModule: function(moduleName, bundle) {
             var module;
@@ -165,14 +122,10 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
             return module;
         },
         /**
-         * @access public
-         *
-         * @memberof JARS~Loader
-         *
-         * @param {JARS~ModuleDependencies~Declaration} moduleNames
-         * @param {Function(*)} onModulesImported
-         * @param {JARS~ModuleQueue~FailCallback} onModuleAborted
-         * @param {JARS~LoaderQueue~ModuleLoadedCallback} onModuleImported
+         * @param {JARS.internals.ModuleDependencies.Declaration} moduleNames
+         * @param {function(...*)} onModulesImported
+         * @param {JARS.internals.ModuleQueue.FailCallback} onModuleAborted
+         * @param {JARS.internals.LoaderQueue.ModuleLoadedCallback} onModuleImported
          */
         $import: function(moduleNames, onModulesImported, onModuleAborted, onModuleImported) {
             new LoaderQueue(Loader.getModule(Resolver.getRootName()), function onModulesLoaded(refs) {

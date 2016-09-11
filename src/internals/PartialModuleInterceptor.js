@@ -5,22 +5,15 @@ JARS.internal('PartialModuleInterceptor', function partialModuleInterceptorSetup
     var hasOwnProp = InternalsManager.get('utils').hasOwnProp, PartialModuleInterceptor;
 
     /**
-    * @access public
+    * @namespace
+    * @implements JARS.internals.InterceptionManager.Interceptor
     *
-    * @namespace PartialModuleInterceptor
-    * @implements JARS~InterceptionManager~Interceptor
-    *
-    * @memberof JARS
-    * @inner
+    * @memberof JARS.internals
     */
     PartialModuleInterceptor = {
         /**
-         * @access public
-         *
-         * @memberof JARS~PartialModuleInterceptor
-         *
          * @param {*} moduleRef
-         * @param {JARS~Intereption} interception
+         * @param {JARS.internals.Intereption} interception
          */
         intercept: function(moduleRef, interception) {
             var property = interception.info.data;
@@ -33,11 +26,7 @@ JARS.internal('PartialModuleInterceptor', function partialModuleInterceptorSetup
             }
         },
         /**
-         * @access public
-         *
-         * @memberof JARS~PartialModuleInterceptor
-         *
-         * @property {String}
+         * @type {string}
          */
         type: '::'
     };

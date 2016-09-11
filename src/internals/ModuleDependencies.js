@@ -13,15 +13,12 @@ JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsMa
         MSG_INTERCEPTION_DEPENDENCIES_FOUND = FOUND + 'interception dependencie(s) "${deps}"';
 
     /**
-     * @access public
+     * @class
      *
-     * @constructor ModuleDependencies
+     * @memberof JARS.internals
      *
-     * @memberof JARS
-     * @inner
-     *
-     * @param {JARS~Module} module
-     * @param {JARS~ModuleLogger} logger
+     * @param {JARS.internals.Module} module
+     * @param {JARS.internals.ModuleLogger} logger
      */
     function ModuleDependencies(module, logger) {
         var moduleDependencies = this,
@@ -43,22 +40,11 @@ JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsMa
     }
 
     ModuleDependencies.prototype = {
-        /**
-         * @access public
-         *
-         * @alias JARS~ModuleDependencies
-         *
-         * @memberof JARS~ModuleDependencies#
-         */
         constructor: ModuleDependencies,
         /**
-         * @access public
+         * @param {boolean} getInterceptionDeps
          *
-         * @memberof JARS~ModuleDependencies#
-         *
-         * @param {Boolean} getInterceptionDeps
-         *
-         * @return {String[]}
+         * @return {string[]}
          */
         getAll: function(getInterceptionDeps) {
             var moduleDependencies = this,
@@ -71,12 +57,8 @@ JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsMa
             return dependencies;
         },
         /**
-         * @access public
-         *
-         * @memberof JARS~ModuleDependencies#
-         *
-         * @param {JARS~ModuleDependencies~Declaration} dependencies
-         * @param {Boolean} [addInterceptionDependencies]
+         * @param {JARS.internals.ModuleDependencies.Declaration} dependencies
+         * @param {boolean} [addInterceptionDependencies]
          */
         add: function(dependencies, addInterceptionDependencies) {
             var moduleDependencies = this,
@@ -99,14 +81,10 @@ JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsMa
             moduleDependencies[depsKey] = moduleDependencies[depsKey].concat(dependencies);
         },
         /**
-         * @access public
-         *
-         * @memberof JARS~ModuleDependencies#
-         *
-         * @param {JARS~ModuleDependencies~Declaration} interceptionDependencies
-         * @param {JARS~LoaderQueue~ModulesLoadedCallback} onModulesLoaded
-         * @param {JARS~ModuleQueue~FailCallback} onModuleAborted
-         * @param {JARS~LoaderQueue~ModuleLoadedCallback} onModuleLoaded
+         * @param {JARS.internals.ModuleDependencies.Declaration} interceptionDependencies
+         * @param {JARS.internals.LoaderQueue.ModulesLoadedCallback} onModulesLoaded
+         * @param {JARS.internals.ModuleQueue.FailCallback} onModuleAborted
+         * @param {JARS.internals.LoaderQueue.ModuleLoadedCallback} onModuleLoaded
          */
         requestAndLink: function(interceptionDependencies, onModulesLoaded, onModuleAborted, onModuleLoaded) {
             var moduleDependencies = this;
@@ -118,11 +96,7 @@ JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsMa
             }
         },
         /**
-         * @access public
-         *
-         * @memberof JARS~ModuleDependencies#
-         *
-         * @param {JARS~LoaderQueue~ModulesLoadedCallback} onModulesLoaded
+         * @param {JARS.internals.LoaderQueue.ModulesLoadedCallback} onModulesLoaded
          */
         request: function(onModulesLoaded) {
             var moduleDependencies = this;
@@ -132,34 +106,24 @@ JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsMa
             }
         },
         /**
-         * @access public
-         *
-         * @memberof JARS~ModuleDependencies#
-         *
-         * @return {Boolean}
+         * @return {boolean}
          */
         hasCircular: function() {
             return this._traceCircular(false, foundMatch, foundMatch);
         },
         /**
-         * @access public
-         *
-         * @memberof JARS~ModuleDependencies#
-         *
-         * @return {String[]}
+         * @return {string[]}
          */
         getCircular: function() {
             return this._traceCircular([], returnMatch, addCurrentToMatchListAndReturn);
         },
         /**
-         * @access private
-         *
-         * @memberof JARS~ModuleDependencies#
+         * @private
          *
          * @param {*} defaultResult
-         * @param {Function(String)} resultOnMatch
-         * @param {Function(*, String)} resultOnLoopMatch
-         * @param {Object} [traversedModules]
+         * @param {function(string):*} resultOnMatch
+         * @param {function(*, string)} resultOnLoopMatch
+         * @param {Object<string, string>} [traversedModules]
          *
          * @return {*}
          */
@@ -197,11 +161,9 @@ JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsMa
             return traceResult;
         },
         /**
-         * @access private
+         * @private
          *
-         * @memberof JARS~ModuleDependencies#
-         *
-         * @return {Boolean}
+         * @return {boolean}
          */
         _abortCircular: function() {
             var moduleDependencies = this,
@@ -215,27 +177,27 @@ JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsMa
     };
 
     /**
-     * @access private
+     * @private
      *
-     * @memberof JARS~ModuleDependencies
+     * @memberof JARS.internals.ModuleDependencies
      *
-     * @param {String} matchingModuleName
+     * @param {string} matchingModuleName
      *
-     * @return {String[]}
+     * @return {string[]}
      */
     function returnMatch(matchingModuleName) {
         return [matchingModuleName];
     }
 
     /**
-     * @access private
+     * @private
      *
-     * @memberof JARS~ModuleDependencies
+     * @memberof JARS.internals.ModuleDependencies
      *
-     * @param {String[]} result
-     * @param {String} matchingModuleName
+     * @param {string[]} result
+     * @param {string} matchingModuleName
      *
-     * @return {String[]}
+     * @return {string[]}
      */
     function addCurrentToMatchListAndReturn(result, matchingModuleName) {
         if(result.length) {
@@ -246,23 +208,22 @@ JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsMa
     }
 
     /**
-     * @access private
+     * @private
      *
-     * @memberof JARS~ModuleDependencies
+     * @memberof JARS.internals.ModuleDependencies
      *
-     * @param {(String|String[])} match
+     * @param {(string|string[])} match
      *
-     * @return {Boolean}
+     * @return {boolean}
      */
     function foundMatch(match) {
         return !!match;
     }
 
    /**
-    * @typeDef {(String|JARS~ModuleDependencies~Declaration[]|Object<String, JARS~ModuleDependencies~Declaration>)} Declaration
+    * @typeDef {(string|JARS.internals.ModuleDependencies.Declaration[]|Object<string, JARS.internals.ModuleDependencies.Declaration>)} Declaration
     *
-    * @memberof JARS~ModuleDependencies
-    * @inner
+    * @memberof JARS.internals.ModuleDependencies
     */
 
     return ModuleDependencies;

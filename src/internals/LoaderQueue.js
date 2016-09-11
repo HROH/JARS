@@ -13,35 +13,30 @@ JARS.internal('LoaderQueue', function(InternalsManager) {
     /**
     * @callback ModuleLoadedCallback
     *
-    * @memberof JARS~LoaderQueue
-    * @inner
+    * @memberof JARS.internals.LoaderQueue
     *
-    * @param {String} moduleName
+    * @param {string} moduleName
     * @param {*} moduleRef
-    * @param {Number} [percentageLoaded]
+    * @param {number} [percentageLoaded]
     */
 
     /**
     * @callback ModulesLoadedCallback
     *
-    * @memberof JARS~LoaderQueue
-    * @inner
+    * @memberof JARS.internals.LoaderQueue
     *
-    * @param {String[]} moduleRefs
+    * @param {Array<*>} moduleRefs
     */
 
     /**
-    * @access public
+    * @class
     *
-    * @constructor LoaderQueue
+    * @memberof JARS.internals
     *
-    * @memberof JARS
-    * @inner
-    *
-    * @param {(JARS~Module|JARS~Bundle)} moduleOrBundle
-    * @param {JARS~LoaderQueue~ModulesLoadedCallback} onModulesLoaded
-    * @param {JARS~LoaderQueue~ModuleLoadedCallback} onModuleLoaded
-    * @param {JARS~ModuleQueue~FailCallback} onModuleAborted
+    * @param {(JARS.internals.Module|JARS.internals.ModuleBundle)} moduleOrBundle
+    * @param {JARS.internals.LoaderQueue.ModulesLoadedCallback} onModulesLoaded
+    * @param {JARS.internals.LoaderQueue.ModuleLoadedCallback} onModuleLoaded
+    * @param {JARS.internals.ModuleQueue.FailCallback} onModuleAborted
     */
     function LoaderQueue(moduleOrBundle, onModulesLoaded, onModuleLoaded, onModuleAborted) {
         var loaderQueue = this;
@@ -58,20 +53,9 @@ JARS.internal('LoaderQueue', function(InternalsManager) {
     }
 
     LoaderQueue.prototype = {
-        /**
-         * @access public
-         *
-         * @alias JARS~LoaderQueue
-         *
-         * @memberof JARS~LoaderQueue#
-         */
         constructor: LoaderQueue,
         /**
-         * @access public
-         *
-         * @memberof JARS~LoaderQueue#
-         *
-         * @param {String[]} moduleNames
+         * @param {string[]} moduleNames
          */
         loadModules: function(moduleNames) {
             var loaderQueue = this,
@@ -116,11 +100,11 @@ JARS.internal('LoaderQueue', function(InternalsManager) {
     };
 
     /**
-     * @access private
+     * @private
      *
-     * @memberof JARS~LoaderQueue
+     * @memberof JARS.internals.LoaderQueue
      *
-     * @param {JARS~LoaderQueue} loaderQueue
+     * @param {JARS.internals.LoaderQueue} loaderQueue
      */
     function callIfLoaded(loaderQueue) {
         if(loaderQueue._counter === loaderQueue._total) {
@@ -129,9 +113,9 @@ JARS.internal('LoaderQueue', function(InternalsManager) {
     }
 
     /**
-     * @access private
+     * @private
      *
-     * @memberof JARS~LoaderQueue
+     * @memberof JARS.internals.LoaderQueue
      */
     function onModuleLoadedNoop() {}
 
