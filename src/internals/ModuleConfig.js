@@ -26,8 +26,8 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
 
     addConfigTransform('checkCircularDeps', BOOLEAN_CHECK);
 
-    addConfigTransform('config', OBJECT_CHECK, function configTransform(newConfig, module, forBundle) {
-        return objectMerge(module[forBundle ? 'bundleConfig' : 'config'].get('config'), newConfig);
+    addConfigTransform('config', OBJECT_CHECK, function configTransform(newConfig, moduleOrBundle) {
+        return objectMerge(moduleOrBundle.config.get('config'), newConfig);
     });
 
     addConfigTransform('dirPath', STRING_CHECK, ensureEndsWithSlash);
@@ -42,12 +42,12 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
         return loadMin ? '.min' : '';
     });
 
-    addConfigTransform('recover', OBJECT_CHECK, function recoverTransform(recoverConfig, module, forBundle) {
+    addConfigTransform('recover', OBJECT_CHECK, function recoverTransform(recoverConfig, moduleOrBundle) {
         // create a copy of the recover-config
-        // because it should update for every module independendly
+        // because it should update for every module independently
         var recover = objectMerge({}, recoverConfig);
 
-        recover.restrict = module.getName(forBundle);
+        recover.restrict = moduleOrBundle.name;
         // if no next recover-config is given set it explicitly
         // this is important because the recoverflow is as follows:
         // - if the module has a recover-config, use it to update its config
@@ -75,20 +75,16 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
      * @memberof JARS
      * @inner
      *
-     * @param {JARS~Module} module
-     * @param {Boolean} [isBundleConfig = false]
+     * @param {(JARS~Module|JARS~Bundle)} moduleOrBundle
      * @param {JARS~ModuleConfig} [parentConfig]
      */
-    function ModuleConfig(module, isBundleConfig, parentConfig) {
+    function ModuleConfig(moduleOrBundle, parentConfig) {
         var moduleConfig = this;
 
-        moduleConfig._module = module;
-        moduleConfig._isBundleConfig = isBundleConfig;
+        moduleConfig._moduleOrBundle = moduleOrBundle;
         moduleConfig._parentConfig = parentConfig;
         moduleConfig._options = parentConfig ? parentConfig.inheritOptions() : new ModuleConfigOptions();
-        moduleConfig._defaultOptions = new ModuleConfigOptions();
-
-        transformAndUpdateOptions(moduleConfig._defaultOptions, getDefaultOptions(module.name), module, isBundleConfig);
+        moduleConfig._defaultOptions = getDefaultOptions(moduleOrBundle);
     }
 
     ModuleConfig.prototype = {
@@ -110,7 +106,7 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
         update: function(newOptions) {
             var moduleConfig = this;
 
-            transformAndUpdateOptions(moduleConfig._options, newOptions, moduleConfig._module, moduleConfig._isBundleConfig);
+            transformAndUpdateOptions(moduleConfig._options, newOptions, moduleConfig._moduleOrBundle);
         },
         /**
          * @access public
@@ -124,14 +120,13 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
          */
         get: function(option, skipUntil) {
             var moduleConfig = this,
-                module = moduleConfig._module,
-                loader = module.loader,
+                Loader = getInternal('Loader'),
                 options = moduleConfig._options,
                 defaultValue = moduleConfig._defaultOptions[option],
                 result;
 
             if (skipUntil && !hasOwnProp(options, option)) {
-                options = loader.getModule(skipUntil).bundleConfig.inheritOptions();
+                options = Loader.getModule(skipUntil).bundle.config.inheritOptions();
             }
 
             if (option in options) {
@@ -164,8 +159,7 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
      * @inner
      *
      * @param {*} configValue
-     * @param {JARS~Module} [module]
-     * @param {Boolean} [forBundle]
+     * @param {(JARS~Module|JARS~Bundle)} [moduleOrBundle]
      */
 
     /**
@@ -176,7 +170,7 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
      *
      * @param {String} configKey
      * @param {String} typeCheck
-     * @param {TransformFunction} [transform]
+     * @param {JARS~ModuleConfig~TransformFunction} [transform]
      */
     function addConfigTransform(configKey, typeCheck, transform) {
         configTransforms[configKey] = {
@@ -200,7 +194,17 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
         return (!path || RE_END_SLASH.test(path)) ? path : path + SLASH;
     }
 
-    function transformAndUpdateOptions(oldOptions, newOptions, module, isBundleConfig) {
+    /**
+     * @access private
+     *
+     * @memberof JARS~ModuleConfig
+     * @inner
+     *
+     * @param {JARS~ModuleConfig~ModuleConfigOptions} oldOptions
+     * @param {Object} newOptions
+     * @param {(JARS~Module|JARS~Bundle)} moduleOrBundle
+     */
+    function transformAndUpdateOptions(oldOptions, newOptions, moduleOrBundle) {
         objectEach(newOptions, function updateConfig(value, option) {
             var transform, transformFn;
 
@@ -209,11 +213,11 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
                 transformFn = transform.transform;
 
                 if (System.isFunction(value)) {
-                    value = value(oldOptions[option], module);
+                    value = value(oldOptions[option], moduleOrBundle);
                 }
 
                 if (System['is' + transform.check](value)) {
-                    oldOptions[option] = transformFn ? transformFn(value, module, isBundleConfig) : value;
+                    oldOptions[option] = transformFn ? transformFn(value, moduleOrBundle) : value;
                 }
                 else if (System.isNull(value)) {
                     delete oldOptions[option];
@@ -228,24 +232,32 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
      * @memberof JARS~ModuleConfig
      * @inner
      *
-     * @param {String} moduleName
+     * @param {(JARS~Module|JARS~Bundle)} moduleOrBundle
      *
-     * @return {Object}
+     * @return {JARS~ModuleConfig~ModuleConfigOptions}
      */
-    function getDefaultOptions(moduleName) {
-        var fileName = Resolver.getModuleTail(moduleName),
+    function getDefaultOptions(moduleOrBundle) {
+        var moduleOrBundleName = moduleOrBundle.name,
+            defaultOptions = new ModuleConfigOptions(),
+            fileName, firstLetterFileName, isLowerCaseFile;
+
+        if(!Resolver.isBundle(moduleOrBundleName)) {
+            fileName = Resolver.getModuleTail(moduleOrBundleName),
             firstLetterFileName = fileName.charAt(0),
             isLowerCaseFile = firstLetterFileName === firstLetterFileName.toLowerCase();
 
-        return {
-            extension: DEFAULT_EXTENSION,
+            transformAndUpdateOptions(defaultOptions, {
+                extension: DEFAULT_EXTENSION,
 
-            fileName: fileName,
+                fileName: fileName,
 
-            dirPath: Resolver.getModuleNameWithoutVersion(isLowerCaseFile ? moduleName : Resolver.getImplicitDependencyName(moduleName)).replace(RE_DOT, SLASH),
+                dirPath: Resolver.getModuleNameWithoutVersion(isLowerCaseFile ? moduleOrBundleName : Resolver.getImplicitDependencyName(moduleOrBundleName)).replace(RE_DOT, SLASH),
 
-            versionDir: Resolver.getVersion(moduleName)
-        };
+                versionDir: Resolver.getVersion(moduleOrBundleName)
+            }, moduleOrBundle);
+        }
+
+        return defaultOptions;
     }
 
     /**

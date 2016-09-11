@@ -5,65 +5,125 @@ JARS.internal('ModuleBundle', function moduleBundleSetup(InternalsManager) {
         Resolver = getInternal('Resolver'),
         LoaderQueue = getInternal('LoaderQueue'),
         ModuleQueue = getInternal('ModuleQueue'),
-        SEPERATOR = '", "',
+        ModuleConfig = getInternal('ModuleConfig'),
+        ModuleLogger = getInternal('ModuleLogger'),
+        ModuleState = getInternal('ModuleState'),
+        SEPARATOR = '", "',
         MSG_BUNDLE_DEFINED = 'defined submodules "${bundle}"',
-        MSG_BUNDLE_NOT_DEFINED = 'there are no submodules defined';
+        MSG_BUNDLE_NOT_DEFINED = 'there are no submodules defined',
+        // Errors when bundle is aborted
+        MSG_BUNDLE_ABORTED = 'parent "${parent}"',
+        MSG_BUNDLE_SUBMODULE_ABORTED = 'submodule "${subModule}"';
 
-    function ModuleBundle(module) {
-        this._module = module;
-        this._queue = new ModuleQueue(module, true);
+    /**
+     * @access public
+     *
+     * @constructor ModuleBundle
+     *
+     * @memberof JARS
+     * @inner
+     *
+     * @param {String} moduleName
+     * @param {JARS~ModuleConfig} parentConfig
+     */
+    function ModuleBundle(moduleName, parentConfig) {
+        var moduleBundle = this,
+            moduleBundleName = Resolver.getBundleName(moduleName);
+
+        moduleBundle.name = moduleBundleName;
+        moduleBundle.config = new ModuleConfig(moduleBundle, parentConfig);
+        moduleBundle.logger = new ModuleLogger(moduleBundleName);
+        moduleBundle._state = new ModuleState(moduleBundle.logger);
+        moduleBundle._queue = new ModuleQueue(moduleBundleName, moduleBundle._state);
+        moduleBundle._moduleName = moduleName;
     }
 
     ModuleBundle.prototype = {
+        /**
+         * @access public
+         *
+         * @alias JARS~ModuleBundle
+         *
+         * @memberof JARS~ModuleBundle#
+         */
         constructor: ModuleBundle,
-
+        /**
+         * @access public
+         *
+         * @memberof JARS~ModuleBundle#
+         *
+         * @param {JARS~ModuleBundle~Declaration} bundle
+         */
         add: function(bundle) {
             var moduleBundle = this,
-                module = moduleBundle._module,
-                resolvedBundle = Resolver.resolveBundle(bundle, module.name);
+                resolvedBundle = Resolver.resolveBundle(bundle, moduleBundle._moduleName);
 
-            resolvedBundle.length && module.logger.debug(MSG_BUNDLE_DEFINED, true, {
-                bundle: resolvedBundle.join(SEPERATOR)
+            resolvedBundle.length && moduleBundle.logger.debug(MSG_BUNDLE_DEFINED, {
+                bundle: resolvedBundle.join(SEPARATOR)
             });
 
             moduleBundle._bundle = resolvedBundle;
         },
-
-        request: function(callback, errback) {
+        /**
+         * @access public
+         *
+         * @memberof JARS~ModuleBundle#
+         *
+         * @param {JARS~ModuleQueue~SuccessCallback} onBundleLoaded
+         * @param {JARS~ModuleQueue~FailCallback} onBundleAborted
+         */
+        request: function(onBundleLoaded, onBundleAborted) {
             var moduleBundle = this,
                 bundleQueue = moduleBundle._queue,
-                module = moduleBundle._module,
-                state = module.state;
+                bundleState = moduleBundle._state;
 
-            if(state.trySetRequested(true)) {
-                new LoaderQueue(module, true, function onModulesLoaded() {
+            if(bundleState.trySetRequested()) {
+                new LoaderQueue(moduleBundle, function onModulesLoaded() {
                     var bundle = moduleBundle._bundle;
 
-                    bundle.length || module.logger.warn(MSG_BUNDLE_NOT_DEFINED, true);
+                    bundle.length || moduleBundle.logger.warn(MSG_BUNDLE_NOT_DEFINED);
 
-                    new LoaderQueue(module, true, function onModulesLoaded() {
-                        if (!state.isLoaded(true)) {
-                            state.setLoaded(true);
+                    new LoaderQueue(moduleBundle, function onModulesLoaded() {
+                        if (!bundleState.isLoaded()) {
+                            bundleState.setLoaded();
                             bundleQueue.notify();
                         }
                     }).loadModules(bundle);
-                }).loadModules([module.name]);
+                }).loadModules([moduleBundle._moduleName]);
             }
 
-            bundleQueue.add(callback, errback);
+            bundleQueue.add(onBundleLoaded, onBundleAborted);
         },
-
-        abort: function(bundleDependency) {
+        /**
+         * @access public
+         *
+         * @memberof JARS~ModuleBundle#
+         *
+         * @param {String} parentOrSubModuleName
+         */
+        abort: function(parentOrSubModuleName) {
             var moduleBundle = this,
-                abortionInfo = {
-                    dep: bundleDependency
-                };
+                bundleState = moduleBundle._state,
+                isParent = moduleBundle._moduleName === parentOrSubModuleName;
 
-            if (moduleBundle._module.state.trySetAborted(true, abortionInfo)) {
+            if (bundleState.isLoading()) {
+                bundleState.setAborted(isParent ? MSG_BUNDLE_ABORTED : MSG_BUNDLE_SUBMODULE_ABORTED, isParent ? {
+                    parent: parentOrSubModuleName
+                } : {
+                    subModule: parentOrSubModuleName
+                });
+
                 moduleBundle._queue.notifyError();
             }
         }
     };
+
+   /**
+    * @typeDef {String[]} Declaration
+    *
+    * @memberof JARS~ModuleBundle
+    * @inner
+    */
 
     return ModuleBundle;
 });

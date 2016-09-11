@@ -11,26 +11,12 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
         ModuleConfig = getInternal('ModuleConfig'),
         ModuleLogger = getInternal('ModuleLogger'),
         ModuleState = getInternal('ModuleState'),
-        MSG_RECOVERING = 'failed to load and tries to recover...';
-
-    /**
-     * @callback SuccessCallback
-     *
-     * @memberof JARS~Module
-     * @inner
-     *
-     * @param {String} moduleName
-     * @param {*} [data]
-     */
-
-    /**
-     * @callback FailCallback
-     *
-     * @memberof JARS~Module
-     * @inner
-     *
-     * @param {String} moduleName
-     */
+        SEPARATOR = '", "',
+        MSG_RECOVERING = 'failed to load and tries to recover...',
+        // Errors when module is aborted
+        MSG_MODULE_ABORTED = 'given path "${path}" after ${sec} second(s) - file may not exist',
+        MSG_MODULE_DEPENDENCY_ABORTED = 'dependency "${dep}"',
+        MSG_MODULE_CIRCULAR_DEPENDENCIES_ABORTED = 'circular dependencies "${deps}"';
 
     /**
      * @callback FactoryCallback
@@ -40,21 +26,7 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
      *
      * @param {...*} dependencyRefs
      *
-     * @return {*} moduleRef
-     */
-
-    /**
-     * @typeDef {(String|JARS~Module~DependencyDefinition[]|Object<String, JARS~Module~DependencyDefinition>)} DependencyDefinition
-     *
-     * @memberof JARS~Module
-     * @inner
-     */
-
-    /**
-     * @typeDef {String[]} BundleDefinition
-     *
-     * @memberof JARS~Module
-     * @inner
+     * @return {*}
      */
 
     /**
@@ -69,20 +41,22 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
      * @param {String} moduleName
      */
     function Module(loader, moduleName) {
-        var module = this;
+        var module = this,
+            dependencies, bundleConfig, logger, state, parent;
 
         module.name = moduleName;
         module.loader = loader;
 
-        module.deps = new ModuleDependencies(module);
-        module.bundle = new ModuleBundle(module);
+        module.logger = logger = new ModuleLogger(moduleName);
+        module.state = state = new ModuleState(logger);
+        module.queue = new ModuleQueue(moduleName, state);
 
-        module.queue = new ModuleQueue(module);
+        module.deps = dependencies = new ModuleDependencies(module, logger);
 
-        module.logger = new ModuleLogger(module);
-        module.state = new ModuleState(module);
-
-        module.initConfig();
+        parent = dependencies.parent;
+        module.bundle = new ModuleBundle(moduleName, parent && parent.bundle.config);
+        bundleConfig = module.bundle.config;
+        module.config = module.isRoot() ? bundleConfig : new ModuleConfig(module, bundleConfig);
     }
 
     Module.prototype = {
@@ -108,22 +82,6 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
          * @access public
          *
          * @memberof JARS~Module#
-         */
-        initConfig: function() {
-            var module = this;
-
-            if(module.isRoot()) {
-                module.config = module.bundleConfig = new ModuleConfig(module, true);
-            }
-            else {
-                module.bundleConfig = new ModuleConfig(module, true, module.deps.getParent().bundleConfig);
-                module.config = new ModuleConfig(module, false, module.bundleConfig);
-            }
-        },
-        /**
-         * @access public
-         *
-         * @memberof JARS~Module#
          *
          * @param {String} [fileType]
          *
@@ -142,19 +100,6 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
          * @access public
          *
          * @memberof JARS~Module#
-         *
-         * @param {Object} newConfig
-         * @param {Boolean} [updateBundleConfig]
-         */
-        updateConfig: function(newConfig, updateBundleConfig) {
-            this[updateBundleConfig ? 'bundleConfig' : 'config'].update(newConfig);
-        },
-        /**
-         * @access public
-         *
-         * @memberof JARS~Module#
-         *
-         * @return {JARS~Module}
          */
         load: function() {
             var module = this;
@@ -168,17 +113,19 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
          *
          * @memberof JARS~Module#
          *
-         * @param {JARS~Module~SuccessCallback} callback
-         * @param {JARS~Module~FailCallback} errback
+         * @param {JARS~ModuleQueue~SuccessCallback} onModuleLoaded
+         * @param {JARS~ModuleQueue~FailCallback} onModuleAborted
          */
-        request: function(callback, errback) {
+        request: function(onModuleLoaded, onModuleAborted) {
             var module = this;
 
-            if (module.state.trySetRequested()) {
+            if (module.state.trySetRequested({
+                path: module.getFullPath()
+            })) {
                 module.load();
             }
 
-            module.queue.add(callback, errback);
+            module.queue.add(onModuleLoaded, onModuleAborted);
         },
         /**
          * @access public
@@ -193,15 +140,16 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
                 moduleName = module.name,
                 nextRecover = module.nextRecover,
                 foundRecover = nextRecover === false ? nextRecover : module.config.get('recover', nextRecover),
-                recoverModuleName;
+                recoverModuleName, parent;
 
             if (foundRecover) {
                 recoverModuleName = foundRecover.restrict;
 
                 // This is a recover on a higher level
                 if (recoverModuleName !== moduleName) {
+                    parent = loader.getModule(recoverModuleName).deps.parent;
                     // extract the next recovermodule
-                    module.nextRecover = Resolver.isRootName(recoverModuleName) ? false : loader.getModule(recoverModuleName).deps.getParentName();
+                    module.nextRecover = parent ? parent.name : false;
 
                     // Only recover this module
                     foundRecover.restrict = moduleName;
@@ -227,23 +175,36 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
          *
          * @memberof JARS~Module#
          *
-         * @param {String} [dependency]
+         * @param {(String|String[])} [dependencyOrArray]
          */
-        abort: function(dependency) {
+        abort: function(dependencyOrArray) {
             var module = this,
-                abortionInfo = {
-                    dep: dependency,
+                state = module.state,
+                isRegistered = state.isRegistered(),
+                isDependenciesArray = System.isArray(dependencyOrArray),
+                message;
 
+            if (!module.isRoot() && ((state.isLoading() && !module.findRecover()) || isRegistered)) {
+                message = isRegistered ? (isDependenciesArray ? MSG_MODULE_CIRCULAR_DEPENDENCIES_ABORTED : MSG_MODULE_DEPENDENCY_ABORTED) : MSG_MODULE_ABORTED;
+
+                state.setAborted(message, isRegistered ? (isDependenciesArray ? {
+                    deps: dependencyOrArray.join(SEPARATOR)
+                } : {
+                    dep: dependencyOrArray
+                }) : {
                     path: SourceManager.removeSource(module.name),
 
                     sec: module.config.get('timeout')
-                };
+                });
 
-            if (module.state.trySetAborted(false, abortionInfo)) {
                 module.queue.notifyError();
             }
         },
-
+        /**
+         * @access public
+         *
+         * @memberof JARS~Module#
+         */
         setupAutoAbort: function() {
             var module = this;
 
@@ -251,7 +212,11 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
                 module.abort();
             }, module.config.get('timeout') * 1000);
         },
-
+        /**
+         * @access public
+         *
+         * @memberof JARS~Module#
+         */
         clearAutoAbort: function() {
             var module = this;
 
@@ -262,21 +227,7 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
          *
          * @memberof JARS~Module#
          *
-         * @param {Boolean} forBundle
-         *
-         * @return {String}
-         */
-        getName: function(forBundle) {
-            var moduleName = this.name;
-
-            return forBundle ? Resolver.getBundleName(moduleName) : moduleName;
-        },
-        /**
-         * @access public
-         *
-         * @memberof JARS~Module#
-         *
-         * @param {JARS~Module~DependencyDefinition} dependencies
+         * @param {JARS~ModuleDependencies~Declaration} dependencies
          */
         $import: function(dependencies) {
             var module = this;
@@ -303,21 +254,21 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
             if (state.trySetRegistered()) {
                 module.clearAutoAbort();
 
-                if(!module.isRoot() && dependencies.hasCircular()) {
-                    module.abort();
+                if(!module.isRoot() && module.config.get('checkCircularDeps') && dependencies.hasCircular()) {
+                    module.abort(dependencies.getCircular());
                 }
                 else {
-                    dependencies.request(function(refs) {
+                    dependencies.request(function onDependenciesLoaded(dependencyRefs) {
                         if (state.isRegistered() && !state.isLoaded()) {
                             if(module.isRoot()) {
                                 module.ref = {};
                             }
                             else {
-                                parentRef = refs.shift();
+                                parentRef = dependencyRefs.shift();
 
                                 loader.setCurrentModuleName(moduleName);
 
-                                module.ref = parentRef[Resolver.getModuleTail(moduleName)] = factory ? factory.apply(parentRef, refs) || {} : {};
+                                module.ref = parentRef[Resolver.getModuleTail(moduleName)] = factory ? factory.apply(parentRef, dependencyRefs) || {} : {};
 
                                 loader.setCurrentModuleName(Resolver.getRootName());
                             }
@@ -334,7 +285,7 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
          *
          * @memberof JARS~Module#
          *
-         * @param {JARS~Module~BundleDefinition} bundleModules
+         * @param {JARS~ModuleBundle~Declaration} bundleModules
          */
         defineBundle: function(bundleModules) {
             this.bundle.add(bundleModules);

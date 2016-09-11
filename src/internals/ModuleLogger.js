@@ -1,82 +1,91 @@
-JARS.internal('ModuleLogger', function moduleLoggerSetup() {
+JARS.internal('ModuleLogger', function moduleLoggerSetup(InternalsManager) {
     'use strict';
 
-    function ModuleLogger(module) {
-        this._module = module;
+    var getInternal = InternalsManager.get,
+        Resolver = getInternal('Resolver'),
+        System = getInternal('System');
+
+    /**
+     * @access public
+     *
+     * @constructor ModuleLogger
+     *
+     * @memberof JARS
+     * @inner
+     *
+     * @param {String} moduleOrBundleName
+     */
+    function ModuleLogger(moduleOrBundleName) {
+        this._moduleOrBundleName = moduleOrBundleName;
+        this._loggerContext = (Resolver.isBundle(moduleOrBundleName) ? 'Bundle' : 'Module') + ':' + moduleOrBundleName;
     }
 
-    ModuleLogger.prototype = {
-        constructor: ModuleLogger,
-        /**
-         * @access public
-         *
-         * @memberof JARS~ModuleState#
-         *
-         * @param {String} message
-         * @param {Boolean} logBundle
-         * @param {Object} [values]
-         */
-        debug: function(message, logBundle, values) {
-            this._forward('debug', message, logBundle, values);
-        },
-        /**
-         * @access public
-         *
-         * @memberof JARS~ModuleState#
-         *
-         * @param {String} message
-         * @param {Boolean} logBundle
-         * @param {Object} [values]
-         */
-        error: function(message, logBundle, values) {
-            this._forward('error', message, logBundle, values);
-        },
-        /**
-         * @access public
-         *
-         * @memberof JARS~ModuleState#
-         *
-         * @param {String} message
-         * @param {Boolean} logBundle
-         * @param {Object} [values]
-         */
-        info: function(message, logBundle, values) {
-            this._forward('info', message, logBundle, values);
-        },
-        /**
-         * @access public
-         *
-         * @memberof JARS~ModuleState#
-         *
-         * @param {String} message
-         * @param {Boolean} logBundle
-         * @param {Object} [values]
-         */
-        warn: function(message, logBundle, values) {
-            this._forward('warn', message, logBundle, values);
-        },
-        /**
-         * @access private
-         *
-         * @memberof JARS~ModuleState#
-         *
-         * @param {String} logMethod
-         * @param {String} message
-         * @param {Boolean} logBundle
-         * @param {Object} [values]
-         */
-        _forward: function(logMethod, message, logBundle, values) {
-            var module = this._module,
-                Logger = module.loader.getLogger();
+    getInternal('utils').arrayEach(['debug', 'error', 'info', 'warn'], function addForward(methodName) {
+        ModuleLogger.prototype[methodName] = function(message, values) {
+            log(this, methodName, message, values);
+        };
+    });
 
-            if (Logger) {
-                Logger[logMethod + 'WithContext'](getLogContext(module, logBundle), message, values);
-            }
+    /**
+     * @access public
+     *
+     * @method debug
+     *
+     * @memberof JARS~ModuleLogger#
+     *
+     * @param {String} message
+     * @param {Object} [values]
+     */
+
+    /**
+     * @access public
+     *
+     * @method error
+     *
+     * @memberof JARS~ModuleLogger#
+     *
+     * @param {String} message
+     * @param {Object} [values]
+     */
+
+    /**
+     * @access public
+     *
+     * @method info
+     *
+     * @memberof JARS~ModuleLogger#
+     *
+     * @param {String} message
+     * @param {Object} [values]
+     */
+
+    /**
+     * @access public
+     *
+     * @method warn
+     *
+     * @memberof JARS~ModuleLogger#
+     *
+     * @param {String} message
+     * @param {Object} [values]
+     */
+
+    /**
+     * @access private
+     *
+     * @memberof JARS~ModuleLogger
+     *
+     * @param {JARS~ModuleLogger} logger
+     * @param {String} logMethod
+     * @param {String} message
+     * @param {Object} [values]
+     */
+    function log(logger, logMethod, message, values) {
+        var Logger = System.Logger;
+
+        if (Logger) {
+            Logger[logMethod + 'WithContext'](logger._loggerContext, message, values);
         }
-    };
-
-    function getLogContext(module, logBundle) {
-        return (logBundle ? 'Bundle' : 'Module') + ':' + module.getName(logBundle);
     }
 
     return ModuleLogger;

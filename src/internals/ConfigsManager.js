@@ -7,6 +7,7 @@ JARS.internal('ConfigsManager', function configsManagerSetup(InternalsManager) {
         arrayEach = utils.arrayEach,
         objectMerge = utils.objectMerge,
         System = getInternal('System'),
+        Loader = getInternal('Loader'),
         Resolver = getInternal('Resolver'),
         InterceptionManager = getInternal('InterceptionManager'),
         SourceManager = getInternal('SourceManager'),
@@ -18,6 +19,9 @@ JARS.internal('ConfigsManager', function configsManagerSetup(InternalsManager) {
             supressErrors: false
         },
         configHooks = {
+            /**
+             * @param {(Object|Boolean)} debugConfig
+             */
             debugging: function(debugConfig) {
                 if (!System.isObject(debugConfig)) {
                     debugConfig = {
@@ -81,13 +85,10 @@ JARS.internal('ConfigsManager', function configsManagerSetup(InternalsManager) {
                 return newEnvironment;
             },
             /**
-             * @param {(Object|Array)} newModuleConfigs
-             *
-             * @return {Object}
+             * @param {(Object|Object[])} newModuleConfigs
              */
             modules: function setModuleConfigs(newModuleConfigs) {
-                var loader = getLoader(),
-                    modules;
+                var modules;
 
                 if (System.isArray(newModuleConfigs)) {
                     arrayEach(newModuleConfigs, function setModuleConfig(config) {
@@ -98,21 +99,21 @@ JARS.internal('ConfigsManager', function configsManagerSetup(InternalsManager) {
                     modules = newModuleConfigs.restrict ? Resolver.resolve(newModuleConfigs.restrict) : [Resolver.getRootName()];
 
                     arrayEach(modules, function updateModuleConfig(moduleName) {
-                        loader.getModule(moduleName).updateConfig(newModuleConfigs, Resolver.isBundle(moduleName));
+                        var module = Loader.getModule(moduleName);
+
+                        (Resolver.isBundle(moduleName) ? module.bundle : module).config.update(newModuleConfigs);
                     });
                 }
-
-                return loader.getModule(Resolver.getRootName()).bundleConfig;
             },
             /**
              * @param {String} newLoaderContext
              * @param {String} oldLoaderContext
              *
-             * @return {Object}
+             * @return {String}
              */
             loaderContext: function(newLoaderContext, oldLoaderContext) {
                 if (newLoaderContext !== oldLoaderContext) {
-                    newLoaderContext = getLoader().setLoaderContext(newLoaderContext);
+                    newLoaderContext = Loader.setLoaderContext(newLoaderContext);
 
                     exposeModulesGlobal(configs.globalAccess);
                 }
@@ -121,15 +122,11 @@ JARS.internal('ConfigsManager', function configsManagerSetup(InternalsManager) {
             },
             /**
              * @param {JARS~InterceptionManager~Interceptor[]} newInterceptors
-             *
-             * @return {Object<String, JARS~InterceptionManager~Interceptor>}
              */
             interceptors: function(newInterceptors) {
                 if (System.isArray(newInterceptors)) {
                     arrayEach(newInterceptors, InterceptionManager.addInterceptor);
                 }
-
-                return InterceptionManager.getInterceptors();
             }
         },
         ConfigsManager;
@@ -148,17 +145,18 @@ JARS.internal('ConfigsManager', function configsManagerSetup(InternalsManager) {
         *
         * @memberof JARS~ConfigsManager
         *
-        * @param {(Object|String)} config
-        * @param {*} value
+        * @param {(Object|String)} optionOrConfig
+        * @param {*} [value]
         */
-        update: function(config, value) {
-            var configHook = configHooks[config];
+        update: function(optionOrConfig, value) {
+            var configHook;
 
-            if (System.isString(config)) {
-                configs[config] = System.isFunction(configHook) ? configHook(value, configs[config]) : value;
+            if (System.isString(optionOrConfig)) {
+                configHook = configHooks[optionOrConfig];
+                configs[optionOrConfig] = System.isFunction(configHook) ? configHook(value, configs[optionOrConfig]) : value;
             }
-            else if (System.isObject(config)) {
-                objectEach(config, function update(value, option) {
+            else if (System.isObject(optionOrConfig)) {
+                objectEach(optionOrConfig, function update(value, option) {
                     ConfigsManager.update(option, value);
                 });
             }
@@ -187,12 +185,8 @@ JARS.internal('ConfigsManager', function configsManagerSetup(InternalsManager) {
      */
     function exposeModulesGlobal(expose) {
         if (expose) {
-            JARS.mods = getLoader().getRoot();
+            JARS.mods = Loader.getRoot();
         }
-    }
-
-    function getLoader() {
-        return getInternal('Loader');
     }
 
     return ConfigsManager;

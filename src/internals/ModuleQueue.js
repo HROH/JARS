@@ -13,14 +13,14 @@ JARS.internal('ModuleQueue', function moduleQueueSetup(InternalsManager) {
      * @memberof JARS
      * @inner
      *
-     * @param {JARS~Module} module
-     * @param {Boolean} isBundleQueue
+     * @param {String} moduleOrBundleName
+     * @param {JARS~ModuleState} state
      */
-    function ModuleQueue(module, isBundleQueue) {
+    function ModuleQueue(moduleOrBundleName, state) {
         var moduleQueue = this;
 
-        moduleQueue._module = module;
-        moduleQueue._isBundleQueue = isBundleQueue;
+        moduleQueue._moduleOrBundleName = moduleOrBundleName;
+        moduleQueue._state = state;
         moduleQueue._callbacks = [];
     }
 
@@ -42,8 +42,7 @@ JARS.internal('ModuleQueue', function moduleQueueSetup(InternalsManager) {
          */
         _call: function(callbackType) {
             var moduleQueue = this,
-                module = moduleQueue._module,
-                name = module.getName(moduleQueue._isBundleQueue),
+                name = moduleQueue._moduleOrBundleName,
                 callbacks = moduleQueue._callbacks,
                 callback;
 
@@ -76,22 +75,38 @@ JARS.internal('ModuleQueue', function moduleQueueSetup(InternalsManager) {
          *
          * @memberof JARS~ModuleQueue#
          *
-         * @param {JARS~Module~SuccessCallback} callback
-         * @param {JARS~Module~FailCallback} errback
+         * @param {JARS~ModuleQueue~SuccessCallback} onQueueSuccess
+         * @param {JARS~ModuleQueue~FailCallback} onQueueFail
          */
-        add: function(callback, errback) {
-            var moduleQueue = this,
-                isBundleQueue = moduleQueue._isBundleQueue,
-                module = moduleQueue._module;
+        add: function(onQueueSuccess, onQueueFail) {
+            var moduleQueue = this;
 
-            if(module.state.isLoaded(isBundleQueue)) {
-                callback(module.getName(isBundleQueue));
+            if(moduleQueue._state.isLoaded()) {
+                onQueueSuccess(moduleQueue._moduleOrBundleName);
             }
             else {
-                moduleQueue._callbacks.push([callback, errback]);
+                moduleQueue._callbacks.push([onQueueSuccess, onQueueFail]);
             }
         }
     };
+
+    /**
+     * @callback SuccessCallback
+     *
+     * @memberof JARS~ModuleQueue
+     * @inner
+     *
+     * @param {String} loadedModuleName
+     */
+
+    /**
+     * @callback FailCallback
+     *
+     * @memberof JARS~ModuleQueue
+     * @inner
+     *
+     * @param {String} abortedModuleName
+     */
 
     return ModuleQueue;
 });

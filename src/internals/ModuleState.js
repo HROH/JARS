@@ -1,27 +1,23 @@
 JARS.internal('ModuleState', function moduleStateSetup() {
     'use strict';
 
-    var LOADING = 'loading',
+    var stateMsgMap = {},
+        LOADING = 'loading',
         LOADED = 'loaded',
         LOADED_MANUALLY = LOADED + ' manually',
         ATTEMPTED_TO = 'attempted to ',
         ATTEMPTED_TO_LOAD = ATTEMPTED_TO + 'load',
         BUT_ALREADY = ' but is already ',
         ABORTED_LOADING = 'aborted ' + LOADING + ' because of problems with ',
-        // Error when module or bundle is aborted
-        MSG_MODULE_ABORTED = createAbortionMessage('given path "${path}" after ${sec} second(s) - file may not exist'),
-        MSG_MODULE_DEPENDENCY_ABORTED = createAbortionMessage('dependency "${dep}"'),
-        MSG_BUNDLE_ABORTED = createAbortionMessage('parent "${dep}"'),
-        MSG_BUNDLE_SUBMODULE_ABORTED = createAbortionMessage('submodule "${dep}"'),
         // Show module or bundle is requested
         MSG_REQUESTED = 'was requested',
         // Show loading progress for module or bundle
-        MSG_LOADED = createLoadingMessage('finished'),
-        MSG_LOADING = createLoadingMessage('started'),
+        MSG_LOADED = 'finished ' + LOADING,
+        MSG_LOADING = 'started ' + LOADING,
         // Info when loading is already in progress or done
-        MSG_ALREADY_LOADED = createLoadAttemptMessage(LOADED),
-        MSG_ALREADY_LOADED_MANUAL = createLoadAttemptMessage(LOADED_MANUALLY),
-        MSG_ALREADY_LOADING = createLoadAttemptMessage(LOADING),
+        MSG_ALREADY_LOADED = ATTEMPTED_TO_LOAD + BUT_ALREADY + LOADED,
+        MSG_ALREADY_LOADED_MANUAL = ATTEMPTED_TO_LOAD + BUT_ALREADY + LOADED_MANUALLY,
+        MSG_ALREADY_LOADING = ATTEMPTED_TO_LOAD + BUT_ALREADY + LOADING,
         // Warning when a module is registered twice
         MSG_ALREADY_REGISTERED = ATTEMPTED_TO + 'register' + BUT_ALREADY + 'registered',
         // Show special cases for module
@@ -79,6 +75,11 @@ JARS.internal('ModuleState', function moduleStateSetup() {
          */
         REGISTERED_STATE = 5;
 
+    stateMsgMap[LOADING_STATE] = MSG_LOADING;
+    stateMsgMap[LOADED_STATE] = MSG_LOADED;
+    stateMsgMap[LOADED_MANUALLY_STATE] = MSG_LOADED_MANUALLY;
+    stateMsgMap[REGISTERED_STATE] = MSG_REGISTERING;
+
     /**
     * @access public
     *
@@ -87,15 +88,13 @@ JARS.internal('ModuleState', function moduleStateSetup() {
     * @memberof JARS
     * @inner
     *
-    * @param {JARS~Module} module
+    * @param {JARS~ModuleLogger} logger
     */
-    function ModuleState(module) {
+    function ModuleState(logger) {
         var moduleState = this;
 
-        moduleState._module = module;
-
-        moduleState._set(WAITING_STATE);
-        moduleState._set(WAITING_STATE, true);
+        moduleState._logger = logger;
+        moduleState._state = WAITING_STATE;
     }
 
     ModuleState.prototype = {
@@ -112,84 +111,77 @@ JARS.internal('ModuleState', function moduleStateSetup() {
          *
          * @memberof JARS~ModuleState#
          *
-         * @param {Number[]} state
-         * @param {Boolean} compareBundleState
+         * @param {Number} newState
+         * @param {Object} [info]
          */
-        _compareState: function(state, compareBundleState) {
-            return this[getStateProp(compareBundleState)] === state;
-        },
-        /**
-         * @access private
-         *
-         * @memberof JARS~ModuleState#
-         *
-         * @param {Number} state
-         * @param {Boolean} setBundleState
-         */
-        _set: function(state, setBundleState) {
-            this[getStateProp(setBundleState)] = state;
+        _setAndLog: function(newState, info) {
+            this._state = newState;
+            this._logger.info(stateMsgMap[newState], info);
         },
         /**
          * @access public
          *
          * @memberof JARS~ModuleState#
          *
-         * @param {Boolean} isBundleState
+         * @return {Boolean}
          */
-        isLoading: function(isBundleState) {
-            return this._compareState(LOADING_STATE, isBundleState);
+        isLoading: function() {
+            return this._state === LOADING_STATE;
         },
         /**
          * @access public
          *
          * @memberof JARS~ModuleState#
+         *
+         * @return {Boolean}
          */
         isRegistered: function() {
+            var moduleState = this,
+                state = moduleState._state;
+
+            return state === REGISTERED_STATE || state === LOADED_MANUALLY_STATE || moduleState.isLoaded();
+        },
+        /**
+         * @access public
+         *
+         * @memberof JARS~ModuleState#
+         *
+         * @return {Boolean}
+         */
+        isLoaded: function() {
+            return this._state === LOADED_STATE;
+        },
+        /**
+         * @access public
+         *
+         * @memberof JARS~ModuleState#
+         */
+        setLoaded: function() {
             var moduleState = this;
 
-            return moduleState._compareState(REGISTERED_STATE) || moduleState._compareState(LOADED_MANUALLY_STATE) || moduleState.isLoaded();
+            moduleState._setAndLog(LOADED_STATE);
         },
         /**
          * @access public
          *
          * @memberof JARS~ModuleState#
          *
-         * @param {Boolean} setBundleState
-         */
-        isLoaded: function(isBundleState) {
-            return this._compareState(LOADED_STATE, isBundleState);
-        },
-        /**
-         * @access public
+         * @param {Object} requestInfo
          *
-         * @memberof JARS~ModuleState#
-         *
-         * @param {Boolean} setBundleState
+         * @return {Boolean}
          */
-        setLoaded: function(setBundleState) {
+        trySetRequested: function(requestInfo) {
             var moduleState = this,
-                module = moduleState._module;
+                logger = moduleState._logger,
+                isWaiting = moduleState._state === WAITING_STATE;
 
-            moduleState._set(LOADED_STATE, setBundleState);
-            module.logger.info(MSG_LOADED, setBundleState);
-        },
-
-        trySetRequested: function(setBundleState) {
-            var moduleState = this,
-                module = moduleState._module,
-                logger = module.logger,
-                isWaiting = moduleState._compareState(WAITING_STATE, setBundleState);
-
-            logger.debug(MSG_REQUESTED, setBundleState);
+            logger.info(MSG_REQUESTED);
 
             if(!isWaiting) {
-                logger.info(getRequestStateMessage(moduleState, setBundleState));
+                logger.info(getRequestStateMessage(moduleState));
             }
             else {
-                moduleState._set(LOADING_STATE, setBundleState);
-                logger.info(MSG_LOADING, setBundleState, {
-                    path: module.getFullPath()
-                });
+                moduleState._setAndLog(LOADING_STATE, requestInfo);
             }
 
             return isWaiting;
@@ -203,42 +195,31 @@ JARS.internal('ModuleState', function moduleStateSetup() {
          */
         trySetRegistered: function() {
             var moduleState = this,
-                logger = moduleState._module.logger,
-                registered = false,
-                isLoading = moduleState.isLoading();
+                canRegister = !moduleState.isRegistered();
 
-            if (!moduleState.isRegistered()) {
-                moduleState._set(isLoading ? REGISTERED_STATE : LOADED_MANUALLY_STATE);
-                logger.debug(isLoading ? MSG_REGISTERING : MSG_LOADED_MANUALLY);
-
-                registered = true;
+            if (canRegister) {
+                moduleState._setAndLog(moduleState.isLoading() ? REGISTERED_STATE : LOADED_MANUALLY_STATE);
             }
             else {
-                logger.warn(MSG_ALREADY_REGISTERED);
+                moduleState._logger.warn(MSG_ALREADY_REGISTERED);
             }
 
-            return registered;
+            return canRegister;
         },
+        /**
+         * @access public
+         *
+         * @memberof JARS~ModuleState#
+         *
+         * @param {String} abortionMessage
+         * @param {Object} abortionInfo
+         */
+        setAborted: function(abortionMessage, abortionInfo) {
+            var moduleState = this;
 
-        trySetAborted: function(setBundleState, abortionInfo) {
-            var moduleState = this,
-                module = moduleState._module,
-                aborted = false,
-                abortionMessage;
+            moduleState._state = WAITING_STATE;
 
-            if (moduleState.isLoading(setBundleState) && (setBundleState || !module.findRecover())) {
-                moduleState._set(WAITING_STATE, setBundleState);
-                aborted = true;
-                abortionMessage = setBundleState ? (moduleState.isRegistered() ? MSG_BUNDLE_SUBMODULE_ABORTED : MSG_BUNDLE_ABORTED) : MSG_MODULE_ABORTED;
-            }
-            else if (moduleState.isRegistered()) {
-                aborted = true;
-                abortionMessage = setBundleState ? MSG_BUNDLE_SUBMODULE_ABORTED : MSG_MODULE_DEPENDENCY_ABORTED;
-            }
-
-            aborted && module.logger.error(abortionMessage, setBundleState, abortionInfo);
-
-            return aborted;
+            moduleState._logger.error(ABORTED_LOADING + abortionMessage, abortionInfo);
         }
     };
 
@@ -246,23 +227,18 @@ JARS.internal('ModuleState', function moduleStateSetup() {
      * @access private
      *
      * @memberof JARS~ModuleState
-     * @inner
      *
-     * @param {Boolean} isBundleState
+     * @param {JARS~ModuleState} moduleState
      *
      * @return {String}
      */
-    function getStateProp(isBundleState) {
-        return isBundleState ? '_bundleState' : '_state';
-    }
-
-    function getRequestStateMessage(moduleState, setBundleState) {
+    function getRequestStateMessage(moduleState) {
         var requestStateMsg;
 
-        if(moduleState.isLoaded(setBundleState)) {
+        if(moduleState.isLoaded()) {
             requestStateMsg = MSG_ALREADY_LOADED;
         }
-        else if (moduleState._compareState(LOADED_MANUALLY_STATE)) {
+        else if (moduleState._state === LOADED_MANUALLY_STATE) {
             requestStateMsg = MSG_ALREADY_LOADED_MANUAL;
         }
         else {
@@ -270,18 +246,6 @@ JARS.internal('ModuleState', function moduleStateSetup() {
         }
 
         return requestStateMsg;
-    }
-
-    function createLoadingMessage(loadingProgress) {
-        return loadingProgress + ' ' + LOADING;
-    }
-
-    function createLoadAttemptMessage(loadingProgress) {
-        return ATTEMPTED_TO_LOAD + BUT_ALREADY + loadingProgress;
-    }
-
-    function createAbortionMessage(abortionReason) {
-        return ABORTED_LOADING + abortionReason;
     }
 
     return ModuleState;
