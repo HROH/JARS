@@ -4,8 +4,7 @@
     var InternalsManager, delegateToInternal, registerInternal, getInternal;
 
     InternalsManager = (function internalsManagerSetup() {
-        var INTERNALS_PATH = 'internals/',
-            internalsToLoad = [
+        var internalsToLoad = [
                 'ConfigHooks',
                 'ConfigsManager',
                 'ExternalBootstrapper',
@@ -26,9 +25,10 @@
                 'PluginInterceptor',
                 'ResolutionStrategies',
                 'Resolver',
-                'System'
+                'System',
+                'Utils'
             ],
-            internalsLoading = internalsToLoad.length + 2,
+            internalsLoading = internalsToLoad.length + 1,
             internalsInitialized = false,
             internalsReady = false,
             internals = {},
@@ -79,7 +79,7 @@
         };
 
         function setupInternals() {
-            getInternal('InternalBootstrapper').bootstrap(INTERNALS_PATH);
+            getInternal('InternalBootstrapper').bootstrap();
 
             while(readyCallbacks.length) {
                 readyCallbacks.shift()();
@@ -100,11 +100,12 @@
         }
 
         function loadInternals() {
-            var SourceManager = getInternal('SourceManager');
+            var SourceManager = getInternal('SourceManager'),
+                index;
 
-            getInternal('utils').arrayEach(internalsToLoad, function loadInternal(internalName) {
-                SourceManager.loadSource('internal:' + internalName, SourceManager.getBasePath() + INTERNALS_PATH + internalName + '.js');
-            });
+            for(index = 0; index < internalsLoading; index++) {
+                SourceManager.loadInternal(internalsToLoad[index]);
+            }
         }
 
         return InternalsManager;
@@ -114,84 +115,13 @@
     registerInternal = InternalsManager.register;
     getInternal = InternalsManager.get;
 
-    registerInternal('utils', function utilsSetup() {
-        var hasOwn = ({}).hasOwnProperty,
-            utils;
-
-        /**
-         * @namespace
-         *
-         * @memberof JARS.internals
-         */
-        utils = {
-            /**
-             * @param {Object} object
-             * @param {string} prop
-             *
-             * @return {boolean}
-             */
-            hasOwnProp: function(object, prop) {
-                return hasOwn.call(object, prop);
-            },
-            /**
-             * @param {Object} object
-             * @param {function(*, string): boolean} callback
-             */
-            objectEach: function(object, callback) {
-                var property;
-
-                for (property in object) {
-                    if (utils.hasOwnProp(object, property)) {
-                        if (callback(object[property], property)) {
-                            break;
-                        }
-                    }
-                }
-            },
-            /**
-             * @param {Object} dest
-             * @param {Object} source
-             *
-             * @return {Object}
-             */
-            objectMerge: function(dest, source) {
-                utils.objectEach(source, function mergeValue(value, key) {
-                    dest[key] = value;
-                });
-
-                return dest;
-            },
-            /**
-             * @param {(Array|NodeList)} array
-             * @param {function(*, number): boolean} callback
-             */
-            arrayEach: function(array, callback) {
-                var index = 0,
-                    length = array.length;
-
-                for (; index < length; index++) {
-                    if (callback(array[index], index)) {
-                        break;
-                    }
-                }
-            },
-            /**
-             * @type Global
-             */
-            global: envGlobal
-        };
-
-        return utils;
-    });
-
-    registerInternal('SourceManager', function sourceManagerSetup(InternalsManager) {
-        var SELF_PATH = 'jars.js',
-            arrayEach = InternalsManager.get('utils').arrayEach,
-            doc = envGlobal.document,
+    registerInternal('SourceManager', function sourceManagerSetup() {
+        var doc = envGlobal.document,
             head = doc.getElementsByTagName('head')[0],
             scripts = {},
-            basePath, SourceManager;
-
+            jarsScript = getSelfScript(),
+            basePath = getBasePath(),
+            SourceManager;
 
         /**
          * @namespace
@@ -199,37 +129,16 @@
          * @memberof JARS.internals
          */
         SourceManager =  {
+            MAIN_FILE: jarsScript.getAttribute('data-main'),
+
+            BASE_PATH: basePath,
+
+            INTERNALS_PATH: basePath + (jarsScript.getAttribute('data-internals') || '') + 'internals/',
             /**
-             * @return {string}
+             * @param {string} internalName
              */
-            getMain: function() {
-                var main;
-
-                arrayEach(doc.getElementsByTagName('script'), function findMainScript(script) {
-                    main = script.getAttribute('data-main');
-
-                    return !!main;
-                });
-
-                return main;
-            },
-            /**
-             * @return {string}
-             */
-            getBasePath: function() {
-                var src;
-
-                if(!basePath) {
-                    arrayEach(doc.getElementsByTagName('script'), function findSelf(script) {
-                        src = script.src;
-
-                        return src.indexOf(SELF_PATH) > -1;
-                    });
-
-                    basePath = src.substring(0, src.lastIndexOf(SELF_PATH));
-                }
-
-                return basePath;
+            loadInternal: function(internalName) {
+                SourceManager.loadSource('internal:' + internalName, SourceManager.INTERNALS_PATH + internalName + '.js');
             },
             /**
              * @param {string} moduleName
@@ -275,6 +184,18 @@
                 return path;
             }
         };
+
+        function getSelfScript() {
+            var scripts = doc.getElementsByTagName('script');
+
+            return scripts[scripts.length - 1];
+        }
+
+        function getBasePath() {
+            var src = jarsScript.src;
+
+            return src.substring(0, src.lastIndexOf('/') + 1);
+        }
 
         return SourceManager;
     });
@@ -346,9 +267,8 @@
          */
 
         /**
-         * @private
-         *
          * @memberof JARS
+         * @inner
          *
          * @return {JARS}
          */
@@ -361,7 +281,7 @@
 
     (function bootstrapJARS() {
         var SourceManager = getInternal('SourceManager'),
-            main = SourceManager.getMain(),
+            main = SourceManager.MAIN_FILE,
             config = envGlobal.jarsConfig || main && {};
 
         if(config) {

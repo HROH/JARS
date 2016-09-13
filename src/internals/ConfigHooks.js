@@ -7,9 +7,9 @@ JARS.internal('ConfigHooks', function(InternalsManager) {
         Resolver = getInternal('Resolver'),
         InterceptionManager = getInternal('InterceptionManager'),
         SourceManager = getInternal('SourceManager'),
-        utils = getInternal('utils'),
-        arrayEach = utils.arrayEach,
-        objectMerge = utils.objectMerge,
+        Utils = getInternal('Utils'),
+        arrayEach = Utils.arrayEach,
+        objectMerge = Utils.objectMerge,
         ConfigHooks;
 
     /**
@@ -46,6 +46,7 @@ JARS.internal('ConfigHooks', function(InternalsManager) {
             }
             else {
                 delete JARS.mods;
+                delete JARS.internals;
             }
 
             return !!makeGlobal;
@@ -131,15 +132,15 @@ JARS.internal('ConfigHooks', function(InternalsManager) {
     };
 
     /**
-     * @private
-     *
      * @memberof JARS.internals.ConfigHooks
+     * @inner
      *
      * @param {boolean} expose
      */
     function exposeModulesGlobal(expose) {
         if (expose) {
             JARS.mods = Loader.getRoot();
+            JARS.internals = InternalsManager;
         }
     }
 

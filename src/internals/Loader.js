@@ -2,7 +2,7 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
     'use strict';
 
     var getInternal = InternalsManager.get,
-        objectEach = getInternal('utils').objectEach,
+        objectEach = getInternal('Utils').objectEach,
         System = getInternal('System'),
         Resolver = getInternal('Resolver'),
         Module = getInternal('Module'),

@@ -10,10 +10,10 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
         SLASH = '/',
         DEFAULT_EXTENSION = 'js',
         getInternal = InternalsManager.get,
-        utils = getInternal('utils'),
-        hasOwnProp = utils.hasOwnProp,
-        objectMerge = utils.objectMerge,
-        objectEach = utils.objectEach,
+        Utils = getInternal('Utils'),
+        hasOwnProp = Utils.hasOwnProp,
+        objectMerge = Utils.objectMerge,
+        objectEach = Utils.objectEach,
         configTransforms = {},
         Resolver = getInternal('Resolver'),
         System = getInternal('System');
@@ -131,18 +131,16 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
     /**
      * @callback TransformFunction
      *
-     * @private
-     *
      * @memberof JARS.internals.ModuleConfig
+     * @inner
      *
      * @param {*} configValue
      * @param {(JARS.internals.Module|JARS.internals.ModuleBundle)} [moduleOrBundle]
      */
 
     /**
-     * @private
-     *
      * @memberof JARS.internals.ModuleConfig
+     * @inner
      *
      * @param {string} configKey
      * @param {string} typeCheck
@@ -157,9 +155,8 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
     }
 
     /**
-     * @private
-     *
      * @memberof JARS.internals.ModuleConfig
+     * @inner
      *
      * @param {string} path
      *
@@ -170,9 +167,8 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
     }
 
     /**
-     * @private
-     *
      * @memberof JARS.internals.ModuleConfig
+     * @inner
      *
      * @param {JARS.internals.ModuleConfig.internals.ModuleConfigOptions} oldOptions
      * @param {Object} newOptions
@@ -201,9 +197,8 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
     }
 
     /**
-     * @private
-     *
      * @memberof JARS.internals.ModuleConfig
+     * @inner
      *
      * @param {(JARS.internals.Module|JARS.internals.ModuleBundle)} moduleOrBundle
      *
@@ -234,9 +229,8 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
     }
 
     /**
-     * @private
-     *
      * @memberof JARS.internals.ModuleConfig
+     * @inner
      *
      * @param {Function} Constructor
      * @param {Object} [newProto]

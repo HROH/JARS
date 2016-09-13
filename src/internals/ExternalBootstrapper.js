@@ -2,7 +2,7 @@ JARS.internal('ExternalBootstrapper', function externalBootstrapperSetup(Interna
     'use strict';
 
     var getInternal = InternalsManager.get,
-        arrayEach = getInternal('utils').arrayEach,
+        arrayEach = getInternal('Utils').arrayEach,
         Loader = getInternal('Loader'),
         ConfigsManager = getInternal('ConfigsManager'),
         JARS_MAIN_LOGCONTEXT = 'JARS:main',
@@ -51,9 +51,8 @@ JARS.internal('ExternalBootstrapper', function externalBootstrapperSetup(Interna
     };
 
     /**
-     * @private
-     *
      * @memberof JARS.internals.ExternalBootstrapper
+     * @inner
      *
      * @param {System} System
      * @param {JARS.ModuleDependencies.Declaration} modules
@@ -95,9 +94,8 @@ JARS.internal('ExternalBootstrapper', function externalBootstrapperSetup(Interna
     }
 
     /**
-     * @private
-     *
      * @memberof JARS.internals.ExternalBootstrapper
+     * @inner
      *
      * @type {JARS.ModuleQueue.FailCallback}
      */

@@ -2,7 +2,7 @@ JARS.internal('LoaderQueue', function(InternalsManager) {
     'use strict';
 
     var getInternal = InternalsManager.get,
-        arrayEach = getInternal('utils').arrayEach,
+        arrayEach = getInternal('Utils').arrayEach,
         System = getInternal('System'),
         Resolver = getInternal('Resolver'),
         InterceptionManager = getInternal('InterceptionManager'),
@@ -100,9 +100,8 @@ JARS.internal('LoaderQueue', function(InternalsManager) {
     };
 
     /**
-     * @private
-     *
      * @memberof JARS.internals.LoaderQueue
+     * @inner
      *
      * @param {JARS.internals.LoaderQueue} loaderQueue
      */
@@ -113,9 +112,8 @@ JARS.internal('LoaderQueue', function(InternalsManager) {
     }
 
     /**
-     * @private
-     *
      * @memberof JARS.internals.LoaderQueue
+     * @inner
      */
     function onModuleLoadedNoop() {}
 

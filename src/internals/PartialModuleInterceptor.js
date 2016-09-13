@@ -2,7 +2,8 @@ JARS.internal('PartialModuleInterceptor', function partialModuleInterceptorSetup
     'use strict';
 
     // TODO allow search for nested properties
-    var hasOwnProp = InternalsManager.get('utils').hasOwnProp, PartialModuleInterceptor;
+    var hasOwnProp = InternalsManager.get('Utils').hasOwnProp,
+        PartialModuleInterceptor;
 
     /**
     * @namespace

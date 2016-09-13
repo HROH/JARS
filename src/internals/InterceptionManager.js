@@ -1,17 +1,15 @@
 JARS.internal('InterceptionManager', function interceptionManagerSetup(InternalsManager) {
     'use strict';
 
-    var utils = InternalsManager.get('utils'),
-        hasOwnProp = utils.hasOwnProp,
-        objectEach = utils.objectEach,
+    var Utils = InternalsManager.get('Utils'),
+        hasOwnProp = Utils.hasOwnProp,
+        objectEach = Utils.objectEach,
         Interception = InternalsManager.get('Interception'),
         interceptors = {},
         interceptionInfoCache = {},
         InterceptionManager;
 
     /**
-    * @private
-    *
     * @namespace
     *
     * @memberof JARS.internals
@@ -60,9 +58,8 @@ JARS.internal('InterceptionManager', function interceptionManagerSetup(Internals
     };
 
     /**
-     * @access private
-     *
      * @memberof JARS.internals.InterceptionManager
+     * @inner
      *
      * @param {string} moduleName
      *
@@ -98,8 +95,6 @@ JARS.internal('InterceptionManager', function interceptionManagerSetup(Internals
     }
 
     /**
-     * @private
-     *
      * @typedef InterceptionInfo
      *
      * @memberof JARS.internals.InterceptionManager
@@ -110,9 +105,8 @@ JARS.internal('InterceptionManager', function interceptionManagerSetup(Internals
      */
 
     /**
-     * @interface Interceptor
-     *
-     * @memberof JARS.internals.InterceptionManager
+     * @class JARS.internals.InterceptionManager.Interceptor
+     * @abstract
      */
 
     /**
@@ -120,9 +114,7 @@ JARS.internal('InterceptionManager', function interceptionManagerSetup(Internals
      */
 
      /**
-     * @method intercept
-     *
-     * @memberof JARS.internals.InterceptionManager.Interceptor#
+     * @method JARS.internals.InterceptionManager.Interceptor#intercept
      *
      * @param {*} moduleRef
      * @param {JARS.internals.Interception} interception

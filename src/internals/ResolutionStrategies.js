@@ -3,9 +3,9 @@ JARS.internal('ResolutionStrategies', function resolutionStrategiesSetup(Interna
 
     var getInternal = InternalsManager.get,
         System = getInternal('System'),
-        utils = getInternal('utils'),
-        objectEach = utils.objectEach,
-        arrayEach = utils.arrayEach,
+        Utils = getInternal('Utils'),
+        objectEach = Utils.objectEach,
+        arrayEach = Utils.arrayEach,
         EMPTY_STRING = '',
         DOT = '.',
         RE_LEADING_DOT = /^\./,
@@ -174,9 +174,8 @@ JARS.internal('ResolutionStrategies', function resolutionStrategiesSetup(Interna
     };
 
     /**
-     * @private
-     *
      * @memberof JARS.internals.ResolutionStrategies
+     * @inner
      *
      * @param {string} baseModuleName
      * @param {string} moduleName
@@ -190,9 +189,8 @@ JARS.internal('ResolutionStrategies', function resolutionStrategiesSetup(Interna
     }
 
     /**
-     * @private
-     *
      * @memberof JARS.internals.ResolutionStrategies
+     * @inner
      *
      * @param {string} moduleName
      *
@@ -203,9 +201,8 @@ JARS.internal('ResolutionStrategies', function resolutionStrategiesSetup(Interna
     }
 
     /**
-     * @private
-     *
      * @memberof JARS.internals.ResolutionStrategies
+     * @inner
      *
      * @param {string} baseModuleName
      * @param {string} moduleName

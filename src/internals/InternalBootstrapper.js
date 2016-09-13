@@ -10,16 +10,12 @@ JARS.internal('InternalBootstrapper', function(InternalsManager) {
      * @memberof JARS.internals
      */
     InternalBootstrapper = {
-        /**
-         * @param {string} internalsPath
-         */
-        bootstrap: function(internalsPath) {
+        bootstrap: function() {
             var SourceManager = getInternal('SourceManager'),
                 System = getInternal('System'),
                 Loader = getInternal('Loader'),
                 ConfigsManager = getInternal('ConfigsManager'),
-                InterceptionManager = getInternal('InterceptionManager'),
-                basePath = SourceManager.getBasePath();
+                InterceptionManager = getInternal('InterceptionManager');
 
             InterceptionManager.addInterceptor(getInternal('PluginInterceptor'));
 
@@ -30,12 +26,18 @@ JARS.internal('InternalBootstrapper', function(InternalsManager) {
             Loader.registerModule('System', ['Logger', 'Modules']).$export(function systemFactory() {
                 // TODO maybe calling the internal factory for System is the better option
                 // to isolate System on a per context basis but right now this is enough
+
+                /**
+                 * @global
+                 * @module System
+                 * @see JARS.internals.System
+                 */
                 return System;
             });
 
             ConfigsManager.update({
                 modules: [{
-                    basePath: basePath,
+                    basePath: SourceManager.BASE_PATH,
 
                     cache: true,
 
@@ -45,7 +47,7 @@ JARS.internal('InternalBootstrapper', function(InternalsManager) {
                 }, {
                     restrict: 'System.*',
 
-                    basePath: basePath + internalsPath
+                    basePath: SourceManager.INTERNALS_PATH
                 }]
             });
         }

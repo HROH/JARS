@@ -2,8 +2,8 @@ JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsMa
     'use strict';
 
     var getInternal = InternalsManager.get,
-        arrayEach = getInternal('utils').arrayEach,
-        hasOwnProp = getInternal('utils').hasOwnProp,
+        arrayEach = getInternal('Utils').arrayEach,
+        hasOwnProp = getInternal('Utils').hasOwnProp,
         Resolver = getInternal('Resolver'),
         LoaderQueue = getInternal('LoaderQueue'),
         SEPARATOR = '", "',
@@ -177,9 +177,8 @@ JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsMa
     };
 
     /**
-     * @private
-     *
      * @memberof JARS.internals.ModuleDependencies
+     * @inner
      *
      * @param {string} matchingModuleName
      *
@@ -190,9 +189,8 @@ JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsMa
     }
 
     /**
-     * @private
-     *
      * @memberof JARS.internals.ModuleDependencies
+     * @inner
      *
      * @param {string[]} result
      * @param {string} matchingModuleName
@@ -208,9 +206,8 @@ JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsMa
     }
 
     /**
-     * @private
-     *
      * @memberof JARS.internals.ModuleDependencies
+     * @inner
      *
      * @param {(string|string[])} match
      *

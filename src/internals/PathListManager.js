@@ -2,9 +2,9 @@ JARS.internal('PathListManager', function pathListManagerSetup(InternalsManager)
     'use strict';
 
     var getInternal = InternalsManager.get,
-        utils = getInternal('utils'),
-        hasOwnProp = utils.hasOwnProp,
-        arrayEach = utils.arrayEach,
+        Utils = getInternal('Utils'),
+        hasOwnProp = Utils.hasOwnProp,
+        arrayEach = Utils.arrayEach,
         Loader = getInternal('Loader'),
         Resolver = getInternal('Resolver'),
         excludedModules = [Resolver.getRootName(), 'System', 'System.Logger', 'System.Modules'],
@@ -60,9 +60,8 @@ JARS.internal('PathListManager', function pathListManagerSetup(InternalsManager)
     };
 
     /**
-     * @private
-     *
      * @memberof JARS.internals.PathListManager
+     * @inner
      *
      * @param {string[]} [modules = []]
      */
@@ -73,9 +72,8 @@ JARS.internal('PathListManager', function pathListManagerSetup(InternalsManager)
     }
 
     /**
-     * @private
-     *
      * @memberof JARS.internals.PathListManager
+     * @inner
      *
      * @param {JARS.internals.Module} module
      * @param {boolean} [addBundle = false]
@@ -99,9 +97,8 @@ JARS.internal('PathListManager', function pathListManagerSetup(InternalsManager)
     }
 
     /**
-     * @private
-     *
      * @memberof JARS.internals.PathListManager
+     * @inner
      */
     function resetModulesPathList() {
         pathList = [];

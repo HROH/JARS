@@ -4,7 +4,7 @@ JARS.internal('ConfigsManager', function configsManagerSetup(InternalsManager) {
     var getInternal = InternalsManager.get,
         System = getInternal('System'),
         ConfigHooks = getInternal('ConfigHooks'),
-        objectEach = getInternal('utils').objectEach,
+        objectEach = getInternal('Utils').objectEach,
         configs = {
             environments: {},
 
@@ -48,9 +48,8 @@ JARS.internal('ConfigsManager', function configsManagerSetup(InternalsManager) {
     };
 
     /**
-     * @private
-     *
      * @memberof JARS.internals.ConfigsManager
+     * @inner
      *
      * @typedef {('debugging'|'environment'|'environments'|'globalAccess'|'interceptors'|'loaderContext'|'main'|'modules')} Option
      */

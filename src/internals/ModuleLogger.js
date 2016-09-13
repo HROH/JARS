@@ -17,7 +17,7 @@ JARS.internal('ModuleLogger', function moduleLoggerSetup(InternalsManager) {
         this._loggerContext = (Resolver.isBundle(moduleOrBundleName) ? 'Bundle' : 'Module') + ':' + moduleOrBundleName;
     }
 
-    getInternal('utils').arrayEach(['debug', 'error', 'info', 'warn'], function addForward(methodName) {
+    getInternal('Utils').arrayEach(['debug', 'error', 'info', 'warn'], function addForward(methodName) {
         ModuleLogger.prototype[methodName] = function(message, values) {
             log(this, methodName, message, values);
         };
@@ -60,9 +60,8 @@ JARS.internal('ModuleLogger', function moduleLoggerSetup(InternalsManager) {
      */
 
     /**
-     * @private
-     *
      * @memberof JARS.internals.ModuleLogger
+     * @inner
      *
      * @param {JARS.internals.ModuleLogger} logger
      * @param {string} logMethod
