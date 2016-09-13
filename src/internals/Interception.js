@@ -5,8 +5,6 @@ JARS.internal('Interception', function interceptionSetup(InternalsManager) {
         MSG_INTERCEPTION_ERROR = 'error in interception of this module by interceptor "${type}" with data "${data}"';
 
     /**
-     * @private
-     *
      * @class
      *
      * @memberof JARS.internals

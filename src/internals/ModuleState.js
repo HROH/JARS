@@ -25,48 +25,43 @@ JARS.internal('ModuleState', function moduleStateSetup() {
         MSG_REGISTERING = 'is registering...',
         // Module/bundle states
         /**
-         * @private
-         *
          * @constant {number}
          * @default
          *
          * @memberof JARS.internals.ModuleState
+         * @inner
          */
         WAITING_STATE = 1,
         /**
-         * @private
-         *
          * @constant {number}
          * @default
          *
          * @memberof JARS.internals.ModuleState
+         * @inner
          */
         LOADING_STATE = 2,
         /**
-         * @private
-         *
          * @constant {number}
          * @default
          *
          * @memberof JARS.internals.ModuleState
+         * @inner
          */
         LOADED_STATE = 3,
         /**
-         * @private
-         *
          * @constant {number}
          * @default
          *
          * @memberof JARS.internals.ModuleState
+         * @inner
          */
         LOADED_MANUALLY_STATE = 4,
         /**
-         * @private
-         *
          * @constant {number}
          * @default
          *
          * @memberof JARS.internals.ModuleState
+         * @inner
          */
         REGISTERED_STATE = 5;
 
@@ -179,9 +174,8 @@ JARS.internal('ModuleState', function moduleStateSetup() {
     };
 
     /**
-     * @private
-     *
      * @memberof JARS.internals.ModuleState
+     * @inner
      *
      * @param {JARS.internals.ModuleState} moduleState
      *

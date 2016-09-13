@@ -1,9 +1,9 @@
 JARS.internal('System', function systemSetup(InternalsManager) {
     'use strict';
 
-    var utils = InternalsManager.get('utils'),
-        envGlobal = utils.global,
-        hasOwnProp = utils.hasOwnProp,
+    var Utils = InternalsManager.get('Utils'),
+        hasOwnProp = Utils.hasOwnProp,
+        envGlobal = (1,eval)('this'), // jshint ignore:line
         types = 'Null Undefined String Number Boolean Array Arguments Object Function Date RegExp'.split(' '),
         RE_TEMPLATE_KEY = /\$\{(.*?)\}/g,
         UNKNOWN_KEY = '<UNKNOWN KEY>',
@@ -13,26 +13,23 @@ JARS.internal('System', function systemSetup(InternalsManager) {
         isArgs, System;
 
     /**
-     * @exports System
+     * @namespace
      *
-     * @access public
-     *
-     * @namespace System
+     * @memberof JARS.internals
      */
     System = {
         env: {
+            /**
+             * @type Global
+             */
             global: envGlobal
         },
 
         $$internals: InternalsManager,
         /**
-         * @access public
-         *
-         * @memberof System
-         *
          * @param {*} value
          *
-         * @return {String}
+         * @return {string}
          */
         getType: function getType(value) {
             var type;
@@ -56,25 +53,17 @@ JARS.internal('System', function systemSetup(InternalsManager) {
             return type || typeof value;
         },
         /**
-         * @access public
-         *
-         * @memberof System
-         *
          * @param {*} value
          *
-         * @return {Boolean}
+         * @return {boolean}
          */
         isNil: function(value) {
             return value == NOTHING;
         },
         /**
-         * @access public
-         *
-         * @memberof System
-         *
          * @param {*} value
          *
-         * @return {Boolean}
+         * @return {boolean}
          */
         isArrayLike: function(value) {
             var isArrayLike = false,
@@ -89,64 +78,45 @@ JARS.internal('System', function systemSetup(InternalsManager) {
             return isArrayLike;
         },
         /**
-         * @access public
-         *
-         * @memberof System
-         *
          * @param {*} value
          *
-         * @return {Boolean}
+         * @return {boolean}
          */
         isDefined: function(value) {
             return !System.isUndefined(value);
         },
         /**
-         * @access public
-         *
-         * @function
-         * @memberof System
+         * @method
          *
          * @param {*} value
          *
-         * @return {Boolean}
+         * @return {boolean}
          */
         isInteger: Number.isInteger || function(value) {
             return System.isNumber(value) && parseInt(value, 10) === value;
         },
         /**
-         * @access public
-         *
-         * @memberof System
-         *
          * @param {*} value
          *
-         * @return {Boolean}
+         * @return {boolean}
          */
         isNaN: function(value) {
             return envGlobal.isNaN(value) && value !== value;
         },
         /**
-         * @access public
-         *
-         * @memberof System
-         *
          * @param {*} instance
          * @param {Function} Class
          *
-         * @return {Boolean}
+         * @return {boolean}
          */
         isA: function(instance, Class) {
             return instance instanceof Class;
         },
         /**
-         * @access public
+         * @param {string} message
+         * @param {(Object<string, string>|string[])} data
          *
-         * @memberof System
-         *
-         * @param {String} message
-         * @param {(Object<String, String>|String[])} data
-         *
-         * @return {String}
+         * @return {string}
          */
         format: function(message, data) {
             if (System.isString(message) && (System.isObject(data) || System.isArray(data))) {
@@ -160,11 +130,7 @@ JARS.internal('System', function systemSetup(InternalsManager) {
             return message;
         },
         /**
-         * @access public
-         *
-         * @memberof System
-         *
-         * @param {JARS~Interception} pluginRequest
+         * @param {JARS.internals.Interception} pluginRequest
          */
         $plugIn: function(pluginRequest) {
             pluginRequest.success(pluginRequest.listeningModule.config.get('config'));
@@ -172,124 +138,102 @@ JARS.internal('System', function systemSetup(InternalsManager) {
     };
 
     /**
-     * @access public
-     *
      * @function isNull
-     * @memberof System
+     * @memberof JARS.internals.System
      *
      * @param {*} value
      *
-     * @return {Boolean}
+     * @return {boolean}
      */
 
     /**
-     * @access public
-     *
      * @function isUndefined
-     * @memberof System
+     * @memberof JARS.internals.System
      *
      * @param {*} value
      *
-     * @return {Boolean}
+     * @return {boolean}
      */
 
     /**
-     * @access public
-     *
      * @function isString
-     * @memberof System
+     * @memberof JARS.internals.System
      *
      * @param {*} value
      *
-     * @return {Boolean}
+     * @return {boolean}
      */
 
     /**
-     * @access public
-     *
      * @function isNumber
-     * @memberof System
+     * @memberof JARS.internals.System
      *
      * @param {*} value
      *
-     * @return {Boolean}
+     * @return {boolean}
      */
 
     /**
-     * @access public
-     *
      * @function isBoolean
-     * @memberof System
+     * @memberof JARS.internals.System
      *
      * @param {*} value
      *
-     * @return {Boolean}
+     * @return {boolean}
      */
 
     /**
-     * @access public
-     *
      * @function isArray
-     * @memberof System
+     * @memberof JARS.internals.System
      *
      * @param {*} value
      *
-     * @return {Boolean}
+     * @return {boolean}
      */
 
     /**
-     * @access public
-     *
      * @function isObject
-     * @memberof System
+     * @memberof JARS.internals.System
      *
      * @param {*} value
      *
-     * @return {Boolean}
+     * @return {boolean}
      */
 
     /**
-     * @access public
-     *
      * @function isFunction
-     * @memberof System
+     * @memberof JARS.internals.System
      *
      * @param {*} value
      *
-     * @return {Boolean}
+     * @return {boolean}
      */
 
     /**
-     * @access public
-     *
      * @function isDate
-     * @memberof System
+     * @memberof JARS.internals.System
      *
      * @param {*} value
      *
-     * @return {Boolean}
+     * @return {boolean}
      */
 
     /**
-     * @access public
-     *
      * @function isRegExp
-     * @memberof System
+     * @memberof JARS.internals.System
      *
      * @param {*} value
      *
-     * @return {Boolean}
+     * @return {boolean}
      */
 
     /**
-     * @access private
-     *
-     * @memberof System
+     * @memberof JARS.internals.System
      * @inner
      *
-     * @param {String} typeDef
+     * @param {string} typeDef
      *
-     * @return {Function(*):boolean}
+     * @return {function(*):boolean}
      */
     function typeValidatorSetup(typeDef) {
         var nativeTypeValidator = envGlobal[typeDef] && envGlobal[typeDef]['is' + typeDef];
@@ -301,48 +245,40 @@ JARS.internal('System', function systemSetup(InternalsManager) {
         };
     }
 
-    utils.arrayEach(types, function createTypeValidator(type) {
+    Utils.arrayEach(types, function createTypeValidator(type) {
         System['is' + type] = typeValidatorSetup(type);
     });
 
     isArgs = System.isArguments;
 
     /**
-     * @access public
-     *
-     * @memberof System
-     *
      * @param {*} value
      *
-     * @return {Boolean}
+     * @return {boolean}
      */
     System.isArguments = function(value) {
         return value && (isArgs(value) || System.isArrayLike(value));
     };
 
     /**
-     * @access private
-     *
-     * @memberof System
+     * @memberof JARS.internals.System
      * @inner
      *
      * @param {*} value
      *
-     * @return {Boolean}
+     * @return {boolean}
      */
     function isElement(value) {
         return value.nodeType === 1 || value.nodeType === 9;
     }
 
     /**
-     * @access private
-     *
-     * @memberof System
+     * @memberof JARS.internals.System
      * @inner
      *
      * @param {*} value
      *
-     * @return {String}
+     * @return {string}
      */
     function getTypeOfNumber(value) {
         var type = 'number';
@@ -358,15 +294,13 @@ JARS.internal('System', function systemSetup(InternalsManager) {
     }
 
     /**
-     * @access private
-     *
-     * @memberof System
+     * @memberof JARS.internals.System
      * @inner
      *
      * @param {Array} match
-     * @param {String} key
+     * @param {string} key
      *
-     * @return {String}
+     * @return {string}
      */
     function formatReplace(match, key) {
         var data = formatReplace.data;

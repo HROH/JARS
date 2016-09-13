@@ -1,24 +1,31 @@
+/**
+ * @module System.Modules
+ * @see JARS.internals.System.Modules
+ */
 JARS.module('System.Modules').$export(function systemModulesFactory() {
     'use strict';
 
     var internals = this.$$internals,
-        arrayEach = internals.get('utils').arrayEach,
-        Loader = internals.get('Loader'),
-        Resolver = internals.get('Resolver'),
+        getInternal = internals.get,
+        arrayEach = getInternal('Utils').arrayEach,
+        Loader = getInternal('Loader'),
+        Resolver = getInternal('Resolver'),
         Modules;
 
     /**
-     * @namespace System.Modules
+     * @namespace
+     *
+     * @memberof JARS.internals.System
+     *
+     * @borrows JARS.internals.Loader.getModuleRef as use
+     * @borrows JARS.internals.Loader.$import as $import
+     * @borrows JARS.internals.Loader.getCurrentModuleData as getCurrentModuleData
      */
     Modules = {
         /**
-         * @access public
+         * @param {JARS.internals.ModuleDependencies.Declaration} moduleNames
          *
-         * @memberof System.Modules
-         *
-         * @param {(Object|Array|String)} moduleNames
-         *
-         * @return {Array}
+         * @return {Array<*>}
          */
         useAll: function(moduleNames) {
             var refs = [];
@@ -31,7 +38,7 @@ JARS.module('System.Modules').$export(function systemModulesFactory() {
 
             return refs;
         },
-        
+
         use: Loader.getModuleRef,
 
         $import: Loader.$import,
