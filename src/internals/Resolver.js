@@ -121,13 +121,13 @@ JARS.internal('Resolver', function resolverSetup(InternalsManager) {
             return ResolutionStrategies.any(Resolver.isRootName(baseModuleName) ? EMPTY_STRING : baseModuleName, modules, ResolutionStrategies.deps);
         },
         /**
-         * @param {JARS.internals.ModuleBundle.Declaration} modules
+         * @param {JARS.internals.ModuleBundle.Declaration} bundleModules
          * @param {string} baseModuleName
          *
          * @return {string[]}
          */
-        resolveBundle: function(modules, baseModuleName) {
-            return ResolutionStrategies.any(baseModuleName, modules, ResolutionStrategies.bundle);
+        resolveBundle: function(bundleModules, baseModuleName) {
+            return ResolutionStrategies.array(baseModuleName, bundleModules || [], ResolutionStrategies.bundle);
         }
     };
 
