@@ -112,21 +112,21 @@ JARS.internal('Resolver', function resolverSetup(InternalsManager) {
             return RE_BUNDLE.test(moduleName);
         },
         /**
-         * @param {JARS.internals.ModuleDependencies.Declaration} modules
          * @param {string} baseModuleName
+         * @param {JARS.internals.ModuleDependencies.Declaration} modules
          *
          * @return {string[]}
          */
-        resolve: function(modules, baseModuleName) {
+        resolve: function(baseModuleName, modules) {
             return ResolutionStrategies.any(Resolver.isRootName(baseModuleName) ? EMPTY_STRING : baseModuleName, modules, ResolutionStrategies.deps);
         },
         /**
-         * @param {JARS.internals.ModuleBundle.Declaration} bundleModules
          * @param {string} baseModuleName
+         * @param {JARS.internals.ModuleBundle.Declaration} bundleModules
          *
          * @return {string[]}
          */
-        resolveBundle: function(bundleModules, baseModuleName) {
+        resolveBundle: function(baseModuleName, bundleModules) {
             return ResolutionStrategies.array(baseModuleName, bundleModules || [], ResolutionStrategies.bundle);
         }
     };

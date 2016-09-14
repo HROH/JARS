@@ -89,7 +89,7 @@ JARS.internal('ConfigHooks', function(InternalsManager) {
          * @param {(Object|Object[])} newModuleConfigs
          */
         modules: function setModuleConfigs(newModuleConfigs) {
-            var modules;
+            var modules, rootName;
 
             if (System.isArray(newModuleConfigs)) {
                 arrayEach(newModuleConfigs, function setModuleConfig(config) {
@@ -97,7 +97,8 @@ JARS.internal('ConfigHooks', function(InternalsManager) {
                 });
             }
             else {
-                modules = newModuleConfigs.restrict ? Resolver.resolve(newModuleConfigs.restrict) : [Resolver.getRootName()];
+                rootName = Resolver.getRootName();
+                modules = newModuleConfigs.restrict ? Resolver.resolve(rootName, newModuleConfigs.restrict) : [rootName];
 
                 arrayEach(modules, function updateModuleConfig(moduleName) {
                     var module = Loader.getModule(moduleName);

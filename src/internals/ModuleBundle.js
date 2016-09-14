@@ -42,7 +42,7 @@ JARS.internal('ModuleBundle', function moduleBundleSetup(InternalsManager) {
          */
         add: function(bundle) {
             var moduleBundle = this,
-                resolvedBundle = Resolver.resolveBundle(bundle, moduleBundle._moduleName);
+                resolvedBundle = Resolver.resolveBundle(moduleBundle._moduleName, bundle);
 
             resolvedBundle.length && moduleBundle.logger.debug(MSG_BUNDLE_DEFINED, {
                 bundle: resolvedBundle.join(SEPARATOR)

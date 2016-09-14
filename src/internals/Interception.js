@@ -53,7 +53,7 @@ JARS.internal('Interception', function interceptionSetup(InternalsManager) {
         $importAndLink: function(moduleNames, onModulesLoaded, onModuleAborted, onModuleLoaded) {
             var listeningModule = this.listeningModule;
 
-            moduleNames = Resolver.resolve(moduleNames, this.info.moduleName);
+            moduleNames = Resolver.resolve(this.info.moduleName, moduleNames);
 
             if (!listeningModule.isRoot()) {
                 listeningModule.deps.requestAndLink(moduleNames, onModulesLoaded, onModuleAborted, onModuleLoaded);

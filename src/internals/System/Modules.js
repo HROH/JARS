@@ -30,7 +30,7 @@ JARS.module('System.Modules').$export(function systemModulesFactory() {
         useAll: function(moduleNames) {
             var refs = [];
 
-            moduleNames = Resolver.resolve(moduleNames);
+            moduleNames = Resolver.resolve(Resolver.getRootName(), moduleNames);
 
             arrayEach(moduleNames, function use(moduleName) {
                 refs.push(Modules.use(moduleName));
