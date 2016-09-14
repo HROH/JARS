@@ -99,7 +99,7 @@ JARS.internal('ResolutionStrategies', function resolutionStrategiesSetup(Interna
                 resolvedModules = [absoluteModuleName];
             }
             else {
-                logResolutionError(baseModuleName, moduleName, resolutionStrategy);
+                logResolutionError(baseModuleName, moduleName, getResolutionError(resolutionStrategy));
 
                 resolvedModules = [];
             }
@@ -204,13 +204,10 @@ JARS.internal('ResolutionStrategies', function resolutionStrategiesSetup(Interna
      * @memberof JARS.internals.ResolutionStrategies
      * @inner
      *
-     * @param {string} baseModuleName
-     * @param {string} moduleName
      * @param {JARS.internals.ResolutionStrategies.ResolutionStrategy} resolutionStrategy
      */
-    function logResolutionError(baseModuleName, moduleName, resolutionStrategy) {
-        var Logger = System.Logger,
-            message;
+    function getResolutionError(resolutionStrategy) {
+        var message;
 
         switch(resolutionStrategy) {
             case ResolutionStrategies.bundle:
@@ -226,7 +223,21 @@ JARS.internal('ResolutionStrategies', function resolutionStrategiesSetup(Interna
                 message = MSG_DEFAULT_RESOLUTION_ERROR;
         }
 
-        Logger && Logger.errorWithContext(RESOLUTION_LOG_CONTEXT, message, [moduleName, baseModuleName]);
+        return message;
+    }
+
+    /**
+     * @memberof JARS.internals.ResolutionStrategies
+     * @inner
+     *
+     * @param {string} baseModuleName
+     * @param {string} moduleName
+     * @param {string} errorMessage
+     */
+    function logResolutionError(baseModuleName, moduleName, errorMessage) {
+        var Logger = System.Logger;
+
+        Logger && Logger.errorWithContext(RESOLUTION_LOG_CONTEXT, errorMessage, [moduleName, baseModuleName]);
     }
 
     /**
