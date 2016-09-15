@@ -109,7 +109,7 @@ JARS.internal('Resolver', function resolverSetup(InternalsManager) {
          * @return {boolean}
          */
         isBundle: function(moduleName) {
-            return RE_BUNDLE.test(moduleName);
+            return RE_BUNDLE.test(Resolver.getModuleNameWithoutVersion(moduleName));
         },
         /**
          * @param {JARS.internals.Module} baseModule
