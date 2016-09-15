@@ -51,15 +51,16 @@ JARS.internal('Interception', function interceptionSetup(InternalsManager) {
          * @param {JARS.internals.LoaderQueue.ModuleLoadedCallback} onModuleLoaded
          */
         $importAndLink: function(moduleNames, onModulesLoaded, onModuleAborted, onModuleLoaded) {
-            var listeningModule = this.listeningModule;
+            var listeningModule = this.listeningModule,
+                loader = listeningModule.loader;
 
-            moduleNames = Resolver.resolve(this.info.moduleName, moduleNames);
+            moduleNames = Resolver.resolve(loader.getModule(this.info.moduleName), moduleNames);
 
             if (!listeningModule.isRoot()) {
                 listeningModule.deps.requestAndLink(moduleNames, onModulesLoaded, onModuleAborted, onModuleLoaded);
             }
             else {
-                listeningModule.loader.$import(moduleNames, onModulesLoaded, onModuleAborted, onModuleLoaded);
+                loader.$import(moduleNames, onModulesLoaded, onModuleAborted, onModuleLoaded);
             }
         },
     };

@@ -9,9 +9,8 @@ JARS.internal('ResolutionStrategies', function resolutionStrategiesSetup(Interna
         EMPTY_STRING = '',
         DOT = '.',
         RE_LEADING_DOT = /^\./,
-        RESOLUTION_LOG_CONTEXT = 'Resolution',
         MUST_NOT_START_WITH_DOT = 'modulename must not start with a "."',
-        MSG_DEFAULT_RESOLUTION_ERROR = 'Could not resolve "${0}" relative to "${1}": ',
+        MSG_DEFAULT_RESOLUTION_ERROR = 'Could not resolve "${mod}": ',
         MSG_BUNDLE_RESOLUTION_ERROR = MSG_DEFAULT_RESOLUTION_ERROR + 'a bundle ' + MUST_NOT_START_WITH_DOT,
         MSG_DEPS_RESOLUTION_ERROR = MSG_DEFAULT_RESOLUTION_ERROR + 'a dependency modulename must be absolute or relative to the current module',
         MSG_NESTED_RESOLUTION_ERROR = MSG_DEFAULT_RESOLUTION_ERROR + 'a nested ' + MUST_NOT_START_WITH_DOT + ' or only contain it as a special symbol',
@@ -24,73 +23,74 @@ JARS.internal('ResolutionStrategies', function resolutionStrategiesSetup(Interna
      */
     ResolutionStrategies = {
         /**
-         * @param {string} baseModuleName
+         * @param {JARS.internals.Module} baseModule
          * @param {(JARS.internals.ModuleDependencies.Declaration|JARS.internals.ModuleBundle.Declaration)} modules
          * @param {JARS.internals.ResolutionStrategies.ResolutionStrategy} resolutionStrategy
          *
          * @return {string[]}
          */
-        any: function(baseModuleName, modules, resolutionStrategy) {
+        any: function(baseModule, modules, resolutionStrategy) {
             var typeResolutionStrategy = ResolutionStrategies[System.getType(modules)];
 
-            return typeResolutionStrategy(baseModuleName, modules, resolutionStrategy);
+            return typeResolutionStrategy(baseModule, modules, resolutionStrategy);
         },
         /**
-         * @param {string} baseModuleName
+         * @param {JARS.internals.Module} baseModule
          * @param {(JARS.internals.ModuleDependencies.Declaration[]|JARS.internals.ModuleBundle.Declaration)} modules
          * @param {JARS.internals.ResolutionStrategies.ResolutionStrategy} resolutionStrategy
          *
          * @return {string[]}
          */
-        array: function(baseModuleName, modules, resolutionStrategy) {
+        array: function(baseModule, modules, resolutionStrategy) {
             var resolvedModules = [];
 
             arrayEach(modules, function concatResolvedModules(nestedModules) {
-                resolvedModules = resolvedModules.concat(ResolutionStrategies.any(baseModuleName, nestedModules, resolutionStrategy));
+                resolvedModules = resolvedModules.concat(ResolutionStrategies.any(baseModule, nestedModules, resolutionStrategy));
             });
 
             return resolvedModules;
         },
         /**
-         * @param {string} baseModuleName
+         * @param {JARS.internals.Module} baseModule
          * @param {Object<string, JARS.internals.ModuleDependencies.Declaration>} modules
          * @param {JARS.internals.ResolutionStrategies.ResolutionStrategy} resolutionStrategy
          *
          * @return {string[]}
          */
-        object: function(baseModuleName, modules, resolutionStrategy) {
+        object: function(baseModule, modules, resolutionStrategy) {
             var resolvedModules = [];
 
             objectEach(modules, function concatResolvedModules(nestedModules, moduleName) {
-                var tmpBaseModuleName = ResolutionStrategies.string(baseModuleName, moduleName, resolutionStrategy)[0];
+                var tmpBaseModuleName = ResolutionStrategies.string(baseModule, moduleName, resolutionStrategy)[0];
 
                 if(tmpBaseModuleName) {
-                    resolvedModules = resolvedModules.concat(ResolutionStrategies.any(tmpBaseModuleName, nestedModules, ResolutionStrategies.nested));
+                    resolvedModules = resolvedModules.concat(ResolutionStrategies.any(baseModule.loader.getModule(tmpBaseModuleName), nestedModules, ResolutionStrategies.nested));
                 }
             });
 
             return resolvedModules;
         },
         /**
-         * @param {string} baseModuleName
+         * @param {JARS.internals.Module} baseModule
          * @param {string} moduleName
          * @param {JARS.internals.ResolutionStrategies.ResolutionStrategy} resolutionStrategy
          *
          * @return {string[]}
          */
-        string: function(baseModuleName, moduleName, resolutionStrategy) {
+        string: function(baseModule, moduleName, resolutionStrategy) {
             var isRelative = isRelativeModuleName(moduleName),
                 isValidModuleName = false,
+                logger = (resolutionStrategy === ResolutionStrategies.bundle ? baseModule.bundle : baseModule).logger,
                 resolvedModules, absoluteModuleName;
 
-            if (!baseModuleName) {
+            if (baseModule.isRoot()) {
                 if(!isRelative && resolutionStrategy === ResolutionStrategies.deps) {
                     isValidModuleName = true;
                     absoluteModuleName = moduleName;
                 }
             }
             else {
-                absoluteModuleName = resolutionStrategy(baseModuleName, moduleName);
+                absoluteModuleName = resolutionStrategy(baseModule, moduleName);
 
                 isValidModuleName = !!absoluteModuleName;
             }
@@ -99,7 +99,9 @@ JARS.internal('ResolutionStrategies', function resolutionStrategiesSetup(Interna
                 resolvedModules = [absoluteModuleName];
             }
             else {
-                logResolutionError(baseModuleName, moduleName, getResolutionError(resolutionStrategy));
+                logger.error(getResolutionError(resolutionStrategy), {
+                    mod: moduleName
+                });
 
                 resolvedModules = [];
             }
@@ -113,63 +115,68 @@ JARS.internal('ResolutionStrategies', function resolutionStrategiesSetup(Interna
             return [];
         },
         /**
-         * @param {string} baseModuleName
+         * @param {JARS.internals.Module} baseModule
          * @param {string} moduleName
          *
          * @return {string}
          */
-        deps: function(baseModuleName, moduleName) {
-            var baseParts, absoluteModuleName;
+        deps: function(baseModule, moduleName) {
+            var absoluteModuleName;
 
             if(isRelativeModuleName(moduleName)) {
-                baseParts = baseModuleName.split(DOT);
-
-                if(!isRelativeModuleName(baseModuleName)) {
-                    while (baseParts.length && isRelativeModuleName(moduleName)) {
-                        moduleName = moduleName.substr(1);
-                        baseParts.pop();
-                    }
-
-                    if(!isRelativeModuleName(moduleName) && (moduleName || baseParts.length)) {
-                        baseModuleName = baseParts.join(DOT);
-
-                        absoluteModuleName = makeAbsoluteModuleName(baseModuleName, moduleName);
-                    }
-                }
+                absoluteModuleName = ResolutionStrategies.depsRelative(baseModule, moduleName);
             }
             else {
                 absoluteModuleName = moduleName;
             }
 
-            return absoluteModuleName;
+            return isRelativeModuleName(moduleName) ? ResolutionStrategies.depsRelative(baseModule, moduleName) : moduleName;
         },
         /**
-         * @param {string} baseModuleName
+         * @param {JARS.internals.Module} baseModule
          * @param {string} moduleName
          *
          * @return {string}
          */
-        nested: function(baseModuleName, moduleName) {
+        depsRelative: function(baseModule, moduleName) {
+            var absoluteModuleName;
+
+            if(isRelativeModuleName(moduleName) && !baseModule.isRoot()) {
+                absoluteModuleName = ResolutionStrategies.depsRelative(baseModule.deps.parent, moduleName.substr(1));
+            }
+            else {
+                absoluteModuleName = baseModule.isRoot() ? EMPTY_STRING : makeAbsoluteModuleName(baseModule, moduleName);
+            }
+
+            return absoluteModuleName;
+        },
+        /**
+         * @param {JARS.internals.Module} baseModule
+         * @param {string} moduleName
+         *
+         * @return {string}
+         */
+        nested: function(baseModule, moduleName) {
             var absoluteModuleName;
 
             // self reference
             if(moduleName === DOT) {
-                absoluteModuleName = baseModuleName;
+                absoluteModuleName = baseModule.name;
             }
             else if (!isRelativeModuleName(moduleName)) {
-                absoluteModuleName = makeAbsoluteModuleName(baseModuleName, moduleName);
+                absoluteModuleName = makeAbsoluteModuleName(baseModule, moduleName);
             }
 
             return absoluteModuleName;
         },
         /**
-         * @param {string} baseModuleName
+         * @param {JARS.internals.Module} baseModule
          * @param {string} moduleName
          *
          * @return {string}
          */
-        bundle: function(baseModuleName, moduleName) {
-            return isRelativeModuleName(moduleName) ? EMPTY_STRING : makeAbsoluteModuleName(baseModuleName, moduleName);
+        bundle: function(baseModule, moduleName) {
+            return isRelativeModuleName(moduleName) ? EMPTY_STRING : makeAbsoluteModuleName(baseModule, moduleName);
         }
     };
 
@@ -177,15 +184,15 @@ JARS.internal('ResolutionStrategies', function resolutionStrategiesSetup(Interna
      * @memberof JARS.internals.ResolutionStrategies
      * @inner
      *
-     * @param {string} baseModuleName
+     * @param {JARS.internals.Module} baseModule
      * @param {string} moduleName
      *
      * @return {string}
      */
-    function makeAbsoluteModuleName(baseModuleName, moduleName) {
+    function makeAbsoluteModuleName(baseModule, moduleName) {
         var separator = getInternal('InterceptionManager').removeInterceptionData(moduleName) ? DOT : EMPTY_STRING;
 
-        return [baseModuleName, moduleName].join(separator);
+        return [baseModule.name, moduleName].join(separator);
     }
 
     /**
@@ -224,20 +231,6 @@ JARS.internal('ResolutionStrategies', function resolutionStrategiesSetup(Interna
         }
 
         return message;
-    }
-
-    /**
-     * @memberof JARS.internals.ResolutionStrategies
-     * @inner
-     *
-     * @param {string} baseModuleName
-     * @param {string} moduleName
-     * @param {string} errorMessage
-     */
-    function logResolutionError(baseModuleName, moduleName, errorMessage) {
-        var Logger = System.Logger;
-
-        Logger && Logger.errorWithContext(RESOLUTION_LOG_CONTEXT, errorMessage, [moduleName, baseModuleName]);
     }
 
     /**

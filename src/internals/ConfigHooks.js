@@ -98,7 +98,7 @@ JARS.internal('ConfigHooks', function(InternalsManager) {
             }
             else {
                 rootName = Resolver.getRootName();
-                modules = newModuleConfigs.restrict ? Resolver.resolve(rootName, newModuleConfigs.restrict) : [rootName];
+                modules = newModuleConfigs.restrict ? Resolver.resolve(Loader.getModule(rootName), newModuleConfigs.restrict) : [rootName];
 
                 arrayEach(modules, function updateModuleConfig(moduleName) {
                     var module = Loader.getModule(moduleName);

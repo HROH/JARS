@@ -20,19 +20,19 @@ JARS.internal('ModuleBundle', function moduleBundleSetup(InternalsManager) {
      *
      * @memberof JARS.internals
      *
-     * @param {string} moduleName
+     * @param {JARS.internals.Module} module
      * @param {JARS.internals.ModuleConfig} parentConfig
      */
-    function ModuleBundle(moduleName, parentConfig) {
+    function ModuleBundle(module, parentConfig) {
         var moduleBundle = this,
-            moduleBundleName = Resolver.getBundleName(moduleName);
+            moduleBundleName = Resolver.getBundleName(module.name);
 
         moduleBundle.name = moduleBundleName;
         moduleBundle.config = new ModuleConfig(moduleBundle, parentConfig);
         moduleBundle.logger = new ModuleLogger(moduleBundleName);
         moduleBundle._state = new ModuleState(moduleBundle.logger);
         moduleBundle._queue = new ModuleQueue(moduleBundleName, moduleBundle._state);
-        moduleBundle._moduleName = moduleName;
+        moduleBundle._module = module;
     }
 
     ModuleBundle.prototype = {
@@ -42,7 +42,7 @@ JARS.internal('ModuleBundle', function moduleBundleSetup(InternalsManager) {
          */
         add: function(bundle) {
             var moduleBundle = this,
-                resolvedBundle = Resolver.resolveBundle(moduleBundle._moduleName, bundle);
+                resolvedBundle = Resolver.resolveBundle(moduleBundle._module, bundle);
 
             resolvedBundle.length && moduleBundle.logger.debug(MSG_BUNDLE_DEFINED, {
                 bundle: resolvedBundle.join(SEPARATOR)
@@ -71,7 +71,7 @@ JARS.internal('ModuleBundle', function moduleBundleSetup(InternalsManager) {
                             bundleQueue.notify();
                         }
                     }).loadModules(bundle);
-                }).loadModules([moduleBundle._moduleName]);
+                }).loadModules([moduleBundle._module.name]);
             }
 
             bundleQueue.add(onBundleLoaded, onBundleAborted);
@@ -82,7 +82,7 @@ JARS.internal('ModuleBundle', function moduleBundleSetup(InternalsManager) {
         abort: function(parentOrSubModuleName) {
             var moduleBundle = this,
                 bundleState = moduleBundle._state,
-                isParent = moduleBundle._moduleName === parentOrSubModuleName;
+                isParent = moduleBundle._module.name === parentOrSubModuleName;
 
             if (bundleState.isLoading()) {
                 bundleState.setAborted(isParent ? MSG_BUNDLE_ABORTED : MSG_BUNDLE_SUBMODULE_ABORTED, isParent ? {

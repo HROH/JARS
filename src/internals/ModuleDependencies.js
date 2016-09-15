@@ -71,7 +71,7 @@ JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsMa
             else {
                 message = MSG_DEPENDENCIES_FOUND;
                 depsKey = '_deps';
-                dependencies = Resolver.resolve(moduleDependencies._module.name, dependencies);
+                dependencies = Resolver.resolve(moduleDependencies._module, dependencies);
             }
 
             dependencies.length && moduleDependencies._logger.debug(message, {

@@ -128,11 +128,11 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
          * @param {JARS.internals.LoaderQueue.ModuleLoadedCallback} onModuleImported
          */
         $import: function(moduleNames, onModulesImported, onModuleAborted, onModuleImported) {
-            var rootName = Resolver.getRootName();
+            var rootModule = Loader.getModule(Resolver.getRootName());
 
-            new LoaderQueue(Loader.getModule(rootName), function onModulesLoaded(refs) {
+            new LoaderQueue(rootModule, function onModulesLoaded(refs) {
                 onModulesImported.apply(null, refs);
-            }, onModuleImported, onModuleAborted).loadModules(Resolver.resolve(rootName, moduleNames));
+            }, onModuleImported, onModuleAborted).loadModules(Resolver.resolve(rootModule, moduleNames));
         }
     };
 

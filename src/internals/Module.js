@@ -50,7 +50,7 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
         module.deps = dependencies = new ModuleDependencies(module, logger);
 
         parent = dependencies.parent;
-        module.bundle = new ModuleBundle(moduleName, parent && parent.bundle.config);
+        module.bundle = new ModuleBundle(module, parent && parent.bundle.config);
         bundleConfig = module.bundle.config;
         module.config = module.isRoot() ? bundleConfig : new ModuleConfig(module, bundleConfig);
     }
