@@ -101,7 +101,7 @@ JARS.internal('Resolver', function resolverSetup(InternalsManager) {
          * @return {string}
          */
         extractModuleNameFromBundle: function(moduleName) {
-            return moduleName.replace(RE_BUNDLE, EMPTY_STRING);
+            return Resolver.appendVersion(Resolver.getModuleNameWithoutVersion(moduleName).replace(RE_BUNDLE, EMPTY_STRING), Resolver.getVersion(moduleName));
         },
         /**
          * @param {string} moduleName
