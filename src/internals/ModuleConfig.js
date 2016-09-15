@@ -16,6 +16,7 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
         objectEach = Utils.objectEach,
         configTransforms = {},
         Resolver = getInternal('Resolver'),
+        VersionResolver = getInternal('VersionResolver'),
         System = getInternal('System');
 
     addConfigTransform('basePath', STRING_CHECK, ensureEndsWithSlash);
@@ -219,9 +220,9 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
 
                 fileName: fileName,
 
-                dirPath: Resolver.getModuleNameWithoutVersion(isLowerCaseFile ? moduleOrBundleName : Resolver.getImplicitDependencyName(moduleOrBundleName)).replace(RE_DOT, SLASH),
+                dirPath: VersionResolver.removeVersion(isLowerCaseFile ? moduleOrBundleName : Resolver.getImplicitDependencyName(moduleOrBundleName)).replace(RE_DOT, SLASH),
 
-                versionDir: Resolver.getVersion(moduleOrBundleName)
+                versionDir: VersionResolver.getVersion(moduleOrBundleName)
             }, moduleOrBundle);
         }
 

@@ -5,11 +5,9 @@ JARS.internal('Resolver', function resolverSetup(InternalsManager) {
         BUNDLE_SUFFIX = '.*',
         EMPTY_STRING = '',
         DOT = '.',
-        VERSION_DELIMITER = '@',
-        VERSION_WITH_ZERO_PATCH = '$10',
-        RE_VERSION_WITHOUT_PATCH_NUMBER = /(\d+\.\d+\.)\d+.+/,
         RE_BUNDLE = /\.\*$/,
         ResolutionStrategies = InternalsManager.get('ResolutionStrategies'),
+        VersionResolver = InternalsManager.get('VersionResolver'),
         Resolver;
 
     /**
@@ -37,79 +35,40 @@ JARS.internal('Resolver', function resolverSetup(InternalsManager) {
          *
          * @return {string}
          */
-        getBundleName: function(moduleName) {
-            return Resolver.appendVersion(Resolver.getModuleNameWithoutVersion(moduleName) + BUNDLE_SUFFIX, Resolver.getVersion(moduleName));
-        },
+        getBundleName: VersionResolver.unwrapVersion(function getBundleName(moduleName) {
+            return moduleName + BUNDLE_SUFFIX;
+        }),
         /**
          * @param {string} moduleName
          *
          * @return {string}
          */
-        getImplicitDependencyName: function(moduleName) {
-            var version = Resolver.getVersion(moduleName),
-                moduleNameWithoutVersion = Resolver.getModuleNameWithoutVersion(moduleName),
-                implicitDependencyWithoutVersion = moduleNameWithoutVersion.substr(0, moduleNameWithoutVersion.lastIndexOf(DOT));
-
-            version && (version = version.replace(RE_VERSION_WITHOUT_PATCH_NUMBER, VERSION_WITH_ZERO_PATCH));
-
-            return Resolver.appendVersion(implicitDependencyWithoutVersion, version);
-        },
+        getImplicitDependencyName: VersionResolver.unwrapVersion(function getImplicitDependencyName(moduleName) {
+            return moduleName.substr(0, moduleName.lastIndexOf(DOT));
+        }),
         /**
          * @param {string} moduleName
          *
          * @return {string}
          */
         getModuleTail: function(moduleName) {
-            return Resolver.getModuleNameWithoutVersion(moduleName).split(DOT).pop();
-        },
-        /**
-         * @param {string} moduleName
-         *
-         * @return {boolean}
-         */
-        isVersionedModule: function(moduleName) {
-            return moduleName.indexOf(VERSION_DELIMITER) > -1;
+            return VersionResolver.removeVersion(moduleName).split(DOT).pop();
         },
         /**
          * @param {string} moduleName
          *
          * @return {string}
          */
-        getModuleNameWithoutVersion: function(moduleName) {
-            return moduleName.split(VERSION_DELIMITER)[0];
-        },
-        /**
-         * @param {string} moduleName
-         *
-         * @return {string}
-         */
-        getVersion: function(moduleName) {
-            return moduleName.split(VERSION_DELIMITER)[1] || EMPTY_STRING;
-        },
-        /**
-         * @param {string} moduleName
-         * @param {string} version
-         *
-         * @return {string}
-         */
-        appendVersion: function(moduleName, version) {
-            return (moduleName && version) ? [moduleName, version].join(VERSION_DELIMITER) : moduleName;
-        },
-        /**
-         * @param {string} moduleName
-         *
-         * @return {string}
-         */
-        extractModuleNameFromBundle: function(moduleName) {
-            return Resolver.appendVersion(Resolver.getModuleNameWithoutVersion(moduleName).replace(RE_BUNDLE, EMPTY_STRING), Resolver.getVersion(moduleName));
-        },
+        extractModuleNameFromBundle: VersionResolver.unwrapVersion(function(moduleName) {
+            return moduleName.replace(RE_BUNDLE, EMPTY_STRING);
+        }),
         /**
          * @param {string} moduleName
          *
          * @return {boolean}
          */
         isBundle: function(moduleName) {
-            return RE_BUNDLE.test(Resolver.getModuleNameWithoutVersion(moduleName));
+            return RE_BUNDLE.test(VersionResolver.removeVersion(moduleName));
         },
         /**
          * @param {JARS.internals.Module} baseModule

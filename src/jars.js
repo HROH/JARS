@@ -26,7 +26,8 @@
                 'ResolutionStrategies',
                 'Resolver',
                 'System',
-                'Utils'
+                'Utils',
+                'VersionResolver'
             ],
             internalsLoading = internalsToLoad.length + 1,
             internalsInitialized = false,
