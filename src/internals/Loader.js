@@ -79,7 +79,7 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
          */
         getModule: function(moduleName) {
             if (Resolver.isBundle(moduleName)) {
-                moduleName = Resolver.extractModuleNameFromBundle(moduleName);
+                moduleName = Resolver.removeBundle(moduleName);
             }
             else {
                 moduleName = InterceptionManager.removeInterceptionData(moduleName);

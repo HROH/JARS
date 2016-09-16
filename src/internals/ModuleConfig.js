@@ -220,7 +220,7 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
 
                 fileName: fileName,
 
-                dirPath: VersionResolver.removeVersion(isLowerCaseFile ? moduleOrBundleName : Resolver.getImplicitDependencyName(moduleOrBundleName)).replace(RE_DOT, SLASH),
+                dirPath: VersionResolver.removeVersion(isLowerCaseFile ? moduleOrBundleName : Resolver.getParentName(moduleOrBundleName)).replace(RE_DOT, SLASH),
 
                 versionDir: VersionResolver.getVersion(moduleOrBundleName)
             }, moduleOrBundle);

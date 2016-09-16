@@ -43,7 +43,7 @@ JARS.internal('Resolver', function resolverSetup(InternalsManager) {
          *
          * @return {string}
          */
-        getImplicitDependencyName: VersionResolver.unwrapVersion(function getImplicitDependencyName(moduleName) {
+        getParentName: VersionResolver.unwrapVersion(function getParentName(moduleName) {
             return moduleName.substr(0, moduleName.lastIndexOf(DOT));
         }),
         /**
@@ -59,7 +59,7 @@ JARS.internal('Resolver', function resolverSetup(InternalsManager) {
          *
          * @return {string}
          */
-        extractModuleNameFromBundle: VersionResolver.unwrapVersion(function(moduleName) {
+        removeBundle: VersionResolver.unwrapVersion(function(moduleName) {
             return moduleName.replace(RE_BUNDLE, EMPTY_STRING);
         }),
         /**

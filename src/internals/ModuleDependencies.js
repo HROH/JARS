@@ -8,9 +8,10 @@ JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsMa
         LoaderQueue = getInternal('LoaderQueue'),
         SEPARATOR = '", "',
         FOUND = 'found ',
+        DEPENDENCIES = ' dependencie(s) "${deps}"',
         MSG_DEPENDENCY_FOUND = FOUND + 'implicit dependency "${dep}"',
-        MSG_DEPENDENCIES_FOUND = FOUND + 'explicit dependencie(s) "${deps}"',
-        MSG_INTERCEPTION_DEPENDENCIES_FOUND = FOUND + 'interception dependencie(s) "${deps}"';
+        MSG_DEPENDENCIES_FOUND = FOUND + 'explicit' + DEPENDENCIES,
+        MSG_INTERCEPTION_DEPENDENCIES_FOUND = FOUND + 'interception' + DEPENDENCIES;
 
     /**
      * @class
@@ -31,7 +32,7 @@ JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsMa
         moduleDependencies._interceptionDeps = [];
 
         if(!module.isRoot()) {
-            parent = moduleDependencies.parent = module.loader.getModule(Resolver.getImplicitDependencyName(module.name) || Resolver.getRootName());
+            parent = moduleDependencies.parent = module.loader.getModule(Resolver.getParentName(module.name) || Resolver.getRootName());
 
             logger.debug(MSG_DEPENDENCY_FOUND, {
                 dep: parent.name
