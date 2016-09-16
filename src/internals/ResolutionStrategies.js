@@ -3,6 +3,7 @@ JARS.internal('ResolutionStrategies', function resolutionStrategiesSetup(Interna
 
     var getInternal = InternalsManager.get,
         System = getInternal('System'),
+        VersionResolver = getInternal('VersionResolver'),
         Utils = getInternal('Utils'),
         objectEach = Utils.objectEach,
         arrayEach = Utils.arrayEach,
@@ -14,6 +15,7 @@ JARS.internal('ResolutionStrategies', function resolutionStrategiesSetup(Interna
         MSG_BUNDLE_RESOLUTION_ERROR = MSG_DEFAULT_RESOLUTION_ERROR + 'a bundle ' + MUST_NOT_START_WITH_DOT,
         MSG_DEPS_RESOLUTION_ERROR = MSG_DEFAULT_RESOLUTION_ERROR + 'a dependency modulename must be absolute or relative to the current module',
         MSG_NESTED_RESOLUTION_ERROR = MSG_DEFAULT_RESOLUTION_ERROR + 'a nested ' + MUST_NOT_START_WITH_DOT + ' or only contain it as a special symbol',
+        MSG_VERSION_RESOLUTION_ERROR = MSG_DEFAULT_RESOLUTION_ERROR + 'a version must not be added when the parent is already versioned',
         ResolutionStrategies;
 
     /**
@@ -78,19 +80,23 @@ JARS.internal('ResolutionStrategies', function resolutionStrategiesSetup(Interna
          * @return {string[]}
          */
         string: function(baseModule, moduleName, resolutionStrategy) {
-            var isRelative = isRelativeModuleName(moduleName),
-                isValidModuleName = false,
+            var isValidModuleName = false,
+                isVersionError = false,
                 logger = (resolutionStrategy === ResolutionStrategies.bundle ? baseModule.bundle : baseModule).logger,
                 resolvedModules, absoluteModuleName;
 
-            if (baseModule.isRoot()) {
-                if(!isRelative && resolutionStrategy === ResolutionStrategies.deps) {
-                    isValidModuleName = true;
-                    absoluteModuleName = moduleName;
-                }
+
+            if(!isRelativeModuleName(moduleName) && resolutionStrategy === ResolutionStrategies.deps) {
+                isValidModuleName = true;
+                absoluteModuleName = moduleName;
             }
-            else {
-                absoluteModuleName = resolutionStrategy(baseModule, moduleName);
+            else if(!baseModule.isRoot()) {
+                if(VersionResolver.getVersion(baseModule.name) && VersionResolver.getVersion(moduleName)) {
+                    isVersionError = true;
+                }
+                else {
+                    absoluteModuleName = resolutionStrategy(baseModule, moduleName);
+                }
 
                 isValidModuleName = !!absoluteModuleName;
             }
@@ -99,7 +105,7 @@ JARS.internal('ResolutionStrategies', function resolutionStrategiesSetup(Interna
                 resolvedModules = [absoluteModuleName];
             }
             else {
-                logger.error(getResolutionError(resolutionStrategy), {
+                logger.error(isVersionError ? MSG_VERSION_RESOLUTION_ERROR : getResolutionStrategyError(resolutionStrategy), {
                     mod: moduleName
                 });
 
@@ -123,26 +129,8 @@ JARS.internal('ResolutionStrategies', function resolutionStrategiesSetup(Interna
         deps: function(baseModule, moduleName) {
             var absoluteModuleName;
 
-            if(isRelativeModuleName(moduleName)) {
-                absoluteModuleName = ResolutionStrategies.depsRelative(baseModule, moduleName);
-            }
-            else {
-                absoluteModuleName = moduleName;
-            }
-
-            return isRelativeModuleName(moduleName) ? ResolutionStrategies.depsRelative(baseModule, moduleName) : moduleName;
-        },
-        /**
-         * @param {JARS.internals.Module} baseModule
-         * @param {string} moduleName
-         *
-         * @return {string}
-         */
-        depsRelative: function(baseModule, moduleName) {
-            var absoluteModuleName;
-
             if(isRelativeModuleName(moduleName) && !baseModule.isRoot()) {
-                absoluteModuleName = ResolutionStrategies.depsRelative(baseModule.deps.parent, moduleName.substr(1));
+                absoluteModuleName = ResolutionStrategies.deps(baseModule.deps.parent, moduleName.substr(1));
             }
             else {
                 absoluteModuleName = baseModule.isRoot() ? EMPTY_STRING : makeAbsoluteModuleName(baseModule, moduleName);
@@ -192,7 +180,9 @@ JARS.internal('ResolutionStrategies', function resolutionStrategiesSetup(Interna
     function makeAbsoluteModuleName(baseModule, moduleName) {
         var separator = getInternal('InterceptionManager').removeInterceptionData(moduleName) ? DOT : EMPTY_STRING;
 
-        return [baseModule.name, moduleName].join(separator);
+        return VersionResolver.unwrapVersion(function(baseModuleName) {
+            return [baseModuleName, moduleName].join(separator);
+        })(baseModule.name);
     }
 
     /**
@@ -213,7 +203,7 @@ JARS.internal('ResolutionStrategies', function resolutionStrategiesSetup(Interna
      *
      * @param {JARS.internals.ResolutionStrategies.ResolutionStrategy} resolutionStrategy
      */
-    function getResolutionError(resolutionStrategy) {
+    function getResolutionStrategyError(resolutionStrategy) {
         var message;
 
         switch(resolutionStrategy) {
