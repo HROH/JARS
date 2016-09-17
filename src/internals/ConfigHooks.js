@@ -4,7 +4,6 @@ JARS.internal('ConfigHooks', function(InternalsManager) {
     var getInternal = InternalsManager.get,
         System = getInternal('System'),
         Loader = getInternal('Loader'),
-        Resolver = getInternal('Resolver'),
         DependenciesResolver = getInternal('DependenciesResolver'),
         BundleResolver = getInternal('BundleResolver'),
         InterceptionManager = getInternal('InterceptionManager'),
@@ -91,7 +90,7 @@ JARS.internal('ConfigHooks', function(InternalsManager) {
          * @param {(Object|Object[])} newModuleConfigs
          */
         modules: function setModuleConfigs(newModuleConfigs) {
-            var modules, rootName;
+            var rootModule;
 
             if (System.isArray(newModuleConfigs)) {
                 arrayEach(newModuleConfigs, function setModuleConfig(config) {
@@ -99,14 +98,18 @@ JARS.internal('ConfigHooks', function(InternalsManager) {
                 });
             }
             else {
-                rootName = Resolver.getRootName();
-                modules = newModuleConfigs.restrict ? DependenciesResolver.resolveDeps(Loader.getModule(rootName), newModuleConfigs.restrict) : [rootName];
+                rootModule = Loader.getRootModule();
 
-                arrayEach(modules, function updateModuleConfig(moduleName) {
-                    var module = Loader.getModule(moduleName);
+                if(newModuleConfigs.restrict) {
+                    arrayEach(DependenciesResolver.resolveDeps(rootModule, newModuleConfigs.restrict), function updateModuleConfig(moduleName) {
+                        var module = Loader.getModule(moduleName);
 
-                    (BundleResolver.isBundle(moduleName) ? module.bundle : module).config.update(newModuleConfigs);
-                });
+                        (BundleResolver.isBundle(moduleName) ? module.bundle : module).config.update(newModuleConfigs);
+                    });
+                }
+                else {
+                    rootModule.config.update(newModuleConfigs);
+                }
             }
         },
         /**
@@ -142,7 +145,7 @@ JARS.internal('ConfigHooks', function(InternalsManager) {
      */
     function exposeModulesGlobal(expose) {
         if (expose) {
-            JARS.mods = Loader.getRoot();
+            JARS.mods = Loader.getRootModule().ref;
             JARS.internals = InternalsManager;
         }
     }

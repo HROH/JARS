@@ -9,7 +9,6 @@ JARS.module('System.Modules').$export(function systemModulesFactory() {
         getInternal = internals.get,
         arrayEach = getInternal('Utils').arrayEach,
         Loader = getInternal('Loader'),
-        Resolver = getInternal('Resolver'),
         DependenciesResolver = getInternal('DependenciesResolver'),
         Modules;
 
@@ -31,7 +30,7 @@ JARS.module('System.Modules').$export(function systemModulesFactory() {
         useAll: function(moduleNames) {
             var refs = [];
 
-            moduleNames = DependenciesResolver.resolveDeps(Loader.getModule(Resolver.getRootName()), moduleNames);
+            moduleNames = DependenciesResolver.resolveDeps(Loader.getRootModule(), moduleNames);
 
             arrayEach(moduleNames, function use(moduleName) {
                 refs.push(Modules.use(moduleName));

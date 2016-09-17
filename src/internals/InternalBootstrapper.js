@@ -21,7 +21,7 @@ JARS.internal('InternalBootstrapper', function(InternalsManager) {
 
             InterceptionManager.addInterceptor(getInternal('PartialModuleInterceptor'));
 
-            Loader.registerModule(getInternal('Resolver').getRootName()).$export();
+            Loader.getRootModule().$export();
 
             Loader.registerModule('System', ['Logger', 'Modules']).$export(function systemFactory() {
                 // TODO maybe calling the internal factory for System is the better option

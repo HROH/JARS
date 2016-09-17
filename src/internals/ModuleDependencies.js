@@ -4,7 +4,6 @@ JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsMa
     var getInternal = InternalsManager.get,
         arrayEach = getInternal('Utils').arrayEach,
         hasOwnProp = getInternal('Utils').hasOwnProp,
-        Resolver = getInternal('Resolver'),
         DependenciesResolver = getInternal('DependenciesResolver'),
         LoaderQueue = getInternal('LoaderQueue'),
         SEPARATOR = '", "',
@@ -24,7 +23,8 @@ JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsMa
      */
     function ModuleDependencies(module, logger) {
         var moduleDependencies = this,
-            parent;
+            loader = module.loader,
+            parent, parentName;
 
         moduleDependencies._module = module;
         moduleDependencies._logger = logger;
@@ -32,8 +32,9 @@ JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsMa
 
         moduleDependencies._interceptionDeps = [];
 
-        if(!module.isRoot()) {
-            parent = moduleDependencies.parent = module.loader.getModule(DependenciesResolver.getParentName(module.name) || Resolver.getRootName());
+        if(!module.isRoot) {
+            parentName = DependenciesResolver.getParentName(module.name);
+            parent = moduleDependencies.parent = parentName ? loader.getModule(parentName) : loader.getRootModule();
 
             logger.debug(MSG_DEPENDENCY_FOUND, {
                 dep: parent.name
@@ -170,7 +171,7 @@ JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsMa
         _abortCircular: function() {
             var moduleDependencies = this,
                 module = moduleDependencies._module,
-                hasCircularDependencies = !module.isRoot() && module.config.get('checkCircularDeps') && moduleDependencies.hasCircular();
+                hasCircularDependencies = !module.isRoot && module.config.get('checkCircularDeps') && moduleDependencies.hasCircular();
 
             hasCircularDependencies && module.abort(moduleDependencies.getCircular());
 

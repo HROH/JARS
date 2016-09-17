@@ -4,14 +4,14 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
     var getInternal = InternalsManager.get,
         objectEach = getInternal('Utils').objectEach,
         System = getInternal('System'),
-        Resolver = getInternal('Resolver'),
         DependenciesResolver = getInternal('DependenciesResolver'),
         BundleResolver = getInternal('BundleResolver'),
         Module = getInternal('Module'),
         LoaderQueue = getInternal('LoaderQueue'),
         InterceptionManager = getInternal('InterceptionManager'),
         modulesRegistry = {},
-        currentModuleName = Resolver.getRootName(),
+        ROOT_MODULE_NAME = '*',
+        currentModuleName = ROOT_MODULE_NAME,
         currentLoaderContext = 'default',
         Loader;
 
@@ -45,7 +45,7 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
          * @param {string} moduleName
          */
         setCurrentModuleName: function(moduleName) {
-            currentModuleName = moduleName;
+            currentModuleName = moduleName || ROOT_MODULE_NAME;
         },
         /**
          * @return {{moduleName: string, path: string}}
@@ -63,8 +63,8 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
         /**
          * @return {Object}
          */
-        getRoot: function() {
-            return Loader.getModuleRef(Resolver.getRootName());
+        getRootModule: function() {
+            return Loader.getModule(ROOT_MODULE_NAME, true);
         },
         /**
          * @param {string} moduleName
@@ -76,10 +76,11 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
         },
         /**
          * @param {string} moduleName
+         * @param {boolean} [isRoot]
          *
          * @return {JARS.internals.Module}
          */
-        getModule: function(moduleName) {
+        getModule: function(moduleName, isRoot) {
             if (BundleResolver.isBundle(moduleName)) {
                 moduleName = BundleResolver.removeBundle(moduleName);
             }
@@ -87,15 +88,16 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
                 moduleName = InterceptionManager.removeInterceptionData(moduleName);
             }
 
-            return modulesRegistry[moduleName] || Loader.createModule(moduleName);
+            return modulesRegistry[moduleName] || Loader.createModule(moduleName, isRoot);
         },
         /**
          * @param {string} moduleName
+         * @param {boolean} [isRoot]
          *
          * @return {JARS.internals.Module}
          */
-        createModule: function(moduleName) {
-            return (modulesRegistry[moduleName] = new Module(Loader, moduleName));
+        createModule: function(moduleName, isRoot) {
+            return (modulesRegistry[moduleName] = new Module(Loader, moduleName, isRoot));
         },
         /**
          * @param {function(JARS.internals.Module, string)} callback
@@ -130,7 +132,7 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
          * @param {JARS.internals.LoaderQueue.ModuleLoadedCallback} onModuleImported
          */
         $import: function(moduleNames, onModulesImported, onModuleAborted, onModuleImported) {
-            var rootModule = Loader.getModule(Resolver.getRootName());
+            var rootModule = Loader.getRootModule();
 
             new LoaderQueue(rootModule, function onModulesLoaded(refs) {
                 onModulesImported.apply(null, refs);

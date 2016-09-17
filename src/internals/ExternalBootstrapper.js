@@ -73,7 +73,7 @@ JARS.internal('ExternalBootstrapper', function externalBootstrapperSetup(Interna
         }
 
         function onImport() {
-            var root = Loader.getRoot();
+            var root = Loader.getRootModule().ref;
 
             if (ConfigsManager.get('supressErrors')) {
                 try {

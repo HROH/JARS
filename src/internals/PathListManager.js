@@ -6,9 +6,8 @@ JARS.internal('PathListManager', function pathListManagerSetup(InternalsManager)
         hasOwnProp = Utils.hasOwnProp,
         arrayEach = Utils.arrayEach,
         Loader = getInternal('Loader'),
-        Resolver = getInternal('Resolver'),
         BundleResolver = getInternal('BundleResolver'),
-        excludedModules = [Resolver.getRootName(), 'System', 'System.Logger', 'System.Modules'],
+        excludedModules = [Loader.getRootModule().name, 'System', 'System.Logger', 'System.Modules'],
         sortedModules = {},
         pathList = [],
         PathListManager;

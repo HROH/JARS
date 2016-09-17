@@ -4,14 +4,14 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
     var getInternal = InternalsManager.get,
         System = getInternal('System'),
         SourceManager = getInternal('SourceManager'),
-        Resolver = getInternal('Resolver'),
+        DependenciesResolver = getInternal('DependenciesResolver'),
         ModuleQueue = getInternal('ModuleQueue'),
         ModuleDependencies = getInternal('ModuleDependencies'),
         ModuleBundle = getInternal('ModuleBundle'),
         ModuleConfig = getInternal('ModuleConfig'),
         ModuleLogger = getInternal('ModuleLogger'),
         ModuleState = getInternal('ModuleState'),
-        SEPARATOR = '", "',
+        SEPARATOR = '" -> "',
         MSG_RECOVERING = 'failed to load and tries to recover...',
         // Errors when module is aborted
         MSG_MODULE_ABORTED = 'given path "${path}" after ${sec} second(s) - file may not exist',
@@ -35,13 +35,15 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
      *
      * @param {JARS.internals.Loader} loader
      * @param {string} moduleName
+     * @param {boolean} [isRoot=false]
      */
-    function Module(loader, moduleName) {
+    function Module(loader, moduleName, isRoot) {
         var module = this,
             dependencies, bundleConfig, logger, state, parent;
 
-        module.name = moduleName;
         module.loader = loader;
+        module.name = moduleName;
+        module.isRoot = isRoot || false;
 
         module.logger = logger = new ModuleLogger(moduleName);
         module.state = state = new ModuleState(logger);
@@ -52,17 +54,11 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
         parent = dependencies.parent;
         module.bundle = new ModuleBundle(module, parent && parent.bundle.config);
         bundleConfig = module.bundle.config;
-        module.config = module.isRoot() ? bundleConfig : new ModuleConfig(module, bundleConfig);
+        module.config = module.isRoot ? bundleConfig : new ModuleConfig(module, bundleConfig);
     }
 
     Module.prototype = {
         constructor: Module,
-        /**
-         * @return {boolean}
-         */
-        isRoot: function() {
-            return Resolver.isRootName(this.name);
-        },
         /**
          * @param {string} [fileType]
          *
@@ -149,7 +145,7 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
                 isDependenciesArray = System.isArray(dependencyOrArray),
                 message;
 
-            if (!module.isRoot() && ((state.isLoading() && !module.findRecover()) || isRegistered)) {
+            if (!module.isRoot && ((state.isLoading() && !module.findRecover()) || isRegistered)) {
                 message = isRegistered ? (isDependenciesArray ? MSG_MODULE_CIRCULAR_DEPENDENCIES_ABORTED : MSG_MODULE_DEPENDENCY_ABORTED) : MSG_MODULE_ABORTED;
 
                 state.setAborted(message, isRegistered ? (isDependenciesArray ? {
@@ -203,13 +199,13 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
             if (state.trySetRegistered()) {
                 module.clearAutoAbort();
 
-                if(!module.isRoot() && module.config.get('checkCircularDeps') && dependencies.hasCircular()) {
+                if(!module.isRoot && module.config.get('checkCircularDeps') && dependencies.hasCircular()) {
                     module.abort(dependencies.getCircular());
                 }
                 else {
                     dependencies.request(function onDependenciesLoaded(dependencyRefs) {
                         if (state.isRegistered() && !state.isLoaded()) {
-                            if(module.isRoot()) {
+                            if(module.isRoot) {
                                 module.ref = {};
                             }
                             else {
@@ -217,9 +213,9 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
 
                                 loader.setCurrentModuleName(moduleName);
 
-                                module.ref = parentRef[Resolver.getModuleTail(moduleName)] = factory ? factory.apply(parentRef, dependencyRefs) || {} : {};
+                                module.ref = parentRef[DependenciesResolver.removeParentName(moduleName)] = factory ? factory.apply(parentRef, dependencyRefs) || {} : {};
 
-                                loader.setCurrentModuleName(Resolver.getRootName());
+                                loader.setCurrentModuleName();
                             }
 
                             state.setLoaded();

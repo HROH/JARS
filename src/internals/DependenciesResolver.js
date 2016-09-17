@@ -17,6 +17,14 @@ JARS.internal('DependenciesResolver', function dependenciesResolverSetup(Interna
          *
          * @return {string}
          */
+        removeParentName: VersionResolver.unwrapVersion(function removeParentName(moduleName) {
+            return moduleName.substr(moduleName.lastIndexOf(DOT) + 1);
+        }),
+        /**
+         * @param {string} moduleName
+         *
+         * @return {string}
+         */
         getParentName: VersionResolver.unwrapVersion(function getParentName(moduleName) {
             return moduleName.substr(0, moduleName.lastIndexOf(DOT));
         }),

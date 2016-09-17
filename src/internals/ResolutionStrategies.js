@@ -90,7 +90,7 @@ JARS.internal('ResolutionStrategies', function resolutionStrategiesSetup(Interna
                 isValidModuleName = true;
                 absoluteModuleName = moduleName;
             }
-            else if(!baseModule.isRoot()) {
+            else if(!baseModule.isRoot) {
                 if(VersionResolver.getVersion(baseModule.name) && VersionResolver.getVersion(moduleName)) {
                     isVersionError = true;
                 }
@@ -129,11 +129,11 @@ JARS.internal('ResolutionStrategies', function resolutionStrategiesSetup(Interna
         deps: function(baseModule, moduleName) {
             var absoluteModuleName;
 
-            if(isRelativeModuleName(moduleName) && !baseModule.isRoot()) {
+            if(isRelativeModuleName(moduleName) && !baseModule.isRoot) {
                 absoluteModuleName = ResolutionStrategies.deps(baseModule.deps.parent, moduleName.substr(1));
             }
             else {
-                absoluteModuleName = baseModule.isRoot() ? EMPTY_STRING : makeAbsoluteModuleName(baseModule, moduleName);
+                absoluteModuleName = baseModule.isRoot ? EMPTY_STRING : makeAbsoluteModuleName(baseModule, moduleName);
             }
 
             return absoluteModuleName;

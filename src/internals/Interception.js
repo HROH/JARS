@@ -42,7 +42,7 @@ JARS.internal('Interception', function interceptionSetup(InternalsManager) {
         getFilePath: function(fileType) {
             var listeningModule = this.listeningModule;
 
-            return !listeningModule.isRoot() && listeningModule.getFullPath(fileType);
+            return !listeningModule.isRoot && listeningModule.getFullPath(fileType);
         },
         /**
          * @param {JARS.internals.ModuleDependencies.Declaration} moduleNames
@@ -56,7 +56,7 @@ JARS.internal('Interception', function interceptionSetup(InternalsManager) {
 
             moduleNames = DependenciesResolver.resolveDeps(loader.getModule(this.info.moduleName), moduleNames);
 
-            if (!listeningModule.isRoot()) {
+            if (!listeningModule.isRoot) {
                 listeningModule.deps.requestAndLink(moduleNames, onModulesLoaded, onModuleAborted, onModuleLoaded);
             }
             else {
