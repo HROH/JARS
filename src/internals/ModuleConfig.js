@@ -212,8 +212,8 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
             fileName, firstLetterFileName, isLowerCaseFile;
 
         if(!BundleResolver.isBundle(moduleOrBundleName)) {
-            fileName = VersionResolver.removeVersion(DependenciesResolver.removeParentName(moduleOrBundleName)),
-            firstLetterFileName = fileName.charAt(0),
+            fileName = VersionResolver.removeVersion(DependenciesResolver.removeParentName(moduleOrBundleName));
+            firstLetterFileName = fileName.charAt(0);
             isLowerCaseFile = firstLetterFileName === firstLetterFileName.toLowerCase();
 
             transformAndUpdateOptions(defaultOptions, {
