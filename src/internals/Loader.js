@@ -107,17 +107,17 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
         },
         /**
          * @param {string} moduleName
-         * @param {JARS.internals.ModuleBundle.Declaration} bundle
+         * @param {JARS.internals.ModuleBundle.Declaration} bundleModules
          *
          * @return {JARS.internals.Module}
          */
-        registerModule: function(moduleName, bundle) {
+        registerModule: function(moduleName, bundleModules) {
             var module;
 
             if(moduleName) {
                 module = Loader.getModule(moduleName);
 
-                module.defineBundle(bundle);
+                module.bundle.add(bundleModules);
             }
             else {
                 System.Logger.error('No modulename provided');

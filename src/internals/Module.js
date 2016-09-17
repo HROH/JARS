@@ -218,12 +218,6 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
                     }
                 });
             }
-        },
-        /**
-         * @param {JARS.internals.ModuleBundle.Declaration} bundleModules
-         */
-        defineBundle: function(bundleModules) {
-            this.bundle.add(bundleModules);
         }
     };
 
