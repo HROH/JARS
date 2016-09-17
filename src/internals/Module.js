@@ -191,7 +191,6 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
         $export: function(factory) {
             var module = this,
                 state = module.state,
-                dependencies = module.deps,
                 loader = module.loader,
                 moduleName = module.name,
                 parentRef;
@@ -199,30 +198,25 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
             if (state.trySetRegistered()) {
                 module.clearAutoAbort();
 
-                if(!module.isRoot && module.config.get('checkCircularDeps') && dependencies.hasCircular()) {
-                    module.abort(dependencies.getCircular());
-                }
-                else {
-                    dependencies.request(function onDependenciesLoaded(dependencyRefs) {
-                        if (state.isRegistered() && !state.isLoaded()) {
-                            if(module.isRoot) {
-                                module.ref = {};
-                            }
-                            else {
-                                parentRef = dependencyRefs.shift();
-
-                                loader.setCurrentModuleName(moduleName);
-
-                                module.ref = parentRef[DependenciesResolver.removeParentName(moduleName)] = factory ? factory.apply(parentRef, dependencyRefs) || {} : {};
-
-                                loader.setCurrentModuleName();
-                            }
-
-                            state.setLoaded();
-                            module.queue.notify();
+                module.deps.request(function onDependenciesLoaded(dependencyRefs) {
+                    if (state.isRegistered() && !state.isLoaded()) {
+                        if(module.isRoot) {
+                            module.ref = {};
                         }
-                    });
-                }
+                        else {
+                            parentRef = dependencyRefs.shift();
+
+                            loader.setCurrentModuleName(moduleName);
+
+                            module.ref = parentRef[DependenciesResolver.removeParentName(moduleName)] = factory ? factory.apply(parentRef, dependencyRefs) || {} : {};
+
+                            loader.setCurrentModuleName();
+                        }
+
+                        state.setLoaded();
+                        module.queue.notify();
+                    }
+                });
             }
         },
         /**
