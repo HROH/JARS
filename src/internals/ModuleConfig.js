@@ -16,6 +16,8 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
         objectEach = Utils.objectEach,
         configTransforms = {},
         Resolver = getInternal('Resolver'),
+        DependenciesResolver = getInternal('DependenciesResolver'),
+        BundleResolver = getInternal('BundleResolver'),
         VersionResolver = getInternal('VersionResolver'),
         System = getInternal('System');
 
@@ -210,7 +212,7 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
             defaultOptions = new ModuleConfigOptions(),
             fileName, firstLetterFileName, isLowerCaseFile;
 
-        if(!Resolver.isBundle(moduleOrBundleName)) {
+        if(!BundleResolver.isBundle(moduleOrBundleName)) {
             fileName = Resolver.getModuleTail(moduleOrBundleName),
             firstLetterFileName = fileName.charAt(0),
             isLowerCaseFile = firstLetterFileName === firstLetterFileName.toLowerCase();
@@ -220,7 +222,7 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
 
                 fileName: fileName,
 
-                dirPath: VersionResolver.removeVersion(isLowerCaseFile ? moduleOrBundleName : Resolver.getParentName(moduleOrBundleName)).replace(RE_DOT, SLASH),
+                dirPath: VersionResolver.removeVersion(isLowerCaseFile ? moduleOrBundleName : DependenciesResolver.getParentName(moduleOrBundleName)).replace(RE_DOT, SLASH),
 
                 versionDir: VersionResolver.getVersion(moduleOrBundleName)
             }, moduleOrBundle);

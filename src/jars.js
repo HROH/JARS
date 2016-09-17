@@ -5,8 +5,10 @@
 
     InternalsManager = (function internalsManagerSetup() {
         var internalsToLoad = [
+                'BundleResolver',
                 'ConfigHooks',
                 'ConfigsManager',
+                'DependenciesResolver',
                 'ExternalBootstrapper',
                 'Interception',
                 'InterceptionManager',

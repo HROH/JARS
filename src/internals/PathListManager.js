@@ -7,6 +7,7 @@ JARS.internal('PathListManager', function pathListManagerSetup(InternalsManager)
         arrayEach = Utils.arrayEach,
         Loader = getInternal('Loader'),
         Resolver = getInternal('Resolver'),
+        BundleResolver = getInternal('BundleResolver'),
         excludedModules = [Resolver.getRootName(), 'System', 'System.Logger', 'System.Modules'],
         sortedModules = {},
         pathList = [],
@@ -67,7 +68,7 @@ JARS.internal('PathListManager', function pathListManagerSetup(InternalsManager)
      */
     function addModules(modules) {
         arrayEach(modules || [], function addModuleToPathList(moduleName) {
-            addToPathList(Loader.getModule(moduleName), Resolver.isBundle(moduleName));
+            addToPathList(Loader.getModule(moduleName), BundleResolver.isBundle(moduleName));
         });
     }
 

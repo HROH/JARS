@@ -5,6 +5,8 @@ JARS.internal('ConfigHooks', function(InternalsManager) {
         System = getInternal('System'),
         Loader = getInternal('Loader'),
         Resolver = getInternal('Resolver'),
+        DependenciesResolver = getInternal('DependenciesResolver'),
+        BundleResolver = getInternal('BundleResolver'),
         InterceptionManager = getInternal('InterceptionManager'),
         SourceManager = getInternal('SourceManager'),
         Utils = getInternal('Utils'),
@@ -98,12 +100,12 @@ JARS.internal('ConfigHooks', function(InternalsManager) {
             }
             else {
                 rootName = Resolver.getRootName();
-                modules = newModuleConfigs.restrict ? Resolver.resolve(Loader.getModule(rootName), newModuleConfigs.restrict) : [rootName];
+                modules = newModuleConfigs.restrict ? DependenciesResolver.resolveDeps(Loader.getModule(rootName), newModuleConfigs.restrict) : [rootName];
 
                 arrayEach(modules, function updateModuleConfig(moduleName) {
                     var module = Loader.getModule(moduleName);
 
-                    (Resolver.isBundle(moduleName) ? module.bundle : module).config.update(newModuleConfigs);
+                    (BundleResolver.isBundle(moduleName) ? module.bundle : module).config.update(newModuleConfigs);
                 });
             }
         },

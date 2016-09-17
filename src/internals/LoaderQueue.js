@@ -4,7 +4,7 @@ JARS.internal('LoaderQueue', function(InternalsManager) {
     var getInternal = InternalsManager.get,
         arrayEach = getInternal('Utils').arrayEach,
         System = getInternal('System'),
-        Resolver = getInternal('Resolver'),
+        BundleResolver = getInternal('BundleResolver'),
         InterceptionManager = getInternal('InterceptionManager'),
         SEPARATOR = '", "',
         MSG_SUBSCRIBED_TO = 'subscribed to "${subs}"',
@@ -74,7 +74,7 @@ JARS.internal('LoaderQueue', function(InternalsManager) {
 
                 arrayEach(moduleNames, function loadModule(moduleName, moduleIndex) {
                     var requestedModule = Loader.getModule(moduleName),
-                        requestedModuleOrBundle = Resolver.isBundle(moduleName) ? requestedModule.bundle : requestedModule;
+                        requestedModuleOrBundle = BundleResolver.isBundle(moduleName) ? requestedModule.bundle : requestedModule;
 
                     refsIndexLookUp[moduleName] = loaderQueue._total - modulesToLoad + moduleIndex;
 

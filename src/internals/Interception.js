@@ -1,7 +1,7 @@
 JARS.internal('Interception', function interceptionSetup(InternalsManager) {
     'use strict';
 
-    var Resolver = InternalsManager.get('Resolver'),
+    var DependenciesResolver = InternalsManager.get('DependenciesResolver'),
         MSG_INTERCEPTION_ERROR = 'error in interception of this module by interceptor "${type}" with data "${data}"';
 
     /**
@@ -54,7 +54,7 @@ JARS.internal('Interception', function interceptionSetup(InternalsManager) {
             var listeningModule = this.listeningModule,
                 loader = listeningModule.loader;
 
-            moduleNames = Resolver.resolve(loader.getModule(this.info.moduleName), moduleNames);
+            moduleNames = DependenciesResolver.resolveDeps(loader.getModule(this.info.moduleName), moduleNames);
 
             if (!listeningModule.isRoot()) {
                 listeningModule.deps.requestAndLink(moduleNames, onModulesLoaded, onModuleAborted, onModuleLoaded);

@@ -2,7 +2,7 @@ JARS.internal('ModuleBundle', function moduleBundleSetup(InternalsManager) {
     'use strict';
 
     var getInternal = InternalsManager.get,
-        Resolver = getInternal('Resolver'),
+        BundleResolver = getInternal('BundleResolver'),
         LoaderQueue = getInternal('LoaderQueue'),
         ModuleQueue = getInternal('ModuleQueue'),
         ModuleConfig = getInternal('ModuleConfig'),
@@ -25,7 +25,7 @@ JARS.internal('ModuleBundle', function moduleBundleSetup(InternalsManager) {
      */
     function ModuleBundle(module, parentConfig) {
         var moduleBundle = this,
-            moduleBundleName = Resolver.getBundleName(module.name);
+            moduleBundleName = BundleResolver.getBundleName(module.name);
 
         moduleBundle.name = moduleBundleName;
         moduleBundle.config = new ModuleConfig(moduleBundle, parentConfig);
@@ -42,7 +42,7 @@ JARS.internal('ModuleBundle', function moduleBundleSetup(InternalsManager) {
          */
         add: function(bundle) {
             var moduleBundle = this,
-                resolvedBundle = Resolver.resolveBundle(moduleBundle._module, bundle);
+                resolvedBundle = BundleResolver.resolveBundle(moduleBundle._module, bundle);
 
             resolvedBundle.length && moduleBundle.logger.debug(MSG_BUNDLE_DEFINED, {
                 bundle: resolvedBundle.join(SEPARATOR)

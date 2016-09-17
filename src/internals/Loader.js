@@ -5,6 +5,8 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
         objectEach = getInternal('Utils').objectEach,
         System = getInternal('System'),
         Resolver = getInternal('Resolver'),
+        DependenciesResolver = getInternal('DependenciesResolver'),
+        BundleResolver = getInternal('BundleResolver'),
         Module = getInternal('Module'),
         LoaderQueue = getInternal('LoaderQueue'),
         InterceptionManager = getInternal('InterceptionManager'),
@@ -78,8 +80,8 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
          * @return {JARS.internals.Module}
          */
         getModule: function(moduleName) {
-            if (Resolver.isBundle(moduleName)) {
-                moduleName = Resolver.removeBundle(moduleName);
+            if (BundleResolver.isBundle(moduleName)) {
+                moduleName = BundleResolver.removeBundle(moduleName);
             }
             else {
                 moduleName = InterceptionManager.removeInterceptionData(moduleName);
@@ -132,7 +134,7 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
 
             new LoaderQueue(rootModule, function onModulesLoaded(refs) {
                 onModulesImported.apply(null, refs);
-            }, onModuleImported, onModuleAborted).loadModules(Resolver.resolve(rootModule, moduleNames));
+            }, onModuleImported, onModuleAborted).loadModules(DependenciesResolver.resolveDeps(rootModule, moduleNames));
         }
     };
 

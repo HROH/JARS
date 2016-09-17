@@ -5,6 +5,7 @@ JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsMa
         arrayEach = getInternal('Utils').arrayEach,
         hasOwnProp = getInternal('Utils').hasOwnProp,
         Resolver = getInternal('Resolver'),
+        DependenciesResolver = getInternal('DependenciesResolver'),
         LoaderQueue = getInternal('LoaderQueue'),
         SEPARATOR = '", "',
         FOUND = 'found ',
@@ -32,7 +33,7 @@ JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsMa
         moduleDependencies._interceptionDeps = [];
 
         if(!module.isRoot()) {
-            parent = moduleDependencies.parent = module.loader.getModule(Resolver.getParentName(module.name) || Resolver.getRootName());
+            parent = moduleDependencies.parent = module.loader.getModule(DependenciesResolver.getParentName(module.name) || Resolver.getRootName());
 
             logger.debug(MSG_DEPENDENCY_FOUND, {
                 dep: parent.name
@@ -72,7 +73,7 @@ JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsMa
             else {
                 message = MSG_DEPENDENCIES_FOUND;
                 depsKey = '_deps';
-                dependencies = Resolver.resolve(moduleDependencies._module, dependencies);
+                dependencies = DependenciesResolver.resolveDeps(moduleDependencies._module, dependencies);
             }
 
             dependencies.length && moduleDependencies._logger.debug(message, {
