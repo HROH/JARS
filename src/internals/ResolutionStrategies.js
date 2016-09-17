@@ -22,6 +22,8 @@ JARS.internal('ResolutionStrategies', function resolutionStrategiesSetup(Interna
      * @namespace
      *
      * @memberof JARS.internals
+     *
+     * @borrows JARS.internals.ResolutionStrategies~makeAbsoluteModuleName as bundle
      */
     ResolutionStrategies = {
         /**
@@ -127,16 +129,7 @@ JARS.internal('ResolutionStrategies', function resolutionStrategiesSetup(Interna
          * @return {string}
          */
         deps: function(baseModule, moduleName) {
-            var absoluteModuleName;
-
-            if(isRelativeModuleName(moduleName) && !baseModule.isRoot) {
-                absoluteModuleName = ResolutionStrategies.deps(baseModule.deps.parent, moduleName.substr(1));
-            }
-            else {
-                absoluteModuleName = baseModule.isRoot ? EMPTY_STRING : makeAbsoluteModuleName(baseModule, moduleName);
-            }
-
-            return absoluteModuleName;
+            return (!baseModule.isRoot && isRelativeModuleName(moduleName)) ? ResolutionStrategies.deps(baseModule.deps.parent, moduleName.substr(1)) : makeAbsoluteModuleName(baseModule, moduleName);
         },
         /**
          * @param {JARS.internals.Module} baseModule
@@ -145,27 +138,10 @@ JARS.internal('ResolutionStrategies', function resolutionStrategiesSetup(Interna
          * @return {string}
          */
         nested: function(baseModule, moduleName) {
-            var absoluteModuleName;
-
-            // self reference
-            if(moduleName === DOT) {
-                absoluteModuleName = baseModule.name;
-            }
-            else if (!isRelativeModuleName(moduleName)) {
-                absoluteModuleName = makeAbsoluteModuleName(baseModule, moduleName);
-            }
-
-            return absoluteModuleName;
+            return moduleName === DOT ? baseModule.name : makeAbsoluteModuleName(baseModule, moduleName);
         },
-        /**
-         * @param {JARS.internals.Module} baseModule
-         * @param {string} moduleName
-         *
-         * @return {string}
-         */
-        bundle: function(baseModule, moduleName) {
-            return isRelativeModuleName(moduleName) ? EMPTY_STRING : makeAbsoluteModuleName(baseModule, moduleName);
-        }
+
+        bundle: makeAbsoluteModuleName
     };
 
     /**
@@ -180,7 +156,7 @@ JARS.internal('ResolutionStrategies', function resolutionStrategiesSetup(Interna
     function makeAbsoluteModuleName(baseModule, moduleName) {
         var separator = getInternal('InterceptionManager').removeInterceptionData(moduleName) ? DOT : EMPTY_STRING;
 
-        return VersionResolver.unwrapVersion(function(baseModuleName) {
+        return (baseModule.isRoot || isRelativeModuleName(moduleName)) ? EMPTY_STRING : VersionResolver.unwrapVersion(function(baseModuleName) {
             return [baseModuleName, moduleName].join(separator);
         })(baseModule.name);
     }
