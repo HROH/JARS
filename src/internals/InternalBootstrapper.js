@@ -14,12 +14,7 @@ JARS.internal('InternalBootstrapper', function(InternalsManager) {
             var SourceManager = getInternal('SourceManager'),
                 System = getInternal('System'),
                 Loader = getInternal('Loader'),
-                ConfigsManager = getInternal('ConfigsManager'),
-                InterceptionManager = getInternal('InterceptionManager');
-
-            InterceptionManager.addInterceptor(getInternal('PluginInterceptor'));
-
-            InterceptionManager.addInterceptor(getInternal('PartialModuleInterceptor'));
+                ConfigsManager = getInternal('ConfigsManager');
 
             Loader.getRootModule().$export();
 
@@ -48,7 +43,12 @@ JARS.internal('InternalBootstrapper', function(InternalsManager) {
                     restrict: 'System.*',
 
                     basePath: SourceManager.INTERNALS_PATH
-                }]
+                }],
+
+                interceptors: [
+                    getInternal('PluginInterceptor'),
+                    getInternal('PartialModuleInterceptor')
+                ]
             });
         }
     };
