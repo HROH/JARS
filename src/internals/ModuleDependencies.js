@@ -24,7 +24,7 @@ JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsMa
     function ModuleDependencies(module, logger) {
         var moduleDependencies = this,
             loader = module.loader,
-            parent, parentName;
+            parentName;
 
         moduleDependencies._module = module;
         moduleDependencies._logger = logger;
@@ -34,10 +34,10 @@ JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsMa
 
         if(!module.isRoot) {
             parentName = DependenciesResolver.getParentName(module.name);
-            parent = moduleDependencies.parent = parentName ? loader.getModule(parentName) : loader.getRootModule();
+            moduleDependencies.parent = parentName ? loader.getModule(parentName) : loader.getRootModule();
 
-            logger.debug(MSG_DEPENDENCY_FOUND, {
-                dep: parent.name
+            parentName && logger.debug(MSG_DEPENDENCY_FOUND, {
+                dep: parentName
             });
         }
     }
@@ -94,9 +94,7 @@ JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsMa
 
             moduleDependencies.add(interceptionDependencies, true);
 
-            if(!moduleDependencies._abortCircular()) {
-                new LoaderQueue(moduleDependencies._module, onModulesLoaded, onModuleLoaded, onModuleAborted).loadModules(interceptionDependencies);
-            }
+            loadDependencies(moduleDependencies, interceptionDependencies, onModulesLoaded, onModuleAborted, onModuleLoaded);
         },
         /**
          * @param {JARS.internals.LoaderQueue.ModulesLoadedCallback} onModulesLoaded
@@ -104,9 +102,7 @@ JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsMa
         request: function(onModulesLoaded) {
             var moduleDependencies = this;
 
-            if(!moduleDependencies._abortCircular()) {
-                new LoaderQueue(moduleDependencies._module, onModulesLoaded).loadModules(moduleDependencies.getAll());
-            }
+            loadDependencies(moduleDependencies, moduleDependencies.getAll(), onModulesLoaded);
         },
         /**
          * @return {boolean}
@@ -162,22 +158,29 @@ JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsMa
             }
 
             return traceResult;
-        },
-        /**
-         * @private
-         *
-         * @return {boolean}
-         */
-        _abortCircular: function() {
-            var moduleDependencies = this,
-                module = moduleDependencies._module,
-                hasCircularDependencies = !module.isRoot && module.config.get('checkCircularDeps') && moduleDependencies.hasCircular();
-
-            hasCircularDependencies && module.abort(moduleDependencies.getCircular());
-
-            return hasCircularDependencies;
         }
     };
+
+    /**
+     * @memberof JARS.internals.ModuleDependencies
+     * @inner
+     *
+     * @param {JARS.internals.ModuleDependencies} moduleDependencies
+     * @param {JARS.internals.ModuleDependencies.Declaration} dependenciesToLoad
+     * @param {JARS.internals.LoaderQueue.ModulesLoadedCallback} onModulesLoaded
+     * @param {JARS.internals.ModuleQueue.FailCallback} onModuleAborted
+     * @param {JARS.internals.LoaderQueue.ModuleLoadedCallback} onModuleLoaded
+     */
+    function loadDependencies(moduleDependencies, dependenciesToLoad, onModulesLoaded, onModuleAborted, onModuleLoaded) {
+        var module = moduleDependencies._module,
+            hasCircularDependencies = !module.isRoot && module.config.get('checkCircularDeps') && moduleDependencies.hasCircular();
+
+        hasCircularDependencies && module.abort(moduleDependencies.getCircular());
+
+        if(!hasCircularDependencies) {
+            new LoaderQueue(module, onModulesLoaded, onModuleLoaded, onModuleAborted).loadModules(dependenciesToLoad);
+        }
+    }
 
     /**
      * @memberof JARS.internals.ModuleDependencies
