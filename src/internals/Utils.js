@@ -11,6 +11,23 @@ JARS.internal('Utils', function utilsSetup() {
      */
     Utils = {
         /**
+         * @param {Function} Constructor
+         * @param {Object} [newProto]
+         *
+         * @return {Object}
+         */
+        create: function(Constructor, newProto) {
+            var oldProto = Constructor.prototype, object;
+
+            newProto && (Constructor.prototype = newProto);
+
+            object = new Constructor();
+
+            newProto && (Constructor.prototype = oldProto);
+
+            return object;
+        },
+        /**
          * @param {Object} object
          * @param {string} prop
          *

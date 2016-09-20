@@ -1,73 +1,20 @@
 JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
     'use strict';
 
-    var MIN_TIMEOUT = 0.5,
-        STRING_CHECK = 'String',
-        OBJECT_CHECK = 'Object',
-        BOOLEAN_CHECK = 'Boolean',
-        RE_END_SLASH = /\/$/,
-        RE_DOT = /\./g,
-        SLASH = '/',
+    var RE_DOT = /\./g,
         DEFAULT_EXTENSION = 'js',
+        SLASH = '/',
         getInternal = InternalsManager.get,
         Utils = getInternal('Utils'),
+        create = Utils.create,
         hasOwnProp = Utils.hasOwnProp,
-        objectMerge = Utils.objectMerge,
         objectEach = Utils.objectEach,
-        configTransforms = {},
+        ModuleConfigOptions = getInternal('ModuleConfigOptions'),
+        ModuleConfigTransforms = getInternal('ModuleConfigTransforms'),
         DependenciesResolver = getInternal('DependenciesResolver'),
         BundleResolver = getInternal('BundleResolver'),
         VersionResolver = getInternal('VersionResolver'),
         System = getInternal('System');
-
-    addConfigTransform('basePath', STRING_CHECK, ensureEndsWithSlash);
-
-    addConfigTransform('cache', BOOLEAN_CHECK, function cacheTransform(cache) {
-        return !!cache;
-    });
-
-    addConfigTransform('checkCircularDeps', BOOLEAN_CHECK);
-
-    addConfigTransform('config', OBJECT_CHECK, function configTransform(newConfig, moduleOrBundle) {
-        return objectMerge(moduleOrBundle.config.get('config'), newConfig);
-    });
-
-    addConfigTransform('dirPath', STRING_CHECK, ensureEndsWithSlash);
-
-    addConfigTransform('extension', STRING_CHECK, function extensionTransform(extension) {
-        return '.' + extension;
-    });
-
-    addConfigTransform('fileName', STRING_CHECK);
-
-    addConfigTransform('minified', BOOLEAN_CHECK, function minTransform(loadMin) {
-        return loadMin ? '.min' : '';
-    });
-
-    addConfigTransform('recover', OBJECT_CHECK, function recoverTransform(recoverConfig, moduleOrBundle) {
-        // create a copy of the recover-config
-        // because it should update for every module independently
-        var recover = objectMerge({}, recoverConfig);
-
-        recover.restrict = moduleOrBundle.name;
-        // if no next recover-config is given set it explicitly
-        // this is important because the recoverflow is as follows:
-        // - if the module has a recover-config, use it to update its config
-        // - if it has no recover-config look for it in a higher bundle-config
-        // - if such a config is found, update the config for the module
-        // - when the module-config is updated, options will always be overwritten but never deleted
-        // So if the module has a recover-config that doesn't get replaced
-        // it may repeatedly try to recover with this config
-        recover.recover || (recover.recover = null);
-
-        return recover;
-    });
-
-    addConfigTransform('timeout', 'Number', function timeoutTransform(timeout) {
-        return (timeout > MIN_TIMEOUT ? timeout : MIN_TIMEOUT);
-    });
-
-    addConfigTransform('versionDir', STRING_CHECK, ensureEndsWithSlash);
 
     /**
      * @class
@@ -123,7 +70,7 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
             return result;
         },
         /**
-         * @return {JARS.internals.ModuleConfig.ModuleConfigOptions}
+         * @return {JARS.internals.ModuleConfigOptions}
          */
         inheritOptions: function() {
             return create(ModuleConfigOptions, this._options);
@@ -131,48 +78,10 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
     };
 
     /**
-     * @callback TransformFunction
-     *
      * @memberof JARS.internals.ModuleConfig
      * @inner
      *
-     * @param {*} configValue
-     * @param {(JARS.internals.Module|JARS.internals.ModuleBundle)} [moduleOrBundle]
-     */
-
-    /**
-     * @memberof JARS.internals.ModuleConfig
-     * @inner
-     *
-     * @param {string} configKey
-     * @param {string} typeCheck
-     * @param {JARS.internals.ModuleConfig.TransformFunction} [transform]
-     */
-    function addConfigTransform(configKey, typeCheck, transform) {
-        configTransforms[configKey] = {
-            check: typeCheck,
-
-            transform: transform
-        };
-    }
-
-    /**
-     * @memberof JARS.internals.ModuleConfig
-     * @inner
-     *
-     * @param {string} path
-     *
-     * @return {string}
-     */
-    function ensureEndsWithSlash(path) {
-        return (!path || RE_END_SLASH.test(path)) ? path : path + SLASH;
-    }
-
-    /**
-     * @memberof JARS.internals.ModuleConfig
-     * @inner
-     *
-     * @param {JARS.internals.ModuleConfig.internals.ModuleConfigOptions} oldOptions
+     * @param {JARS.internals.ModuleConfigOptions} oldOptions
      * @param {Object} newOptions
      * @param {(JARS.internals.Module|JARS.internals.ModuleBundle)} moduleOrBundle
      */
@@ -180,8 +89,8 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
         objectEach(newOptions, function updateConfig(value, option) {
             var transform, transformFn;
 
-            if (hasOwnProp(configTransforms, option)) {
-                transform = configTransforms[option];
+            if (hasOwnProp(ModuleConfigTransforms, option)) {
+                transform = ModuleConfigTransforms[option];
                 transformFn = transform.transform;
 
                 if (System.isFunction(value)) {
@@ -204,7 +113,7 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
      *
      * @param {(JARS.internals.Module|JARS.internals.ModuleBundle)} moduleOrBundle
      *
-     * @return {JARS.internals.ModuleConfig.ModuleConfigOptions}
+     * @return {JARS.internals.ModuleConfigOptions}
      */
     function getDefaultOptions(moduleOrBundle) {
         var moduleOrBundleName = moduleOrBundle.name,
@@ -229,43 +138,6 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
 
         return defaultOptions;
     }
-
-    /**
-     * @memberof JARS.internals.ModuleConfig
-     * @inner
-     *
-     * @param {Function} Constructor
-     * @param {Object} [newProto]
-     *
-     * @return {Object}
-     */
-    function create(Constructor, newProto) {
-        var oldProto = Constructor.prototype, object;
-
-        newProto && (Constructor.prototype = newProto);
-
-        object = new Constructor();
-
-        newProto && (Constructor.prototype = oldProto);
-
-        return object;
-    }
-
-    /**
-     * @class
-     *
-     * @memberof JARS.internals.ModuleConfig
-     */
-    function ModuleConfigOptions() {
-        this.config = create(PublicModuleConfig, this.config);
-    }
-
-    /**
-     * @class
-     *
-     * @memberof JARS.internals.ModuleConfig
-     */
-    function PublicModuleConfig() {}
 
     return ModuleConfig;
 });

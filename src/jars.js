@@ -18,6 +18,8 @@
                 'Module',
                 'ModuleBundle',
                 'ModuleConfig',
+                'ModuleConfigOptions',
+                'ModuleConfigTransforms',
                 'ModuleDependencies',
                 'ModuleLogger',
                 'ModuleQueue',
