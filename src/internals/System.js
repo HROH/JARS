@@ -27,6 +27,21 @@ JARS.internal('System', function systemSetup(InternalsManager) {
 
         $$internals: InternalsManager,
         /**
+         * @param {string} typeDef
+         *
+         * @return {JARS.internals.System.TypeValidator}
+         */
+        addTypeValidator: function(typeDef) {
+            var validatorName = 'is' + typeDef,
+                nativeTypeValidator = envGlobal[typeDef] && envGlobal[typeDef][validatorName];
+
+            typeLookup['[object ' + typeDef + ']'] = typeDef = typeDef.toLowerCase();
+
+            System[validatorName] = nativeTypeValidator || function typeValidator(value) {
+                return System.getType(value) === typeDef;
+            };
+        },
+        /**
          * @param {*} value
          *
          * @return {string}
@@ -53,17 +68,13 @@ JARS.internal('System', function systemSetup(InternalsManager) {
             return type || typeof value;
         },
         /**
-         * @param {*} value
-         *
-         * @return {boolean}
+         * @member {JARS.internals.System.TypeValidator}
          */
         isNil: function(value) {
             return value == NOTHING;
         },
         /**
-         * @param {*} value
-         *
-         * @return {boolean}
+         * @member {JARS.internals.System.TypeValidator}
          */
         isArrayLike: function(value) {
             var isArrayLike = false,
@@ -78,27 +89,19 @@ JARS.internal('System', function systemSetup(InternalsManager) {
             return isArrayLike;
         },
         /**
-         * @param {*} value
-         *
-         * @return {boolean}
+         * @member {JARS.internals.System.TypeValidator}
          */
         isDefined: function(value) {
             return !System.isUndefined(value);
         },
         /**
-         * @method
-         *
-         * @param {*} value
-         *
-         * @return {boolean}
+         * @member {JARS.internals.System.TypeValidator}
          */
         isInteger: Number.isInteger || function(value) {
             return System.isNumber(value) && parseInt(value, 10) === value;
         },
         /**
-         * @param {*} value
-         *
-         * @return {boolean}
+         * @member {JARS.internals.System.TypeValidator}
          */
         isNaN: function(value) {
             return envGlobal.isNaN(value) && value !== value;
@@ -138,135 +141,79 @@ JARS.internal('System', function systemSetup(InternalsManager) {
     };
 
     /**
-     * @function isNull
-     * @memberof JARS.internals.System
+     * @name JARS.internals.System.isNull
+     * @type {JARS.internals.System.TypeValidator}
+     */
+
+    /**
+     * @name JARS.internals.System.isUndefined
+     * @type {JARS.internals.System.TypeValidator}
+     */
+
+    /**
+     * @name JARS.internals.System.isString
+     * @type {JARS.internals.System.TypeValidator}
+     */
+
+    /**
+     * @name JARS.internals.System.isNumber
+     * @type {JARS.internals.System.TypeValidator}
+     */
+
+    /**
+     * @name JARS.internals.System.isBoolean
+     * @type {JARS.internals.System.TypeValidator}
+     */
+
+    /**
+     * @name JARS.internals.System.isArray
+     * @type {JARS.internals.System.TypeValidator}
+     */
+
+    /**
+     * @name JARS.internals.System.isObject
+     * @type {JARS.internals.System.TypeValidator}
+     */
+
+    /**
+     * @name JARS.internals.System.isFunction
+     * @type {JARS.internals.System.TypeValidator}
+     */
+
+    /**
+     * @name JARS.internals.System.isDate
+     * @type {JARS.internals.System.TypeValidator}
+     */
+
+    /**
+     * @name JARS.internals.System.isRegExp
+     * @type {JARS.internals.System.TypeValidator}
+     */
+
+    /**
+     * @typedef {function} JARS.internals.System.TypeValidator
      *
      * @param {*} value
      *
      * @return {boolean}
      */
 
-    /**
-     * @function isUndefined
-     * @memberof JARS.internals.System
-     *
-     * @param {*} value
-     *
-     * @return {boolean}
-     */
-
-    /**
-     * @function isString
-     * @memberof JARS.internals.System
-     *
-     * @param {*} value
-     *
-     * @return {boolean}
-     */
-
-    /**
-     * @function isNumber
-     * @memberof JARS.internals.System
-     *
-     * @param {*} value
-     *
-     * @return {boolean}
-     */
-
-    /**
-     * @function isBoolean
-     * @memberof JARS.internals.System
-     *
-     * @param {*} value
-     *
-     * @return {boolean}
-     */
-
-    /**
-     * @function isArray
-     * @memberof JARS.internals.System
-     *
-     * @param {*} value
-     *
-     * @return {boolean}
-     */
-
-    /**
-     * @function isObject
-     * @memberof JARS.internals.System
-     *
-     * @param {*} value
-     *
-     * @return {boolean}
-     */
-
-    /**
-     * @function isFunction
-     * @memberof JARS.internals.System
-     *
-     * @param {*} value
-     *
-     * @return {boolean}
-     */
-
-    /**
-     * @function isDate
-     * @memberof JARS.internals.System
-     *
-     * @param {*} value
-     *
-     * @return {boolean}
-     */
-
-    /**
-     * @function isRegExp
-     * @memberof JARS.internals.System
-     *
-     * @param {*} value
-     *
-     * @return {boolean}
-     */
-
-    /**
-     * @memberof JARS.internals.System
-     * @inner
-     *
-     * @param {string} typeDef
-     *
-     * @return {function(*):boolean}
-     */
-    function typeValidatorSetup(typeDef) {
-        var nativeTypeValidator = envGlobal[typeDef] && envGlobal[typeDef]['is' + typeDef];
-
-        typeLookup['[object ' + typeDef + ']'] = typeDef = typeDef.toLowerCase();
-
-        return nativeTypeValidator || function typeValidator(value) {
-            return System.getType(value) === typeDef;
-        };
-    }
-
-    Utils.arrayEach(types, function createTypeValidator(type) {
-        System['is' + type] = typeValidatorSetup(type);
-    });
+    Utils.arrayEach(types, System.addTypeValidator);
 
     isArgs = System.isArguments;
 
     /**
-     * @param {*} value
-     *
-     * @return {boolean}
+     * @member {JARS.internals.System.TypeValidator}
      */
     System.isArguments = function(value) {
         return value && (isArgs(value) || System.isArrayLike(value));
     };
 
     /**
+     * @member {JARS.internals.System.TypeValidator}
+     *
      * @memberof JARS.internals.System
      * @inner
-     *
-     * @param {*} value
-     *
-     * @return {boolean}
      */
     function isElement(value) {
         return value.nodeType === 1 || value.nodeType === 9;
