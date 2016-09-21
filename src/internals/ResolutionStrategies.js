@@ -123,19 +123,13 @@ JARS.internal('ResolutionStrategies', function resolutionStrategiesSetup(Interna
             return [];
         },
         /**
-         * @param {JARS.internals.Module} baseModule
-         * @param {string} moduleName
-         *
-         * @return {string}
+         * @member {JARS.internals.ResolutionStrategies.ResolutionStrategy}
          */
         deps: function(baseModule, moduleName) {
             return (!baseModule.isRoot && isRelativeModuleName(moduleName)) ? ResolutionStrategies.deps(baseModule.deps.parent, moduleName.substr(1)) : makeAbsoluteModuleName(baseModule, moduleName);
         },
         /**
-         * @param {JARS.internals.Module} baseModule
-         * @param {string} moduleName
-         *
-         * @return {string}
+         * @member {JARS.internals.ResolutionStrategies.ResolutionStrategy}
          */
         nested: function(baseModule, moduleName) {
             return moduleName === DOT ? baseModule.name : makeAbsoluteModuleName(baseModule, moduleName);
@@ -145,13 +139,10 @@ JARS.internal('ResolutionStrategies', function resolutionStrategiesSetup(Interna
     };
 
     /**
+     * @member {JARS.internals.ResolutionStrategies.ResolutionStrategy}
+     *
      * @memberof JARS.internals.ResolutionStrategies
      * @inner
-     *
-     * @param {JARS.internals.Module} baseModule
-     * @param {string} moduleName
-     *
-     * @return {string}
      */
     function makeAbsoluteModuleName(baseModule, moduleName) {
         var separator = getInternal('InterceptionManager').removeInterceptionData(moduleName) ? DOT : EMPTY_STRING;
@@ -200,14 +191,12 @@ JARS.internal('ResolutionStrategies', function resolutionStrategiesSetup(Interna
     }
 
     /**
-     * @callback ResolutionStrategy
+     * @typedef {function} JARS.internals.ResolutionStrategies.ResolutionStrategy
      *
-     * @memberof JARS.internals.ResolutionStrategies
-     *
-     * @param {string} baseModuleName
+     * @param {JARS.internals.Module} baseModule
      * @param {string} moduleName
      *
-     * @return {string[]}
+     * @return {string}
      */
 
     return ResolutionStrategies;
