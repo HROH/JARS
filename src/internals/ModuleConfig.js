@@ -2,6 +2,7 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
     'use strict';
 
     var RE_DOT = /\./g,
+        RE_STARTS_WITH_LOWERCASE = /^[a-z]/,
         DEFAULT_EXTENSION = 'js',
         SLASH = '/',
         getInternal = InternalsManager.get,
@@ -118,19 +119,17 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
     function getDefaultOptions(moduleOrBundle) {
         var moduleOrBundleName = moduleOrBundle.name,
             defaultOptions = new ModuleConfigOptions(),
-            fileName, firstLetterFileName, isLowerCaseFile;
+            fileName;
 
         if(!BundleResolver.isBundle(moduleOrBundleName)) {
             fileName = VersionResolver.removeVersion(DependenciesResolver.removeParentName(moduleOrBundleName));
-            firstLetterFileName = fileName.charAt(0);
-            isLowerCaseFile = firstLetterFileName === firstLetterFileName.toLowerCase();
 
             transformAndUpdateOptions(defaultOptions, {
                 extension: DEFAULT_EXTENSION,
 
                 fileName: fileName,
 
-                dirPath: VersionResolver.removeVersion(isLowerCaseFile ? moduleOrBundleName : DependenciesResolver.getParentName(moduleOrBundleName)).replace(RE_DOT, SLASH),
+                dirPath: VersionResolver.removeVersion(RE_STARTS_WITH_LOWERCASE.test(fileName) ? moduleOrBundleName : DependenciesResolver.getParentName(moduleOrBundleName)).replace(RE_DOT, SLASH),
 
                 versionDir: VersionResolver.getVersion(moduleOrBundleName)
             }, moduleOrBundle);
