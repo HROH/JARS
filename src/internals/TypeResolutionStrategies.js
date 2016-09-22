@@ -1,4 +1,4 @@
-JARS.internal('ResolutionStrategies', function resolutionStrategiesSetup(InternalsManager) {
+JARS.internal('TypeResolutionStrategies', function resolutionStrategiesSetup(InternalsManager) {
     'use strict';
 
     var getInternal = InternalsManager.get,
@@ -13,14 +13,14 @@ JARS.internal('ResolutionStrategies', function resolutionStrategiesSetup(Interna
         arrayEach = Utils.arrayEach,
         MSG_DEFAULT_RESOLUTION_ERROR = 'Could not resolve "${mod}": ',
         MSG_VERSION_RESOLUTION_ERROR = 'a version must not be added when the parent is already versioned',
-        ResolutionStrategies;
+        TypeResolutionStrategies;
 
     /**
      * @namespace
      *
      * @memberof JARS.internals
      */
-    ResolutionStrategies = {
+    TypeResolutionStrategies = {
         /**
          * @param {JARS.internals.Module} baseModule
          * @param {(JARS.internals.ModuleDependencies.Declaration|JARS.internals.ModuleBundle.Declaration)} modules
@@ -29,7 +29,7 @@ JARS.internal('ResolutionStrategies', function resolutionStrategiesSetup(Interna
          * @return {string[]}
          */
         any: function(baseModule, modules, resolutionStrategy) {
-            var typeResolutionStrategy = ResolutionStrategies[System.getType(modules)];
+            var typeResolutionStrategy = TypeResolutionStrategies[System.getType(modules)];
 
             return typeResolutionStrategy(baseModule, modules, resolutionStrategy);
         },
@@ -44,7 +44,7 @@ JARS.internal('ResolutionStrategies', function resolutionStrategiesSetup(Interna
             var resolvedModules = [];
 
             arrayEach(modules, function concatResolvedModules(nestedModules) {
-                resolvedModules = resolvedModules.concat(ResolutionStrategies.any(baseModule, nestedModules, resolutionStrategy));
+                resolvedModules = resolvedModules.concat(TypeResolutionStrategies.any(baseModule, nestedModules, resolutionStrategy));
             });
 
             return resolvedModules;
@@ -60,10 +60,10 @@ JARS.internal('ResolutionStrategies', function resolutionStrategiesSetup(Interna
             var resolvedModules = [];
 
             objectEach(modules, function concatResolvedModules(nestedModules, moduleName) {
-                var tmpBaseModuleName = ResolutionStrategies.string(baseModule, moduleName, resolutionStrategy)[0];
+                var tmpBaseModuleName = TypeResolutionStrategies.string(baseModule, moduleName, resolutionStrategy)[0];
 
                 if(tmpBaseModuleName) {
-                    resolvedModules = resolvedModules.concat(ResolutionStrategies.any(baseModule.loader.getModule(tmpBaseModuleName), nestedModules, NestedResolutionStrategy));
+                    resolvedModules = resolvedModules.concat(TypeResolutionStrategies.any(baseModule.loader.getModule(tmpBaseModuleName), nestedModules, NestedResolutionStrategy));
                 }
             });
 
@@ -135,5 +135,5 @@ JARS.internal('ResolutionStrategies', function resolutionStrategiesSetup(Interna
      * @return {string}
      */
 
-    return ResolutionStrategies;
+    return TypeResolutionStrategies;
 });

@@ -2,7 +2,7 @@ JARS.internal('DependenciesResolver', function dependenciesResolverSetup(Interna
     'use strict';
 
     var getInternal = InternalsManager.get,
-        resolveAny = getInternal('ResolutionStrategies').any,
+        resolveAny = getInternal('TypeResolutionStrategies').any,
         DependenciesResolutionStrategy = getInternal('DependenciesResolutionStrategy'),
         VersionResolver = getInternal('VersionResolver'),
         DOT = '.',

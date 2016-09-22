@@ -31,8 +31,8 @@
                 'PathListManager',
                 'PluginInterceptor',
                 'ResolutionHelpers',
-                'ResolutionStrategies',
                 'System',
+                'TypeResolutionStrategies',
                 'Utils',
                 'VersionResolver'
             ],

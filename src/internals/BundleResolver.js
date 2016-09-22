@@ -2,7 +2,7 @@ JARS.internal('BundleResolver', function bundleResolverSetup(InternalsManager) {
     'use strict';
 
     var getInternal = InternalsManager.get,
-        resolveArray = getInternal('ResolutionStrategies').array,
+        resolveArray = getInternal('TypeResolutionStrategies').array,
         BundleResolutionStrategy = getInternal('BundleResolutionStrategy'),
         VersionResolver = getInternal('VersionResolver'),
         BUNDLE_SUFFIX = '.*',
