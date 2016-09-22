@@ -24,36 +24,28 @@ JARS.internal('ModuleLogger', function moduleLoggerSetup(InternalsManager) {
     });
 
     /**
-     * @method debug
-     *
-     * @memberof JARS.internals.ModuleLogger#
+     * @method JARS.internals.ModuleLogger#debug
      *
      * @param {string} message
      * @param {Object} [values]
      */
 
     /**
-     * @method error
-     *
-     * @memberof JARS.internals.ModuleLogger#
+     * @method JARS.internals.ModuleLogger#error
      *
      * @param {string} message
      * @param {Object} [values]
      */
 
     /**
-     * @method info
-     *
-     * @memberof JARS.internals.ModuleLogger#
+     * @method JARS.internals.ModuleLogger#info
      *
      * @param {string} message
      * @param {Object} [values]
      */
 
     /**
-     * @method warn
-     *
-     * @memberof JARS.internals.ModuleLogger#
+     * @method JARS.internals.ModuleLogger#warn
      *
      * @param {string} message
      * @param {Object} [values]
