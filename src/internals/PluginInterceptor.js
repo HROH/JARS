@@ -6,7 +6,7 @@ JARS.internal('PluginInterceptor', function pluginInterceptorSetup(InternalsMana
 
     /**
     * @namespace
-    * @implements JARS.internals.InterceptionManager.Interceptor
+    * @implements JARS.internals.Interceptor
     *
     * @memberof JARS.internals
     */

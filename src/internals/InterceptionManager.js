@@ -1,10 +1,11 @@
 JARS.internal('InterceptionManager', function interceptionManagerSetup(InternalsManager) {
     'use strict';
 
-    var Utils = InternalsManager.get('Utils'),
+    var getInternal = InternalsManager.get,
+        Interception = getInternal('Interception'),
+        Utils = getInternal('Utils'),
         hasOwnProp = Utils.hasOwnProp,
         objectEach = Utils.objectEach,
-        Interception = InternalsManager.get('Interception'),
         interceptors = {},
         interceptionInfoCache = {},
         InterceptionManager;
@@ -16,17 +17,17 @@ JARS.internal('InterceptionManager', function interceptionManagerSetup(Internals
     */
     InterceptionManager = {
         /**
-         * @param {JARS.internals.InterceptionManager.Interceptor} interceptor
+         * @param {JARS.internals.Interceptor} interceptor
          */
         addInterceptor: function(interceptor) {
-            var interceptorType =  interceptor.type;
+            var interceptorType = interceptor.type;
 
             if (!hasOwnProp(interceptors, interceptorType)) {
                 interceptors[interceptorType] = interceptor;
             }
         },
         /**
-         * @return {Object<string, JARS.internals.InterceptionManager.Interceptor>}
+         * @return {Object<string, JARS.internals.Interceptor>}
          */
         getInterceptors: function() {
             return interceptors;
@@ -63,7 +64,7 @@ JARS.internal('InterceptionManager', function interceptionManagerSetup(Internals
      *
      * @param {string} moduleName
      *
-     * @return {JARS.internals.InterceptionManager.InterceptionInfo}
+     * @return {JARS.internals.InterceptionInfo}
      */
     function extractInterceptionInfo(moduleName) {
         var interceptionInfo = interceptionInfoCache[moduleName],
@@ -97,7 +98,7 @@ JARS.internal('InterceptionManager', function interceptionManagerSetup(Internals
     /**
      * @typedef InterceptionInfo
      *
-     * @memberof JARS.internals.InterceptionManager
+     * @memberof JARS.internals
      *
      * @property {string} moduleName
      * @property {string} type
@@ -105,16 +106,15 @@ JARS.internal('InterceptionManager', function interceptionManagerSetup(Internals
      */
 
     /**
-     * @class JARS.internals.InterceptionManager.Interceptor
-     * @abstract
+     * @interface JARS.internals.Interceptor
      */
 
     /**
-     * @member {string} JARS.internals.InterceptionManager.Interceptor#type
+     * @member {string} JARS.internals.Interceptor#type
      */
 
      /**
-     * @method JARS.internals.InterceptionManager.Interceptor#intercept
+     * @method JARS.internals.Interceptor#intercept
      *
      * @param {*} moduleRef
      * @param {JARS.internals.Interception} interception

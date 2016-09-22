@@ -128,7 +128,7 @@ JARS.internal('ConfigHooks', function(InternalsManager) {
             return newLoaderContext;
         },
         /**
-         * @param {JARS.internals.InterceptionManager.Interceptor[]} newInterceptors
+         * @param {JARS.internals.Interceptor[]} newInterceptors
          */
         interceptors: function(newInterceptors) {
             if (System.isArray(newInterceptors)) {

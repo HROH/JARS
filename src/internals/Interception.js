@@ -10,7 +10,7 @@ JARS.internal('Interception', function interceptionSetup(InternalsManager) {
      * @memberof JARS.internals
      *
      * @param {JARS.internals.Module} listeningModule
-     * @param {JARS.internals.InterceptionManager.InterceptionInfo} interceptionInfo
+     * @param {JARS.internals.InterceptionInfo} interceptionInfo
      * @param {JARS.internals.ModuleQueue.SuccessCallback} onSuccess
      * @param {JARS.internals.ModuleQueue.FailCallback} onFail
      */

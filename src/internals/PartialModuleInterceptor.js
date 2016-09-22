@@ -7,7 +7,7 @@ JARS.internal('PartialModuleInterceptor', function partialModuleInterceptorSetup
 
     /**
     * @namespace
-    * @implements JARS.internals.InterceptionManager.Interceptor
+    * @implements JARS.internals.Interceptor
     *
     * @memberof JARS.internals
     */
