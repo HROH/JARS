@@ -60,6 +60,9 @@ JARS.internal('ModuleQueue', function moduleQueueSetup(InternalsManager) {
             if(moduleQueue._state.isLoaded()) {
                 onQueueSuccess(moduleQueue._moduleOrBundleName);
             }
+            else if(moduleQueue._state.isAborted()) {
+                onQueueFail(moduleQueue._moduleOrBundleName);
+            }
             else {
                 moduleQueue._callbacks.push([onQueueSuccess, onQueueFail]);
             }
@@ -67,17 +70,13 @@ JARS.internal('ModuleQueue', function moduleQueueSetup(InternalsManager) {
     };
 
     /**
-     * @callback SuccessCallback
-     *
-     * @memberof JARS.internals.ModuleQueue
+     * @callback JARS.internals.ModuleQueue.SuccessCallback
      *
      * @param {string} loadedModuleName
      */
 
     /**
-     * @callback FailCallback
-     *
-     * @memberof JARS.internals.ModuleQueue
+     * @callback JARS.internals.ModuleQueue.FailCallback
      *
      * @param {string} abortedModuleName
      */
