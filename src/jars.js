@@ -5,9 +5,11 @@
 
     InternalsManager = (function internalsManagerSetup() {
         var internalsToLoad = [
+                'BundleResolutionStrategy',
                 'BundleResolver',
                 'ConfigHooks',
                 'ConfigsManager',
+                'DependenciesResolutionStrategy',
                 'DependenciesResolver',
                 'ExternalBootstrapper',
                 'Interception',
@@ -24,9 +26,11 @@
                 'ModuleLogger',
                 'ModuleQueue',
                 'ModuleState',
+                'NestedResolutionStrategy',
                 'PartialModuleInterceptor',
                 'PathListManager',
                 'PluginInterceptor',
+                'ResolutionHelpers',
                 'ResolutionStrategies',
                 'System',
                 'Utils',

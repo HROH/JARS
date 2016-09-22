@@ -1,9 +1,11 @@
 JARS.internal('DependenciesResolver', function dependenciesResolverSetup(InternalsManager) {
     'use strict';
 
-    var DOT = '.',
-        ResolutionStrategies = InternalsManager.get('ResolutionStrategies'),
-        VersionResolver = InternalsManager.get('VersionResolver'),
+    var getInternal = InternalsManager.get,
+        resolveAny = getInternal('ResolutionStrategies').any,
+        DependenciesResolutionStrategy = getInternal('DependenciesResolutionStrategy'),
+        VersionResolver = getInternal('VersionResolver'),
+        DOT = '.',
         DependenciesResolver;
 
     /**
@@ -35,7 +37,7 @@ JARS.internal('DependenciesResolver', function dependenciesResolverSetup(Interna
          * @return {string[]}
          */
         resolveDeps: function(baseModule, modules) {
-            return ResolutionStrategies.any(baseModule, modules, ResolutionStrategies.deps);
+            return resolveAny(baseModule, modules, DependenciesResolutionStrategy);
         },
     };
 
