@@ -14,15 +14,18 @@ JARS.internal('ModuleState', function moduleStateSetup() {
         // Show loading progress for module or bundle
         MSG_LOADED = 'finished ' + LOADING,
         MSG_LOADING = 'started ' + LOADING,
-        // Info when loading is already in progress or done
+        // Info when loading is already in progress, done or aborted
         MSG_ALREADY_LOADED = ATTEMPTED_TO_LOAD + BUT_ALREADY + LOADED,
-        MSG_ALREADY_LOADED_MANUAL = ATTEMPTED_TO_LOAD + BUT_ALREADY + LOADED_MANUALLY,
+        MSG_ALREADY_LOADED_MANUALLY = ATTEMPTED_TO_LOAD + BUT_ALREADY + LOADED_MANUALLY,
         MSG_ALREADY_LOADING = ATTEMPTED_TO_LOAD + BUT_ALREADY + LOADING,
+        MSG_ALEADY_ABORTED = ATTEMPTED_TO_LOAD + BUT_ALREADY + 'aborted',
         // Warning when a module is registered twice
         MSG_ALREADY_REGISTERED = ATTEMPTED_TO + 'register' + BUT_ALREADY + 'registered',
         // Show special cases for module
         MSG_LOADED_MANUALLY = 'was ' + LOADED_MANUALLY,
         MSG_REGISTERING = 'is registering...',
+        PROGRESS_MESSAGE = 0,
+        ALREADY_PROGRESSED_MESSAGE = 1,
         // Module/bundle states
         /**
          * @constant {number}
@@ -63,12 +66,21 @@ JARS.internal('ModuleState', function moduleStateSetup() {
          * @memberof JARS.internals.ModuleState
          * @inner
          */
-        REGISTERED_STATE = 5;
+        REGISTERED_STATE = 5,
+        /**
+         * @constant {number}
+         * @default
+         *
+         * @memberof JARS.internals.ModuleState
+         * @inner
+         */
+        ABORTED_STATE = 6;
 
-    stateMsgMap[LOADING_STATE] = MSG_LOADING;
-    stateMsgMap[LOADED_STATE] = MSG_LOADED;
-    stateMsgMap[LOADED_MANUALLY_STATE] = MSG_LOADED_MANUALLY;
-    stateMsgMap[REGISTERED_STATE] = MSG_REGISTERING;
+    stateMsgMap[LOADING_STATE] = [MSG_LOADING, MSG_ALREADY_LOADING];
+    stateMsgMap[LOADED_STATE] = [MSG_LOADED, MSG_ALREADY_LOADED];
+    stateMsgMap[LOADED_MANUALLY_STATE] = [MSG_LOADED_MANUALLY, MSG_ALREADY_LOADED_MANUALLY];
+    stateMsgMap[REGISTERED_STATE] = [MSG_REGISTERING, MSG_ALREADY_REGISTERED];
+    stateMsgMap[ABORTED_STATE] = [null, MSG_ALEADY_ABORTED];
 
     /**
     * @class
@@ -94,7 +106,7 @@ JARS.internal('ModuleState', function moduleStateSetup() {
          */
         _setAndLog: function(newState, info) {
             this._state = newState;
-            this._logger.info(stateMsgMap[newState], info);
+            this._logger.info(stateMsgMap[newState][PROGRESS_MESSAGE], info);
         },
         /**
          * @return {boolean}
@@ -117,6 +129,12 @@ JARS.internal('ModuleState', function moduleStateSetup() {
         isLoaded: function() {
             return this._state === LOADED_STATE;
         },
+        /**
+         * @return {boolean}
+         */
+        isAborted: function() {
+            return this._state === ABORTED_STATE;
+        },
 
         setLoaded: function() {
             var moduleState = this;
@@ -136,7 +154,7 @@ JARS.internal('ModuleState', function moduleStateSetup() {
             logger.info(MSG_REQUESTED);
 
             if(!isWaiting) {
-                logger.info(getRequestStateMessage(moduleState));
+                logger.info(stateMsgMap[moduleState._state][ALREADY_PROGRESSED_MESSAGE]);
             }
             else {
                 moduleState._setAndLog(LOADING_STATE, requestInfo);
@@ -167,35 +185,11 @@ JARS.internal('ModuleState', function moduleStateSetup() {
         setAborted: function(abortionMessage, abortionInfo) {
             var moduleState = this;
 
-            moduleState._state = WAITING_STATE;
+            moduleState._state = ABORTED_STATE;
 
             moduleState._logger.error(ABORTED_LOADING + abortionMessage, abortionInfo);
         }
     };
-
-    /**
-     * @memberof JARS.internals.ModuleState
-     * @inner
-     *
-     * @param {JARS.internals.ModuleState} moduleState
-     *
-     * @return {string}
-     */
-    function getRequestStateMessage(moduleState) {
-        var requestStateMsg;
-
-        if(moduleState.isLoaded()) {
-            requestStateMsg = MSG_ALREADY_LOADED;
-        }
-        else if (moduleState._state === LOADED_MANUALLY_STATE) {
-            requestStateMsg = MSG_ALREADY_LOADED_MANUAL;
-        }
-        else {
-            requestStateMsg = MSG_ALREADY_LOADING;
-        }
-
-        return requestStateMsg;
-    }
 
     return ModuleState;
 });
