@@ -141,22 +141,12 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
         abort: function(dependencyOrArray) {
             var module = this,
                 state = module.state,
-                isRegistered = state.isRegistered(),
-                isDependenciesArray = System.isArray(dependencyOrArray),
-                message;
+                abortionMessageAndInfo;
 
-            if (!module.isRoot && ((state.isLoading() && !module.findRecover()) || isRegistered)) {
-                message = isRegistered ? (isDependenciesArray ? MSG_MODULE_CIRCULAR_DEPENDENCIES_ABORTED : MSG_MODULE_DEPENDENCY_ABORTED) : MSG_MODULE_ABORTED;
+            if (!module.isRoot && ((state.isLoading() && !module.findRecover()) || state.isRegistered())) {
+                abortionMessageAndInfo = getAbortionMessageAndInfo(module, dependencyOrArray);
 
-                state.setAborted(message, isRegistered ? (isDependenciesArray ? {
-                    deps: dependencyOrArray.join(SEPARATOR)
-                } : {
-                    dep: dependencyOrArray
-                }) : {
-                    path: SourceManager.removeSource(module.name),
-
-                    sec: module.config.get('timeout')
-                });
+                state.setAborted(abortionMessageAndInfo[0], abortionMessageAndInfo[1]);
 
                 module.queue.notifyError();
             }
@@ -220,6 +210,27 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
             }
         }
     };
+
+    /**
+     * @memberof JARS.internals.Module
+     * @inner
+     *
+     * @param {JARS.internals.Module} module
+     * @param dependencyOrArray {(string|string[])}
+     *
+     * @return {Array}
+     */
+    function getAbortionMessageAndInfo(module, dependencyOrArray) {
+        return module.state.isRegistered() ? (System.isArray(dependencyOrArray) ? [MSG_MODULE_CIRCULAR_DEPENDENCIES_ABORTED, {
+            deps: dependencyOrArray.join(SEPARATOR)
+        }] : [MSG_MODULE_DEPENDENCY_ABORTED, {
+            dep: dependencyOrArray
+        }]) : [MSG_MODULE_ABORTED, {
+            path: SourceManager.removeSource(module.name),
+
+            sec: module.config.get('timeout')
+        }];
+    }
 
     return Module;
 });
