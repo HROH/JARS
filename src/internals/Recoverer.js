@@ -1,0 +1,82 @@
+JARS.internal('Recoverer', function(InternalsManager) {
+    'use strict';
+
+    var objectMerge = InternalsManager.get('Utils').objectMerge,
+        nextRecoverConfigs = {},
+        MSG_RECOVERING = 'failed to load and tries to recover...',
+        Recoverer;
+
+    /**
+     * @namespace
+     *
+     * @memberof JARS.internals
+     */
+    Recoverer = {
+        /**
+         * @param {JARS.internals.Module} module
+         *
+         * @return {boolean}
+         */
+        recover: function(module) {
+            var updatedNextRecover = updateNextRecover(module.name, module.config);
+
+            if (updatedNextRecover) {
+                module.logger.warn(MSG_RECOVERING);
+                module.load();
+            }
+
+            return updatedNextRecover;
+        }
+    };
+
+    /**
+     * @memberof JARS.internals.Recoverer
+     * @inner
+     *
+     * @param {string} moduleName
+     * @param {JARS.internals.ModuleConfig} config
+     *
+     * @return {boolean}
+     */
+    function updateNextRecover(moduleName, config) {
+        var currentRecoverConfig = getCurrentRecoverConfig(moduleName, config),
+            nextRecover;
+
+        if(currentRecoverConfig) {
+            setNextRecoverConfig(moduleName, currentRecoverConfig);
+            nextRecover = currentRecoverConfig.get('recover');
+
+            nextRecover && config.update(objectMerge({}, nextRecover, {
+                restrict: moduleName
+            }));
+        }
+
+        return !!nextRecover;
+    }
+
+    /**
+     * @memberof JARS.internals.Recoverer
+     * @inner
+     *
+     * @param {string} moduleName
+     * @param {JARS.internals.ModuleConfig} fallbackConfig
+     *
+     * @return {(JARS.internals.ModuleConfig|boolean)}
+     */
+    function getCurrentRecoverConfig(moduleName, fallbackConfig) {
+        return nextRecoverConfigs[moduleName] === false ? false : nextRecoverConfigs[moduleName] || (nextRecoverConfigs[moduleName] = fallbackConfig);
+    }
+
+    /**
+     * @memberof JARS.internals.Recoverer
+     * @inner
+     *
+     * @param {string} moduleName
+     * @param {JARS.internals.ModuleConfig} currentRecoverConfig
+     */
+    function setNextRecoverConfig(moduleName, currentRecoverConfig) {
+        nextRecoverConfigs[moduleName] = currentRecoverConfig.parentConfig || false;
+    }
+
+    return Recoverer;
+});

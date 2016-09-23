@@ -28,8 +28,8 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
     function ModuleConfig(moduleOrBundle, parentConfig) {
         var moduleConfig = this;
 
+        moduleConfig.parentConfig = parentConfig;
         moduleConfig._moduleOrBundle = moduleOrBundle;
-        moduleConfig._parentConfig = parentConfig;
         moduleConfig._options = parentConfig ? parentConfig.inheritOptions() : new ModuleConfigOptions();
         moduleConfig._defaultOptions = getDefaultOptions(moduleOrBundle);
     }
@@ -46,20 +46,14 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
         },
         /**
          * @param {string} option
-         * @param {string} skipUntil
          *
          * @return {*}
          */
-        get: function(option, skipUntil) {
+        get: function(option) {
             var moduleConfig = this,
-                Loader = getInternal('Loader'),
                 options = moduleConfig._options,
                 defaultValue = moduleConfig._defaultOptions[option],
                 result;
-
-            if (skipUntil && !hasOwnProp(options, option)) {
-                options = Loader.getModule(skipUntil).bundle.config.inheritOptions();
-            }
 
             if (option in options) {
                 result = options[option];

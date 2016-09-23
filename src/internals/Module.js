@@ -4,6 +4,7 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
     var getInternal = InternalsManager.get,
         System = getInternal('System'),
         SourceManager = getInternal('SourceManager'),
+        Recoverer = getInternal('Recoverer'),
         DependenciesResolver = getInternal('DependenciesResolver'),
         ModuleQueue = getInternal('ModuleQueue'),
         ModuleDependencies = getInternal('ModuleDependencies'),
@@ -12,7 +13,6 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
         ModuleLogger = getInternal('ModuleLogger'),
         ModuleState = getInternal('ModuleState'),
         SEPARATOR = '" -> "',
-        MSG_RECOVERING = 'failed to load and tries to recover...',
         // Errors when module is aborted
         MSG_MODULE_ABORTED = 'given path "${path}" after ${sec} second(s) - file may not exist',
         MSG_MODULE_DEPENDENCY_ABORTED = 'dependency "${dep}"',
@@ -97,45 +97,6 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
             module.queue.add(onModuleLoaded, onModuleAborted);
         },
         /**
-         * @return {boolean}
-         */
-        findRecover: function() {
-            var module = this,
-                loader = module.loader,
-                moduleName = module.name,
-                nextRecover = module.nextRecover,
-                foundRecover = nextRecover === false ? nextRecover : module.config.get('recover', nextRecover),
-                recoverModuleName, parent;
-
-            if (foundRecover) {
-                recoverModuleName = foundRecover.restrict;
-
-                // This is a recover on a higher level
-                if (recoverModuleName !== moduleName) {
-                    parent = loader.getModule(recoverModuleName).deps.parent;
-                    // extract the next recovermodule
-                    module.nextRecover = parent ? parent.name : false;
-
-                    // Only recover this module
-                    foundRecover.restrict = moduleName;
-                }
-
-                module.updateConfig(foundRecover);
-
-                // Restore module recover association
-                foundRecover.restrict = recoverModuleName;
-
-                module.logger.warn(MSG_RECOVERING);
-
-                module.load();
-            }
-            else {
-                module.nextRecover = false;
-            }
-
-            return !!foundRecover;
-        },
-        /**
          * @param {(string|string[])} [dependencyOrArray]
          */
         abort: function(dependencyOrArray) {
@@ -143,7 +104,7 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
                 state = module.state,
                 abortionMessageAndInfo;
 
-            if (!module.isRoot && ((state.isLoading() && !module.findRecover()) || state.isRegistered())) {
+            if (!module.isRoot && ((state.isLoading() && !Recoverer.recover(module)) || state.isRegistered())) {
                 abortionMessageAndInfo = getAbortionMessageAndInfo(module, dependencyOrArray);
 
                 state.setAborted(abortionMessageAndInfo[0], abortionMessageAndInfo[1]);

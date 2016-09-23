@@ -30,6 +30,7 @@
                 'PartialModuleInterceptor',
                 'PathListManager',
                 'PluginInterceptor',
+                'Recoverer',
                 'ResolutionHelpers',
                 'System',
                 'TypeResolutionStrategies',
