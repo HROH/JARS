@@ -2,6 +2,7 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
     'use strict';
 
     var getInternal = InternalsManager.get,
+        AutoAborter = getInternal('AutoAborter'),
         System = getInternal('System'),
         SourceManager = getInternal('SourceManager'),
         Recoverer = getInternal('Recoverer'),
@@ -77,7 +78,7 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
         load: function() {
             var module = this;
 
-            module.setupAutoAbort();
+            AutoAborter.setup(module);
 
             SourceManager.loadSource(module.name, module.getFullPath());
         },
@@ -112,20 +113,6 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
                 module.queue.notifyError();
             }
         },
-
-        setupAutoAbort: function() {
-            var module = this;
-
-            module.timeoutID = System.env.global.setTimeout(function abortModule() {
-                module.abort();
-            }, module.config.get('timeout') * 1000);
-        },
-
-        clearAutoAbort: function() {
-            var module = this;
-
-            module.timeoutID && System.env.global.clearTimeout(module.timeoutID);
-        },
         /**
          * @param {JARS.internals.ModuleDependencies.Declaration} dependencies
          */
@@ -147,7 +134,7 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
                 parentRef;
 
             if (state.trySetRegistered()) {
-                module.clearAutoAbort();
+                AutoAborter.clear(module);
 
                 module.deps.request(function onDependenciesLoaded(dependencyRefs) {
                     if (state.isRegistered() && !state.isLoaded()) {

@@ -5,6 +5,7 @@
 
     InternalsManager = (function internalsManagerSetup() {
         var internalsToLoad = [
+                'AutoAborter',
                 'BundleResolutionStrategy',
                 'BundleResolver',
                 'ConfigHooks',
