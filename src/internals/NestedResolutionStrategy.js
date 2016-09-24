@@ -3,6 +3,7 @@ JARS.internal('NestedResolutionStrategy', function(InternalsManager) {
 
     var makeAbsolute = InternalsManager.get('ResolutionHelpers').makeAbsolute,
         DOT = '.',
+        MSG_NESTED_RESOLUTION_ERROR = 'a nested modulename must contain "." only as a special symbol',
         NestedResolutionStrategy;
 
     /**
@@ -19,12 +20,13 @@ JARS.internal('NestedResolutionStrategy', function(InternalsManager) {
          * @return {string}
          */
         resolve: function(baseModule, moduleName) {
-            return moduleName === DOT ? baseModule.name : makeAbsolute(baseModule, moduleName);
-        },
-        /**
-         * @property {string}
-         */
-        errorMessage: 'a nested modulename must contain "." only as a special symbol'
+            if(!baseModule.isRoot && moduleName === DOT) {
+                moduleName = baseModule.name;
+                baseModule = null;
+            }
+
+            return makeAbsolute(baseModule, moduleName, MSG_NESTED_RESOLUTION_ERROR);
+        }
     };
 
     return NestedResolutionStrategy;

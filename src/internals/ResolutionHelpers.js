@@ -2,9 +2,9 @@ JARS.internal('ResolutionHelpers', function(InternalsManager) {
     'use strict';
 
     var VersionResolver = InternalsManager.get('VersionResolver'),
-        EMPTY_STRING = '',
         DOT = '.',
         RE_LEADING_DOT = /^\./,
+        MSG_VERSION_RESOLUTION_ERROR = 'a version must not be added when the parent is already versioned',
         ResolutionHelpers;
 
     /**
@@ -16,15 +16,27 @@ JARS.internal('ResolutionHelpers', function(InternalsManager) {
         /**
          * @param {JARS.internals.Module} baseModule
          * @param {string} moduleName
+         * @param {string} errorMessage
          *
          * @return {string}
          */
-        makeAbsolute: function(baseModule, moduleName) {
-            var separator = InternalsManager.get('InterceptionManager').removeInterceptionData(moduleName) ? DOT : EMPTY_STRING;
+        makeAbsolute: function(baseModule, moduleName, errorMessage) {
+            var resolutionInfo = {},
+                moduleNameWithoutInterceptionData = InternalsManager.get('InterceptionManager').removeInterceptionData(moduleName);
 
-            return (baseModule.isRoot || ResolutionHelpers.isRelative(moduleName)) ? EMPTY_STRING : VersionResolver.unwrapVersion(function(baseModuleName) {
-                return [baseModuleName, moduleName].join(separator);
-            })(baseModule.name);
+            if(VersionResolver.getVersion(moduleNameWithoutInterceptionData) && baseModule && VersionResolver.getVersion(baseModule.name)) {
+                resolutionInfo.error = MSG_VERSION_RESOLUTION_ERROR;
+            }
+            else if(!canMakeAbsolute(baseModule, moduleNameWithoutInterceptionData)) {
+                resolutionInfo.error = errorMessage;
+            }
+            else {
+                resolutionInfo.resolved = baseModule ? VersionResolver.unwrapVersion(function makeAbsolute(baseModuleName) {
+                    return baseModuleName + (moduleNameWithoutInterceptionData ? DOT + moduleName : moduleName);
+                })(baseModule.name) : moduleName;
+            }
+
+            return resolutionInfo;
         },
         /**
          * @param {string} moduleName
@@ -35,6 +47,19 @@ JARS.internal('ResolutionHelpers', function(InternalsManager) {
             return RE_LEADING_DOT.test(moduleName);
         }
     };
+
+    /**
+     * @memberof JARS.internals.ResolutionHelpers
+     * @inner
+     *
+     * @param {JARS.internals.Module} baseModule
+     * @param {string} moduleName
+     *
+     * @return {boolean}
+     */
+    function canMakeAbsolute(baseModule, moduleName) {
+        return ((baseModule && !baseModule.isRoot) || moduleName) && !ResolutionHelpers.isRelative(moduleName);
+    }
 
     return ResolutionHelpers;
 });

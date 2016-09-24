@@ -1,6 +1,9 @@
 JARS.internal('BundleResolutionStrategy', function(InternalsManager) {
     'use strict';
 
+    var makeAbsolute = InternalsManager.get('ResolutionHelpers').makeAbsolute,
+        MSG_BUNDLE_RESOLUTION_ERROR = 'a bundle modulename must not start with a "."';
+
     /**
      * @namespace
      * @implements JARS.internals.ResolutionStrategy
@@ -16,11 +19,9 @@ JARS.internal('BundleResolutionStrategy', function(InternalsManager) {
          *
          * @return {string}
          */
-        resolve: InternalsManager.get('ResolutionHelpers').makeAbsolute,
-        /**
-         * @property {string}
-         */
-        errorMessage: 'a bundle modulename must not start with a "."'
+        resolve: function(baseModule, moduleName) {
+            return makeAbsolute(baseModule, moduleName, MSG_BUNDLE_RESOLUTION_ERROR);
+        }
     };
 
     return BundleResolutionStrategy;

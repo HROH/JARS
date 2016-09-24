@@ -3,16 +3,12 @@ JARS.internal('TypeResolutionStrategies', function resolutionStrategiesSetup(Int
 
     var getInternal = InternalsManager.get,
         System = getInternal('System'),
-        VersionResolver = getInternal('VersionResolver'),
-        ResolutionHelpers = getInternal('ResolutionHelpers'),
-        DependenciesResolutionStrategy = getInternal('DependenciesResolutionStrategy'),
         BundleResolutionStrategy = getInternal('BundleResolutionStrategy'),
         NestedResolutionStrategy = getInternal('NestedResolutionStrategy'),
         Utils = getInternal('Utils'),
         objectEach = Utils.objectEach,
         arrayEach = Utils.arrayEach,
         MSG_DEFAULT_RESOLUTION_ERROR = 'Could not resolve "${mod}": ',
-        MSG_VERSION_RESOLUTION_ERROR = 'a version must not be added when the parent is already versioned',
         TypeResolutionStrategies;
 
     /**
@@ -77,35 +73,17 @@ JARS.internal('TypeResolutionStrategies', function resolutionStrategiesSetup(Int
          * @return {string[]}
          */
         string: function(baseModule, moduleName, resolutionStrategy) {
-            var isValidModuleName = false,
-                isVersionError = false,
-                logger = (resolutionStrategy === BundleResolutionStrategy ? baseModule.bundle : baseModule).logger,
-                resolvedModules, absoluteModuleName;
+            var logger = (resolutionStrategy === BundleResolutionStrategy ? baseModule.bundle : baseModule).logger,
+                resolutionInfo = resolutionStrategy.resolve(baseModule, moduleName),
+                resolvedModules = [];
 
-            if(!ResolutionHelpers.isRelative(moduleName) && resolutionStrategy === DependenciesResolutionStrategy) {
-                isValidModuleName = true;
-                absoluteModuleName = moduleName;
-            }
-            else if(!baseModule.isRoot) {
-                if(VersionResolver.getVersion(baseModule.name) && VersionResolver.getVersion(moduleName)) {
-                    isVersionError = true;
-                }
-                else {
-                    absoluteModuleName = resolutionStrategy.resolve(baseModule, moduleName);
-                }
-
-                isValidModuleName = !!absoluteModuleName;
-            }
-
-            if (isValidModuleName) {
-                resolvedModules = [absoluteModuleName];
-            }
-            else {
-                logger.error(MSG_DEFAULT_RESOLUTION_ERROR + (isVersionError ? MSG_VERSION_RESOLUTION_ERROR : resolutionStrategy.errorMessage), {
+            if (resolutionInfo.error) {
+                logger.error(MSG_DEFAULT_RESOLUTION_ERROR + resolutionInfo.error, {
                     mod: moduleName
                 });
-
-                resolvedModules = [];
+            }
+            else {
+                resolvedModules = [resolutionInfo.resolved];
             }
 
             return resolvedModules;
