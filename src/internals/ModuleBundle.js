@@ -6,7 +6,7 @@ JARS.internal('ModuleBundle', function moduleBundleSetup(InternalsManager) {
         LoaderQueue = getInternal('LoaderQueue'),
         ModuleConfig = getInternal('ModuleConfig'),
         ModuleLogger = getInternal('ModuleLogger'),
-        ModuleState = getInternal('ModuleState'),
+        State = getInternal('State'),
         SEPARATOR = '", "',
         MSG_BUNDLE_DEFINED = 'defined submodules "${bundle}"',
         MSG_BUNDLE_NOT_DEFINED = 'there are no submodules defined',
@@ -29,7 +29,7 @@ JARS.internal('ModuleBundle', function moduleBundleSetup(InternalsManager) {
         moduleBundle.name = moduleBundleName;
         moduleBundle.config = new ModuleConfig(moduleBundle, parentConfig);
         moduleBundle.logger = new ModuleLogger(moduleBundleName);
-        moduleBundle._state = new ModuleState(moduleBundleName, moduleBundle.logger);
+        moduleBundle._state = new State(moduleBundleName, moduleBundle.logger);
         moduleBundle._module = module;
     }
 
@@ -49,8 +49,8 @@ JARS.internal('ModuleBundle', function moduleBundleSetup(InternalsManager) {
             moduleBundle._bundle = resolvedBundle;
         },
         /**
-         * @param {JARS.internals.ModuleQueue.SuccessCallback} onBundleLoaded
-         * @param {JARS.internals.ModuleQueue.FailCallback} onBundleAborted
+         * @param {JARS.internals.StateQueue.SuccessCallback} onBundleLoaded
+         * @param {JARS.internals.StateQueue.FailCallback} onBundleAborted
          */
         request: function(onBundleLoaded, onBundleAborted) {
             var moduleBundle = this,

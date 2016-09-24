@@ -11,7 +11,7 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
         ModuleBundle = getInternal('ModuleBundle'),
         ModuleConfig = getInternal('ModuleConfig'),
         ModuleLogger = getInternal('ModuleLogger'),
-        ModuleState = getInternal('ModuleState'),
+        State = getInternal('State'),
         SEPARATOR = '" -> "',
         // Errors when module is aborted
         MSG_MODULE_ABORTED = 'given path "${path}" after ${sec} second(s) - file may not exist',
@@ -46,7 +46,7 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
         module.isRoot = isRoot || false;
 
         module.logger = logger = new ModuleLogger(moduleName);
-        module.state = state = new ModuleState(moduleName, logger);
+        module.state = state = new State(moduleName, logger);
 
         module.deps = dependencies = new ModuleDependencies(module, logger);
 
@@ -81,8 +81,8 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
             SourceManager.loadSource(module.name, module.getFullPath());
         },
         /**
-         * @param {JARS.internals.ModuleQueue.SuccessCallback} onModuleLoaded
-         * @param {JARS.internals.ModuleQueue.FailCallback} onModuleAborted
+         * @param {JARS.internals.StateQueue.SuccessCallback} onModuleLoaded
+         * @param {JARS.internals.StateQueue.FailCallback} onModuleAborted
          */
         request: function(onModuleLoaded, onModuleAborted) {
             var module = this,

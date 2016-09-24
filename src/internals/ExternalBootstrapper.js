@@ -34,7 +34,7 @@ JARS.internal('ExternalBootstrapper', function externalBootstrapperSetup(Interna
         },
         /**
          * @param {function(...*)} main
-         * @param {JARS.ModuleQueue.FailCallback} [onAbort]
+         * @param {JARS.StateQueue.FailCallback} [onAbort]
          */
         main: function(main, onAbort) {
             var moduleNames = moduleNamesQueue;
@@ -57,7 +57,7 @@ JARS.internal('ExternalBootstrapper', function externalBootstrapperSetup(Interna
      * @param {System} System
      * @param {JARS.ModuleDependencies.Declaration} modules
      * @param {function(...*)} main
-     * @param {JARS.ModuleQueue.FailCallback} [onAbort]
+     * @param {JARS.StateQueue.FailCallback} [onAbort]
      */
     function bootstrapMain(System, moduleNames, main, onAbort) {
         if (System.isFunction(main)) {
@@ -97,7 +97,7 @@ JARS.internal('ExternalBootstrapper', function externalBootstrapperSetup(Interna
      * @memberof JARS.internals.ExternalBootstrapper
      * @inner
      *
-     * @type {JARS.ModuleQueue.FailCallback}
+     * @type {JARS.StateQueue.FailCallback}
      */
     function defaultOnAbort(abortedModuleName) {
         mainLogger.error('Import of "${0}" failed!', [abortedModuleName]);

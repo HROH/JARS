@@ -1,0 +1,85 @@
+JARS.internal('StateQueue', function StateQueueSetup(InternalsManager) {
+    'use strict';
+
+    var System = InternalsManager.get('System'),
+        QUEUE_SUCCESS = 0,
+        QUEUE_ERROR = 1;
+
+    /**
+     * @class
+     *
+     * @memberof JARS.internals
+     *
+     * @param {string} moduleOrBundleName
+     * @param {JARS.internals.State} state
+     */
+    function StateQueue(moduleOrBundleName, state) {
+        var stateQueue = this;
+
+        stateQueue._moduleOrBundleName = moduleOrBundleName;
+        stateQueue._state = state;
+        stateQueue._callbacks = [];
+    }
+
+    StateQueue.prototype = {
+        constructor: StateQueue,
+        /**
+         * @private
+         *
+         * @param {Number} callbackType
+         */
+        _call: function(callbackType) {
+            var stateQueue = this,
+                name = stateQueue._moduleOrBundleName,
+                callbacks = stateQueue._callbacks,
+                callback;
+
+            while (callbacks.length) {
+                callback = callbacks.shift()[callbackType];
+
+                if (System.isFunction(callback)) {
+                    callback(name);
+                }
+            }
+        },
+
+        notify: function() {
+            this._call(QUEUE_SUCCESS);
+        },
+
+        notifyError: function() {
+            this._call(QUEUE_ERROR);
+        },
+        /**
+         * @param {JARS.internals.StateQueue.SuccessCallback} onQueueSuccess
+         * @param {JARS.internals.StateQueue.FailCallback} onQueueFail
+         */
+        add: function(onQueueSuccess, onQueueFail) {
+            var stateQueue = this;
+
+            if(stateQueue._state.isLoaded()) {
+                onQueueSuccess(stateQueue._moduleOrBundleName);
+            }
+            else if(stateQueue._state.isAborted()) {
+                onQueueFail(stateQueue._moduleOrBundleName);
+            }
+            else {
+                stateQueue._callbacks.push([onQueueSuccess, onQueueFail]);
+            }
+        }
+    };
+
+    /**
+     * @callback JARS.internals.StateQueue.SuccessCallback
+     *
+     * @param {string} loadedModuleName
+     */
+
+    /**
+     * @callback JARS.internals.StateQueue.FailCallback
+     *
+     * @param {string} abortedModuleName
+     */
+
+    return StateQueue;
+});

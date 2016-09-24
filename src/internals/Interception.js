@@ -11,8 +11,8 @@ JARS.internal('Interception', function interceptionSetup(InternalsManager) {
      *
      * @param {JARS.internals.Module} listeningModule
      * @param {JARS.internals.InterceptionInfo} interceptionInfo
-     * @param {JARS.internals.ModuleQueue.SuccessCallback} onSuccess
-     * @param {JARS.internals.ModuleQueue.FailCallback} onFail
+     * @param {JARS.internals.StateQueue.SuccessCallback} onSuccess
+     * @param {JARS.internals.StateQueue.FailCallback} onFail
      */
     function Interception(listeningModule, interceptionInfo, onSuccess, onFail) {
         var interception = this,
@@ -47,7 +47,7 @@ JARS.internal('Interception', function interceptionSetup(InternalsManager) {
         /**
          * @param {JARS.internals.ModuleDependencies.Declaration} moduleNames
          * @param {JARS.internals.LoaderQueue.ModulesLoadedCallback} onModulesLoaded
-         * @param {JARS.internals.ModuleQueue.FailCallback} onModuleAborted
+         * @param {JARS.internals.StateQueue.FailCallback} onModuleAborted
          * @param {JARS.internals.LoaderQueue.ModuleLoadedCallback} onModuleLoaded
          */
         $importAndLink: function(moduleNames, onModulesLoaded, onModuleAborted, onModuleLoaded) {

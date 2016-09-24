@@ -43,10 +43,10 @@ JARS.internal('InterceptionManager', function interceptionManagerSetup(Internals
         /**
          * @param {JARS.internals.Module} listeningModule
          * @param {string} interceptedModuleName
-         * @param {JARS.internals.ModuleQueue.SuccessCallback} onModuleLoaded
-         * @param {JARS.internals.ModuleQueue.FailCallback} onModuleAborted
+         * @param {JARS.internals.StateQueue.SuccessCallback} onModuleLoaded
+         * @param {JARS.internals.StateQueue.FailCallback} onModuleAborted
          *
-         * @return {JARS.internals.ModuleQueue.SuccessCallback}
+         * @return {JARS.internals.StateQueue.SuccessCallback}
          */
         intercept: function(listeningModule, interceptedModuleName, onModuleLoaded, onModuleAborted) {
             var interceptorInfo = extractInterceptionInfo(interceptedModuleName),

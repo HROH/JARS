@@ -1,7 +1,7 @@
-JARS.internal('ModuleState', function moduleStateSetup(InternalsManager) {
+JARS.internal('State', function stateSetup(InternalsManager) {
     'use strict';
 
-    var ModuleQueue = InternalsManager.get('ModuleQueue'),
+    var StateQueue = InternalsManager.get('StateQueue'),
         stateMsgMap = {},
         LOADING = 'loading',
         LOADED = 'loaded',
@@ -32,7 +32,7 @@ JARS.internal('ModuleState', function moduleStateSetup(InternalsManager) {
          * @constant {number}
          * @default
          *
-         * @memberof JARS.internals.ModuleState
+         * @memberof JARS.internals.State
          * @inner
          */
         WAITING_STATE = 1,
@@ -40,7 +40,7 @@ JARS.internal('ModuleState', function moduleStateSetup(InternalsManager) {
          * @constant {number}
          * @default
          *
-         * @memberof JARS.internals.ModuleState
+         * @memberof JARS.internals.State
          * @inner
          */
         LOADING_STATE = 2,
@@ -48,7 +48,7 @@ JARS.internal('ModuleState', function moduleStateSetup(InternalsManager) {
          * @constant {number}
          * @default
          *
-         * @memberof JARS.internals.ModuleState
+         * @memberof JARS.internals.State
          * @inner
          */
         LOADED_STATE = 3,
@@ -56,7 +56,7 @@ JARS.internal('ModuleState', function moduleStateSetup(InternalsManager) {
          * @constant {number}
          * @default
          *
-         * @memberof JARS.internals.ModuleState
+         * @memberof JARS.internals.State
          * @inner
          */
         LOADED_MANUALLY_STATE = 4,
@@ -64,7 +64,7 @@ JARS.internal('ModuleState', function moduleStateSetup(InternalsManager) {
          * @constant {number}
          * @default
          *
-         * @memberof JARS.internals.ModuleState
+         * @memberof JARS.internals.State
          * @inner
          */
         REGISTERED_STATE = 5,
@@ -72,7 +72,7 @@ JARS.internal('ModuleState', function moduleStateSetup(InternalsManager) {
          * @constant {number}
          * @default
          *
-         * @memberof JARS.internals.ModuleState
+         * @memberof JARS.internals.State
          * @inner
          */
         ABORTED_STATE = 6;
@@ -90,17 +90,17 @@ JARS.internal('ModuleState', function moduleStateSetup(InternalsManager) {
     *
     * @param {JARS.internals.ModuleLogger} logger
     */
-    function ModuleState(moduleOrBundleName, logger) {
-        var moduleState = this;
+    function State(moduleOrBundleName, logger) {
+        var state = this;
 
-        moduleState._moduleOrBundleName = moduleOrBundleName;
-        moduleState._logger = logger;
-        moduleState._state = WAITING_STATE;
-        moduleState._queue = new ModuleQueue(moduleOrBundleName, moduleState);
+        state._moduleOrBundleName = moduleOrBundleName;
+        state._logger = logger;
+        state._state = WAITING_STATE;
+        state._queue = new StateQueue(moduleOrBundleName, state);
     }
 
-    ModuleState.prototype = {
-        constructor: ModuleState,
+    State.prototype = {
+        constructor: State,
         /**
          * @private
          *
@@ -121,10 +121,10 @@ JARS.internal('ModuleState', function moduleStateSetup(InternalsManager) {
          * @return {boolean}
          */
         isRegistered: function() {
-            var moduleState = this,
-                state = moduleState._state;
+            var state = this,
+                currentState = state._state;
 
-            return state === REGISTERED_STATE || state === LOADED_MANUALLY_STATE || moduleState.isLoaded();
+            return currentState === REGISTERED_STATE || currentState === LOADED_MANUALLY_STATE || state.isLoaded();
         },
         /**
          * @return {boolean}
@@ -140,10 +140,10 @@ JARS.internal('ModuleState', function moduleStateSetup(InternalsManager) {
         },
 
         setLoaded: function() {
-            var moduleState = this;
+            var state = this;
 
-            moduleState._setAndLog(LOADED_STATE);
-            moduleState._queue.notify();
+            state._setAndLog(LOADED_STATE);
+            state._queue.notify();
         },
         /**
          * @param {Object} requestInfo
@@ -151,17 +151,17 @@ JARS.internal('ModuleState', function moduleStateSetup(InternalsManager) {
          * @return {boolean}
          */
         trySetRequested: function(requestInfo) {
-            var moduleState = this,
-                logger = moduleState._logger,
-                isWaiting = moduleState._state === WAITING_STATE;
+            var state = this,
+                logger = state._logger,
+                isWaiting = state._state === WAITING_STATE;
 
             logger.info(MSG_REQUESTED);
 
             if(!isWaiting) {
-                logger.info(stateMsgMap[moduleState._state][ALREADY_PROGRESSED_MESSAGE]);
+                logger.info(stateMsgMap[state._state][ALREADY_PROGRESSED_MESSAGE]);
             }
             else {
-                moduleState._setAndLog(LOADING_STATE, requestInfo);
+                state._setAndLog(LOADING_STATE, requestInfo);
             }
 
             return isWaiting;
@@ -170,14 +170,14 @@ JARS.internal('ModuleState', function moduleStateSetup(InternalsManager) {
          * @return {boolean}
          */
         trySetRegistered: function() {
-            var moduleState = this,
-                canRegister = !moduleState.isRegistered();
+            var state = this,
+                canRegister = !state.isRegistered();
 
             if (canRegister) {
-                moduleState._setAndLog(moduleState.isLoading() ? REGISTERED_STATE : LOADED_MANUALLY_STATE);
+                state._setAndLog(state.isLoading() ? REGISTERED_STATE : LOADED_MANUALLY_STATE);
             }
             else {
-                moduleState._logger.warn(MSG_ALREADY_REGISTERED);
+                state._logger.warn(MSG_ALREADY_REGISTERED);
             }
 
             return canRegister;
@@ -187,12 +187,12 @@ JARS.internal('ModuleState', function moduleStateSetup(InternalsManager) {
          * @param {Object} abortionInfo
          */
         setAborted: function(abortionMessage, abortionInfo) {
-            var moduleState = this;
+            var state = this;
 
-            moduleState._state = ABORTED_STATE;
+            state._state = ABORTED_STATE;
 
-            moduleState._logger.error(ABORTED_LOADING + abortionMessage, abortionInfo);
-            moduleState._queue.notifyError();
+            state._logger.error(ABORTED_LOADING + abortionMessage, abortionInfo);
+            state._queue.notifyError();
         },
 
         onChange: function(onModuleLoaded, onModuleAborted) {
@@ -200,5 +200,5 @@ JARS.internal('ModuleState', function moduleStateSetup(InternalsManager) {
         }
     };
 
-    return ModuleState;
+    return State;
 });
