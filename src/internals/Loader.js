@@ -88,16 +88,7 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
                 moduleName = InterceptionManager.removeInterceptionData(moduleName);
             }
 
-            return modulesRegistry[moduleName] || Loader.createModule(moduleName, isRoot);
-        },
-        /**
-         * @param {string} moduleName
-         * @param {boolean} [isRoot]
-         *
-         * @return {JARS.internals.Module}
-         */
-        createModule: function(moduleName, isRoot) {
-            return (modulesRegistry[moduleName] = new Module(Loader, moduleName, isRoot));
+            return moduleName ? modulesRegistry[moduleName] || (modulesRegistry[moduleName] = new Module(Loader, moduleName, isRoot)) : null;
         },
         /**
          * @param {function(JARS.internals.Module, string)} callback
@@ -112,11 +103,9 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
          * @return {JARS.internals.Module}
          */
         registerModule: function(moduleName, bundleModules) {
-            var module;
+            var module = Loader.getModule(moduleName);
 
-            if(moduleName) {
-                module = Loader.getModule(moduleName);
-
+            if(module) {
                 module.bundle.add(bundleModules);
             }
             else {
