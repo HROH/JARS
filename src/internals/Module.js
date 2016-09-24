@@ -7,7 +7,7 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
         SourceManager = getInternal('SourceManager'),
         Recoverer = getInternal('Recoverer'),
         DependenciesResolver = getInternal('DependenciesResolver'),
-        ModuleDependencies = getInternal('ModuleDependencies'),
+        Dependencies = getInternal('Dependencies'),
         Bundle = getInternal('Bundle'),
         ModuleConfig = getInternal('ModuleConfig'),
         ModuleLogger = getInternal('ModuleLogger'),
@@ -48,7 +48,7 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
         module.logger = logger = new ModuleLogger(moduleName);
         module.state = state = new State(moduleName, logger);
 
-        module.deps = dependencies = new ModuleDependencies(module, logger);
+        module.deps = dependencies = new Dependencies(module, logger);
 
         parent = dependencies.parent;
         module.bundle = new Bundle(module, parent && parent.bundle.config);
@@ -111,7 +111,7 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
             }
         },
         /**
-         * @param {JARS.internals.ModuleDependencies.Declaration} dependencies
+         * @param {JARS.internals.Dependencies.Declaration} dependencies
          */
         $import: function(dependencies) {
             var module = this;

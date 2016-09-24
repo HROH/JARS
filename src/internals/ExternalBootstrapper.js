@@ -27,7 +27,7 @@ JARS.internal('ExternalBootstrapper', function externalBootstrapperSetup(Interna
      */
     ExternalBootstrapper = {
         /**
-         * @param {JARS.ModuleDependencies.Declaration} modules
+         * @param {JARS.Dependencies.Declaration} modules
          */
         $import: function(modules) {
             moduleNamesQueue = moduleNamesQueue.concat(modules);
@@ -55,7 +55,7 @@ JARS.internal('ExternalBootstrapper', function externalBootstrapperSetup(Interna
      * @inner
      *
      * @param {System} System
-     * @param {JARS.ModuleDependencies.Declaration} modules
+     * @param {JARS.Dependencies.Declaration} modules
      * @param {function(...*)} main
      * @param {JARS.StateQueue.AbortedCallback} [onAbort]
      */

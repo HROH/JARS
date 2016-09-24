@@ -23,7 +23,7 @@
                 'ModuleConfig',
                 'ModuleConfigOptions',
                 'ModuleConfigTransforms',
-                'ModuleDependencies',
+                'Dependencies',
                 'ModuleLogger',
                 'StateQueue',
                 'State',

@@ -45,7 +45,7 @@ JARS.internal('Interception', function interceptionSetup(InternalsManager) {
             return !listeningModule.isRoot && listeningModule.getFullPath(fileType);
         },
         /**
-         * @param {JARS.internals.ModuleDependencies.Declaration} moduleNames
+         * @param {JARS.internals.Dependencies.Declaration} moduleNames
          * @param {JARS.internals.LoaderQueue.ModulesLoadedCallback} onModulesLoaded
          * @param {JARS.internals.StateQueue.AbortedCallback} onModuleAborted
          * @param {JARS.internals.LoaderQueue.ModuleLoadedCallback} onModuleLoaded

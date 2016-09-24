@@ -32,7 +32,7 @@ JARS.internal('DependenciesResolver', function dependenciesResolverSetup(Interna
         }),
         /**
          * @param {JARS.internals.Module} baseModule
-         * @param {JARS.internals.ModuleDependencies.Declaration} modules
+         * @param {JARS.internals.Dependencies.Declaration} modules
          *
          * @return {string[]}
          */

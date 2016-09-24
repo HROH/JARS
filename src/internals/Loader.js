@@ -115,7 +115,7 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
             return module;
         },
         /**
-         * @param {JARS.internals.ModuleDependencies.Declaration} moduleNames
+         * @param {JARS.internals.Dependencies.Declaration} moduleNames
          * @param {function(...*)} onModulesImported
          * @param {JARS.internals.StateQueue.AbortedCallback} onModuleAborted
          * @param {JARS.internals.LoaderQueue.ModuleLoadedCallback} onModuleImported

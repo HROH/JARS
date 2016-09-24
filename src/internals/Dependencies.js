@@ -1,4 +1,4 @@
-JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsManager) {
+JARS.internal('Dependencies', function dependenciesSetup(InternalsManager) {
     'use strict';
 
     var getInternal = InternalsManager.get,
@@ -21,20 +21,20 @@ JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsMa
      * @param {JARS.internals.Module} module
      * @param {JARS.internals.ModuleLogger} logger
      */
-    function ModuleDependencies(module, logger) {
-        var moduleDependencies = this,
+    function Dependencies(module, logger) {
+        var dependencies = this,
             loader = module.loader,
             parentName;
 
-        moduleDependencies._module = module;
-        moduleDependencies._logger = logger;
-        moduleDependencies._deps = [];
+        dependencies._module = module;
+        dependencies._logger = logger;
+        dependencies._deps = [];
 
-        moduleDependencies._interceptionDeps = [];
+        dependencies._interceptionDeps = [];
 
         if(!module.isRoot) {
             parentName = DependenciesResolver.getParentName(module.name);
-            moduleDependencies.parent = parentName ? loader.getModule(parentName) : loader.getRootModule();
+            dependencies.parent = parentName ? loader.getModule(parentName) : loader.getRootModule();
 
             parentName && logger.debug(MSG_DEPENDENCY_FOUND, {
                 dep: parentName
@@ -42,29 +42,29 @@ JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsMa
         }
     }
 
-    ModuleDependencies.prototype = {
-        constructor: ModuleDependencies,
+    Dependencies.prototype = {
+        constructor: Dependencies,
         /**
          * @param {boolean} getInterceptionDeps
          *
          * @return {string[]}
          */
         getAll: function(getInterceptionDeps) {
-            var moduleDependencies = this,
-                dependencies = moduleDependencies._deps,
-                parent = moduleDependencies.parent;
+            var dependencies = this,
+                dependencyModules = dependencies._deps,
+                parent = dependencies.parent;
 
-            getInterceptionDeps && (dependencies = dependencies.concat(moduleDependencies._interceptionDeps));
-            parent && (dependencies = [parent.name].concat(dependencies));
+            getInterceptionDeps && (dependencyModules = dependencyModules.concat(dependencies._interceptionDeps));
+            parent && (dependencyModules = [parent.name].concat(dependencyModules));
 
-            return dependencies;
+            return dependencyModules;
         },
         /**
-         * @param {JARS.internals.ModuleDependencies.Declaration} dependencies
+         * @param {JARS.internals.Dependencies.Declaration} dependencyModules
          * @param {boolean} [addInterceptionDependencies]
          */
-        add: function(dependencies, addInterceptionDependencies) {
-            var moduleDependencies = this,
+        add: function(dependencyModules, addInterceptionDependencies) {
+            var dependencies = this,
                 message, depsKey;
 
             if(addInterceptionDependencies) {
@@ -74,35 +74,35 @@ JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsMa
             else {
                 message = MSG_DEPENDENCIES_FOUND;
                 depsKey = '_deps';
-                dependencies = DependenciesResolver.resolveDeps(moduleDependencies._module, dependencies);
+                dependencyModules = DependenciesResolver.resolveDeps(dependencies._module, dependencyModules);
             }
 
-            dependencies.length && moduleDependencies._logger.debug(message, {
-                deps: dependencies.join(SEPARATOR)
+            dependencyModules.length && dependencies._logger.debug(message, {
+                deps: dependencyModules.join(SEPARATOR)
             });
 
-            moduleDependencies[depsKey] = moduleDependencies[depsKey].concat(dependencies);
+            dependencies[depsKey] = dependencies[depsKey].concat(dependencyModules);
         },
         /**
-         * @param {JARS.internals.ModuleDependencies.Declaration} interceptionDependencies
+         * @param {JARS.internals.Dependencies.Declaration} interceptionDependencies
          * @param {JARS.internals.LoaderQueue.ModulesLoadedCallback} onModulesLoaded
          * @param {JARS.internals.StateQueue.AbortedCallback} onModuleAborted
          * @param {JARS.internals.LoaderQueue.ModuleLoadedCallback} onModuleLoaded
          */
         requestAndLink: function(interceptionDependencies, onModulesLoaded, onModuleAborted, onModuleLoaded) {
-            var moduleDependencies = this;
+            var dependencies = this;
 
-            moduleDependencies.add(interceptionDependencies, true);
+            dependencies.add(interceptionDependencies, true);
 
-            loadDependencies(moduleDependencies, interceptionDependencies, onModulesLoaded, onModuleAborted, onModuleLoaded);
+            loadDependencies(dependencies, interceptionDependencies, onModulesLoaded, onModuleAborted, onModuleLoaded);
         },
         /**
          * @param {JARS.internals.LoaderQueue.ModulesLoadedCallback} onModulesLoaded
          */
         request: function(onModulesLoaded) {
-            var moduleDependencies = this;
+            var dependencies = this;
 
-            loadDependencies(moduleDependencies, moduleDependencies.getAll(), onModulesLoaded);
+            loadDependencies(dependencies, dependencies.getAll(), onModulesLoaded);
         },
         /**
          * @return {boolean}
@@ -127,10 +127,10 @@ JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsMa
          * @return {*}
          */
         _traceCircular: function(defaultResult, resultOnMatch, resultOnLoopMatch, traversedModules) {
-            var moduleDependencies = this,
-                module = moduleDependencies._module,
+            var dependencies = this,
+                module = dependencies._module,
                 moduleName = module.name,
-                dependencies = moduleDependencies.getAll(true),
+                dependencyModules = dependencies.getAll(true),
                 traceResult = defaultResult;
 
             traversedModules = traversedModules || {};
@@ -141,7 +141,7 @@ JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsMa
             else {
                 traversedModules[moduleName] = true;
 
-                arrayEach(dependencies, function findCircularDeps(dependencyName) {
+                arrayEach(dependencyModules, function findCircularDeps(dependencyName) {
                     var dependencyModule = module.loader.getModule(dependencyName),
                         tmpResult = dependencyModule.deps._traceCircular(traceResult, resultOnMatch, resultOnLoopMatch, traversedModules);
 
@@ -162,28 +162,29 @@ JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsMa
     };
 
     /**
-     * @memberof JARS.internals.ModuleDependencies
+     * @memberof JARS.internals.Dependencies
      * @inner
      *
-     * @param {JARS.internals.ModuleDependencies} moduleDependencies
-     * @param {JARS.internals.ModuleDependencies.Declaration} dependenciesToLoad
+     * @param {JARS.internals.Dependencies} dependencies
+     * @param {JARS.internals.Dependencies.Declaration} dependenciesToLoad
      * @param {JARS.internals.LoaderQueue.ModulesLoadedCallback} onModulesLoaded
      * @param {JARS.internals.StateQueue.AbortedCallback} onModuleAborted
      * @param {JARS.internals.LoaderQueue.ModuleLoadedCallback} onModuleLoaded
      */
-    function loadDependencies(moduleDependencies, dependenciesToLoad, onModulesLoaded, onModuleAborted, onModuleLoaded) {
-        var module = moduleDependencies._module,
-            hasCircularDependencies = !module.isRoot && module.config.get('checkCircularDeps') && moduleDependencies.hasCircular();
+    function loadDependencies(dependencies, dependenciesToLoad, onModulesLoaded, onModuleAborted, onModuleLoaded) {
+        var module = dependencies._module,
+            hasCircularDependencies = !module.isRoot && module.config.get('checkCircularDeps') && dependencies.hasCircular();
 
-        hasCircularDependencies && module.abort(moduleDependencies.getCircular());
-
-        if(!hasCircularDependencies) {
+        if(hasCircularDependencies) {
+            module.abort(dependencies.getCircular());
+        }
+        else {
             new LoaderQueue(module, onModulesLoaded, onModuleLoaded, onModuleAborted).loadModules(dependenciesToLoad);
         }
     }
 
     /**
-     * @memberof JARS.internals.ModuleDependencies
+     * @memberof JARS.internals.Dependencies
      * @inner
      *
      * @param {string} matchingModuleName
@@ -195,7 +196,7 @@ JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsMa
     }
 
     /**
-     * @memberof JARS.internals.ModuleDependencies
+     * @memberof JARS.internals.Dependencies
      * @inner
      *
      * @param {string[]} result
@@ -212,7 +213,7 @@ JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsMa
     }
 
     /**
-     * @memberof JARS.internals.ModuleDependencies
+     * @memberof JARS.internals.Dependencies
      * @inner
      *
      * @param {(string|string[])} match
@@ -224,10 +225,10 @@ JARS.internal('ModuleDependencies', function moduleDependenciesSetup(InternalsMa
     }
 
    /**
-    * @typeDef {(string|JARS.internals.ModuleDependencies.Declaration[]|Object<string, JARS.internals.ModuleDependencies.Declaration>)} Declaration
+    * @typeDef {(string|JARS.internals.Dependencies.Declaration[]|Object<string, JARS.internals.Dependencies.Declaration>)} Declaration
     *
-    * @memberof JARS.internals.ModuleDependencies
+    * @memberof JARS.internals.Dependencies
     */
 
-    return ModuleDependencies;
+    return Dependencies;
 });
