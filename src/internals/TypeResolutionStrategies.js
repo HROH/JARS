@@ -101,10 +101,6 @@ JARS.internal('TypeResolutionStrategies', function resolutionStrategiesSetup(Int
      */
 
     /**
-     * @member {string} JARS.internals.ResolutionStrategy#errorMessage
-     */
-
-    /**
      * @method JARS.internals.ResolutionStrategy#resolve
      *
      * @param {JARS.internals.Module} baseModule
