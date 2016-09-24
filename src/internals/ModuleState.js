@@ -1,7 +1,8 @@
-JARS.internal('ModuleState', function moduleStateSetup() {
+JARS.internal('ModuleState', function moduleStateSetup(InternalsManager) {
     'use strict';
 
-    var stateMsgMap = {},
+    var ModuleQueue = InternalsManager.get('ModuleQueue'),
+        stateMsgMap = {},
         LOADING = 'loading',
         LOADED = 'loaded',
         LOADED_MANUALLY = LOADED + ' manually',
@@ -89,11 +90,13 @@ JARS.internal('ModuleState', function moduleStateSetup() {
     *
     * @param {JARS.internals.ModuleLogger} logger
     */
-    function ModuleState(logger) {
+    function ModuleState(moduleOrBundleName, logger) {
         var moduleState = this;
 
+        moduleState._moduleOrBundleName = moduleOrBundleName;
         moduleState._logger = logger;
         moduleState._state = WAITING_STATE;
+        moduleState._queue = new ModuleQueue(moduleOrBundleName, moduleState);
     }
 
     ModuleState.prototype = {
@@ -140,6 +143,7 @@ JARS.internal('ModuleState', function moduleStateSetup() {
             var moduleState = this;
 
             moduleState._setAndLog(LOADED_STATE);
+            moduleState._queue.notify();
         },
         /**
          * @param {Object} requestInfo
@@ -188,6 +192,11 @@ JARS.internal('ModuleState', function moduleStateSetup() {
             moduleState._state = ABORTED_STATE;
 
             moduleState._logger.error(ABORTED_LOADING + abortionMessage, abortionInfo);
+            moduleState._queue.notifyError();
+        },
+
+        onChange: function(onModuleLoaded, onModuleAborted) {
+            this._queue.add(onModuleLoaded, onModuleAborted);
         }
     };
 

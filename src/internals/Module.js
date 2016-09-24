@@ -7,7 +7,6 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
         SourceManager = getInternal('SourceManager'),
         Recoverer = getInternal('Recoverer'),
         DependenciesResolver = getInternal('DependenciesResolver'),
-        ModuleQueue = getInternal('ModuleQueue'),
         ModuleDependencies = getInternal('ModuleDependencies'),
         ModuleBundle = getInternal('ModuleBundle'),
         ModuleConfig = getInternal('ModuleConfig'),
@@ -47,8 +46,7 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
         module.isRoot = isRoot || false;
 
         module.logger = logger = new ModuleLogger(moduleName);
-        module.state = state = new ModuleState(logger);
-        module.queue = new ModuleQueue(moduleName, state);
+        module.state = state = new ModuleState(moduleName, logger);
 
         module.deps = dependencies = new ModuleDependencies(module, logger);
 
@@ -87,15 +85,16 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
          * @param {JARS.internals.ModuleQueue.FailCallback} onModuleAborted
          */
         request: function(onModuleLoaded, onModuleAborted) {
-            var module = this;
+            var module = this,
+                state = module.state;
 
-            if (module.state.trySetRequested({
+            if (state.trySetRequested({
                 path: module.getFullPath()
             })) {
                 module.load();
             }
 
-            module.queue.add(onModuleLoaded, onModuleAborted);
+            state.onChange(onModuleLoaded, onModuleAborted);
         },
         /**
          * @param {(string|string[])} [dependencyOrArray]
@@ -109,8 +108,6 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
                 abortionMessageAndInfo = getAbortionMessageAndInfo(module, dependencyOrArray);
 
                 state.setAborted(abortionMessageAndInfo[0], abortionMessageAndInfo[1]);
-
-                module.queue.notifyError();
             }
         },
         /**
@@ -152,7 +149,6 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
                         }
 
                         state.setLoaded();
-                        module.queue.notify();
                     }
                 });
             }

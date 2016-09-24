@@ -4,7 +4,6 @@ JARS.internal('ModuleBundle', function moduleBundleSetup(InternalsManager) {
     var getInternal = InternalsManager.get,
         BundleResolver = getInternal('BundleResolver'),
         LoaderQueue = getInternal('LoaderQueue'),
-        ModuleQueue = getInternal('ModuleQueue'),
         ModuleConfig = getInternal('ModuleConfig'),
         ModuleLogger = getInternal('ModuleLogger'),
         ModuleState = getInternal('ModuleState'),
@@ -30,8 +29,7 @@ JARS.internal('ModuleBundle', function moduleBundleSetup(InternalsManager) {
         moduleBundle.name = moduleBundleName;
         moduleBundle.config = new ModuleConfig(moduleBundle, parentConfig);
         moduleBundle.logger = new ModuleLogger(moduleBundleName);
-        moduleBundle._state = new ModuleState(moduleBundle.logger);
-        moduleBundle._queue = new ModuleQueue(moduleBundleName, moduleBundle._state);
+        moduleBundle._state = new ModuleState(moduleBundleName, moduleBundle.logger);
         moduleBundle._module = module;
     }
 
@@ -56,7 +54,6 @@ JARS.internal('ModuleBundle', function moduleBundleSetup(InternalsManager) {
          */
         request: function(onBundleLoaded, onBundleAborted) {
             var moduleBundle = this,
-                bundleQueue = moduleBundle._queue,
                 bundleState = moduleBundle._state;
 
             if(bundleState.trySetRequested()) {
@@ -68,13 +65,12 @@ JARS.internal('ModuleBundle', function moduleBundleSetup(InternalsManager) {
                     new LoaderQueue(moduleBundle, function onModulesLoaded() {
                         if (!bundleState.isLoaded()) {
                             bundleState.setLoaded();
-                            bundleQueue.notify();
                         }
                     }).loadModules(bundle);
                 }).loadModules([moduleBundle._module.name]);
             }
 
-            bundleQueue.add(onBundleLoaded, onBundleAborted);
+            bundleState.onChange(onBundleLoaded, onBundleAborted);
         },
         /**
          * @param {string} parentOrSubModuleName
@@ -90,8 +86,6 @@ JARS.internal('ModuleBundle', function moduleBundleSetup(InternalsManager) {
                 } : {
                     subModule: parentOrSubModuleName
                 });
-
-                moduleBundle._queue.notifyError();
             }
         }
     };
