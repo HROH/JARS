@@ -58,15 +58,15 @@ JARS.internal('Bundle', function bundleSetup(InternalsManager) {
 
             if(bundleState.trySetRequested()) {
                 new LoaderQueue(bundle, function onModulesLoaded() {
-                    var bundle = bundle._bundle;
+                    var bundleModules = bundle._bundle;
 
-                    bundle.length || bundle.logger.warn(MSG_BUNDLE_NOT_DEFINED);
+                    bundleModules.length || bundle.logger.warn(MSG_BUNDLE_NOT_DEFINED);
 
                     new LoaderQueue(bundle, function onModulesLoaded() {
                         if (!bundleState.isLoaded()) {
                             bundleState.setLoaded();
                         }
-                    }).loadModules(bundle);
+                    }).loadModules(bundleModules);
                 }).loadModules([bundle._module.name]);
             }
 
