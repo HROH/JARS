@@ -1,4 +1,4 @@
-JARS.internal('ModuleBundle', function moduleBundleSetup(InternalsManager) {
+JARS.internal('Bundle', function bundleSetup(InternalsManager) {
     'use strict';
 
     var getInternal = InternalsManager.get,
@@ -22,52 +22,52 @@ JARS.internal('ModuleBundle', function moduleBundleSetup(InternalsManager) {
      * @param {JARS.internals.Module} module
      * @param {JARS.internals.ModuleConfig} parentConfig
      */
-    function ModuleBundle(module, parentConfig) {
-        var moduleBundle = this,
-            moduleBundleName = BundleResolver.getBundleName(module.name);
+    function Bundle(module, parentConfig) {
+        var bundle = this,
+            bundleName = BundleResolver.getBundleName(module.name);
 
-        moduleBundle.name = moduleBundleName;
-        moduleBundle.config = new ModuleConfig(moduleBundle, parentConfig);
-        moduleBundle.logger = new ModuleLogger(moduleBundleName);
-        moduleBundle._state = new State(moduleBundleName, moduleBundle.logger);
-        moduleBundle._module = module;
+        bundle.name = bundleName;
+        bundle.config = new ModuleConfig(bundle, parentConfig);
+        bundle.logger = new ModuleLogger(bundleName);
+        bundle._state = new State(bundleName, bundle.logger);
+        bundle._module = module;
     }
 
-    ModuleBundle.prototype = {
-        constructor: ModuleBundle,
+    Bundle.prototype = {
+        constructor: Bundle,
         /**
-         * @param {JARS.internals.ModuleBundle.Declaration} bundle
+         * @param {JARS.internals.Bundle.Declaration} bundleModules
          */
-        add: function(bundle) {
-            var moduleBundle = this,
-                resolvedBundle = BundleResolver.resolveBundle(moduleBundle._module, bundle);
+        add: function(bundleModules) {
+            var bundle = this,
+                resolvedBundle = BundleResolver.resolveBundle(bundle._module, bundleModules);
 
-            resolvedBundle.length && moduleBundle.logger.debug(MSG_BUNDLE_DEFINED, {
+            resolvedBundle.length && bundle.logger.debug(MSG_BUNDLE_DEFINED, {
                 bundle: resolvedBundle.join(SEPARATOR)
             });
 
-            moduleBundle._bundle = resolvedBundle;
+            bundle._bundle = resolvedBundle;
         },
         /**
          * @param {JARS.internals.StateQueue.LoadedCallback} onBundleLoaded
          * @param {JARS.internals.StateQueue.AbortedCallback} onBundleAborted
          */
         request: function(onBundleLoaded, onBundleAborted) {
-            var moduleBundle = this,
-                bundleState = moduleBundle._state;
+            var bundle = this,
+                bundleState = bundle._state;
 
             if(bundleState.trySetRequested()) {
-                new LoaderQueue(moduleBundle, function onModulesLoaded() {
-                    var bundle = moduleBundle._bundle;
+                new LoaderQueue(bundle, function onModulesLoaded() {
+                    var bundle = bundle._bundle;
 
-                    bundle.length || moduleBundle.logger.warn(MSG_BUNDLE_NOT_DEFINED);
+                    bundle.length || bundle.logger.warn(MSG_BUNDLE_NOT_DEFINED);
 
-                    new LoaderQueue(moduleBundle, function onModulesLoaded() {
+                    new LoaderQueue(bundle, function onModulesLoaded() {
                         if (!bundleState.isLoaded()) {
                             bundleState.setLoaded();
                         }
                     }).loadModules(bundle);
-                }).loadModules([moduleBundle._module.name]);
+                }).loadModules([bundle._module.name]);
             }
 
             bundleState.onChange(onBundleLoaded, onBundleAborted);
@@ -76,9 +76,9 @@ JARS.internal('ModuleBundle', function moduleBundleSetup(InternalsManager) {
          * @param {string} parentOrSubModuleName
          */
         abort: function(parentOrSubModuleName) {
-            var moduleBundle = this,
-                bundleState = moduleBundle._state,
-                isParent = moduleBundle._module.name === parentOrSubModuleName;
+            var bundle = this,
+                bundleState = bundle._state,
+                isParent = bundle._module.name === parentOrSubModuleName;
 
             if (bundleState.isLoading()) {
                 bundleState.setAborted(isParent ? MSG_BUNDLE_ABORTED : MSG_BUNDLE_SUBMODULE_ABORTED, isParent ? {
@@ -93,8 +93,8 @@ JARS.internal('ModuleBundle', function moduleBundleSetup(InternalsManager) {
    /**
     * @typeDef {string[]} Declaration
     *
-    * @memberof JARS.internals.ModuleBundle
+    * @memberof JARS.internals.Bundle
     */
 
-    return ModuleBundle;
+    return Bundle;
 });

@@ -22,7 +22,7 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
      *
      * @memberof JARS.internals
      *
-     * @param {(JARS.internals.Module|JARS.internals.ModuleBundle)} moduleOrBundle
+     * @param {(JARS.internals.Module|JARS.internals.Bundle)} moduleOrBundle
      * @param {JARS.internals.ModuleConfig} [parentConfig]
      */
     function ModuleConfig(moduleOrBundle, parentConfig) {
@@ -78,7 +78,7 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
      *
      * @param {JARS.internals.ModuleConfigOptions} oldOptions
      * @param {Object} newOptions
-     * @param {(JARS.internals.Module|JARS.internals.ModuleBundle)} moduleOrBundle
+     * @param {(JARS.internals.Module|JARS.internals.Bundle)} moduleOrBundle
      */
     function transformAndUpdateOptions(oldOptions, newOptions, moduleOrBundle) {
         objectEach(newOptions, function updateConfig(value, option) {
@@ -106,7 +106,7 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
      * @memberof JARS.internals.ModuleConfig
      * @inner
      *
-     * @param {(JARS.internals.Module|JARS.internals.ModuleBundle)} moduleOrBundle
+     * @param {(JARS.internals.Module|JARS.internals.Bundle)} moduleOrBundle
      *
      * @return {JARS.internals.ModuleConfigOptions}
      */

@@ -94,7 +94,7 @@ JARS.internal('ModuleConfigTransforms', function(InternalsManager) {
     * @inner
     *
     * @param {*} configValue
-    * @param {(JARS.internals.Module|JARS.internals.ModuleBundle)} [moduleOrBundle]
+    * @param {(JARS.internals.Module|JARS.internals.Bundle)} [moduleOrBundle]
     */
 
     return ModuleConfigTransforms;

@@ -1,4 +1,4 @@
-JARS.internal('StateQueue', function StateQueueSetup(InternalsManager) {
+JARS.internal('StateQueue', function stateQueueSetup(InternalsManager) {
     'use strict';
 
     var System = InternalsManager.get('System'),

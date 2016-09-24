@@ -8,7 +8,7 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
         Recoverer = getInternal('Recoverer'),
         DependenciesResolver = getInternal('DependenciesResolver'),
         ModuleDependencies = getInternal('ModuleDependencies'),
-        ModuleBundle = getInternal('ModuleBundle'),
+        Bundle = getInternal('Bundle'),
         ModuleConfig = getInternal('ModuleConfig'),
         ModuleLogger = getInternal('ModuleLogger'),
         State = getInternal('State'),
@@ -51,7 +51,7 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
         module.deps = dependencies = new ModuleDependencies(module, logger);
 
         parent = dependencies.parent;
-        module.bundle = new ModuleBundle(module, parent && parent.bundle.config);
+        module.bundle = new Bundle(module, parent && parent.bundle.config);
         bundleConfig = module.bundle.config;
         module.config = module.isRoot ? bundleConfig : new ModuleConfig(module, bundleConfig);
     }

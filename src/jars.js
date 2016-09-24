@@ -19,7 +19,7 @@
                 'Loader',
                 'LoaderQueue',
                 'Module',
-                'ModuleBundle',
+                'Bundle',
                 'ModuleConfig',
                 'ModuleConfigOptions',
                 'ModuleConfigTransforms',
@@ -243,7 +243,7 @@
             }),
             /**
              * @param {string} moduleName
-             * @param {JARS.internals.ModuleBundle.Declaration} bundle
+             * @param {JARS.internals.Bundle.Declaration} bundle
              */
             moduleAuto: function(moduleName, bundle) {
                 JARS.module(moduleName, bundle).$export();

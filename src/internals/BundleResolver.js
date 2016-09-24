@@ -42,7 +42,7 @@ JARS.internal('BundleResolver', function bundleResolverSetup(InternalsManager) {
         },
         /**
          * @param {JARS.internals.Module} baseModule
-         * @param {JARS.internals.ModuleBundle.Declaration} bundleModules
+         * @param {JARS.internals.Bundle.Declaration} bundleModules
          *
          * @return {string[]}
          */

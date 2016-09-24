@@ -33,7 +33,7 @@ JARS.internal('LoaderQueue', function(InternalsManager) {
     *
     * @memberof JARS.internals
     *
-    * @param {(JARS.internals.Module|JARS.internals.ModuleBundle)} moduleOrBundle
+    * @param {(JARS.internals.Module|JARS.internals.Bundle)} moduleOrBundle
     * @param {JARS.internals.LoaderQueue.ModulesLoadedCallback} onModulesLoaded
     * @param {JARS.internals.LoaderQueue.ModuleLoadedCallback} onModuleLoaded
     * @param {JARS.internals.StateQueue.AbortedCallback} onModuleAborted

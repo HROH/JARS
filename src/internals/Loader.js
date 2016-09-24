@@ -98,7 +98,7 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
         },
         /**
          * @param {string} moduleName
-         * @param {JARS.internals.ModuleBundle.Declaration} bundleModules
+         * @param {JARS.internals.Bundle.Declaration} bundleModules
          *
          * @return {JARS.internals.Module}
          */

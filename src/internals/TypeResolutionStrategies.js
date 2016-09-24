@@ -19,7 +19,7 @@ JARS.internal('TypeResolutionStrategies', function resolutionStrategiesSetup(Int
     TypeResolutionStrategies = {
         /**
          * @param {JARS.internals.Module} baseModule
-         * @param {(JARS.internals.ModuleDependencies.Declaration|JARS.internals.ModuleBundle.Declaration)} modules
+         * @param {(JARS.internals.ModuleDependencies.Declaration|JARS.internals.Bundle.Declaration)} modules
          * @param {JARS.internals.ResolutionStrategy} resolutionStrategy
          *
          * @return {string[]}
@@ -31,7 +31,7 @@ JARS.internal('TypeResolutionStrategies', function resolutionStrategiesSetup(Int
         },
         /**
          * @param {JARS.internals.Module} baseModule
-         * @param {(JARS.internals.ModuleDependencies.Declaration[]|JARS.internals.ModuleBundle.Declaration)} modules
+         * @param {(JARS.internals.ModuleDependencies.Declaration[]|JARS.internals.Bundle.Declaration)} modules
          * @param {JARS.internals.ResolutionStrategy} resolutionStrategy
          *
          * @return {string[]}
