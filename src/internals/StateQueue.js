@@ -51,32 +51,32 @@ JARS.internal('StateQueue', function StateQueueSetup(InternalsManager) {
             this._call(QUEUE_ERROR);
         },
         /**
-         * @param {JARS.internals.StateQueue.SuccessCallback} onQueueSuccess
-         * @param {JARS.internals.StateQueue.FailCallback} onQueueFail
+         * @param {JARS.internals.StateQueue.LoadedCallback} onModuleLoaded
+         * @param {JARS.internals.StateQueue.AbortedCallback} onModuleAborted
          */
-        add: function(onQueueSuccess, onQueueFail) {
+        add: function(onModuleLoaded, onModuleAborted) {
             var stateQueue = this;
 
             if(stateQueue._state.isLoaded()) {
-                onQueueSuccess(stateQueue._moduleOrBundleName);
+                onModuleLoaded(stateQueue._moduleOrBundleName);
             }
             else if(stateQueue._state.isAborted()) {
-                onQueueFail(stateQueue._moduleOrBundleName);
+                onModuleAborted(stateQueue._moduleOrBundleName);
             }
             else {
-                stateQueue._callbacks.push([onQueueSuccess, onQueueFail]);
+                stateQueue._callbacks.push([onModuleLoaded, onModuleAborted]);
             }
         }
     };
 
     /**
-     * @callback JARS.internals.StateQueue.SuccessCallback
+     * @callback JARS.internals.StateQueue.LoadedCallback
      *
      * @param {string} loadedModuleName
      */
 
     /**
-     * @callback JARS.internals.StateQueue.FailCallback
+     * @callback JARS.internals.StateQueue.AbortedCallback
      *
      * @param {string} abortedModuleName
      */

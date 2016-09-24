@@ -49,8 +49,8 @@ JARS.internal('ModuleBundle', function moduleBundleSetup(InternalsManager) {
             moduleBundle._bundle = resolvedBundle;
         },
         /**
-         * @param {JARS.internals.StateQueue.SuccessCallback} onBundleLoaded
-         * @param {JARS.internals.StateQueue.FailCallback} onBundleAborted
+         * @param {JARS.internals.StateQueue.LoadedCallback} onBundleLoaded
+         * @param {JARS.internals.StateQueue.AbortedCallback} onBundleAborted
          */
         request: function(onBundleLoaded, onBundleAborted) {
             var moduleBundle = this,
