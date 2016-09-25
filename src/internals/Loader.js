@@ -33,7 +33,7 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
 
             System.Logger.info('Successfully flushed Loader with context "${0}"', [loaderContext]);
 
-            getInternal('ConfigsManager').update('loaderContext', switchToContext);
+            getInternal('GlobalConfig').update('loaderContext', switchToContext);
         },
         /**
          * @param {string} newLoaderContext

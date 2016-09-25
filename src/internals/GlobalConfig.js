@@ -1,9 +1,9 @@
-JARS.internal('ConfigsManager', function configsManagerSetup(InternalsManager) {
+JARS.internal('GlobalConfig', function globalConfigSetup(InternalsManager) {
     'use strict';
 
     var getInternal = InternalsManager.get,
         System = getInternal('System'),
-        ConfigHooks = getInternal('ConfigHooks'),
+        GlobalConfigHooks = getInternal('GlobalConfigHooks'),
         objectEach = getInternal('Utils').objectEach,
         configs = {
             environments: {},
@@ -12,33 +12,33 @@ JARS.internal('ConfigsManager', function configsManagerSetup(InternalsManager) {
 
             supressErrors: false
         },
-        ConfigsManager;
+        GlobalConfig;
 
     /**
      * @namespace
      *
      * @memberof JARS.internals
      */
-    ConfigsManager = {
+    GlobalConfig = {
         /**
-         * @param {(JARS.internals.ConfigsManager.Option|Object<JARS.internals.ConfigsManager.Option, *>)} optionOrConfig
+         * @param {(JARS.internals.GlobalConfig.Option|Object<JARS.internals.GlobalConfig.Option, *>)} optionOrConfig
          * @param {*} [value]
          */
         update: function(optionOrConfig, value) {
             var configHook;
 
             if (System.isString(optionOrConfig)) {
-                configHook = ConfigHooks[optionOrConfig];
+                configHook = GlobalConfigHooks[optionOrConfig];
                 configs[optionOrConfig] = System.isFunction(configHook) ? configHook(value, configs[optionOrConfig]) : value;
             }
             else if (System.isObject(optionOrConfig)) {
                 objectEach(optionOrConfig, function update(value, option) {
-                    ConfigsManager.update(option, value);
+                    GlobalConfig.update(option, value);
                 });
             }
         },
         /**
-         * @param {JARS.internals.ConfigsManager.Option} option
+         * @param {JARS.internals.GlobalConfig.Option} option
          *
          * @return {*}
          */
@@ -48,11 +48,11 @@ JARS.internal('ConfigsManager', function configsManagerSetup(InternalsManager) {
     };
 
     /**
-     * @memberof JARS.internals.ConfigsManager
+     * @memberof JARS.internals.GlobalConfig
      * @inner
      *
      * @typedef {('debugging'|'environment'|'environments'|'globalAccess'|'interceptors'|'loaderContext'|'main'|'modules')} Option
      */
 
-    return ConfigsManager;
+    return GlobalConfig;
 });

@@ -1,4 +1,4 @@
-JARS.internal('ConfigHooks', function(InternalsManager) {
+JARS.internal('GlobalConfigHooks', function globalConfigHooksSetup(InternalsManager) {
     'use strict';
 
     var getInternal = InternalsManager.get,
@@ -11,14 +11,14 @@ JARS.internal('ConfigHooks', function(InternalsManager) {
         Utils = getInternal('Utils'),
         arrayEach = Utils.arrayEach,
         objectMerge = Utils.objectMerge,
-        ConfigHooks;
+        GlobalConfigHooks;
 
     /**
      * @namespace
      *
      * @memberof JARS.internals
      */
-    ConfigHooks = {
+    GlobalConfigHooks = {
         /**
          * @param {(Object|boolean)} debugConfig
          */
@@ -29,7 +29,7 @@ JARS.internal('ConfigHooks', function(InternalsManager) {
                 };
             }
 
-            getInternal('ConfigsManager').update('modules', {
+            getInternal('GlobalConfig').update('modules', {
                 restrict: 'System.Logger',
 
                 config: debugConfig
@@ -77,11 +77,11 @@ JARS.internal('ConfigHooks', function(InternalsManager) {
          * @return {string}
          */
         environment: function(newEnvironment, oldEnvironment) {
-            var ConfigsManager = getInternal('ConfigsManager'),
-                environment = ConfigsManager.get('environments')[newEnvironment];
+            var GlobalConfig = getInternal('GlobalConfig'),
+                environment = GlobalConfig.get('environments')[newEnvironment];
 
             if (newEnvironment !== oldEnvironment && System.isObject(environment)) {
-                ConfigsManager.update(environment);
+                GlobalConfig.update(environment);
             }
 
             return newEnvironment;
@@ -122,7 +122,7 @@ JARS.internal('ConfigHooks', function(InternalsManager) {
             if (newLoaderContext !== oldLoaderContext) {
                 newLoaderContext = Loader.setLoaderContext(newLoaderContext);
 
-                exposeModulesGlobal(getInternal('ConfigsManager').get('globalAccess'));
+                exposeModulesGlobal(getInternal('GlobalConfig').get('globalAccess'));
             }
 
             return newLoaderContext;
@@ -138,7 +138,7 @@ JARS.internal('ConfigHooks', function(InternalsManager) {
     };
 
     /**
-     * @memberof JARS.internals.ConfigHooks
+     * @memberof JARS.internals.GlobalConfigHooks
      * @inner
      *
      * @param {boolean} expose
@@ -150,5 +150,5 @@ JARS.internal('ConfigHooks', function(InternalsManager) {
         }
     }
 
-    return ConfigHooks;
+    return GlobalConfigHooks;
 });

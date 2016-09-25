@@ -14,7 +14,7 @@ JARS.internal('InternalBootstrapper', function(InternalsManager) {
             var SourceManager = getInternal('SourceManager'),
                 System = getInternal('System'),
                 Loader = getInternal('Loader'),
-                ConfigsManager = getInternal('ConfigsManager');
+                GlobalConfig = getInternal('GlobalConfig');
 
             Loader.getRootModule().$export();
 
@@ -30,7 +30,7 @@ JARS.internal('InternalBootstrapper', function(InternalsManager) {
                 return System;
             });
 
-            ConfigsManager.update({
+            GlobalConfig.update({
                 modules: [{
                     basePath: SourceManager.BASE_PATH,
 
