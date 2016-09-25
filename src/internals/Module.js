@@ -9,7 +9,7 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
         DependenciesResolver = getInternal('DependenciesResolver'),
         Dependencies = getInternal('Dependencies'),
         Bundle = getInternal('Bundle'),
-        ModuleConfig = getInternal('ModuleConfig'),
+        Config = getInternal('Config'),
         ModuleLogger = getInternal('ModuleLogger'),
         State = getInternal('State'),
         SEPARATOR = '" -> "',
@@ -53,7 +53,7 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
         parent = dependencies.parent;
         module.bundle = new Bundle(module, parent && parent.bundle.config);
         bundleConfig = module.bundle.config;
-        module.config = module.isRoot ? bundleConfig : new ModuleConfig(module, bundleConfig);
+        module.config = module.isRoot ? bundleConfig : new Config(module, bundleConfig);
     }
 
     Module.prototype = {

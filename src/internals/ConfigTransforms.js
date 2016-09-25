@@ -1,4 +1,4 @@
-JARS.internal('ModuleConfigTransforms', function(InternalsManager) {
+JARS.internal('ConfigTransforms', function configTransformsSetup(InternalsManager) {
     'use strict';
 
     var MIN_TIMEOUT = 0.5,
@@ -8,7 +8,7 @@ JARS.internal('ModuleConfigTransforms', function(InternalsManager) {
         RE_END_SLASH = /\/$/,
         SLASH = '/',
         objectMerge = InternalsManager.get('Utils').objectMerge,
-        ModuleConfigTransforms = {};
+        ConfigTransforms = {};
 
     addConfigTransform('basePath', STRING_CHECK, ensureEndsWithSlash);
 
@@ -60,7 +60,7 @@ JARS.internal('ModuleConfigTransforms', function(InternalsManager) {
     addConfigTransform('versionDir', STRING_CHECK, ensureEndsWithSlash);
 
     /**
-     * @memberof JARS.internals.ModuleConfigTransforms
+     * @memberof JARS.internals.ConfigTransforms
      * @inner
      *
      * @param {*} value
@@ -72,7 +72,7 @@ JARS.internal('ModuleConfigTransforms', function(InternalsManager) {
     }
 
     /**
-     * @memberof JARS.internals.ModuleConfigTransforms
+     * @memberof JARS.internals.ConfigTransforms
      * @inner
      *
      * @param {string} path
@@ -84,15 +84,15 @@ JARS.internal('ModuleConfigTransforms', function(InternalsManager) {
     }
 
    /**
-    * @memberof JARS.internals.ModuleConfigTransforms
+    * @memberof JARS.internals.ConfigTransforms
     * @inner
     *
     * @param {string} configKey
     * @param {string} typeCheck
-    * @param {JARS.internals.ModuleConfigTransforms.TransformFunction} [transform]
+    * @param {JARS.internals.ConfigTransforms.TransformFunction} [transform]
     */
    function addConfigTransform(configKey, typeCheck, transform) {
-       ModuleConfigTransforms[configKey] = {
+       ConfigTransforms[configKey] = {
            check: typeCheck,
 
            transform: transform
@@ -102,12 +102,12 @@ JARS.internal('ModuleConfigTransforms', function(InternalsManager) {
    /**
     * @callback TransformFunction
     *
-    * @memberof JARS.internals.ModuleConfigTransforms
+    * @memberof JARS.internals.ConfigTransforms
     * @inner
     *
     * @param {*} configValue
     * @param {(JARS.internals.Module|JARS.internals.Bundle)} [moduleOrBundle]
     */
 
-    return ModuleConfigTransforms;
+    return ConfigTransforms;
 });

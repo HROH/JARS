@@ -87,28 +87,28 @@ JARS.internal('ConfigHooks', function(InternalsManager) {
             return newEnvironment;
         },
         /**
-         * @param {(Object|Object[])} newModuleConfigs
+         * @param {(Object|Object[])} newConfigs
          */
-        modules: function setModuleConfigs(newModuleConfigs) {
+        modules: function setConfigs(newConfigs) {
             var rootModule;
 
-            if (System.isArray(newModuleConfigs)) {
-                arrayEach(newModuleConfigs, function setModuleConfig(config) {
-                    setModuleConfigs(config);
+            if (System.isArray(newConfigs)) {
+                arrayEach(newConfigs, function setConfig(config) {
+                    setConfigs(config);
                 });
             }
             else {
                 rootModule = Loader.getRootModule();
 
-                if(newModuleConfigs.restrict) {
-                    arrayEach(DependenciesResolver.resolveDeps(rootModule, newModuleConfigs.restrict), function updateModuleConfig(moduleName) {
+                if(newConfigs.restrict) {
+                    arrayEach(DependenciesResolver.resolveDeps(rootModule, newConfigs.restrict), function updateConfig(moduleName) {
                         var module = Loader.getModule(moduleName);
 
-                        (BundleResolver.isBundle(moduleName) ? module.bundle : module).config.update(newModuleConfigs);
+                        (BundleResolver.isBundle(moduleName) ? module.bundle : module).config.update(newConfigs);
                     });
                 }
                 else {
-                    rootModule.config.update(newModuleConfigs);
+                    rootModule.config.update(newConfigs);
                 }
             }
         },

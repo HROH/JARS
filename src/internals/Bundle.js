@@ -4,7 +4,7 @@ JARS.internal('Bundle', function bundleSetup(InternalsManager) {
     var getInternal = InternalsManager.get,
         BundleResolver = getInternal('BundleResolver'),
         LoaderQueue = getInternal('LoaderQueue'),
-        ModuleConfig = getInternal('ModuleConfig'),
+        Config = getInternal('Config'),
         ModuleLogger = getInternal('ModuleLogger'),
         State = getInternal('State'),
         SEPARATOR = '", "',
@@ -20,14 +20,14 @@ JARS.internal('Bundle', function bundleSetup(InternalsManager) {
      * @memberof JARS.internals
      *
      * @param {JARS.internals.Module} module
-     * @param {JARS.internals.ModuleConfig} parentConfig
+     * @param {JARS.internals.Config} parentConfig
      */
     function Bundle(module, parentConfig) {
         var bundle = this,
             bundleName = BundleResolver.getBundleName(module.name);
 
         bundle.name = bundleName;
-        bundle.config = new ModuleConfig(bundle, parentConfig);
+        bundle.config = new Config(bundle, parentConfig);
         bundle.logger = new ModuleLogger(bundleName);
         bundle._state = new State(bundleName, bundle.logger);
         bundle._module = module;

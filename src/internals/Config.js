@@ -1,4 +1,4 @@
-JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
+JARS.internal('Config', function configSetup(InternalsManager) {
     'use strict';
 
     var RE_DOT = /\./g,
@@ -10,8 +10,8 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
         create = Utils.create,
         hasOwnProp = Utils.hasOwnProp,
         objectEach = Utils.objectEach,
-        ModuleConfigOptions = getInternal('ModuleConfigOptions'),
-        ModuleConfigTransforms = getInternal('ModuleConfigTransforms'),
+        ConfigOptions = getInternal('ConfigOptions'),
+        ConfigTransforms = getInternal('ConfigTransforms'),
         DependenciesResolver = getInternal('DependenciesResolver'),
         BundleResolver = getInternal('BundleResolver'),
         VersionResolver = getInternal('VersionResolver'),
@@ -23,26 +23,26 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
      * @memberof JARS.internals
      *
      * @param {(JARS.internals.Module|JARS.internals.Bundle)} moduleOrBundle
-     * @param {JARS.internals.ModuleConfig} [parentConfig]
+     * @param {JARS.internals.Config} [parentConfig]
      */
-    function ModuleConfig(moduleOrBundle, parentConfig) {
-        var moduleConfig = this;
+    function Config(moduleOrBundle, parentConfig) {
+        var config = this;
 
-        moduleConfig.parentConfig = parentConfig;
-        moduleConfig._moduleOrBundle = moduleOrBundle;
-        moduleConfig._options = parentConfig ? parentConfig.inheritOptions() : new ModuleConfigOptions();
-        moduleConfig._defaultOptions = getDefaultOptions(moduleOrBundle);
+        config.parentConfig = parentConfig;
+        config._moduleOrBundle = moduleOrBundle;
+        config._options = parentConfig ? parentConfig.inheritOptions() : new ConfigOptions();
+        config._defaultOptions = getDefaultOptions(moduleOrBundle);
     }
 
-    ModuleConfig.prototype = {
-        constructor: ModuleConfig,
+    Config.prototype = {
+        constructor: Config,
         /**
          * @param {Object} newOptions
          */
         update: function(newOptions) {
-            var moduleConfig = this;
+            var config = this;
 
-            transformAndUpdateOptions(moduleConfig._options, newOptions, moduleConfig._moduleOrBundle);
+            transformAndUpdateOptions(config._options, newOptions, config._moduleOrBundle);
         },
         /**
          * @param {string} option
@@ -50,9 +50,9 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
          * @return {*}
          */
         get: function(option) {
-            var moduleConfig = this,
-                options = moduleConfig._options,
-                defaultValue = moduleConfig._defaultOptions[option],
+            var config = this,
+                options = config._options,
+                defaultValue = config._defaultOptions[option],
                 result;
 
             if (option in options) {
@@ -65,18 +65,18 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
             return result;
         },
         /**
-         * @return {JARS.internals.ModuleConfigOptions}
+         * @return {JARS.internals.ConfigOptions}
          */
         inheritOptions: function() {
-            return create(ModuleConfigOptions, this._options);
+            return create(ConfigOptions, this._options);
         }
     };
 
     /**
-     * @memberof JARS.internals.ModuleConfig
+     * @memberof JARS.internals.Config
      * @inner
      *
-     * @param {JARS.internals.ModuleConfigOptions} oldOptions
+     * @param {JARS.internals.ConfigOptions} oldOptions
      * @param {Object} newOptions
      * @param {(JARS.internals.Module|JARS.internals.Bundle)} moduleOrBundle
      */
@@ -84,8 +84,8 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
         objectEach(newOptions, function updateConfig(value, option) {
             var transform;
 
-            if (hasOwnProp(ModuleConfigTransforms, option)) {
-                transform = ModuleConfigTransforms[option];
+            if (hasOwnProp(ConfigTransforms, option)) {
+                transform = ConfigTransforms[option];
 
                 if (System.isFunction(value)) {
                     value = value(oldOptions[option], moduleOrBundle);
@@ -101,16 +101,16 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
     }
 
     /**
-     * @memberof JARS.internals.ModuleConfig
+     * @memberof JARS.internals.Config
      * @inner
      *
      * @param {(JARS.internals.Module|JARS.internals.Bundle)} moduleOrBundle
      *
-     * @return {JARS.internals.ModuleConfigOptions}
+     * @return {JARS.internals.ConfigOptions}
      */
     function getDefaultOptions(moduleOrBundle) {
         var moduleOrBundleName = moduleOrBundle.name,
-            defaultOptions = new ModuleConfigOptions(),
+            defaultOptions = new ConfigOptions(),
             fileName;
 
         if(!BundleResolver.isBundle(moduleOrBundleName)) {
@@ -130,5 +130,5 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
         return defaultOptions;
     }
 
-    return ModuleConfig;
+    return Config;
 });

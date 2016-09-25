@@ -34,7 +34,7 @@ JARS.internal('Recoverer', function(InternalsManager) {
      * @inner
      *
      * @param {string} moduleName
-     * @param {JARS.internals.ModuleConfig} config
+     * @param {JARS.internals.Config} config
      *
      * @return {boolean}
      */
@@ -59,9 +59,9 @@ JARS.internal('Recoverer', function(InternalsManager) {
      * @inner
      *
      * @param {string} moduleName
-     * @param {JARS.internals.ModuleConfig} fallbackConfig
+     * @param {JARS.internals.Config} fallbackConfig
      *
-     * @return {(JARS.internals.ModuleConfig|boolean)}
+     * @return {(JARS.internals.Config|boolean)}
      */
     function getCurrentRecoverConfig(moduleName, fallbackConfig) {
         return nextRecoverConfigs[moduleName] === false ? false : nextRecoverConfigs[moduleName] || (nextRecoverConfigs[moduleName] = fallbackConfig);
@@ -72,7 +72,7 @@ JARS.internal('Recoverer', function(InternalsManager) {
      * @inner
      *
      * @param {string} moduleName
-     * @param {JARS.internals.ModuleConfig} currentRecoverConfig
+     * @param {JARS.internals.Config} currentRecoverConfig
      */
     function setNextRecoverConfig(moduleName, currentRecoverConfig) {
         nextRecoverConfigs[moduleName] = currentRecoverConfig.parentConfig || false;
