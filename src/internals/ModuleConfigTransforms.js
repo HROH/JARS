@@ -16,7 +16,7 @@ JARS.internal('ModuleConfigTransforms', function(InternalsManager) {
         return !!cache;
     });
 
-    addConfigTransform('checkCircularDeps', BOOLEAN_CHECK);
+    addConfigTransform('checkCircularDeps', BOOLEAN_CHECK, identityTransform);
 
     addConfigTransform('config', OBJECT_CHECK, function configTransform(newConfig, moduleOrBundle) {
         return objectMerge(moduleOrBundle.config.get('config'), newConfig);
@@ -28,7 +28,7 @@ JARS.internal('ModuleConfigTransforms', function(InternalsManager) {
         return '.' + extension;
     });
 
-    addConfigTransform('fileName', STRING_CHECK);
+    addConfigTransform('fileName', STRING_CHECK, identityTransform);
 
     addConfigTransform('minified', BOOLEAN_CHECK, function minTransform(loadMin) {
         return loadMin ? '.min' : '';
@@ -59,17 +59,29 @@ JARS.internal('ModuleConfigTransforms', function(InternalsManager) {
 
     addConfigTransform('versionDir', STRING_CHECK, ensureEndsWithSlash);
 
-   /**
-    * @memberof JARS.internals.ModuleConfigTransforms
-    * @inner
-    *
-    * @param {string} path
-    *
-    * @return {string}
-    */
-   function ensureEndsWithSlash(path) {
+    /**
+     * @memberof JARS.internals.ModuleConfigTransforms
+     * @inner
+     *
+     * @param {*} value
+     *
+     * @return {*}
+     */
+    function identityTransform(value) {
+        return value;
+    }
+
+    /**
+     * @memberof JARS.internals.ModuleConfigTransforms
+     * @inner
+     *
+     * @param {string} path
+     *
+     * @return {string}
+     */
+    function ensureEndsWithSlash(path) {
        return (!path || RE_END_SLASH.test(path)) ? path : path + SLASH;
-   }
+    }
 
    /**
     * @memberof JARS.internals.ModuleConfigTransforms

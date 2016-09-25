@@ -82,18 +82,16 @@ JARS.internal('ModuleConfig', function moduleConfigSetup(InternalsManager) {
      */
     function transformAndUpdateOptions(oldOptions, newOptions, moduleOrBundle) {
         objectEach(newOptions, function updateConfig(value, option) {
-            var transform, transformFn;
+            var transform;
 
             if (hasOwnProp(ModuleConfigTransforms, option)) {
                 transform = ModuleConfigTransforms[option];
-                transformFn = transform.transform;
 
                 if (System.isFunction(value)) {
                     value = value(oldOptions[option], moduleOrBundle);
                 }
-
-                if (System['is' + transform.check](value)) {
-                    oldOptions[option] = transformFn ? transformFn(value, moduleOrBundle) : value;
+                else if (System['is' + transform.check](value)) {
+                    oldOptions[option] = transform.transform(value, moduleOrBundle);
                 }
                 else if (System.isNull(value)) {
                     delete oldOptions[option];
