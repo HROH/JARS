@@ -1,4 +1,4 @@
-JARS.internal('AutoAborter', function(InternalsManager) {
+JARS.internal('AutoAborter', function autoAborterSetup(InternalsManager) {
     'use strict';
 
     var global = InternalsManager.get('System').env.global,

@@ -1,4 +1,4 @@
-JARS.internal('LoaderQueue', function(InternalsManager) {
+JARS.internal('LoaderQueue', function loaderQueueSetup(InternalsManager) {
     'use strict';
 
     var getInternal = InternalsManager.get,

@@ -1,4 +1,4 @@
-JARS.internal('ResolutionHelpers', function(InternalsManager) {
+JARS.internal('ResolutionHelpers', function resolutionHelpersSetup(InternalsManager) {
     'use strict';
 
     var VersionResolver = InternalsManager.get('VersionResolver'),

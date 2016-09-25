@@ -1,4 +1,4 @@
-JARS.internal('DependenciesResolutionStrategy', function(InternalsManager) {
+JARS.internal('DependenciesResolutionStrategy', function dependenciesResolutionStrategySetup(InternalsManager) {
     'use strict';
 
     var ResolutionHelpers = InternalsManager.get('ResolutionHelpers'),

@@ -1,4 +1,4 @@
-JARS.internal('InternalBootstrapper', function(InternalsManager) {
+JARS.internal('InternalBootstrapper', function internalBootstrapperSetup(InternalsManager) {
     'use strict';
 
     var getInternal = InternalsManager.get,

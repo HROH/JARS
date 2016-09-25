@@ -1,4 +1,4 @@
-JARS.internal('BundleResolutionStrategy', function(InternalsManager) {
+JARS.internal('BundleResolutionStrategy', function bundleResolutionStrategySetup(InternalsManager) {
     'use strict';
 
     var makeAbsolute = InternalsManager.get('ResolutionHelpers').makeAbsolute,

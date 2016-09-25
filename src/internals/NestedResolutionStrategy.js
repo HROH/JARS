@@ -1,4 +1,4 @@
-JARS.internal('NestedResolutionStrategy', function(InternalsManager) {
+JARS.internal('NestedResolutionStrategy', function nestedResolutionStrategySetup(InternalsManager) {
     'use strict';
 
     var makeAbsolute = InternalsManager.get('ResolutionHelpers').makeAbsolute,

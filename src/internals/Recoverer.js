@@ -1,4 +1,4 @@
-JARS.internal('Recoverer', function(InternalsManager) {
+JARS.internal('Recoverer', function recovererSetup(InternalsManager) {
     'use strict';
 
     var objectMerge = InternalsManager.get('Utils').objectMerge,
