@@ -10,7 +10,7 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
         Dependencies = getInternal('Dependencies'),
         Bundle = getInternal('Bundle'),
         Config = getInternal('Config'),
-        ModuleLogger = getInternal('ModuleLogger'),
+        Logger = getInternal('Logger'),
         State = getInternal('State'),
         SEPARATOR = '" -> "',
         // Errors when module is aborted
@@ -45,7 +45,7 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
         module.name = moduleName;
         module.isRoot = isRoot || false;
 
-        module.logger = logger = new ModuleLogger(moduleName);
+        module.logger = logger = new Logger(moduleName);
         module.state = state = new State(moduleName, logger);
 
         module.deps = dependencies = new Dependencies(module, logger);

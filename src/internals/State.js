@@ -89,7 +89,7 @@ JARS.internal('State', function stateSetup(InternalsManager) {
     * @memberof JARS.internals
     *
     * @param {string} moduleOrBundleName
-    * @param {JARS.internals.ModuleLogger} logger
+    * @param {JARS.internals.Logger} logger
     */
     function State(moduleOrBundleName, logger) {
         var state = this;

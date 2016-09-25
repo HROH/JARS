@@ -19,7 +19,7 @@ JARS.internal('Dependencies', function dependenciesSetup(InternalsManager) {
      * @memberof JARS.internals
      *
      * @param {JARS.internals.Module} module
-     * @param {JARS.internals.ModuleLogger} logger
+     * @param {JARS.internals.Logger} logger
      */
     function Dependencies(module, logger) {
         var dependencies = this,

@@ -1,4 +1,4 @@
-JARS.internal('ModuleLogger', function moduleLoggerSetup(InternalsManager) {
+JARS.internal('Logger', function loggerSetup(InternalsManager) {
     'use strict';
 
     var getInternal = InternalsManager.get,
@@ -12,61 +12,61 @@ JARS.internal('ModuleLogger', function moduleLoggerSetup(InternalsManager) {
      *
      * @param {string} moduleOrBundleName
      */
-    function ModuleLogger(moduleOrBundleName) {
+    function Logger(moduleOrBundleName) {
         this._moduleOrBundleName = moduleOrBundleName;
         this._loggerContext = (BundleResolver.isBundle(moduleOrBundleName) ? 'Bundle' : 'Module') + ':' + moduleOrBundleName;
     }
 
     getInternal('Utils').arrayEach(['debug', 'error', 'info', 'warn'], function addForward(methodName) {
-        ModuleLogger.prototype[methodName] = function(message, values) {
+        Logger.prototype[methodName] = function(message, values) {
             log(this, methodName, message, values);
         };
     });
 
     /**
-     * @method JARS.internals.ModuleLogger#debug
+     * @method JARS.internals.Logger#debug
      *
      * @param {string} message
      * @param {Object} [values]
      */
 
     /**
-     * @method JARS.internals.ModuleLogger#error
+     * @method JARS.internals.Logger#error
      *
      * @param {string} message
      * @param {Object} [values]
      */
 
     /**
-     * @method JARS.internals.ModuleLogger#info
+     * @method JARS.internals.Logger#info
      *
      * @param {string} message
      * @param {Object} [values]
      */
 
     /**
-     * @method JARS.internals.ModuleLogger#warn
+     * @method JARS.internals.Logger#warn
      *
      * @param {string} message
      * @param {Object} [values]
      */
 
     /**
-     * @memberof JARS.internals.ModuleLogger
+     * @memberof JARS.internals.Logger
      * @inner
      *
-     * @param {JARS.internals.ModuleLogger} logger
+     * @param {JARS.internals.Logger} logger
      * @param {string} logMethod
      * @param {string} message
      * @param {Object} [values]
      */
     function log(logger, logMethod, message, values) {
-        var Logger = System.Logger;
+        var SystemLogger = System.Logger;
 
-        if (Logger) {
-            Logger[logMethod + 'WithContext'](logger._loggerContext, message, values);
+        if (SystemLogger) {
+            SystemLogger[logMethod + 'WithContext'](logger._loggerContext, message, values);
         }
     }
 
-    return ModuleLogger;
+    return Logger;
 });
