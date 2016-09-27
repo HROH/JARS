@@ -16,8 +16,6 @@ JARS.internal('InternalBootstrapper', function internalBootstrapperSetup(Interna
                 Loader = getInternal('Loader'),
                 GlobalConfig = getInternal('GlobalConfig');
 
-            Loader.getRootModule().$export();
-
             Loader.registerModule('System', ['Logger', 'Modules']).$export(function systemFactory() {
                 // TODO maybe calling the internal factory for System is the better option
                 // to isolate System on a per context basis but right now this is enough

@@ -129,5 +129,7 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
         }
     };
 
+    Loader.getRootModule().$export();
+
     return Loader;
 });
