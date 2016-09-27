@@ -6,6 +6,7 @@ JARS.internal('Dependencies', function dependenciesSetup(InternalsManager) {
         hasOwnProp = getInternal('Utils').hasOwnProp,
         DependenciesResolver = getInternal('DependenciesResolver'),
         ModulesQueue = getInternal('ModulesQueue'),
+        ModulesRegistry = getInternal('ModulesRegistry'),
         SEPARATOR = '", "',
         FOUND = 'found ',
         DEPENDENCIES = ' dependencie(s) "${deps}"',
@@ -23,7 +24,6 @@ JARS.internal('Dependencies', function dependenciesSetup(InternalsManager) {
      */
     function Dependencies(module, logger) {
         var dependencies = this,
-            loader = module.loader,
             parentName;
 
         dependencies._module = module;
@@ -34,7 +34,7 @@ JARS.internal('Dependencies', function dependenciesSetup(InternalsManager) {
 
         if(!module.isRoot) {
             parentName = DependenciesResolver.getParentName(module.name);
-            dependencies.parent = parentName ? loader.getModule(parentName) : loader.getRootModule();
+            dependencies.parent = parentName ? ModulesRegistry.get(parentName) : ModulesRegistry.getRoot();
 
             parentName && logger.debug(MSG_DEPENDENCY_FOUND, {
                 dep: parentName
@@ -142,7 +142,7 @@ JARS.internal('Dependencies', function dependenciesSetup(InternalsManager) {
                 traversedModules[moduleName] = true;
 
                 arrayEach(dependencyModules, function findCircularDeps(dependencyName) {
-                    var dependencyModule = module.loader.getModule(dependencyName),
+                    var dependencyModule = ModulesRegistry.get(dependencyName),
                         tmpResult = dependencyModule.deps._traceCircular(traceResult, resultOnMatch, resultOnLoopMatch, traversedModules);
 
                     tmpResult = resultOnLoopMatch(tmpResult, moduleName);

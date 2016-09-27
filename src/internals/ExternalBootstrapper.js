@@ -4,6 +4,7 @@ JARS.internal('ExternalBootstrapper', function externalBootstrapperSetup(Interna
     var getInternal = InternalsManager.get,
         arrayEach = getInternal('Utils').arrayEach,
         Loader = getInternal('Loader'),
+        ModulesRegistry = getInternal('ModulesRegistry'),
         GlobalConfig = getInternal('GlobalConfig'),
         JARS_MAIN_LOGCONTEXT = 'JARS:main',
         moduleNamesQueue = [],
@@ -73,7 +74,7 @@ JARS.internal('ExternalBootstrapper', function externalBootstrapperSetup(Interna
         }
 
         function onImport() {
-            var root = Loader.getRootModule().ref;
+            var root = ModulesRegistry.getRoot().ref;
 
             if (GlobalConfig.get('supressErrors')) {
                 try {

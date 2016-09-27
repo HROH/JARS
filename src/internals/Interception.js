@@ -1,7 +1,9 @@
 JARS.internal('Interception', function interceptionSetup(InternalsManager) {
     'use strict';
 
-    var DependenciesResolver = InternalsManager.get('DependenciesResolver');
+    var getInternal = InternalsManager.get,
+        ModulesRegistry = getInternal('ModulesRegistry'),
+        DependenciesResolver = InternalsManager.get('DependenciesResolver');
 
     /**
      * @class
@@ -41,16 +43,15 @@ JARS.internal('Interception', function interceptionSetup(InternalsManager) {
          * @param {JARS.internals.ModulesQueue.ModuleLoadedCallback} onModuleLoaded
          */
         $importAndLink: function(moduleNames, onModulesLoaded, onModuleAborted, onModuleLoaded) {
-            var listeningModule = this.listeningModule,
-                loader = listeningModule.loader;
+            var listeningModule = this.listeningModule;
 
-            moduleNames = DependenciesResolver.resolveDeps(loader.getModule(this.info.moduleName), moduleNames);
+            moduleNames = DependenciesResolver.resolveDeps(ModulesRegistry.get(this.info.moduleName), moduleNames);
 
             if (!listeningModule.isRoot) {
                 listeningModule.deps.requestAndLink(moduleNames, onModulesLoaded, onModuleAborted, onModuleLoaded);
             }
             else {
-                loader.$import(moduleNames, onModulesLoaded, onModuleAborted, onModuleLoaded);
+                getInternal('Loader').$import(moduleNames, onModulesLoaded, onModuleAborted, onModuleLoaded);
             }
         },
     };

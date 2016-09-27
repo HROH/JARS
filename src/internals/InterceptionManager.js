@@ -3,6 +3,7 @@ JARS.internal('InterceptionManager', function interceptionManagerSetup(Internals
 
     var getInternal = InternalsManager.get,
         Interception = getInternal('Interception'),
+        ModulesRegistry = getInternal('ModulesRegistry'),
         Utils = getInternal('Utils'),
         hasOwnProp = Utils.hasOwnProp,
         objectEach = Utils.objectEach,
@@ -50,12 +51,11 @@ JARS.internal('InterceptionManager', function interceptionManagerSetup(Internals
          * @return {JARS.internals.StateQueue.LoadedCallback}
          */
         intercept: function(listeningModule, interceptedModuleName, onModuleLoaded, onModuleAborted) {
-            var Loader = getInternal('Loader'),
-                interceptionInfo = extractInterceptionInfo(interceptedModuleName),
+            var interceptionInfo = extractInterceptionInfo(interceptedModuleName),
                 interceptor = interceptors[interceptionInfo.type];
 
             return function interceptorListener(moduleName) {
-                var interceptedModule = Loader.getModule(moduleName),
+                var interceptedModule = ModulesRegistry.get(moduleName),
                     ref = interceptedModule.ref;
 
                 interceptor ? interceptor.intercept(ref, new Interception(listeningModule, interceptionInfo, function onInterceptionSuccess(data) {

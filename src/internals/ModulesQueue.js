@@ -3,6 +3,7 @@ JARS.internal('ModulesQueue', function loaderQueueSetup(InternalsManager) {
 
     var getInternal = InternalsManager.get,
         arrayEach = getInternal('Utils').arrayEach,
+        ModulesRegistry = getInternal('ModulesRegistry'),
         BundleResolver = getInternal('BundleResolver'),
         InterceptionManager = getInternal('InterceptionManager'),
         SEPARATOR = '", "',
@@ -57,11 +58,9 @@ JARS.internal('ModulesQueue', function loaderQueueSetup(InternalsManager) {
                 refsIndexLookUp = {},
                 refs = [],
                 counter = 0,
-                total = moduleNames.length,
-                Loader;
+                total = moduleNames.length;
 
             if(total) {
-                Loader = getInternal('Loader');
                 onModuleLoaded = onModuleLoaded || onModuleLoadedNoop;
                 onModuleAborted = onModuleAborted || function onModuleAbortedDefault(abortedModuleName) {
                     moduleOrBundle.abort(abortedModuleName);
@@ -72,7 +71,7 @@ JARS.internal('ModulesQueue', function loaderQueueSetup(InternalsManager) {
                 });
 
                 arrayEach(moduleNames, function loadModule(moduleName, moduleIndex) {
-                    var requestedModule = Loader.getModule(moduleName),
+                    var requestedModule = ModulesRegistry.get(moduleName),
                         requestedModuleOrBundle = BundleResolver.isBundle(moduleName) ? requestedModule.bundle : requestedModule;
 
                     refsIndexLookUp[moduleName] = moduleIndex;

@@ -4,6 +4,7 @@ JARS.internal('GlobalConfigHooks', function globalConfigHooksSetup(InternalsMana
     var getInternal = InternalsManager.get,
         System = getInternal('System'),
         Loader = getInternal('Loader'),
+        ModulesRegistry = getInternal('ModulesRegistry'),
         DependenciesResolver = getInternal('DependenciesResolver'),
         BundleResolver = getInternal('BundleResolver'),
         InterceptionManager = getInternal('InterceptionManager'),
@@ -96,11 +97,11 @@ JARS.internal('GlobalConfigHooks', function globalConfigHooksSetup(InternalsMana
                 arrayEach(newConfigs, updateConfigs);
             }
             else {
-                rootModule = Loader.getRootModule();
+                rootModule = ModulesRegistry.getRoot();
 
                 if(newConfigs.restrict) {
                     arrayEach(DependenciesResolver.resolveDeps(rootModule, newConfigs.restrict), function updateConfig(moduleName) {
-                        var module = Loader.getModule(moduleName);
+                        var module = ModulesRegistry.get(moduleName);
 
                         (BundleResolver.isBundle(moduleName) ? module.bundle : module).config.update(newConfigs);
                     });
@@ -143,7 +144,7 @@ JARS.internal('GlobalConfigHooks', function globalConfigHooksSetup(InternalsMana
      */
     function exposeModulesGlobal(expose) {
         if (expose) {
-            JARS.mods = Loader.getRootModule().ref;
+            JARS.mods = ModulesRegistry.getRoot().ref;
             JARS.internals = InternalsManager;
         }
     }

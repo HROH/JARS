@@ -6,6 +6,7 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
         System = getInternal('System'),
         SourceManager = getInternal('SourceManager'),
         Recoverer = getInternal('Recoverer'),
+        ModulesRegistry = getInternal('ModulesRegistry'),
         DependenciesResolver = getInternal('DependenciesResolver'),
         Dependencies = getInternal('Dependencies'),
         Bundle = getInternal('Bundle'),
@@ -33,15 +34,13 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
      *
      * @memberof JARS.internals
      *
-     * @param {JARS.internals.Loader} loader
      * @param {string} moduleName
      * @param {boolean} [isRoot=false]
      */
-    function Module(loader, moduleName, isRoot) {
+    function Module(moduleName, isRoot) {
         var module = this,
             dependencies, bundleConfig, logger, state, parent;
 
-        module.loader = loader;
         module.name = moduleName;
         module.isRoot = isRoot || false;
 
@@ -126,7 +125,6 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
         $export: function(factory) {
             var module = this,
                 state = module.state,
-                loader = module.loader,
                 moduleName = module.name,
                 parentRef;
 
@@ -141,11 +139,11 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
                         else {
                             parentRef = dependencyRefs.shift();
 
-                            loader.setCurrentModuleName(moduleName);
+                            ModulesRegistry.setCurrent(module);
 
                             module.ref = parentRef[DependenciesResolver.removeParentName(moduleName)] = factory ? factory.apply(parentRef, dependencyRefs) || {} : {};
 
-                            loader.setCurrentModuleName();
+                            ModulesRegistry.setCurrent();
                         }
 
                         state.setLoaded();

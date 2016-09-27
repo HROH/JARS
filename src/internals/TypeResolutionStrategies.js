@@ -3,6 +3,7 @@ JARS.internal('TypeResolutionStrategies', function typeResolutionStrategiesSetup
 
     var getInternal = InternalsManager.get,
         System = getInternal('System'),
+        ModulesRegistry = getInternal('ModulesRegistry'),
         BundleResolutionStrategy = getInternal('BundleResolutionStrategy'),
         NestedResolutionStrategy = getInternal('NestedResolutionStrategy'),
         Utils = getInternal('Utils'),
@@ -59,7 +60,7 @@ JARS.internal('TypeResolutionStrategies', function typeResolutionStrategiesSetup
                 var tmpBaseModuleName = TypeResolutionStrategies.string(baseModule, moduleName, resolutionStrategy)[0];
 
                 if(tmpBaseModuleName) {
-                    resolvedModules = resolvedModules.concat(TypeResolutionStrategies.any(baseModule.loader.getModule(tmpBaseModuleName), nestedModules, NestedResolutionStrategy));
+                    resolvedModules = resolvedModules.concat(TypeResolutionStrategies.any(ModulesRegistry.get(tmpBaseModuleName), nestedModules, NestedResolutionStrategy));
                 }
             });
 

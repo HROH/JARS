@@ -9,6 +9,7 @@ JARS.module('System.Modules').$export(function systemModulesFactory() {
         getInternal = internals.get,
         arrayEach = getInternal('Utils').arrayEach,
         Loader = getInternal('Loader'),
+        ModulesRegistry = getInternal('ModulesRegistry'),
         DependenciesResolver = getInternal('DependenciesResolver'),
         Modules;
 
@@ -18,7 +19,6 @@ JARS.module('System.Modules').$export(function systemModulesFactory() {
      * @memberof JARS.internals.System
      *
      * @borrows JARS.internals.Loader.$import as $import
-     * @borrows JARS.internals.Loader.getCurrentModuleData as getCurrentModuleData
      */
     Modules = {
         /**
@@ -29,7 +29,7 @@ JARS.module('System.Modules').$export(function systemModulesFactory() {
         useAll: function(moduleNames) {
             var refs = [];
 
-            moduleNames = DependenciesResolver.resolveDeps(Loader.getRootModule(), moduleNames);
+            moduleNames = DependenciesResolver.resolveDeps(ModulesRegistry.getRoot(), moduleNames);
 
             arrayEach(moduleNames, function use(moduleName) {
                 refs.push(Modules.use(moduleName));
@@ -43,12 +43,22 @@ JARS.module('System.Modules').$export(function systemModulesFactory() {
          * @return {*}
          */
         use: function(moduleName) {
-            return Loader.getModule(moduleName).ref;
+            return ModulesRegistry.get(moduleName).ref;
         },
 
         $import: Loader.$import,
+        /**
+         * @return {{moduleName: string, path: string}}
+         */
+        getCurrentModuleData: function() {
+            var module = ModulesRegistry.getCurrent();
 
-        getCurrentModuleData: Loader.getCurrentModuleData
+            return {
+                moduleName: module.name,
+
+                path: module.getFullPath()
+            };
+        }
     };
 
     return Modules;

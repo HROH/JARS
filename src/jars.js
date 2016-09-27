@@ -22,6 +22,7 @@
                 'InterceptionManager',
                 'InternalBootstrapper',
                 'ModulesQueue',
+                'ModulesRegistry',
                 'Loader',
                 'Logger',
                 'Module',
@@ -223,12 +224,12 @@
 
             $import: delegateToInternal('ExternalBootstrapper', '$import', getJARS),
 
-            module: delegateToInternal('Loader', 'registerModule', function returnModuleWrapper(moduleName) {
+            module: delegateToInternal('ModulesRegistry', 'register', function returnModuleWrapper(moduleName) {
                 var dynamicInternalName = 'Loader:' + moduleName,
                     ModuleWrapper;
 
                 registerInternal(dynamicInternalName, function internalModuleSetup() {
-                    return getInternal('Loader').getModule(moduleName);
+                    return getInternal('ModulesRegistry').get(moduleName);
                 });
 
                 ModuleWrapper = {
