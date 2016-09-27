@@ -44,8 +44,5 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
         }
     };
 
-    ModulesRegistry.getRoot().$export();
-    ModulesRegistry.setCurrent();
-
     return Loader;
 });

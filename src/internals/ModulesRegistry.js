@@ -9,6 +9,26 @@ JARS.internal('ModulesRegistry', function modulesRegistrySetup(InternalsManager)
         ModulesRegistry, Module, InterceptionManager, BundleResolver, currentModule;
 
     ModulesRegistry = {
+        init: function() {
+            Module = getInternal('Module');
+            InterceptionManager = getInternal('InterceptionManager');
+            BundleResolver = getInternal('BundleResolver');
+
+            ModulesRegistry.getRoot().$export();
+            ModulesRegistry.setCurrent();
+
+            ModulesRegistry.register('System', ['Logger', 'Modules']).$export(function systemFactory() {
+                // TODO maybe calling the internal factory for System is the better option
+                // to isolate System on a per context basis but right now this is enough
+
+                /**
+                 * @global
+                 * @module System
+                 * @see JARS.internals.System
+                 */
+                return System;
+            });
+        },
         /**
          * @param {string} moduleName
          * @param {JARS.internals.Bundle.Declaration} bundleModules
@@ -34,8 +54,6 @@ JARS.internal('ModulesRegistry', function modulesRegistrySetup(InternalsManager)
          * @return {JARS.internals.Module}
          */
         get: function(moduleName, isRoot) {
-            initializeModulesRegistry();
-
             if (BundleResolver.isBundle(moduleName)) {
                 moduleName = BundleResolver.removeBundle(moduleName);
             }
@@ -70,14 +88,6 @@ JARS.internal('ModulesRegistry', function modulesRegistrySetup(InternalsManager)
             objectEach(modulesRegistry, callback);
         }
     };
-
-    function initializeModulesRegistry() {
-        if(!(Module && InterceptionManager && BundleResolver)) {
-            Module = getInternal('Module');
-            InterceptionManager = getInternal('InterceptionManager');
-            BundleResolver = getInternal('BundleResolver');
-        }
-    }
 
     return ModulesRegistry;
 });
