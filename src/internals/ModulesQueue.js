@@ -3,7 +3,6 @@ JARS.internal('ModulesQueue', function loaderQueueSetup(InternalsManager) {
 
     var getInternal = InternalsManager.get,
         arrayEach = getInternal('Utils').arrayEach,
-        System = getInternal('System'),
         BundleResolver = getInternal('BundleResolver'),
         InterceptionManager = getInternal('InterceptionManager'),
         SEPARATOR = '", "',
@@ -16,7 +15,7 @@ JARS.internal('ModulesQueue', function loaderQueueSetup(InternalsManager) {
      * @memberof JARS.internals.ModulesQueue
      *
      * @param {string} moduleName
-     * @param {*} moduleRef
+     * @param {*} moduleRefOrData
      * @param {number} [percentageLoaded]
      */
 
@@ -54,19 +53,20 @@ JARS.internal('ModulesQueue', function loaderQueueSetup(InternalsManager) {
             var loaderQueue = this,
                 moduleOrBundle = loaderQueue._moduleOrBundle,
                 logger = moduleOrBundle.logger,
-                Loader = getInternal('Loader'),
                 moduleNames = loaderQueue._moduleNames,
                 refsIndexLookUp = {},
                 refs = [],
                 counter = 0,
-                total = moduleNames.length;
+                total = moduleNames.length,
+                Loader;
 
             if(total) {
+                Loader = getInternal('Loader');
                 onModuleLoaded = onModuleLoaded || onModuleLoadedNoop;
                 onModuleAborted = onModuleAborted || function onModuleAbortedDefault(abortedModuleName) {
                     moduleOrBundle.abort(abortedModuleName);
                 };
-                
+
                 logger.debug(MSG_SUBSCRIBED_TO, {
                     subs: moduleNames.join(SEPARATOR)
                 });
@@ -77,17 +77,14 @@ JARS.internal('ModulesQueue', function loaderQueueSetup(InternalsManager) {
 
                     refsIndexLookUp[moduleName] = moduleIndex;
 
-                    requestedModuleOrBundle.request(InterceptionManager.intercept(moduleOrBundle, moduleName, function processOnModuleLoaded(publishingModuleName, data) {
-                        var percentageLoaded = Number((counter++/total).toFixed(2)),
-                            ref = System.isNil(data) ? Loader.getModuleRef(publishingModuleName) : data;
-
-                        refs[refsIndexLookUp[publishingModuleName]] = ref;
+                    requestedModuleOrBundle.request(InterceptionManager.intercept(moduleOrBundle, moduleName, function processOnModuleLoaded(publishingModuleName, refOrData) {
+                        refs[refsIndexLookUp[publishingModuleName]] = refOrData;
 
                         logger.debug(MSG_NOTIFIED_BY, {
                             pub: publishingModuleName
                         });
 
-                        onModuleLoaded(moduleName, ref, percentageLoaded);
+                        onModuleLoaded(moduleName, refOrData, Number((counter++/total).toFixed(2)));
                         (counter === total) && onModulesLoaded(refs);
                     }, onModuleAborted), onModuleAborted);
                 });

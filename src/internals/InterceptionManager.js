@@ -8,6 +8,7 @@ JARS.internal('InterceptionManager', function interceptionManagerSetup(Internals
         objectEach = Utils.objectEach,
         interceptors = {},
         interceptionInfoCache = {},
+        MSG_INTERCEPTION_ERROR = 'error in interception of this module by interceptor "${type}" with data "${data}"',
         InterceptionManager;
 
     /**
@@ -49,12 +50,22 @@ JARS.internal('InterceptionManager', function interceptionManagerSetup(Internals
          * @return {JARS.internals.StateQueue.LoadedCallback}
          */
         intercept: function(listeningModule, interceptedModuleName, onModuleLoaded, onModuleAborted) {
-            var interceptorInfo = extractInterceptionInfo(interceptedModuleName),
-                interceptor = interceptors[interceptorInfo.type];
+            var Loader = getInternal('Loader'),
+                interceptionInfo = extractInterceptionInfo(interceptedModuleName),
+                interceptor = interceptors[interceptionInfo.type];
 
-            return interceptor ? function interceptorListener(moduleName) {
-                interceptor.intercept(listeningModule.loader.getModuleRef(moduleName), new Interception(listeningModule, interceptorInfo, onModuleLoaded, onModuleAborted));
-            } : onModuleLoaded;
+            return function interceptorListener(moduleName) {
+                var interceptedModule = Loader.getModule(moduleName),
+                    ref = interceptedModule.ref;
+
+                interceptor ? interceptor.intercept(ref, new Interception(listeningModule, interceptionInfo, function onInterceptionSuccess(data) {
+                    onModuleLoaded(interceptedModuleName, data);
+                }, function onInterceptionFail(error) {
+                    interceptedModule.logger.error(error || MSG_INTERCEPTION_ERROR, interceptionInfo);
+
+                    onModuleAborted(interceptedModuleName);
+                })) : onModuleLoaded(moduleName, ref);
+            };
         }
     };
 

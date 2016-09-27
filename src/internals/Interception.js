@@ -1,8 +1,7 @@
 JARS.internal('Interception', function interceptionSetup(InternalsManager) {
     'use strict';
 
-    var DependenciesResolver = InternalsManager.get('DependenciesResolver'),
-        MSG_INTERCEPTION_ERROR = 'error in interception of this module by interceptor "${type}" with data "${data}"';
+    var DependenciesResolver = InternalsManager.get('DependenciesResolver');
 
     /**
      * @class
@@ -11,25 +10,16 @@ JARS.internal('Interception', function interceptionSetup(InternalsManager) {
      *
      * @param {JARS.internals.Module} listeningModule
      * @param {JARS.internals.InterceptionInfo} interceptionInfo
-     * @param {JARS.internals.StateQueue.LoadedCallback} onSuccess
-     * @param {JARS.internals.StateQueue.AbortedCallback} onFail
+     * @param {JARS.internals.Interception.SuccessCallback} onSuccess
+     * @param {JARS.internals.Interception.FailCallback} onFail
      */
     function Interception(listeningModule, interceptionInfo, onSuccess, onFail) {
-        var interception = this,
-            interceptedModuleName = interceptionInfo.moduleName + interceptionInfo.type + interceptionInfo.data;
+        var interception = this;
 
         interception.listeningModule = listeningModule;
         interception.info = interceptionInfo;
-
-        interception.success = function(data) {
-            onSuccess(interceptedModuleName, data);
-        };
-
-        interception.fail = function(error) {
-            listeningModule.loader.getModule(interceptionInfo.moduleName).logger.error(error || MSG_INTERCEPTION_ERROR, interceptionInfo);
-
-            onFail(interceptedModuleName);
-        };
+        interception.success = onSuccess;
+        interception.fail = onFail;
     }
 
     Interception.prototype = {
@@ -46,9 +36,9 @@ JARS.internal('Interception', function interceptionSetup(InternalsManager) {
         },
         /**
          * @param {JARS.internals.Dependencies.Declaration} moduleNames
-         * @param {JARS.internals.LoaderQueue.ModulesLoadedCallback} onModulesLoaded
+         * @param {JARS.internals.ModulesQueue.ModulesLoadedCallback} onModulesLoaded
          * @param {JARS.internals.StateQueue.AbortedCallback} onModuleAborted
-         * @param {JARS.internals.LoaderQueue.ModuleLoadedCallback} onModuleLoaded
+         * @param {JARS.internals.ModulesQueue.ModuleLoadedCallback} onModuleLoaded
          */
         $importAndLink: function(moduleNames, onModulesLoaded, onModuleAborted, onModuleLoaded) {
             var listeningModule = this.listeningModule,
