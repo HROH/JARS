@@ -68,14 +68,6 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
         },
         /**
          * @param {string} moduleName
-         *
-         * @return {*}
-         */
-        getModuleRef: function(moduleName) {
-            return Loader.getModule(moduleName).ref;
-        },
-        /**
-         * @param {string} moduleName
          * @param {boolean} [isRoot]
          *
          * @return {JARS.internals.Module}

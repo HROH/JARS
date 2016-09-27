@@ -17,7 +17,6 @@ JARS.module('System.Modules').$export(function systemModulesFactory() {
      *
      * @memberof JARS.internals.System
      *
-     * @borrows JARS.internals.Loader.getModuleRef as use
      * @borrows JARS.internals.Loader.$import as $import
      * @borrows JARS.internals.Loader.getCurrentModuleData as getCurrentModuleData
      */
@@ -38,8 +37,14 @@ JARS.module('System.Modules').$export(function systemModulesFactory() {
 
             return refs;
         },
-
-        use: Loader.getModuleRef,
+        /**
+         * @param {string} moduleName
+         *
+         * @return {*}
+         */
+        use: function(moduleName) {
+            return Loader.getModule(moduleName).ref;
+        },
 
         $import: Loader.$import,
 
