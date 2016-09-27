@@ -3,7 +3,7 @@ JARS.internal('Bundle', function bundleSetup(InternalsManager) {
 
     var getInternal = InternalsManager.get,
         BundleResolver = getInternal('BundleResolver'),
-        LoaderQueue = getInternal('LoaderQueue'),
+        ModulesQueue = getInternal('ModulesQueue'),
         Config = getInternal('Config'),
         Logger = getInternal('Logger'),
         State = getInternal('State'),
@@ -57,17 +57,17 @@ JARS.internal('Bundle', function bundleSetup(InternalsManager) {
                 bundleState = bundle._state;
 
             if(bundleState.trySetRequested()) {
-                new LoaderQueue(bundle, function onModulesLoaded() {
+                new ModulesQueue(bundle, [bundle._module.name]).request(function onModulesLoaded() {
                     var bundleModules = bundle._bundle;
 
                     bundleModules.length || bundle.logger.warn(MSG_BUNDLE_NOT_DEFINED);
 
-                    new LoaderQueue(bundle, function onModulesLoaded() {
+                    new ModulesQueue(bundle, bundleModules).request(function onModulesLoaded() {
                         if (!bundleState.isLoaded()) {
                             bundleState.setLoaded();
                         }
-                    }).loadModules(bundleModules);
-                }).loadModules([bundle._module.name]);
+                    });
+                });
             }
 
             bundleState.onChange(onBundleLoaded, onBundleAborted);

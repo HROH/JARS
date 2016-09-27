@@ -7,7 +7,7 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
         DependenciesResolver = getInternal('DependenciesResolver'),
         BundleResolver = getInternal('BundleResolver'),
         Module = getInternal('Module'),
-        LoaderQueue = getInternal('LoaderQueue'),
+        ModulesQueue = getInternal('ModulesQueue'),
         InterceptionManager = getInternal('InterceptionManager'),
         modulesRegistry = {},
         ROOT_MODULE_NAME = '*',
@@ -118,14 +118,14 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
          * @param {JARS.internals.Dependencies.Declaration} moduleNames
          * @param {function(...*)} onModulesImported
          * @param {JARS.internals.StateQueue.AbortedCallback} onModuleAborted
-         * @param {JARS.internals.LoaderQueue.ModuleLoadedCallback} onModuleImported
+         * @param {JARS.internals.ModulesQueue.ModuleLoadedCallback} onModuleImported
          */
         $import: function(moduleNames, onModulesImported, onModuleAborted, onModuleImported) {
             var rootModule = Loader.getRootModule();
 
-            new LoaderQueue(rootModule, function onModulesLoaded(refs) {
+            new ModulesQueue(rootModule, DependenciesResolver.resolveDeps(rootModule, moduleNames)).request(function onModulesLoaded(refs) {
                 onModulesImported.apply(null, refs);
-            }, onModuleImported, onModuleAborted).loadModules(DependenciesResolver.resolveDeps(rootModule, moduleNames));
+            }, onModuleImported, onModuleAborted);
         }
     };
 

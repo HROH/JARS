@@ -5,7 +5,7 @@ JARS.internal('Dependencies', function dependenciesSetup(InternalsManager) {
         arrayEach = getInternal('Utils').arrayEach,
         hasOwnProp = getInternal('Utils').hasOwnProp,
         DependenciesResolver = getInternal('DependenciesResolver'),
-        LoaderQueue = getInternal('LoaderQueue'),
+        ModulesQueue = getInternal('ModulesQueue'),
         SEPARATOR = '", "',
         FOUND = 'found ',
         DEPENDENCIES = ' dependencie(s) "${deps}"',
@@ -85,9 +85,9 @@ JARS.internal('Dependencies', function dependenciesSetup(InternalsManager) {
         },
         /**
          * @param {JARS.internals.Dependencies.Declaration} interceptionDependencies
-         * @param {JARS.internals.LoaderQueue.ModulesLoadedCallback} onModulesLoaded
+         * @param {JARS.internals.ModulesQueue.ModulesLoadedCallback} onModulesLoaded
          * @param {JARS.internals.StateQueue.AbortedCallback} onModuleAborted
-         * @param {JARS.internals.LoaderQueue.ModuleLoadedCallback} onModuleLoaded
+         * @param {JARS.internals.ModulesQueue.ModuleLoadedCallback} onModuleLoaded
          */
         requestAndLink: function(interceptionDependencies, onModulesLoaded, onModuleAborted, onModuleLoaded) {
             var dependencies = this;
@@ -97,7 +97,7 @@ JARS.internal('Dependencies', function dependenciesSetup(InternalsManager) {
             loadDependencies(dependencies, interceptionDependencies, onModulesLoaded, onModuleAborted, onModuleLoaded);
         },
         /**
-         * @param {JARS.internals.LoaderQueue.ModulesLoadedCallback} onModulesLoaded
+         * @param {JARS.internals.ModulesQueue.ModulesLoadedCallback} onModulesLoaded
          */
         request: function(onModulesLoaded) {
             var dependencies = this;
@@ -167,9 +167,9 @@ JARS.internal('Dependencies', function dependenciesSetup(InternalsManager) {
      *
      * @param {JARS.internals.Dependencies} dependencies
      * @param {JARS.internals.Dependencies.Declaration} dependenciesToLoad
-     * @param {JARS.internals.LoaderQueue.ModulesLoadedCallback} onModulesLoaded
+     * @param {JARS.internals.ModulesQueue.ModulesLoadedCallback} onModulesLoaded
      * @param {JARS.internals.StateQueue.AbortedCallback} onModuleAborted
-     * @param {JARS.internals.LoaderQueue.ModuleLoadedCallback} onModuleLoaded
+     * @param {JARS.internals.ModulesQueue.ModuleLoadedCallback} onModuleLoaded
      */
     function loadDependencies(dependencies, dependenciesToLoad, onModulesLoaded, onModuleAborted, onModuleLoaded) {
         var module = dependencies._module,
@@ -179,7 +179,7 @@ JARS.internal('Dependencies', function dependenciesSetup(InternalsManager) {
             module.abort(dependencies.getCircular());
         }
         else {
-            new LoaderQueue(module, onModulesLoaded, onModuleLoaded, onModuleAborted).loadModules(dependenciesToLoad);
+            new ModulesQueue(module, dependenciesToLoad).request(onModulesLoaded, onModuleLoaded, onModuleAborted);
         }
     }
 
