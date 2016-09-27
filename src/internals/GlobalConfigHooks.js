@@ -89,13 +89,11 @@ JARS.internal('GlobalConfigHooks', function globalConfigHooksSetup(InternalsMana
         /**
          * @param {(Object|Object[])} newConfigs
          */
-        modules: function setConfigs(newConfigs) {
+        modules: function updateConfigs(newConfigs) {
             var rootModule;
 
             if (System.isArray(newConfigs)) {
-                arrayEach(newConfigs, function setConfig(config) {
-                    setConfigs(config);
-                });
+                arrayEach(newConfigs, updateConfigs);
             }
             else {
                 rootModule = Loader.getRootModule();
