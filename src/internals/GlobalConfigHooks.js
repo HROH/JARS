@@ -3,7 +3,6 @@ JARS.internal('GlobalConfigHooks', function globalConfigHooksSetup(InternalsMana
 
     var getInternal = InternalsManager.get,
         System = getInternal('System'),
-        Loader = getInternal('Loader'),
         ModulesRegistry = getInternal('ModulesRegistry'),
         DependenciesResolver = getInternal('DependenciesResolver'),
         BundleResolver = getInternal('BundleResolver'),
@@ -123,8 +122,6 @@ JARS.internal('GlobalConfigHooks', function globalConfigHooksSetup(InternalsMana
          */
         loaderContext: function(globalConfig, loaderContext) {
             if (loaderContext !== globalConfig.get('loaderContext')) {
-                loaderContext = Loader.setLoaderContext(loaderContext);
-
                 exposeModulesGlobal(globalConfig.get('globalAccess'));
             }
 

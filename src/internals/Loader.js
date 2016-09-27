@@ -3,10 +3,10 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
 
     var getInternal = InternalsManager.get,
         System = getInternal('System'),
+        GlobalConfig = getInternal('GlobalConfig'),
         DependenciesResolver = getInternal('DependenciesResolver'),
         ModulesRegistry = getInternal('ModulesRegistry'),
         ModulesQueue = getInternal('ModulesQueue'),
-        currentLoaderContext = 'default',
         Loader;
 
     /**
@@ -27,13 +27,7 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
 
             System.Logger.info('Successfully flushed Loader with context "${0}"', [loaderContext]);
 
-            getInternal('GlobalConfig').update('loaderContext', switchToContext);
-        },
-        /**
-         * @param {string} newLoaderContext
-         */
-        setLoaderContext: function(newLoaderContext) {
-            currentLoaderContext = newLoaderContext;
+            switchToContext && GlobalConfig.update('loaderContext', switchToContext);
         },
         /**
          * @param {JARS.internals.Dependencies.Declaration} moduleNames
