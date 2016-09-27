@@ -35,7 +35,13 @@ JARS.internal('InternalBootstrapper', function internalBootstrapperSetup(Interna
                 interceptors: [
                     getInternal('PluginInterceptor'),
                     getInternal('PartialModuleInterceptor')
-                ]
+                ],
+
+                globalAccess: false,
+
+                supressErrors: false,
+
+                loaderContext: 'default'
             });
         }
     };
