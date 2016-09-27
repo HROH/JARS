@@ -21,30 +21,31 @@ JARS.internal('GlobalConfigHooks', function globalConfigHooksSetup(InternalsMana
      */
     GlobalConfigHooks = {
         /**
+         * @param {JARS.internals.GlobalConfig} globalConfig
          * @param {(Object|boolean)} debugConfig
          */
-        debugging: function(debugConfig) {
+        debugging: function(globalConfig, debugConfig) {
             if (!System.isObject(debugConfig)) {
                 debugConfig = {
                     debug: debugConfig
                 };
             }
 
-            getInternal('GlobalConfig').update('modules', {
+            globalConfig.update('modules', {
                 restrict: 'System.Logger',
 
                 config: debugConfig
             });
         },
         /**
+         * @param {JARS.internals.GlobalConfig} globalConfig
          * @param {boolean} makeGlobal
-         * @param {boolean} isGlobal
          *
          * @return {boolean}
          */
-        globalAccess: function(makeGlobal, isGlobal) {
+        globalAccess: function(globalConfig, makeGlobal) {
             if (makeGlobal) {
-                exposeModulesGlobal(!isGlobal);
+                exposeModulesGlobal(!globalConfig.get('globalAccess'));
             }
             else {
                 delete JARS.mods;
@@ -54,82 +55,86 @@ JARS.internal('GlobalConfigHooks', function globalConfigHooksSetup(InternalsMana
             return !!makeGlobal;
         },
         /**
+         * @param {JARS.internals.GlobalConfig} globalConfig
          * @param {string} mainScript
-         * @param {string} oldMainScript
          *
          * @return {string}
          */
-        main: function(mainScript, oldMainScript) {
-            return oldMainScript || (mainScript && SourceManager.loadSource('main', mainScript + '.js'));
+        main: function(globalConfig, mainScript) {
+            return globalConfig.get('main') || (mainScript && SourceManager.loadSource('main', mainScript + '.js'));
         },
         /**
-         * @param {Object} newEnvironments
-         * @param {Object} oldEnvironments
+         * @param {JARS.internals.GlobalConfig} globalConfig
+         * @param {Object} environments
          *
          * @return {Object<string, Object>}
          */
-        environments: function(newEnvironments, oldEnvironments) {
-            return objectMerge(oldEnvironments, newEnvironments);
+        environments: function(globalConfig, environments) {
+            return objectMerge(globalConfig.get('environments'), environments);
         },
         /**
-         * @param {string} newEnvironment
-         * @param {string} oldEnvironment
+         * @param {JARS.internals.GlobalConfig} globalConfig
+         * @param {string} environment
          *
          * @return {string}
          */
-        environment: function(newEnvironment, oldEnvironment) {
+        environment: function(globalConfig, environment) {
             var GlobalConfig = getInternal('GlobalConfig'),
-                environment = GlobalConfig.get('environments')[newEnvironment];
+                environmentConfig = GlobalConfig.get('environments')[environment];
 
-            if (newEnvironment !== oldEnvironment && System.isObject(environment)) {
-                GlobalConfig.update(environment);
+            if (environmentConfig !== globalConfig.get('environment') && System.isObject(environmentConfig)) {
+                GlobalConfig.update(environmentConfig);
             }
 
-            return newEnvironment;
+            return environment;
         },
         /**
-         * @param {(Object|Object[])} newConfigs
+         * @param {JARS.internals.GlobalConfig} globalConfig
+         * @param {(Object|Object[])} configs
          */
-        modules: function updateConfigs(newConfigs) {
+        modules: function(globalConfig, configs) {
             var rootModule;
 
-            if (System.isArray(newConfigs)) {
-                arrayEach(newConfigs, updateConfigs);
+            if (System.isArray(configs)) {
+                arrayEach(configs, function updateConfig(config) {
+                    globalConfig.update('modules', config);
+                });
             }
             else {
                 rootModule = ModulesRegistry.getRoot();
 
-                if(newConfigs.restrict) {
-                    arrayEach(DependenciesResolver.resolveDeps(rootModule, newConfigs.restrict), function updateConfig(moduleName) {
+                if(configs.restrict) {
+                    arrayEach(DependenciesResolver.resolveDeps(rootModule,configs.restrict), function updateConfig(moduleName) {
                         var module = ModulesRegistry.get(moduleName);
 
-                        (BundleResolver.isBundle(moduleName) ? module.bundle : module).config.update(newConfigs);
+                        (BundleResolver.isBundle(moduleName) ? module.bundle : module).config.update(configs);
                     });
                 }
                 else {
-                    rootModule.config.update(newConfigs);
+                    rootModule.config.update(configs);
                 }
             }
         },
         /**
-         * @param {string} newLoaderContext
-         * @param {string} oldLoaderContext
+         * @param {JARS.internals.GlobalConfig} globalConfig
+         * @param {string} loaderContext
          *
          * @return {string}
          */
-        loaderContext: function(newLoaderContext, oldLoaderContext) {
-            if (newLoaderContext !== oldLoaderContext) {
-                newLoaderContext = Loader.setLoaderContext(newLoaderContext);
+        loaderContext: function(globalConfig, loaderContext) {
+            if (loaderContext !== globalConfig.get('loaderContext')) {
+                loaderContext = Loader.setLoaderContext(loaderContext);
 
-                exposeModulesGlobal(getInternal('GlobalConfig').get('globalAccess'));
+                exposeModulesGlobal(globalConfig.get('globalAccess'));
             }
 
-            return newLoaderContext;
+            return loaderContext;
         },
         /**
+         * @param {JARS.internals.GlobalConfig} globalConfig
          * @param {JARS.internals.Interceptor[]} newInterceptors
          */
-        interceptors: function(newInterceptors) {
+        interceptors: function(globalConfig, newInterceptors) {
             if (System.isArray(newInterceptors)) {
                 arrayEach(newInterceptors, InterceptionManager.addInterceptor);
             }

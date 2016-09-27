@@ -29,7 +29,7 @@ JARS.internal('GlobalConfig', function globalConfigSetup(InternalsManager) {
 
             if (System.isString(optionOrConfig)) {
                 configHook = GlobalConfigHooks[optionOrConfig];
-                configs[optionOrConfig] = System.isFunction(configHook) ? configHook(value, configs[optionOrConfig]) : value;
+                configs[optionOrConfig] = System.isFunction(configHook) ? configHook(GlobalConfig, value) : value;
             }
             else if (System.isObject(optionOrConfig)) {
                 objectEach(optionOrConfig, function update(value, option) {
