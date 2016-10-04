@@ -4,12 +4,10 @@ JARS.internal('TypeResolutionStrategies', function typeResolutionStrategiesSetup
     var getInternal = InternalsManager.get,
         System = getInternal('System'),
         ModulesRegistry = getInternal('ModulesRegistry'),
-        BundleResolutionStrategy = getInternal('BundleResolutionStrategy'),
         NestedResolutionStrategy = getInternal('NestedResolutionStrategy'),
         Utils = getInternal('Utils'),
         objectEach = Utils.objectEach,
         arrayEach = Utils.arrayEach,
-        MSG_DEFAULT_RESOLUTION_ERROR = 'Could not resolve "${mod}": ',
         TypeResolutionStrategies;
 
     /**
@@ -74,20 +72,9 @@ JARS.internal('TypeResolutionStrategies', function typeResolutionStrategiesSetup
          * @return {string[]}
          */
         string: function(baseModule, moduleName, resolutionStrategy) {
-            var logger = (resolutionStrategy === BundleResolutionStrategy ? baseModule.bundle : baseModule).logger,
-                resolutionInfo = resolutionStrategy.resolve(baseModule, moduleName),
-                resolvedModules = [];
+            var resolvedModule = resolutionStrategy.resolve(baseModule, moduleName);
 
-            if (resolutionInfo.error) {
-                logger.error(MSG_DEFAULT_RESOLUTION_ERROR + resolutionInfo.error, {
-                    mod: moduleName
-                });
-            }
-            else {
-                resolvedModules = [resolutionInfo.resolved];
-            }
-
-            return resolvedModules;
+            return resolvedModule ? [resolvedModule] : [];
         },
         /**
          * @return {string[]}
@@ -108,6 +95,14 @@ JARS.internal('TypeResolutionStrategies', function typeResolutionStrategiesSetup
      * @param {string} moduleName
      *
      * @return {string}
+     */
+
+    /**
+     * @method JARS.internals.ResolutionStrategy#getLogger
+     *
+     * @param {JARS.internals.Module} baseModule
+     *
+     * @return {JARS.internals.Logger}
      */
 
     return TypeResolutionStrategies;

@@ -1,9 +1,12 @@
 JARS.internal('ResolutionHelpers', function resolutionHelpersSetup(InternalsManager) {
     'use strict';
 
-    var VersionResolver = InternalsManager.get('VersionResolver'),
+    var getInternal = InternalsManager.get,
+        VersionResolver = getInternal('VersionResolver'),
+        InterceptionResolver = getInternal('InterceptionResolver'),
         DOT = '.',
         RE_LEADING_DOT = /^\./,
+        MSG_DEFAULT_RESOLUTION_ERROR = 'Could not resolve "${mod}": ',
         MSG_VERSION_RESOLUTION_ERROR = 'a version must not be added when the parent is already versioned',
         ResolutionHelpers;
 
@@ -16,27 +19,37 @@ JARS.internal('ResolutionHelpers', function resolutionHelpersSetup(InternalsMana
         /**
          * @param {JARS.internals.Module} baseModule
          * @param {string} moduleName
-         * @param {string} errorMessage
          *
          * @return {string}
          */
-        makeAbsolute: function(baseModule, moduleName, errorMessage) {
-            var resolutionInfo = {},
-                moduleNameWithoutInterceptionData = InternalsManager.get('InterceptionManager').removeInterceptionData(moduleName);
+        resolveAbsolute: function(baseModule, moduleName) {
+            var moduleNameWithoutInterceptionData = InterceptionResolver.removeInterceptionData(moduleName),
+                resolutionData = {};
 
             if(VersionResolver.getVersion(moduleNameWithoutInterceptionData) && baseModule && VersionResolver.getVersion(baseModule.name)) {
-                resolutionInfo.error = MSG_VERSION_RESOLUTION_ERROR;
+                resolutionData.error = MSG_VERSION_RESOLUTION_ERROR;
             }
-            else if(!canMakeAbsolute(baseModule, moduleNameWithoutInterceptionData)) {
-                resolutionInfo.error = errorMessage;
-            }
-            else {
-                resolutionInfo.resolved = baseModule ? VersionResolver.unwrapVersion(function makeAbsolute(baseModuleName) {
+            else if(canMakeAbsolute(baseModule, moduleNameWithoutInterceptionData)) {
+                resolutionData.moduleName = baseModule ? VersionResolver.unwrapVersion(function resolveAbsolute(baseModuleName) {
                     return baseModuleName + (moduleNameWithoutInterceptionData ? DOT + moduleName : moduleName);
                 })(baseModule.name) : moduleName;
             }
 
-            return resolutionInfo;
+            return resolutionData;
+        },
+
+        logResolutionError: function(resolve, getLogger, errorMessage) {
+            return function wrappedResolve(baseModule, moduleName) {
+                var resolutionData = resolve(baseModule, moduleName);
+
+                if(resolutionData.error || !resolutionData.moduleName) {
+                    getLogger(baseModule).error(MSG_DEFAULT_RESOLUTION_ERROR + (resolutionData.error || errorMessage), {
+                        mod: moduleName
+                    });
+                }
+
+                return resolutionData.moduleName;
+            };
         },
         /**
          * @param {string} moduleName
@@ -58,7 +71,7 @@ JARS.internal('ResolutionHelpers', function resolutionHelpersSetup(InternalsMana
      * @return {boolean}
      */
     function canMakeAbsolute(baseModule, moduleName) {
-        return ((baseModule && !baseModule.isRoot) || moduleName) && !ResolutionHelpers.isRelative(moduleName);
+        return (baseModule ? !baseModule.isRoot : moduleName) && !ResolutionHelpers.isRelative(moduleName);
     }
 
     return ResolutionHelpers;
