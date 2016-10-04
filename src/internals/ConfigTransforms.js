@@ -12,9 +12,7 @@ JARS.internal('ConfigTransforms', function configTransformsSetup(InternalsManage
 
     addConfigTransform('basePath', STRING_CHECK, ensureEndsWithSlash);
 
-    addConfigTransform('cache', BOOLEAN_CHECK, function cacheTransform(cache) {
-        return !!cache;
-    });
+    addConfigTransform('cache', BOOLEAN_CHECK, identityTransform);
 
     addConfigTransform('checkCircularDeps', BOOLEAN_CHECK, identityTransform);
 
