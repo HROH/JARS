@@ -3,7 +3,8 @@ JARS.internal('Interception', function interceptionSetup(InternalsManager) {
 
     var getInternal = InternalsManager.get,
         ModulesRegistry = getInternal('ModulesRegistry'),
-        DependenciesResolver = InternalsManager.get('DependenciesResolver');
+        DependenciesResolver = InternalsManager.get('DependenciesResolver'),
+        MSG_INTERCEPTION_ERROR = 'error in interception of this module by interceptor "${type}" with data "${data}"';
 
     /**
      * @class
@@ -20,8 +21,8 @@ JARS.internal('Interception', function interceptionSetup(InternalsManager) {
 
         interception.listeningModule = listeningModule;
         interception.info = interceptionInfo;
-        interception.success = onSuccess;
-        interception.fail = onFail;
+        interception.success = createSuccessHandler(interceptionInfo, onSuccess);
+        interception.fail = createFailHandler(interceptionInfo, onFail);
     }
 
     Interception.prototype = {
@@ -55,6 +56,22 @@ JARS.internal('Interception', function interceptionSetup(InternalsManager) {
             }
         },
     };
+
+    function createFailHandler(interceptionInfo, onModuleAborted) {
+        var interceptedModuleName = interceptionInfo.fullModuleName;
+
+        return function onInterceptionFail(error) {
+            ModulesRegistry.get(interceptedModuleName).logger.error(error || MSG_INTERCEPTION_ERROR, interceptionInfo);
+
+            onModuleAborted(interceptedModuleName);
+        };
+    }
+
+    function createSuccessHandler(interceptionInfo, onModuleLoaded) {
+        return function onInterceptionSuccess(data) {
+            onModuleLoaded(interceptionInfo.fullModuleName, data);
+        };
+    }
 
     return Interception;
 });

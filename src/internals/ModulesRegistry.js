@@ -6,12 +6,17 @@ JARS.internal('ModulesRegistry', function modulesRegistrySetup(InternalsManager)
         objectEach = getInternal('Utils').objectEach,
         modulesRegistry = {},
         ROOT_MODULE_NAME = '*',
-        ModulesRegistry, Module, InterceptionManager, BundleResolver, currentModule;
+        ModulesRegistry, Module, InterceptionResolver, BundleResolver, currentModule;
 
+    /**
+     * @namespace
+     *
+     * @memberof JARS.internals
+     */
     ModulesRegistry = {
         init: function() {
             Module = getInternal('Module');
-            InterceptionManager = getInternal('InterceptionManager');
+            InterceptionResolver = getInternal('InterceptionResolver');
             BundleResolver = getInternal('BundleResolver');
 
             ModulesRegistry.getRoot().$export();
@@ -58,7 +63,7 @@ JARS.internal('ModulesRegistry', function modulesRegistrySetup(InternalsManager)
                 moduleName = BundleResolver.removeBundle(moduleName);
             }
             else {
-                moduleName = InterceptionManager.removeInterceptionData(moduleName);
+                moduleName = InterceptionResolver.removeInterceptionData(moduleName);
             }
 
             return moduleName ? modulesRegistry[moduleName] || (modulesRegistry[moduleName] = new Module(moduleName, isRoot)) : null;

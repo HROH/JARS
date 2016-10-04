@@ -5,7 +5,9 @@ JARS.internal('ModulesQueue', function loaderQueueSetup(InternalsManager) {
         arrayEach = getInternal('Utils').arrayEach,
         ModulesRegistry = getInternal('ModulesRegistry'),
         BundleResolver = getInternal('BundleResolver'),
-        InterceptionManager = getInternal('InterceptionManager'),
+        Interception = getInternal('Interception'),
+        InterceptionResolver = getInternal('InterceptionResolver'),
+        InterceptorRegistry = getInternal('InterceptorRegistry'),
         SEPARATOR = '", "',
         MSG_SUBSCRIBED_TO = 'subscribed to "${subs}"',
         MSG_NOTIFIED_BY = 'was notified by "${pub}"';
@@ -70,26 +72,39 @@ JARS.internal('ModulesQueue', function loaderQueueSetup(InternalsManager) {
                     subs: moduleNames.join(SEPARATOR)
                 });
 
-                arrayEach(moduleNames, function loadModule(moduleName, moduleIndex) {
-                    var requestedModule = ModulesRegistry.get(moduleName),
-                        requestedModuleOrBundle = BundleResolver.isBundle(moduleName) ? requestedModule.bundle : requestedModule;
+                arrayEach(moduleNames, function loadModule(requestedModuleName, moduleIndex) {
+                    var requestedModule = ModulesRegistry.get(requestedModuleName),
+                        requestedModuleOrBundle = BundleResolver.isBundle(requestedModuleName) ? requestedModule.bundle : requestedModule;
 
-                    refsIndexLookUp[moduleName] = moduleIndex;
+                    refsIndexLookUp[requestedModuleName] = moduleIndex;
 
-                    requestedModuleOrBundle.request(InterceptionManager.intercept(moduleOrBundle, moduleName, function processOnModuleLoaded(publishingModuleName, refOrData) {
-                        refs[refsIndexLookUp[publishingModuleName]] = refOrData;
+                    requestedModuleOrBundle.request(function interceptorListener() {
+                        var interceptionInfo = InterceptionResolver.extractInterceptionInfo(requestedModuleName),
+                            interceptor = InterceptorRegistry.get(interceptionInfo.type),
+                            ref = requestedModule.ref;
 
-                        logger.debug(MSG_NOTIFIED_BY, {
-                            pub: publishingModuleName
-                        });
-
-                        onModuleLoaded(moduleName, refOrData, Number((counter++/total).toFixed(2)));
-                        (counter === total) && onModulesLoaded(refs);
-                    }, onModuleAborted), onModuleAborted);
+                        if(interceptor) {
+                            interceptor.intercept(ref, new Interception(moduleOrBundle, interceptionInfo, processOnModuleLoaded, onModuleAborted));
+                        }
+                        else {
+                            processOnModuleLoaded(requestedModuleName, ref);
+                        }
+                    }, onModuleAborted);
                 });
             }
             else {
                 onModulesLoaded(refs);
+            }
+
+            function processOnModuleLoaded(publishingModuleName, refOrData) {
+                refs[refsIndexLookUp[publishingModuleName]] = refOrData;
+
+                logger.debug(MSG_NOTIFIED_BY, {
+                    pub: publishingModuleName
+                });
+
+                onModuleLoaded(publishingModuleName, refOrData, Number((counter++/total).toFixed(2)));
+                (counter === total) && onModulesLoaded(refs);
             }
         }
     };
