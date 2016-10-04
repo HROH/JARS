@@ -6,7 +6,7 @@ JARS.internal('GlobalConfigHooks', function globalConfigHooksSetup(InternalsMana
         ModulesRegistry = getInternal('ModulesRegistry'),
         DependenciesResolver = getInternal('DependenciesResolver'),
         BundleResolver = getInternal('BundleResolver'),
-        InterceptionManager = getInternal('InterceptionManager'),
+        InterceptorRegistry = getInternal('InterceptorRegistry'),
         SourceManager = getInternal('SourceManager'),
         Utils = getInternal('Utils'),
         arrayEach = Utils.arrayEach,
@@ -31,8 +31,6 @@ JARS.internal('GlobalConfigHooks', function globalConfigHooksSetup(InternalsMana
             }
 
             globalConfig.update('modules', {
-                restrict: 'System.Logger',
-
                 config: debugConfig
             });
         },
@@ -78,40 +76,30 @@ JARS.internal('GlobalConfigHooks', function globalConfigHooksSetup(InternalsMana
          * @return {string}
          */
         environment: function(globalConfig, environment) {
-            var GlobalConfig = getInternal('GlobalConfig'),
-                environmentConfig = GlobalConfig.get('environments')[environment];
+            var environmentConfig = globalConfig.get('environments')[environment];
 
-            if (environmentConfig !== globalConfig.get('environment') && System.isObject(environmentConfig)) {
-                GlobalConfig.update(environmentConfig);
+            if (environmentConfig !== globalConfig.get('environment')) {
+                globalConfig.update(environmentConfig);
             }
 
             return environment;
         },
         /**
          * @param {JARS.internals.GlobalConfig} globalConfig
-         * @param {(Object|Object[])} configs
+         * @param {Object} config
          */
-        modules: function(globalConfig, configs) {
-            var rootModule;
+        modules: function(globalConfig, config) {
+            var rootModule = ModulesRegistry.getRoot();
 
-            if (System.isArray(configs)) {
-                arrayEach(configs, function updateConfig(config) {
-                    globalConfig.update('modules', config);
+            if(config.restrict) {
+                arrayEach(DependenciesResolver.resolveDeps(rootModule, config.restrict), function updateConfig(moduleName) {
+                    var module = ModulesRegistry.get(moduleName);
+
+                    (BundleResolver.isBundle(moduleName) ? module.bundle : module).config.update(config);
                 });
             }
             else {
-                rootModule = ModulesRegistry.getRoot();
-
-                if(configs.restrict) {
-                    arrayEach(DependenciesResolver.resolveDeps(rootModule,configs.restrict), function updateConfig(moduleName) {
-                        var module = ModulesRegistry.get(moduleName);
-
-                        (BundleResolver.isBundle(moduleName) ? module.bundle : module).config.update(configs);
-                    });
-                }
-                else {
-                    rootModule.config.update(configs);
-                }
+                rootModule.config.update(config);
             }
         },
         /**
@@ -129,12 +117,10 @@ JARS.internal('GlobalConfigHooks', function globalConfigHooksSetup(InternalsMana
         },
         /**
          * @param {JARS.internals.GlobalConfig} globalConfig
-         * @param {JARS.internals.Interceptor[]} newInterceptors
+         * @param {JARS.internals.Interceptor} interceptor
          */
-        interceptors: function(globalConfig, newInterceptors) {
-            if (System.isArray(newInterceptors)) {
-                arrayEach(newInterceptors, InterceptionManager.addInterceptor);
-            }
+        interceptors: function(globalConfig, interceptor) {
+            InterceptorRegistry.register(interceptor);
         }
     };
 

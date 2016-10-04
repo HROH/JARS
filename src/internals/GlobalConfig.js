@@ -4,8 +4,9 @@ JARS.internal('GlobalConfig', function globalConfigSetup(InternalsManager) {
     var getInternal = InternalsManager.get,
         System = getInternal('System'),
         GlobalConfigHooks = getInternal('GlobalConfigHooks'),
+        arrayEach = getInternal('Utils').arrayEach,
         objectEach = getInternal('Utils').objectEach,
-        configs = {
+        globalConfig = {
             environments: {}
         },
         GlobalConfig;
@@ -17,20 +18,20 @@ JARS.internal('GlobalConfig', function globalConfigSetup(InternalsManager) {
      */
     GlobalConfig = {
         /**
-         * @param {(JARS.internals.GlobalConfig.Option|Object<JARS.internals.GlobalConfig.Option, *>)} optionOrConfig
-         * @param {*} [value]
+         * @param {(JARS.internals.GlobalConfig.Option|Object<JARS.internals.GlobalConfig.Option, *>)} optionOrConfigOrArray
+         * @param {*} [valueOrArray]
          */
-        update: function(optionOrConfig, value) {
-            var configHook;
-
-            if (System.isString(optionOrConfig)) {
-                configHook = GlobalConfigHooks[optionOrConfig];
-                configs[optionOrConfig] = System.isFunction(configHook) ? configHook(GlobalConfig, value) : value;
+        update: function(optionOrConfigOrArray, valueOrArray) {
+            if (System.isString(optionOrConfigOrArray)) {
+                updateOption(optionOrConfigOrArray, valueOrArray);
             }
-            else if (System.isObject(optionOrConfig)) {
-                objectEach(optionOrConfig, function update(value, option) {
+            else if (System.isObject(optionOrConfigOrArray)) {
+                objectEach(optionOrConfigOrArray, function updateConfig(value, option) {
                     GlobalConfig.update(option, value);
                 });
+            }
+            else if (System.isArray(optionOrConfigOrArray)) {
+                arrayEach(optionOrConfigOrArray, GlobalConfig.update);
             }
         },
         /**
@@ -39,9 +40,23 @@ JARS.internal('GlobalConfig', function globalConfigSetup(InternalsManager) {
          * @return {*}
          */
         get: function(option) {
-            return configs[option];
+            return globalConfig[option];
         }
     };
+
+    function updateOption(option, valueOrArray) {
+        var configHook;
+
+        if(System.isArray(valueOrArray)) {
+            arrayEach(valueOrArray, function(value) {
+                updateOption(option, value);
+            });
+        }
+        else {
+            configHook = GlobalConfigHooks[option];
+            globalConfig[option] = System.isFunction(configHook) ? configHook(GlobalConfig, valueOrArray) : valueOrArray;
+        }
+    }
 
     /**
      * @memberof JARS.internals.GlobalConfig
