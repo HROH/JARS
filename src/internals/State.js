@@ -113,11 +113,11 @@ JARS.internal('State', function stateSetup(InternalsManager) {
             this._logger.info(stateMsgMap[newState][PROGRESS_MESSAGE], info);
         },
         /**
+         * @method
+         *
          * @return {boolean}
          */
-        isLoading: function() {
-            return this._state === LOADING_STATE;
-        },
+        isLoading: comparerFor(LOADING_STATE),
         /**
          * @return {boolean}
          */
@@ -128,17 +128,17 @@ JARS.internal('State', function stateSetup(InternalsManager) {
             return currentState === REGISTERED_STATE || currentState === LOADED_MANUALLY_STATE || state.isLoaded();
         },
         /**
+         * @method
+         *
          * @return {boolean}
          */
-        isLoaded: function() {
-            return this._state === LOADED_STATE;
-        },
+        isLoaded: comparerFor(LOADED_STATE),
         /**
+         * @method
+         *
          * @return {boolean}
          */
-        isAborted: function() {
-            return this._state === ABORTED_STATE;
-        },
+        isAborted: comparerFor(ABORTED_STATE),
 
         setLoaded: function() {
             var state = this;
@@ -154,12 +154,13 @@ JARS.internal('State', function stateSetup(InternalsManager) {
         trySetRequested: function(requestInfo) {
             var state = this,
                 logger = state._logger,
-                isWaiting = state._state === WAITING_STATE;
+                currentState = state._state,
+                isWaiting = currentState === WAITING_STATE;
 
             logger.info(MSG_REQUESTED);
 
             if(!isWaiting) {
-                logger.info(stateMsgMap[state._state][ALREADY_PROGRESSED_MESSAGE]);
+                logger.info(stateMsgMap[currentState][ALREADY_PROGRESSED_MESSAGE]);
             }
             else {
                 state._setAndLog(LOADING_STATE, requestInfo);
@@ -200,6 +201,12 @@ JARS.internal('State', function stateSetup(InternalsManager) {
             this._queue.add(onModuleLoaded, onModuleAborted);
         }
     };
+
+    function comparerFor(state) {
+        return function compareState() {
+            return this._state === state;
+        };
+    }
 
     return State;
 });
