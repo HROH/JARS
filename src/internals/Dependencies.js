@@ -86,7 +86,7 @@ JARS.internal('Dependencies', function dependenciesSetup(InternalsManager) {
         /**
          * @param {JARS.internals.Dependencies.Declaration} interceptionDependencies
          * @param {JARS.internals.ModulesQueue.ModulesLoadedCallback} onModulesLoaded
-         * @param {JARS.internals.StateQueue.AbortedCallback} onModuleAborted
+         * @param {JARS.internals.State.AbortedCallback} onModuleAborted
          * @param {JARS.internals.ModulesQueue.ModuleLoadedCallback} onModuleLoaded
          */
         requestAndLink: function(interceptionDependencies, onModulesLoaded, onModuleAborted, onModuleLoaded) {
@@ -168,7 +168,7 @@ JARS.internal('Dependencies', function dependenciesSetup(InternalsManager) {
      * @param {JARS.internals.Dependencies} dependencies
      * @param {JARS.internals.Dependencies.Declaration} dependenciesToLoad
      * @param {JARS.internals.ModulesQueue.ModulesLoadedCallback} onModulesLoaded
-     * @param {JARS.internals.StateQueue.AbortedCallback} onModuleAborted
+     * @param {JARS.internals.State.AbortedCallback} onModuleAborted
      * @param {JARS.internals.ModulesQueue.ModuleLoadedCallback} onModuleLoaded
      */
     function loadDependencies(dependencies, dependenciesToLoad, onModulesLoaded, onModuleAborted, onModuleLoaded) {

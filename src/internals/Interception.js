@@ -40,7 +40,7 @@ JARS.internal('Interception', function interceptionSetup(InternalsManager) {
         /**
          * @param {JARS.internals.Dependencies.Declaration} moduleNames
          * @param {JARS.internals.ModulesQueue.ModulesLoadedCallback} onModulesLoaded
-         * @param {JARS.internals.StateQueue.AbortedCallback} onModuleAborted
+         * @param {JARS.internals.State.AbortedCallback} onModuleAborted
          * @param {JARS.internals.ModulesQueue.ModuleLoadedCallback} onModuleLoaded
          */
         $importAndLink: function(moduleNames, onModulesLoaded, onModuleAborted, onModuleLoaded) {

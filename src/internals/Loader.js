@@ -32,7 +32,7 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
         /**
          * @param {JARS.internals.Dependencies.Declaration} moduleNames
          * @param {function(...*)} onModulesImported
-         * @param {JARS.internals.StateQueue.AbortedCallback} onModuleAborted
+         * @param {JARS.internals.State.AbortedCallback} onModuleAborted
          * @param {JARS.internals.ModulesQueue.ModuleLoadedCallback} onModuleImported
          */
         $import: function(moduleNames, onModulesImported, onModuleAborted, onModuleImported) {

@@ -50,7 +50,7 @@ JARS.internal('ModulesQueue', function loaderQueueSetup(InternalsManager) {
         /**
          * @param {JARS.internals.ModulesQueue.ModulesLoadedCallback} onModulesLoaded
          * @param {JARS.internals.ModulesQueue.ModuleLoadedCallback} onModuleLoaded
-         * @param {JARS.internals.StateQueue.AbortedCallback} onModuleAborted
+         * @param {JARS.internals.State.AbortedCallback} onModuleAborted
          */
         request: function(onModulesLoaded, onModuleLoaded, onModuleAborted) {
             var loaderQueue = this,

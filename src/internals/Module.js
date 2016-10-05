@@ -80,8 +80,8 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
             SourceManager.loadSource(module.name, module.getFullPath());
         },
         /**
-         * @param {JARS.internals.StateQueue.LoadedCallback} onModuleLoaded
-         * @param {JARS.internals.StateQueue.AbortedCallback} onModuleAborted
+         * @param {JARS.internals.State.LoadedCallback} onModuleLoaded
+         * @param {JARS.internals.State.AbortedCallback} onModuleAborted
          */
         request: function(onModuleLoaded, onModuleAborted) {
             var module = this,

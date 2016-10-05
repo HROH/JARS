@@ -1,8 +1,7 @@
-JARS.internal('State', function stateSetup(InternalsManager) {
+JARS.internal('State', function stateSetup() {
     'use strict';
 
-    var StateQueue = InternalsManager.get('StateQueue'),
-        stateMsgMap = {},
+    var stateMsgMap = {},
         LOADING = 'loading',
         LOADED = 'loaded',
         LOADED_MANUALLY = LOADED + ' manually',
@@ -27,6 +26,8 @@ JARS.internal('State', function stateSetup(InternalsManager) {
         MSG_REGISTERING = 'is registering...',
         PROGRESS_MESSAGE = 0,
         ALREADY_PROGRESSED_MESSAGE = 1,
+        QUEUE_LOADED = 0,
+        QUEUE_ABORTED = 1,
         // Module/bundle states
         /**
          * @constant {number}
@@ -97,7 +98,7 @@ JARS.internal('State', function stateSetup(InternalsManager) {
         state._moduleOrBundleName = moduleOrBundleName;
         state._logger = logger;
         state._state = WAITING_STATE;
-        state._queue = new StateQueue(moduleOrBundleName, state);
+        state._queue = [];
     }
 
     State.prototype = {
@@ -144,7 +145,7 @@ JARS.internal('State', function stateSetup(InternalsManager) {
             var state = this;
 
             state._setAndLog(LOADED_STATE);
-            state._queue.notify();
+            syncQueueWithState(state);
         },
         /**
          * @param {Object} requestInfo
@@ -194,19 +195,62 @@ JARS.internal('State', function stateSetup(InternalsManager) {
             state._state = ABORTED_STATE;
 
             state._logger.error(ABORTED_LOADING + abortionMessage, abortionInfo);
-            state._queue.notifyError();
+            syncQueueWithState(state);
         },
 
         onChange: function(onModuleLoaded, onModuleAborted) {
-            this._queue.add(onModuleLoaded, onModuleAborted);
+            var state = this;
+
+            state._queue.push([onModuleLoaded, onModuleAborted]);
+            syncQueueWithState(state);
         }
     };
 
-    function comparerFor(state) {
+   /**
+    * @memberof JARS.internals.State
+    * @inner
+    *
+    * @param {JARS.internals.State} state
+    */
+    function syncQueueWithState(state) {
+        var queue = state._queue,
+            moduleOrBundleName = state._moduleOrBundleName,
+            callbackIndex;
+
+        if(state.isLoaded() || state.isAborted()) {
+            callbackIndex = state.isLoaded() ? QUEUE_LOADED : QUEUE_ABORTED;
+
+            while (queue.length) {
+                queue.shift()[callbackIndex](moduleOrBundleName);
+            }
+        }
+    }
+
+   /**
+    * @memberof JARS.internals.State
+    * @inner
+    *
+    * @param {number} state
+    *
+    * @return {function(this:JARS.internals.State):boolean}
+    */
+    function comparerFor(stateToCompare) {
         return function compareState() {
-            return this._state === state;
+            return this._state === stateToCompare;
         };
     }
+
+    /**
+     * @callback JARS.internals.State.LoadedCallback
+     *
+     * @param {string} loadedModuleName
+     */
+
+    /**
+     * @callback JARS.internals.State.AbortedCallback
+     *
+     * @param {string} abortedModuleName
+     */
 
     return State;
 });

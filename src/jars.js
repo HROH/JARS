@@ -33,7 +33,6 @@
                 'PluginInterceptor',
                 'Recoverer',
                 'ResolutionHelpers',
-                'StateQueue',
                 'State',
                 'System',
                 'TypeResolutionStrategies',
