@@ -5,6 +5,7 @@
 
     InternalsManager = (function internalsManagerSetup() {
         var internalsToLoad = [
+                'AbsoluteResolutionStrategy',
                 'AutoAborter',
                 'Bundle',
                 'BundleResolutionStrategy',
@@ -32,6 +33,7 @@
                 'PathListManager',
                 'PluginInterceptor',
                 'Recoverer',
+                'RelativeResolutionStrategy',
                 'ResolutionHelpers',
                 'State',
                 'System',

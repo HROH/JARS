@@ -72,7 +72,7 @@ JARS.internal('TypeResolutionStrategies', function typeResolutionStrategiesSetup
          * @return {string[]}
          */
         string: function(baseModule, moduleName, resolutionStrategy) {
-            var resolvedModule = resolutionStrategy.resolve(baseModule, moduleName);
+            var resolvedModule = resolutionStrategy(baseModule, moduleName);
 
             return resolvedModule ? [resolvedModule] : [];
         },
@@ -85,24 +85,12 @@ JARS.internal('TypeResolutionStrategies', function typeResolutionStrategiesSetup
     };
 
     /**
-     * @interface JARS.internals.ResolutionStrategy
-     */
-
-    /**
-     * @method JARS.internals.ResolutionStrategy#resolve
+     * @callback JARS.internals.ResolutionStrategy
      *
      * @param {JARS.internals.Module} baseModule
      * @param {string} moduleName
      *
      * @return {string}
-     */
-
-    /**
-     * @method JARS.internals.ResolutionStrategy#getLogger
-     *
-     * @param {JARS.internals.Module} baseModule
-     *
-     * @return {JARS.internals.Logger}
      */
 
     return TypeResolutionStrategies;
