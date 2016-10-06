@@ -2,20 +2,17 @@ JARS.internal('Dependencies', function dependenciesSetup(InternalsManager) {
     'use strict';
 
     var getInternal = InternalsManager.get,
-        arrayEach = getInternal('Utils').arrayEach,
-        hasOwnProp = getInternal('Utils').hasOwnProp,
         DependenciesResolver = getInternal('DependenciesResolver'),
+        DependenciesAborter = getInternal('DependenciesAborter'),
+        DependenciesChecker = getInternal('DependenciesChecker'),
         ModulesQueue = getInternal('ModulesQueue'),
         ModulesRegistry = getInternal('ModulesRegistry'),
         SEPARATOR = '", "',
-        CIRCULAR_SEPARATOR = '" -> "',
         FOUND = 'found ',
         DEPENDENCIES = ' dependencie(s) "${deps}"',
         MSG_DEPENDENCY_FOUND = FOUND + 'implicit dependency "${dep}"',
         MSG_DEPENDENCIES_FOUND = FOUND + 'explicit' + DEPENDENCIES,
-        MSG_INTERCEPTION_DEPENDENCIES_FOUND = FOUND + 'interception' + DEPENDENCIES,
-        MSG_DEPENDENCY_ABORTED = 'dependency "${dep}"',
-        MSG_CIRCULAR_DEPENDENCIES_ABORTED = 'circular dependencies "${deps}"';
+        MSG_INTERCEPTION_DEPENDENCIES_FOUND = FOUND + 'interception' + DEPENDENCIES;
 
     /**
      * @class
@@ -32,6 +29,7 @@ JARS.internal('Dependencies', function dependenciesSetup(InternalsManager) {
         dependencies._module = module;
         dependencies._logger = logger;
         dependencies._deps = [];
+        dependencies._aborter = new DependenciesAborter(module);
 
         dependencies._interceptionDeps = [];
 
@@ -105,66 +103,9 @@ JARS.internal('Dependencies', function dependenciesSetup(InternalsManager) {
         request: function(onModulesLoaded) {
             var dependencies = this;
 
-            loadDependencies(dependencies, dependencies.getAll(), onModulesLoaded, function onModuleAborted(moduleName) {
-                dependencies._module.state.setAborted(MSG_DEPENDENCY_ABORTED, {
-                    dep: moduleName
-                });
+            loadDependencies(dependencies, dependencies.getAll(), onModulesLoaded, function onModuleAborted(dependencyName) {
+                dependencies._aborter.abortDependency(dependencyName);
             });
-        },
-        /**
-         * @return {boolean}
-         */
-        hasCircular: function() {
-            return this._traceCircular(false, foundMatch, foundMatch);
-        },
-        /**
-         * @return {string[]}
-         */
-        getCircular: function() {
-            return this._traceCircular([], returnMatch, addCurrentToMatchListAndReturn);
-        },
-        /**
-         * @private
-         *
-         * @param {*} defaultResult
-         * @param {function(string):*} resultOnMatch
-         * @param {function(*, string)} resultOnLoopMatch
-         * @param {Object<string, string>} [traversedModules]
-         *
-         * @return {*}
-         */
-        _traceCircular: function(defaultResult, resultOnMatch, resultOnLoopMatch, traversedModules) {
-            var dependencies = this,
-                module = dependencies._module,
-                moduleName = module.name,
-                dependencyModules = dependencies.getAll(true),
-                traceResult = defaultResult;
-
-            traversedModules = traversedModules || {};
-
-            if (hasOwnProp(traversedModules, moduleName)) {
-                traceResult = resultOnMatch(moduleName);
-            }
-            else {
-                traversedModules[moduleName] = true;
-
-                arrayEach(dependencyModules, function findCircularDeps(dependencyName) {
-                    var dependencyModule = ModulesRegistry.get(dependencyName),
-                        tmpResult = dependencyModule.deps._traceCircular(traceResult, resultOnMatch, resultOnLoopMatch, traversedModules);
-
-                    tmpResult = resultOnLoopMatch(tmpResult, moduleName);
-
-                    if(tmpResult) {
-                        traceResult = tmpResult;
-
-                        return true;
-                    }
-                });
-
-                delete traversedModules[moduleName];
-            }
-
-            return traceResult;
         }
     };
 
@@ -179,58 +120,13 @@ JARS.internal('Dependencies', function dependenciesSetup(InternalsManager) {
      * @param {JARS.internals.ModulesQueue.ModuleLoadedCallback} onModuleLoaded
      */
     function loadDependencies(dependencies, dependenciesToLoad, onModulesLoaded, onModuleAborted, onModuleLoaded) {
-        var module = dependencies._module,
-            hasCircularDependencies = !module.isRoot && module.config.get('checkCircularDeps') && dependencies.hasCircular();
+        var module = dependencies._module;
 
-        if(hasCircularDependencies) {
-            module.state.setAborted(MSG_CIRCULAR_DEPENDENCIES_ABORTED, {
-                deps: dependencies.getCircular().join(CIRCULAR_SEPARATOR)
-            });
-        }
-        else {
+        if(DependenciesChecker.hasCircular(module)) {
+            dependencies._aborter.abortCircularDeps(DependenciesChecker.getCircular(module));
+        } else {
             new ModulesQueue(module, dependenciesToLoad).request(onModulesLoaded, onModuleAborted, onModuleLoaded);
         }
-    }
-
-    /**
-     * @memberof JARS.internals.Dependencies
-     * @inner
-     *
-     * @param {string} matchingModuleName
-     *
-     * @return {string[]}
-     */
-    function returnMatch(matchingModuleName) {
-        return [matchingModuleName];
-    }
-
-    /**
-     * @memberof JARS.internals.Dependencies
-     * @inner
-     *
-     * @param {string[]} result
-     * @param {string} matchingModuleName
-     *
-     * @return {string[]}
-     */
-    function addCurrentToMatchListAndReturn(result, matchingModuleName) {
-        if(result.length) {
-            result.unshift(matchingModuleName);
-
-            return result;
-        }
-    }
-
-    /**
-     * @memberof JARS.internals.Dependencies
-     * @inner
-     *
-     * @param {(string|string[])} match
-     *
-     * @return {boolean}
-     */
-    function foundMatch(match) {
-        return !!match;
     }
 
    /**

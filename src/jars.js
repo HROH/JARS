@@ -14,6 +14,8 @@
                 'ConfigOptions',
                 'ConfigTransforms',
                 'Dependencies',
+                'DependenciesAborter',
+                'DependenciesChecker',
                 'DependenciesResolutionStrategy',
                 'DependenciesResolver',
                 'ExternalBootstrapper',
