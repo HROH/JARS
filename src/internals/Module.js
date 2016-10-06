@@ -3,21 +3,14 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
 
     var getInternal = InternalsManager.get,
         AutoAborter = getInternal('AutoAborter'),
-        System = getInternal('System'),
         SourceManager = getInternal('SourceManager'),
-        Recoverer = getInternal('Recoverer'),
         ModulesRegistry = getInternal('ModulesRegistry'),
         DependenciesResolver = getInternal('DependenciesResolver'),
         Dependencies = getInternal('Dependencies'),
         Bundle = getInternal('Bundle'),
         Config = getInternal('Config'),
         Logger = getInternal('Logger'),
-        State = getInternal('State'),
-        SEPARATOR = '" -> "',
-        // Errors when module is aborted
-        MSG_MODULE_ABORTED = 'given path "${path}" after ${sec} second(s) - file may not exist',
-        MSG_MODULE_DEPENDENCY_ABORTED = 'dependency "${dep}"',
-        MSG_MODULE_CIRCULAR_DEPENDENCIES_ABORTED = 'circular dependencies "${deps}"';
+        State = getInternal('State');
 
     /**
      * @callback FactoryCallback
@@ -52,7 +45,7 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
         parent = dependencies.parent;
         module.bundle = new Bundle(module, parent && parent.bundle.config);
         bundleConfig = module.bundle.config;
-        module.config = module.isRoot ? bundleConfig : new Config(module, bundleConfig);
+        module.config = isRoot ? bundleConfig : new Config(module, bundleConfig);
     }
 
     Module.prototype = {
@@ -66,18 +59,19 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
             var module = this,
                 config = module.config,
                 cache = config.get('cache') ? '' : '?_=' + new Date().getTime(),
-                path = config.get('basePath') + config.get('dirPath') + config.get('versionDir'),
-                fileName = config.get('fileName') + config.get('minified') + (fileType || config.get('extension')) + cache;
+                path = [config.get('basePath'), config.get('dirPath'), config.get('versionDir')].join(''),
+                fileName = [config.get('fileName'), config.get('minified'), (fileType || config.get('extension')), cache].join('');
 
             return path + fileName;
         },
 
         load: function() {
-            var module = this;
+            var module = this,
+                path = module.getFullPath();
 
-            AutoAborter.setup(module);
+            AutoAborter.setup(module, path);
 
-            SourceManager.loadSource(module.name, module.getFullPath());
+            SourceManager.loadSource(module.name, path);
         },
         /**
          * @param {JARS.internals.State.LoadedCallback} onModuleLoaded
@@ -94,20 +88,6 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
             }
 
             state.onChange(onModuleLoaded, onModuleAborted);
-        },
-        /**
-         * @param {(string|string[])} [dependencyOrArray]
-         */
-        abort: function(dependencyOrArray) {
-            var module = this,
-                state = module.state,
-                abortionMessageAndInfo;
-
-            if (!module.isRoot && ((state.isLoading() && !Recoverer.recover(module)) || state.isRegistered())) {
-                abortionMessageAndInfo = getAbortionMessageAndInfo(module, dependencyOrArray);
-
-                state.setAborted(abortionMessageAndInfo[0], abortionMessageAndInfo[1]);
-            }
         },
         /**
          * @param {JARS.internals.Dependencies.Declaration} dependencies
@@ -152,27 +132,6 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
             }
         }
     };
-
-    /**
-     * @memberof JARS.internals.Module
-     * @inner
-     *
-     * @param {JARS.internals.Module} module
-     * @param dependencyOrArray {(string|string[])}
-     *
-     * @return {Array}
-     */
-    function getAbortionMessageAndInfo(module, dependencyOrArray) {
-        return module.state.isRegistered() ? (System.isArray(dependencyOrArray) ? [MSG_MODULE_CIRCULAR_DEPENDENCIES_ABORTED, {
-            deps: dependencyOrArray.join(SEPARATOR)
-        }] : [MSG_MODULE_DEPENDENCY_ABORTED, {
-            dep: dependencyOrArray
-        }]) : [MSG_MODULE_ABORTED, {
-            path: SourceManager.removeSource(module.name),
-
-            sec: module.config.get('timeout')
-        }];
-    }
 
     return Module;
 });

@@ -40,7 +40,7 @@ JARS.internal('Loader', function loaderSetup(InternalsManager) {
 
             new ModulesQueue(rootModule, DependenciesResolver.resolveDeps(rootModule, moduleNames)).request(function onModulesLoaded(refs) {
                 onModulesImported.apply(null, refs);
-            }, onModuleImported, onModuleAborted);
+            }, onModuleAborted, onModuleImported);
         }
     };
 

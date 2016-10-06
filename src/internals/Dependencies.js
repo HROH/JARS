@@ -8,11 +8,14 @@ JARS.internal('Dependencies', function dependenciesSetup(InternalsManager) {
         ModulesQueue = getInternal('ModulesQueue'),
         ModulesRegistry = getInternal('ModulesRegistry'),
         SEPARATOR = '", "',
+        CIRCULAR_SEPARATOR = '" -> "',
         FOUND = 'found ',
         DEPENDENCIES = ' dependencie(s) "${deps}"',
         MSG_DEPENDENCY_FOUND = FOUND + 'implicit dependency "${dep}"',
         MSG_DEPENDENCIES_FOUND = FOUND + 'explicit' + DEPENDENCIES,
-        MSG_INTERCEPTION_DEPENDENCIES_FOUND = FOUND + 'interception' + DEPENDENCIES;
+        MSG_INTERCEPTION_DEPENDENCIES_FOUND = FOUND + 'interception' + DEPENDENCIES,
+        MSG_DEPENDENCY_ABORTED = 'dependency "${dep}"',
+        MSG_CIRCULAR_DEPENDENCIES_ABORTED = 'circular dependencies "${deps}"';
 
     /**
      * @class
@@ -102,7 +105,11 @@ JARS.internal('Dependencies', function dependenciesSetup(InternalsManager) {
         request: function(onModulesLoaded) {
             var dependencies = this;
 
-            loadDependencies(dependencies, dependencies.getAll(), onModulesLoaded);
+            loadDependencies(dependencies, dependencies.getAll(), onModulesLoaded, function onModuleAborted(moduleName) {
+                dependencies._module.state.setAborted(MSG_DEPENDENCY_ABORTED, {
+                    dep: moduleName
+                });
+            });
         },
         /**
          * @return {boolean}
@@ -176,10 +183,12 @@ JARS.internal('Dependencies', function dependenciesSetup(InternalsManager) {
             hasCircularDependencies = !module.isRoot && module.config.get('checkCircularDeps') && dependencies.hasCircular();
 
         if(hasCircularDependencies) {
-            module.abort(dependencies.getCircular());
+            module.state.setAborted(MSG_CIRCULAR_DEPENDENCIES_ABORTED, {
+                deps: dependencies.getCircular().join(CIRCULAR_SEPARATOR)
+            });
         }
         else {
-            new ModulesQueue(module, dependenciesToLoad).request(onModulesLoaded, onModuleLoaded, onModuleAborted);
+            new ModulesQueue(module, dependenciesToLoad).request(onModulesLoaded, onModuleAborted, onModuleLoaded);
         }
     }
 

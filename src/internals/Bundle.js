@@ -66,27 +66,19 @@ JARS.internal('Bundle', function bundleSetup(InternalsManager) {
                         if (!bundleState.isLoaded()) {
                             bundleState.setLoaded();
                         }
+                    }, function onModuleAborted(moduleName) {
+                        bundleState.setAborted(MSG_BUNDLE_SUBMODULE_ABORTED, {
+                            subModule: moduleName
+                        });
+                    });
+                }, function onModuleAborted(moduleName) {
+                    bundleState.setAborted(MSG_BUNDLE_ABORTED, {
+                        parent: moduleName
                     });
                 });
             }
 
             bundleState.onChange(onBundleLoaded, onBundleAborted);
-        },
-        /**
-         * @param {string} parentOrSubModuleName
-         */
-        abort: function(parentOrSubModuleName) {
-            var bundle = this,
-                bundleState = bundle._state,
-                isParent = bundle._module.name === parentOrSubModuleName;
-
-            if (bundleState.isLoading()) {
-                bundleState.setAborted(isParent ? MSG_BUNDLE_ABORTED : MSG_BUNDLE_SUBMODULE_ABORTED, isParent ? {
-                    parent: parentOrSubModuleName
-                } : {
-                    subModule: parentOrSubModuleName
-                });
-            }
         }
     };
 

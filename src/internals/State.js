@@ -192,10 +192,12 @@ JARS.internal('State', function stateSetup() {
         setAborted: function(abortionMessage, abortionInfo) {
             var state = this;
 
-            state._state = ABORTED_STATE;
+            if(!state.isAborted()) {
+                state._state = ABORTED_STATE;
 
-            state._logger.error(ABORTED_LOADING + abortionMessage, abortionInfo);
-            syncQueueWithState(state);
+                state._logger.error(ABORTED_LOADING + abortionMessage, abortionInfo);
+                syncQueueWithState(state);
+            }
         },
 
         onChange: function(onModuleLoaded, onModuleAborted) {

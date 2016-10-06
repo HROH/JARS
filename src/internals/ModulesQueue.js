@@ -49,10 +49,10 @@ JARS.internal('ModulesQueue', function loaderQueueSetup(InternalsManager) {
         constructor: ModulesQueue,
         /**
          * @param {JARS.internals.ModulesQueue.ModulesLoadedCallback} onModulesLoaded
-         * @param {JARS.internals.ModulesQueue.ModuleLoadedCallback} onModuleLoaded
          * @param {JARS.internals.State.AbortedCallback} onModuleAborted
+         * @param {JARS.internals.ModulesQueue.ModuleLoadedCallback} [onModuleLoaded]
          */
-        request: function(onModulesLoaded, onModuleLoaded, onModuleAborted) {
+        request: function(onModulesLoaded, onModuleAborted, onModuleLoaded) {
             var loaderQueue = this,
                 moduleOrBundle = loaderQueue._moduleOrBundle,
                 logger = moduleOrBundle.logger,
@@ -64,9 +64,6 @@ JARS.internal('ModulesQueue', function loaderQueueSetup(InternalsManager) {
 
             if(total) {
                 onModuleLoaded = onModuleLoaded || onModuleLoadedNoop;
-                onModuleAborted = onModuleAborted || function onModuleAbortedDefault(abortedModuleName) {
-                    moduleOrBundle.abort(abortedModuleName);
-                };
 
                 logger.debug(MSG_SUBSCRIBED_TO, {
                     subs: moduleNames.join(SEPARATOR)
