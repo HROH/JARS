@@ -81,7 +81,7 @@ JARS.internal('PathListManager', function pathListManagerSetup(InternalsManager)
      */
     function addToPathList(module, addBundle) {
         var moduleName = module.name,
-            dependencies = module.deps.getAll(true);
+            dependencies = module.deps.getAll().concat(module.interceptionDeps.getAll());
 
         if (module.state.isLoaded()) {
             if (!hasOwnProp(sortedModules, moduleName)) {

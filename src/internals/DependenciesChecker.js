@@ -46,9 +46,8 @@ JARS.internal('DependenciesChecker', function dependenciesCheckerSetup(Internals
      * @return {*}
      */
     function traceCircular(module, collector, traceResult, traversedModules) {
-        var dependencies = module.deps,
-            moduleName = module.name,
-            dependencyModules = dependencies.getAll(true);
+        var moduleName = module.name,
+            dependencyModules = module.deps.getAll().concat(module.interceptionDeps.getAll());
 
         traversedModules = traversedModules || {};
 

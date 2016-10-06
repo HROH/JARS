@@ -44,12 +44,14 @@ JARS.internal('Interception', function interceptionSetup(InternalsManager) {
          * @param {JARS.internals.ModulesQueue.ModuleLoadedCallback} onModuleLoaded
          */
         $importAndLink: function(moduleNames, onModulesLoaded, onModuleAborted, onModuleLoaded) {
-            var listeningModule = this.listeningModule;
+            var listeningModule = this.listeningModule,
+                interceptionDeps = listeningModule.interceptionDeps;
 
             moduleNames = DependenciesResolver.resolveDeps(ModulesRegistry.get(this.info.moduleName), moduleNames);
 
             if (!listeningModule.isRoot) {
-                listeningModule.deps.requestAndLink(moduleNames, onModulesLoaded, onModuleAborted, onModuleLoaded);
+                interceptionDeps.add(moduleNames);
+                interceptionDeps.request(onModulesLoaded);
             }
             else {
                 getInternal('Loader').$import(moduleNames, onModulesLoaded, onModuleAborted, onModuleLoaded);

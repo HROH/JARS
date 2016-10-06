@@ -9,10 +9,11 @@ JARS.internal('Dependencies', function dependenciesSetup(InternalsManager) {
         ModulesRegistry = getInternal('ModulesRegistry'),
         SEPARATOR = '", "',
         FOUND = 'found ',
+        EXPLICIT_DEPENDENCIES = 'explicit',
+        INTERCEPTION_DEPENDENCIES = 'interception',
         DEPENDENCIES = ' dependencie(s) "${deps}"',
         MSG_DEPENDENCY_FOUND = FOUND + 'implicit dependency "${dep}"',
-        MSG_DEPENDENCIES_FOUND = FOUND + 'explicit' + DEPENDENCIES,
-        MSG_INTERCEPTION_DEPENDENCIES_FOUND = FOUND + 'interception' + DEPENDENCIES;
+        MSG_DEPENDENCIES_FOUND = FOUND + '${kind}' + DEPENDENCIES;
 
     /**
      * @class
@@ -21,15 +22,17 @@ JARS.internal('Dependencies', function dependenciesSetup(InternalsManager) {
      *
      * @param {JARS.internals.Module} module
      * @param {JARS.internals.Logger} logger
+     * @param {boolean} [isInterceptionDeps=false]
      */
-    function Dependencies(module, logger) {
+    function Dependencies(module, logger, isInterceptionDeps) {
         var dependencies = this,
             parentName;
 
+        dependencies._isInterceptionDeps = isInterceptionDeps;
         dependencies._module = module;
         dependencies._logger = logger;
         dependencies._deps = [];
-        dependencies._aborter = new DependenciesAborter(module);
+        dependencies._aborter = new DependenciesAborter(module.state);
 
         dependencies._interceptionDeps = [];
 
@@ -37,97 +40,60 @@ JARS.internal('Dependencies', function dependenciesSetup(InternalsManager) {
             parentName = DependenciesResolver.getParentName(module.name);
             dependencies.parent = parentName ? ModulesRegistry.get(parentName) : ModulesRegistry.getRoot();
 
-            parentName && logger.debug(MSG_DEPENDENCY_FOUND, {
-                dep: parentName
-            });
+            if(parentName && !isInterceptionDeps) {
+                logger.debug(MSG_DEPENDENCY_FOUND, {
+                    dep: parentName
+                });
+            }
         }
     }
 
     Dependencies.prototype = {
         constructor: Dependencies,
         /**
-         * @param {boolean} getInterceptionDeps
-         *
          * @return {string[]}
          */
-        getAll: function(getInterceptionDeps) {
+        getAll: function() {
             var dependencies = this,
                 dependencyModules = dependencies._deps,
                 parent = dependencies.parent;
 
-            getInterceptionDeps && (dependencyModules = dependencyModules.concat(dependencies._interceptionDeps));
             parent && (dependencyModules = [parent.name].concat(dependencyModules));
 
             return dependencyModules;
         },
         /**
          * @param {JARS.internals.Dependencies.Declaration} dependencyModules
-         * @param {boolean} [addInterceptionDependencies]
          */
-        add: function(dependencyModules, addInterceptionDependencies) {
-            var dependencies = this,
-                message, depsKey;
+        add: function(dependencyModules) {
+            var dependencies = this;
 
-            if(addInterceptionDependencies) {
-                message = MSG_INTERCEPTION_DEPENDENCIES_FOUND;
-                depsKey = '_interceptionDeps';
-            }
-            else {
-                message = MSG_DEPENDENCIES_FOUND;
-                depsKey = '_deps';
-                dependencyModules = DependenciesResolver.resolveDeps(dependencies._module, dependencyModules);
-            }
+            dependencyModules = DependenciesResolver.resolveDeps(dependencies._module, dependencyModules);
 
-            dependencyModules.length && dependencies._logger.debug(message, {
+            dependencyModules.length && dependencies._logger.debug(MSG_DEPENDENCIES_FOUND, {
+                kind: dependencies._isInterceptionDeps ? INTERCEPTION_DEPENDENCIES : EXPLICIT_DEPENDENCIES,
+
                 deps: dependencyModules.join(SEPARATOR)
             });
 
-            dependencies[depsKey] = dependencies[depsKey].concat(dependencyModules);
-        },
-        /**
-         * @param {JARS.internals.Dependencies.Declaration} interceptionDependencies
-         * @param {JARS.internals.ModulesQueue.ModulesLoadedCallback} onModulesLoaded
-         * @param {JARS.internals.State.AbortedCallback} onModuleAborted
-         * @param {JARS.internals.ModulesQueue.ModuleLoadedCallback} onModuleLoaded
-         */
-        requestAndLink: function(interceptionDependencies, onModulesLoaded, onModuleAborted, onModuleLoaded) {
-            var dependencies = this;
-
-            dependencies.add(interceptionDependencies, true);
-
-            loadDependencies(dependencies, interceptionDependencies, onModulesLoaded, onModuleAborted, onModuleLoaded);
+            dependencies._deps = dependencies._deps.concat(dependencyModules);
         },
         /**
          * @param {JARS.internals.ModulesQueue.ModulesLoadedCallback} onModulesLoaded
          */
         request: function(onModulesLoaded) {
-            var dependencies = this;
+            var dependencies = this,
+                module = dependencies._module;
 
-            loadDependencies(dependencies, dependencies.getAll(), onModulesLoaded, function onModuleAborted(dependencyName) {
-                dependencies._aborter.abortDependency(dependencyName);
-            });
+            if(DependenciesChecker.hasCircular(module)) {
+                dependencies._aborter.abortCircularDeps(DependenciesChecker.getCircular(module));
+            } else {
+                new ModulesQueue(module, dependencies.getAll()).request(onModulesLoaded, function onModuleAborted(dependencyName) {
+                    dependencies._aborter.abortDependency(dependencyName);
+                });
+            }
         }
     };
-
-    /**
-     * @memberof JARS.internals.Dependencies
-     * @inner
-     *
-     * @param {JARS.internals.Dependencies} dependencies
-     * @param {JARS.internals.Dependencies.Declaration} dependenciesToLoad
-     * @param {JARS.internals.ModulesQueue.ModulesLoadedCallback} onModulesLoaded
-     * @param {JARS.internals.State.AbortedCallback} onModuleAborted
-     * @param {JARS.internals.ModulesQueue.ModuleLoadedCallback} onModuleLoaded
-     */
-    function loadDependencies(dependencies, dependenciesToLoad, onModulesLoaded, onModuleAborted, onModuleLoaded) {
-        var module = dependencies._module;
-
-        if(DependenciesChecker.hasCircular(module)) {
-            dependencies._aborter.abortCircularDeps(DependenciesChecker.getCircular(module));
-        } else {
-            new ModulesQueue(module, dependenciesToLoad).request(onModulesLoaded, onModuleAborted, onModuleLoaded);
-        }
-    }
 
    /**
     * @typeDef {(string|JARS.internals.Dependencies.Declaration[]|Object<string, JARS.internals.Dependencies.Declaration>)} Declaration

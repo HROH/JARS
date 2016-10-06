@@ -41,6 +41,7 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
         module.state = state = new State(moduleName, logger);
 
         module.deps = dependencies = new Dependencies(module, logger);
+        module.interceptionDeps = new Dependencies(module, logger, true);
 
         parent = dependencies.parent;
         module.bundle = new Bundle(module, parent && parent.bundle.config);
