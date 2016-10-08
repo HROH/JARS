@@ -105,6 +105,8 @@ JARS.internal('ConfigTransforms', function configTransformsSetup(InternalsManage
     *
     * @param {*} configValue
     * @param {(JARS.internals.Module|JARS.internals.Bundle)} [moduleOrBundle]
+    *
+    * @return {*}
     */
 
     return ConfigTransforms;

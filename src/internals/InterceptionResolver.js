@@ -5,6 +5,11 @@ JARS.internal('InterceptionResolver', function interceptionResolverSetup(Interna
         interceptionInfoCache = {},
         InterceptionResolver;
 
+    /**
+     * @namespace
+     *
+     * @memberof JARS.internals
+     */
     InterceptionResolver = {
         /**
          * @param {string} moduleName

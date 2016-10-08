@@ -7,7 +7,15 @@ JARS.internal('InterceptorRegistry', function interceptorRegistrySetup(Internals
         interceptors = {},
         InterceptorRegistry;
 
+    /**
+     * @namespace
+     *
+     * @memberof JARS.internals
+     */
     InterceptorRegistry = {
+        /**
+         * @param {JARS.internals.Interceptor} interceptor
+         */
         register: function(interceptor) {
             var interceptorType = interceptor.type;
 
@@ -15,11 +23,17 @@ JARS.internal('InterceptorRegistry', function interceptorRegistrySetup(Internals
                 interceptors[interceptorType] = interceptor;
             }
         },
-
+        /**
+         * @param {function(JARS.internals.Interceptor, string)} callback
+         */
         each: function(callback) {
             objectEach(interceptors, callback);
         },
-
+        /**
+         * @param {string} type
+         *
+         * @return {JARS.internals.Interceptor}
+         */
         get: function(type) {
             return interceptors[type];
         }

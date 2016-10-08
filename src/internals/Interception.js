@@ -13,16 +13,16 @@ JARS.internal('Interception', function interceptionSetup(InternalsManager) {
      *
      * @param {JARS.internals.Module} listeningModule
      * @param {JARS.internals.InterceptionInfo} interceptionInfo
-     * @param {JARS.internals.Interception.SuccessCallback} onSuccess
-     * @param {JARS.internals.Interception.FailCallback} onFail
+     * @param {JARS.internals.State.LoadedCallback} onModuleLoaded
+     * @param {JARS.internals.State.AbortedCallback} onModuleAborted
      */
-    function Interception(listeningModule, interceptionInfo, onSuccess, onFail) {
+    function Interception(listeningModule, interceptionInfo, onModuleLoaded, onModuleAborted) {
         var interception = this;
 
         interception.listeningModule = listeningModule;
         interception.info = interceptionInfo;
-        interception.success = createSuccessHandler(interceptionInfo, onSuccess);
-        interception.fail = createFailHandler(interceptionInfo, onFail);
+        interception.success = createSuccessHandler(interceptionInfo, onModuleLoaded);
+        interception.fail = createFailHandler(interceptionInfo, onModuleAborted);
     }
 
     Interception.prototype = {
@@ -40,7 +40,7 @@ JARS.internal('Interception', function interceptionSetup(InternalsManager) {
         /**
          * @param {JARS.internals.Dependencies.Declaration} moduleNames
          * @param {JARS.internals.ModulesQueue.ModulesLoadedCallback} onModulesLoaded
-         * @param {JARS.internals.State.AbortedCallback} onModuleAborted
+         * @param {JARS.internals.ModulesQueue.ModuleAbortedCallback} onModuleAborted
          * @param {JARS.internals.ModulesQueue.ModuleLoadedCallback} onModuleLoaded
          */
         $importAndLink: function(moduleNames, onModulesLoaded, onModuleAborted, onModuleLoaded) {
@@ -59,6 +59,15 @@ JARS.internal('Interception', function interceptionSetup(InternalsManager) {
         },
     };
 
+    /**
+     * @memberof JARS.internals.Interception
+     * @inner
+     *
+     * @param {JARS.internals.InterceptionInfo} interceptionInfo
+     * @param {JARS.internals.State.AbortedCallback} onModuleAborted
+     *
+     * @return {function(string)}
+     */
     function createFailHandler(interceptionInfo, onModuleAborted) {
         var interceptedModuleName = interceptionInfo.fullModuleName;
 
@@ -69,6 +78,15 @@ JARS.internal('Interception', function interceptionSetup(InternalsManager) {
         };
     }
 
+    /**
+     * @memberof JARS.internals.Interception
+     * @inner
+     *
+     * @param {JARS.internals.InterceptionInfo} interceptionInfo
+     * @param {JARS.internals.State.LoadedCallback} onModuleLoaded
+     *
+     * @return {function(*)}
+     */
     function createSuccessHandler(interceptionInfo, onModuleLoaded) {
         return function onInterceptionSuccess(data) {
             onModuleLoaded(interceptionInfo.fullModuleName, data);

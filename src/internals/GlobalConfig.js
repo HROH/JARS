@@ -44,6 +44,13 @@ JARS.internal('GlobalConfig', function globalConfigSetup(InternalsManager) {
         }
     };
 
+    /**
+     * @memberof JARS.internals.GlobalConfig
+     * @inner
+     *
+     * @param {string} option
+     * @param {(*|Array<*>)} valueOrArray
+     */
     function updateOption(option, valueOrArray) {
         var configHook;
 

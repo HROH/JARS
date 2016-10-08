@@ -11,6 +11,13 @@ JARS.internal('ResolutionHelpers', function resolutionHelpersSetup() {
      * @memberof JARS.internals
      */
     ResolutionHelpers = {
+        /**
+         * @param {JARS.internals.ResolutionStrategy} resolve
+         * @param {function(JARS.internals.Module):JARS.internals.Logger} getLogger
+         * @param {string} errorMessage
+         *
+         * @return {string}
+         */
         logResolutionError: function(resolve, getLogger, errorMessage) {
             return function wrappedResolve(baseModule, moduleName) {
                 var resolutionData = resolve(baseModule, moduleName);
