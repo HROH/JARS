@@ -139,7 +139,7 @@ JARS.internal('State', function stateSetup() {
          *
          * @return {boolean}
          */
-        trySetRequested: function(requestInfo) {
+        setLoading: function(requestInfo) {
             var state = this,
                 logger = state._logger,
                 currentState = state._state,
@@ -159,7 +159,7 @@ JARS.internal('State', function stateSetup() {
         /**
          * @return {boolean}
          */
-        trySetRegistered: function() {
+        setRegistered: function() {
             var state = this,
                 canRegister = !state.isRegistered();
 

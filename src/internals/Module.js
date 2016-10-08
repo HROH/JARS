@@ -84,7 +84,7 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
                 state = module.state,
                 path = module.getFullPath();
 
-            if (state.trySetRequested({
+            if (state.setLoading({
                 path: path
             })) {
                 module.load(path);
@@ -111,7 +111,7 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
                 moduleName = module.name,
                 parentRef;
 
-            if (state.trySetRegistered()) {
+            if (state.setRegistered()) {
                 AutoAborter.clear(module);
 
                 module.deps.request(function onDependenciesLoaded(dependencyRefs) {

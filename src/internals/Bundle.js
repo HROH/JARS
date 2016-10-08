@@ -54,7 +54,7 @@ JARS.internal('Bundle', function bundleSetup(InternalsManager) {
             var bundle = this,
                 bundleState = bundle.state;
 
-            if(bundleState.trySetRequested()) {
+            if(bundleState.setLoading()) {
                 new ModulesQueue(bundle, [bundle._module.name]).request(function onModulesLoaded() {
                     var bundleModules = bundle._bundle;
 
