@@ -107,14 +107,11 @@ JARS.internal('State', function stateSetup() {
          */
         isLoading: comparerFor(LOADING_STATE),
         /**
+         * @method
+         *
          * @return {boolean}
          */
-        isRegistered: function() {
-            var state = this,
-                currentState = state._state;
-
-            return currentState === REGISTERED_STATE || state.isLoaded();
-        },
+        isRegistered: comparerFor(REGISTERED_STATE),
         /**
          * @method
          *
@@ -161,7 +158,7 @@ JARS.internal('State', function stateSetup() {
          */
         setRegistered: function() {
             var state = this,
-                canRegister = !state.isRegistered();
+                canRegister = !(state.isRegistered() || state.isLoaded());
 
             if (canRegister) {
                 state._setAndLog(REGISTERED_STATE);

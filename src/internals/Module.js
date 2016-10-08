@@ -96,9 +96,10 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
          * @param {JARS.internals.Dependencies.Declaration} dependencies
          */
         $import: function(dependencies) {
-            var module = this;
+            var module = this,
+                state = module.state;
 
-            if (!module.state.isRegistered()) {
+            if (!(state.isRegistered() || state.isLoaded())) {
                 module.deps.add(dependencies);
             }
         },
@@ -115,7 +116,7 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
                 AutoAborter.clear(module);
 
                 module.deps.request(function onDependenciesLoaded(dependencyRefs) {
-                    if (state.isRegistered() && !state.isLoaded()) {
+                    if (!state.isLoaded()) {
                         if(module.isRoot) {
                             module.ref = {};
                         }
