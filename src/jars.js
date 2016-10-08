@@ -17,6 +17,8 @@
                 'Dependencies',
                 'DependenciesAborter',
                 'DependenciesChecker',
+                'DependenciesCollectorGetCircular',
+                'DependenciesCollectorHasCircular',
                 'DependenciesResolutionStrategy',
                 'DependenciesResolver',
                 'ExternalBootstrapper',

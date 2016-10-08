@@ -3,12 +3,12 @@ JARS.internal('DependenciesChecker', function dependenciesCheckerSetup(Internals
 
     var getInternal = InternalsManager.get,
         ModulesRegistry = getInternal('ModulesRegistry'),
+        DependenciesCollectorGetCircular = getInternal('DependenciesCollectorGetCircular'),
+        DependenciesCollectorHasCircular = getInternal('DependenciesCollectorHasCircular'),
         Utils = getInternal('Utils'),
         hasOwnProp = Utils.hasOwnProp,
         arrayEach = Utils.arrayEach,
-        DependenciesChecker,
-        GetCircularDepsCollector,
-        HasCircularDepsCollector;
+        DependenciesChecker;
 
     /**
      * @namespace
@@ -22,7 +22,7 @@ JARS.internal('DependenciesChecker', function dependenciesCheckerSetup(Internals
          * @return {string[]}
          */
         getCircular: function(module) {
-            return traceCircular(module, GetCircularDepsCollector, []);
+            return traceCircular(module, DependenciesCollectorGetCircular, []);
         },
         /**
          * @param {JARS.internals.Module} module
@@ -30,7 +30,7 @@ JARS.internal('DependenciesChecker', function dependenciesCheckerSetup(Internals
          * @return {boolean}
          */
         hasCircular: function(module) {
-            return !module.isRoot && module.config.get('checkCircularDeps') && traceCircular(module, HasCircularDepsCollector, false);
+            return !module.isRoot && module.config.get('checkCircularDeps') && traceCircular(module, DependenciesCollectorHasCircular, false);
         }
     };
 
@@ -39,7 +39,7 @@ JARS.internal('DependenciesChecker', function dependenciesCheckerSetup(Internals
      * @inner
      *
      * @param {JARS.internals.Module} module
-     * @param {Object} collector
+     * @param {JARS.internals.DependenciesChecker.Collector} collector
      * @param {*} traceResult
      * @param {Object<string, string>} [traversedModules]
      *
@@ -60,7 +60,7 @@ JARS.internal('DependenciesChecker', function dependenciesCheckerSetup(Internals
             arrayEach(dependencyModules, function findCircularDeps(dependencyName) {
                 var tmpResult = traceCircular(ModulesRegistry.get(dependencyName), collector, traceResult, traversedModules);
 
-                tmpResult = collector.loopMatch(tmpResult, moduleName);
+                tmpResult = collector.recursiveMatch(tmpResult, moduleName);
 
                 if(tmpResult) {
                     traceResult = tmpResult;
@@ -76,59 +76,29 @@ JARS.internal('DependenciesChecker', function dependenciesCheckerSetup(Internals
     }
 
     /**
-     * @namespace
-     *
-     * @memberof JARS.internals.DependenciesChecker
-     * @inner
+     * @interface JARS.internals.DependenciesChecker.Collector
      */
-    GetCircularDepsCollector = {
-        /**
-         * @param {string} match
-         *
-         * @return {string[]}
-         */
-        match: function(match) {
-            return [match];
-        },
-        /**
-         * @param {string[]} result
-         * @param {string} match
-         *
-         * @return {string[]}
-         */
-        recursiveMatch: function(result, match) {
-            if(result.length) {
-                result.unshift(match);
-
-                return result;
-            }
-        }
-    };
 
     /**
-     * @namespace
+     * @method match
      *
-     * @memberof JARS.internals.DependenciesChecker
-     * @inner
+     * @memberof JARS.internals.DependenciesChecker.Collector#
+     *
+     * @param {string} match
+     *
+     * @return {*}
      */
-    HasCircularDepsCollector = {
-        /**
-         * @param {string} match
-         *
-         * @return {boolean}
-         */
-        match: function(match) {
-            return !!match;
-        },
-        /**
-         * @param {boolean} result
-         *
-         * @return {boolean}
-         */
-        recursiveMatch: function(result) {
-            return !!result;
-        }
-    };
+
+    /**
+     * @method recursiveMatch
+     *
+     * @memberof JARS.internals.DependenciesChecker.Collector#
+     *
+     * @param {*} result
+     * @param {string} match
+     *
+     * @return {*}
+     */
 
     return DependenciesChecker;
 });
