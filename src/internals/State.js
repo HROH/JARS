@@ -4,7 +4,6 @@ JARS.internal('State', function stateSetup() {
     var stateMsgMap = {},
         LOADING = 'loading',
         LOADED = 'loaded',
-        LOADED_MANUALLY = LOADED + ' manually',
         ATTEMPTED_TO = 'attempted to ',
         ATTEMPTED_TO_LOAD = ATTEMPTED_TO + 'load',
         BUT_ALREADY = ' but is already ',
@@ -14,16 +13,13 @@ JARS.internal('State', function stateSetup() {
         // Show loading progress for module or bundle
         MSG_LOADED = 'finished ' + LOADING,
         MSG_LOADING = 'started ' + LOADING,
+        MSG_REGISTERING = 'is registering...',
         // Info when loading is already in progress, done or aborted
         MSG_ALREADY_LOADED = ATTEMPTED_TO_LOAD + BUT_ALREADY + LOADED,
-        MSG_ALREADY_LOADED_MANUALLY = ATTEMPTED_TO_LOAD + BUT_ALREADY + LOADED_MANUALLY,
         MSG_ALREADY_LOADING = ATTEMPTED_TO_LOAD + BUT_ALREADY + LOADING,
         MSG_ALEADY_ABORTED = ATTEMPTED_TO_LOAD + BUT_ALREADY + 'aborted',
         // Warning when a module is registered twice
         MSG_ALREADY_REGISTERED = ATTEMPTED_TO + 'register' + BUT_ALREADY + 'registered',
-        // Show special cases for module
-        MSG_LOADED_MANUALLY = 'was ' + LOADED_MANUALLY,
-        MSG_REGISTERING = 'is registering...',
         PROGRESS_MESSAGE = 0,
         ALREADY_PROGRESSED_MESSAGE = 1,
         QUEUE_LOADED = 0,
@@ -52,7 +48,7 @@ JARS.internal('State', function stateSetup() {
          * @memberof JARS.internals.State
          * @inner
          */
-        LOADED_STATE = 3,
+        REGISTERED_STATE = 3,
         /**
          * @constant {number}
          * @default
@@ -60,7 +56,7 @@ JARS.internal('State', function stateSetup() {
          * @memberof JARS.internals.State
          * @inner
          */
-        LOADED_MANUALLY_STATE = 4,
+        LOADED_STATE = 4,
         /**
          * @constant {number}
          * @default
@@ -68,19 +64,10 @@ JARS.internal('State', function stateSetup() {
          * @memberof JARS.internals.State
          * @inner
          */
-        REGISTERED_STATE = 5,
-        /**
-         * @constant {number}
-         * @default
-         *
-         * @memberof JARS.internals.State
-         * @inner
-         */
-        ABORTED_STATE = 6;
+        ABORTED_STATE = 5;
 
     stateMsgMap[LOADING_STATE] = [MSG_LOADING, MSG_ALREADY_LOADING];
     stateMsgMap[LOADED_STATE] = [MSG_LOADED, MSG_ALREADY_LOADED];
-    stateMsgMap[LOADED_MANUALLY_STATE] = [MSG_LOADED_MANUALLY, MSG_ALREADY_LOADED_MANUALLY];
     stateMsgMap[REGISTERED_STATE] = [MSG_REGISTERING, MSG_ALREADY_REGISTERED];
     stateMsgMap[ABORTED_STATE] = [null, MSG_ALEADY_ABORTED];
 
@@ -126,7 +113,7 @@ JARS.internal('State', function stateSetup() {
             var state = this,
                 currentState = state._state;
 
-            return currentState === REGISTERED_STATE || currentState === LOADED_MANUALLY_STATE || state.isLoaded();
+            return currentState === REGISTERED_STATE || state.isLoaded();
         },
         /**
          * @method
@@ -177,7 +164,7 @@ JARS.internal('State', function stateSetup() {
                 canRegister = !state.isRegistered();
 
             if (canRegister) {
-                state._setAndLog(state.isLoading() ? REGISTERED_STATE : LOADED_MANUALLY_STATE);
+                state._setAndLog(REGISTERED_STATE);
             }
             else {
                 state._logger.warn(MSG_ALREADY_REGISTERED);
