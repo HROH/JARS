@@ -1,4 +1,4 @@
-JARS.internal('ModulesQueue', function loaderQueueSetup(InternalsManager) {
+JARS.internal('ModulesQueue', function modulesQueueSetup(InternalsManager) {
     'use strict';
 
     var getInternal = InternalsManager.get,
@@ -20,6 +20,15 @@ JARS.internal('ModulesQueue', function loaderQueueSetup(InternalsManager) {
      * @param {string} moduleName
      * @param {*} moduleRefOrData
      * @param {number} [percentageLoaded]
+     */
+
+    /**
+     * @callback ModuleAbortedCallback
+     *
+     * @memberof JARS.internals.ModulesQueue
+     *
+     * @param {(JARS.internals.Module|JARS.internals.Bundle)} moduleOrBundle
+     * @param {string} abortedModuleName
      */
 
     /**
@@ -49,7 +58,7 @@ JARS.internal('ModulesQueue', function loaderQueueSetup(InternalsManager) {
         constructor: ModulesQueue,
         /**
          * @param {JARS.internals.ModulesQueue.ModulesLoadedCallback} onModulesLoaded
-         * @param {JARS.internals.State.AbortedCallback} onModuleAborted
+         * @param {JARS.internals.ModulesQueue.ModuleAbortedCallback} onModuleAborted
          * @param {JARS.internals.ModulesQueue.ModuleLoadedCallback} [onModuleLoaded]
          */
         request: function(onModulesLoaded, onModuleAborted, onModuleLoaded) {
@@ -81,12 +90,12 @@ JARS.internal('ModulesQueue', function loaderQueueSetup(InternalsManager) {
                             ref = requestedModule.ref;
 
                         if(interceptor) {
-                            interceptor.intercept(ref, new Interception(moduleOrBundle, interceptionInfo, processOnModuleLoaded, onModuleAborted));
+                            interceptor.intercept(ref, new Interception(moduleOrBundle, interceptionInfo, processOnModuleLoaded, processOnModuleAborted));
                         }
                         else {
                             processOnModuleLoaded(requestedModuleName, ref);
                         }
-                    }, onModuleAborted);
+                    }, processOnModuleAborted);
                 });
             }
             else {
@@ -102,6 +111,10 @@ JARS.internal('ModulesQueue', function loaderQueueSetup(InternalsManager) {
 
                 onModuleLoaded(publishingModuleName, refOrData, Number((counter++/total).toFixed(2)));
                 (counter === total) && onModulesLoaded(refs);
+            }
+
+            function processOnModuleAborted(abortedModuleName) {
+                onModuleAborted(moduleOrBundle, abortedModuleName);
             }
         }
     };
