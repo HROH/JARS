@@ -85,13 +85,13 @@ JARS.internal('State', function stateSetup() {
     stateMsgMap[ABORTED_STATE] = [null, MSG_ALEADY_ABORTED];
 
     /**
-    * @class
-    *
-    * @memberof JARS.internals
-    *
-    * @param {string} moduleOrBundleName
-    * @param {JARS.internals.Logger} logger
-    */
+     * @class
+     *
+     * @memberof JARS.internals
+     *
+     * @param {string} moduleOrBundleName
+     * @param {JARS.internals.Logger} logger
+     */
     function State(moduleOrBundleName, logger) {
         var state = this;
 
@@ -199,7 +199,10 @@ JARS.internal('State', function stateSetup() {
                 syncQueueWithState(state);
             }
         },
-
+        /**
+         * @param {JARS.internals.State.LoadedCallback} onModuleLoaded
+         * @param {JARS.internals.State.AbortedCallback} onModuleAborted
+         */
         onChange: function(onModuleLoaded, onModuleAborted) {
             var state = this;
 
