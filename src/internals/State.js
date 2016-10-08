@@ -84,7 +84,7 @@ JARS.internal('State', function stateSetup() {
 
         state._moduleOrBundleName = moduleOrBundleName;
         state._logger = logger;
-        state._state = WAITING_STATE;
+        state._current = WAITING_STATE;
         state._queue = [];
     }
 
@@ -97,7 +97,7 @@ JARS.internal('State', function stateSetup() {
          * @param {Object} [info]
          */
         _setAndLog: function(newState, info) {
-            this._state = newState;
+            this._current = newState;
             this._logger.info(stateMsgMap[newState][PROGRESS_MESSAGE], info);
         },
         /**
@@ -118,12 +118,6 @@ JARS.internal('State', function stateSetup() {
          * @return {boolean}
          */
         isLoaded: comparerFor(LOADED_STATE),
-        /**
-         * @method
-         *
-         * @return {boolean}
-         */
-        isAborted: comparerFor(ABORTED_STATE),
 
         setLoaded: function() {
             var state = this;
@@ -139,16 +133,16 @@ JARS.internal('State', function stateSetup() {
         setLoading: function(requestInfo) {
             var state = this,
                 logger = state._logger,
-                currentState = state._state,
+                currentState = state._current,
                 isWaiting = currentState === WAITING_STATE;
 
             logger.info(MSG_REQUESTED);
 
-            if(!isWaiting) {
-                logger.info(stateMsgMap[currentState][ALREADY_PROGRESSED_MESSAGE]);
+            if(isWaiting) {
+                state._setAndLog(LOADING_STATE, requestInfo);
             }
             else {
-                state._setAndLog(LOADING_STATE, requestInfo);
+                logger.info(stateMsgMap[currentState][ALREADY_PROGRESSED_MESSAGE]);
             }
 
             return isWaiting;
@@ -176,8 +170,8 @@ JARS.internal('State', function stateSetup() {
         setAborted: function(abortionMessage, abortionInfo) {
             var state = this;
 
-            if(!state.isAborted()) {
-                state._state = ABORTED_STATE;
+            if(state._current !== ABORTED_STATE) {
+                state._current = ABORTED_STATE;
 
                 state._logger.error(ABORTED_LOADING + abortionMessage, abortionInfo);
                 syncQueueWithState(state);
@@ -202,12 +196,14 @@ JARS.internal('State', function stateSetup() {
     * @param {JARS.internals.State} state
     */
     function syncQueueWithState(state) {
-        var queue = state._queue,
+        var currentState = state._current,
+            isLoaded = currentState === LOADED_STATE,
+            queue = state._queue,
             moduleOrBundleName = state._moduleOrBundleName,
             callbackIndex;
 
-        if(state.isLoaded() || state.isAborted()) {
-            callbackIndex = state.isLoaded() ? QUEUE_LOADED : QUEUE_ABORTED;
+        if(isLoaded || currentState === ABORTED_STATE) {
+            callbackIndex = isLoaded ? QUEUE_LOADED : QUEUE_ABORTED;
 
             while (queue.length) {
                 queue.shift()[callbackIndex](moduleOrBundleName);
@@ -225,7 +221,7 @@ JARS.internal('State', function stateSetup() {
     */
     function comparerFor(stateToCompare) {
         return function compareState() {
-            return this._state === stateToCompare;
+            return this._current === stateToCompare;
         };
     }
 
