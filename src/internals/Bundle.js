@@ -61,9 +61,7 @@ JARS.internal('Bundle', function bundleSetup(InternalsManager) {
                     bundleModules.length || bundle.logger.warn(MSG_BUNDLE_NOT_DEFINED);
 
                     new ModulesQueue(bundle, bundleModules).request(function onModulesLoaded() {
-                        if (!bundleState.isLoaded()) {
-                            bundleState.setLoaded();
-                        }
+                        bundleState.setLoaded();
                     }, BundleAborter.abortBySubModule);
                 }, BundleAborter.abortByParent);
             }

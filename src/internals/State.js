@@ -1,75 +1,9 @@
-JARS.internal('State', function stateSetup() {
+JARS.internal('State', function stateSetup(InternalsManager) {
     'use strict';
 
-    var stateMsgMap = {},
-        LOADING = 'loading',
-        LOADED = 'loaded',
-        ATTEMPTED_TO = 'attempted to ',
-        ATTEMPTED_TO_LOAD = ATTEMPTED_TO + 'load',
-        BUT_ALREADY = ' but is already ',
-        ABORTED_LOADING = 'aborted ' + LOADING + ' because of problems with ',
-        // Show module or bundle is requested
-        MSG_REQUESTED = 'was requested',
-        // Show loading progress for module or bundle
-        MSG_LOADED = 'finished ' + LOADING,
-        MSG_LOADING = 'started ' + LOADING,
-        MSG_REGISTERING = 'is registering...',
-        // Info when loading is already in progress, done or aborted
-        MSG_ALREADY_LOADED = ATTEMPTED_TO_LOAD + BUT_ALREADY + LOADED,
-        MSG_ALREADY_LOADING = ATTEMPTED_TO_LOAD + BUT_ALREADY + LOADING,
-        MSG_ALEADY_ABORTED = ATTEMPTED_TO_LOAD + BUT_ALREADY + 'aborted',
-        // Warning when a module is registered twice
-        MSG_ALREADY_REGISTERED = ATTEMPTED_TO + 'register' + BUT_ALREADY + 'registered',
-        PROGRESS_MESSAGE = 0,
-        ALREADY_PROGRESSED_MESSAGE = 1,
+    var StateInfo = InternalsManager.get('StateInfo'),
         QUEUE_LOADED = 0,
-        QUEUE_ABORTED = 1,
-        // Module/bundle states
-        /**
-         * @constant {number}
-         * @default
-         *
-         * @memberof JARS.internals.State
-         * @inner
-         */
-        WAITING_STATE = 1,
-        /**
-         * @constant {number}
-         * @default
-         *
-         * @memberof JARS.internals.State
-         * @inner
-         */
-        LOADING_STATE = 2,
-        /**
-         * @constant {number}
-         * @default
-         *
-         * @memberof JARS.internals.State
-         * @inner
-         */
-        REGISTERED_STATE = 3,
-        /**
-         * @constant {number}
-         * @default
-         *
-         * @memberof JARS.internals.State
-         * @inner
-         */
-        LOADED_STATE = 4,
-        /**
-         * @constant {number}
-         * @default
-         *
-         * @memberof JARS.internals.State
-         * @inner
-         */
-        ABORTED_STATE = 5;
-
-    stateMsgMap[LOADING_STATE] = [MSG_LOADING, MSG_ALREADY_LOADING];
-    stateMsgMap[LOADED_STATE] = [MSG_LOADED, MSG_ALREADY_LOADED];
-    stateMsgMap[REGISTERED_STATE] = [MSG_REGISTERING, MSG_ALREADY_REGISTERED];
-    stateMsgMap[ABORTED_STATE] = [null, MSG_ALEADY_ABORTED];
+        QUEUE_ABORTED = 1;
 
     /**
      * @class
@@ -84,145 +18,116 @@ JARS.internal('State', function stateSetup() {
 
         state._moduleOrBundleName = moduleOrBundleName;
         state._logger = logger;
-        state._current = WAITING_STATE;
+        state._current = StateInfo.initial();
         state._queue = [];
     }
 
-    State.prototype = {
-        constructor: State,
-        /**
-         * @private
-         *
-         * @param {number} newState
-         * @param {Object} [info]
-         */
-        _setAndLog: function(newState, info) {
-            this._current = newState;
-            this._logger.info(stateMsgMap[newState][PROGRESS_MESSAGE], info);
-        },
-        /**
-         * @method
-         *
-         * @return {boolean}
-         */
-        isLoading: comparerFor(LOADING_STATE),
-        /**
-         * @method
-         *
-         * @return {boolean}
-         */
-        isRegistered: comparerFor(REGISTERED_STATE),
-        /**
-         * @method
-         *
-         * @return {boolean}
-         */
-        isLoaded: comparerFor(LOADED_STATE),
+    /**
+     * @param {JARS.internals.State.LoadedCallback} onModuleLoaded
+     * @param {JARS.internals.State.AbortedCallback} onModuleAborted
+     */
+    State.prototype.onChange = function(onModuleLoaded, onModuleAborted) {
+        var state = this;
 
-        setLoaded: function() {
-            var state = this;
-
-            state._setAndLog(LOADED_STATE);
-            syncQueueWithState(state);
-        },
-        /**
-         * @param {Object} requestInfo
-         *
-         * @return {boolean}
-         */
-        setLoading: function(requestInfo) {
-            var state = this,
-                logger = state._logger,
-                currentState = state._current,
-                isWaiting = currentState === WAITING_STATE;
-
-            logger.info(MSG_REQUESTED);
-
-            if(isWaiting) {
-                state._setAndLog(LOADING_STATE, requestInfo);
-            }
-            else {
-                logger.info(stateMsgMap[currentState][ALREADY_PROGRESSED_MESSAGE]);
-            }
-
-            return isWaiting;
-        },
-        /**
-         * @return {boolean}
-         */
-        setRegistered: function() {
-            var state = this,
-                canRegister = !(state.isRegistered() || state.isLoaded());
-
-            if (canRegister) {
-                state._setAndLog(REGISTERED_STATE);
-            }
-            else {
-                state._logger.warn(MSG_ALREADY_REGISTERED);
-            }
-
-            return canRegister;
-        },
-        /**
-         * @param {string} abortionMessage
-         * @param {Object} abortionInfo
-         */
-        setAborted: function(abortionMessage, abortionInfo) {
-            var state = this;
-
-            if(state._current !== ABORTED_STATE) {
-                state._current = ABORTED_STATE;
-
-                state._logger.error(ABORTED_LOADING + abortionMessage, abortionInfo);
-                syncQueueWithState(state);
-            }
-        },
-        /**
-         * @param {JARS.internals.State.LoadedCallback} onModuleLoaded
-         * @param {JARS.internals.State.AbortedCallback} onModuleAborted
-         */
-        onChange: function(onModuleLoaded, onModuleAborted) {
-            var state = this;
-
-            state._queue.push([onModuleLoaded, onModuleAborted]);
-            syncQueueWithState(state);
-        }
+        state._queue.push([onModuleLoaded, onModuleAborted]);
+        syncQueueWithState(state);
     };
 
-   /**
-    * @memberof JARS.internals.State
-    * @inner
-    *
-    * @param {JARS.internals.State} state
-    */
+    StateInfo.each(function(methodSuffix, stateToCompare) {
+        State.prototype['is' + methodSuffix] = function() {
+            return this._current === stateToCompare;
+        };
+
+        State.prototype['set' + methodSuffix] = function(customMessage, logInfo) {
+            var state = this,
+                currentState = state._current,
+                canSetNextState = StateInfo.hasNext(currentState, stateToCompare),
+                logMethod = StateInfo.getLogMethod(currentState, stateToCompare),
+                message = StateInfo.getLogMessage(currentState, stateToCompare) + customMessage || '';
+
+            if(canSetNextState) {
+                state._current = stateToCompare;
+                syncQueueWithState(state);
+            }
+
+            state._logger[logMethod](message, logInfo);
+
+            return canSetNextState;
+        };
+    });
+
+    /**
+     * @method JARS.internals.State#isLoading
+     *
+     * @return {boolean}
+     */
+
+    /**
+     * @method JARS.internals.State#isRegistered
+     *
+     * @return {boolean}
+     */
+
+    /**
+     * @method JARS.internals.State#isLoaded
+     *
+     * @return {boolean}
+     */
+
+    /**
+     * @method JARS.internals.State#isAborted
+     *
+     * @return {boolean}
+     */
+
+    /**
+     * @method JARS.internals.State#setLoading
+     *
+     * @return {boolean}
+     */
+
+    /**
+     * @method JARS.internals.State#setRegistered
+     *
+     * @return {boolean}
+     */
+
+    /**
+     * @method JARS.internals.State#setLoaded
+     *
+     * @return {boolean}
+     */
+
+    /**
+     * @method JARS.internals.State#setAborted
+     *
+     * @param {string} message
+     * @param {Object} abortionInfo
+     *
+     * @return {boolean}
+     */
+
+    /**
+     * @memberof JARS.internals.State
+     * @inner
+     *
+     * @param {JARS.internals.State} state
+     */
     function syncQueueWithState(state) {
-        var currentState = state._current,
-            isLoaded = currentState === LOADED_STATE,
+        var isLoaded = state.isLoaded(),
             queue = state._queue,
             moduleOrBundleName = state._moduleOrBundleName,
             callbackIndex;
 
-        if(isLoaded || currentState === ABORTED_STATE) {
+        if(isLoaded || state.isAborted()) {
             callbackIndex = isLoaded ? QUEUE_LOADED : QUEUE_ABORTED;
 
-            while (queue.length) {
-                queue.shift()[callbackIndex](moduleOrBundleName);
-            }
+            setTimeout(function() {
+                while (queue.length) {
+                    queue.shift()[callbackIndex](moduleOrBundleName);
+                }
+            }, 0);
         }
-    }
-
-   /**
-    * @memberof JARS.internals.State
-    * @inner
-    *
-    * @param {number} state
-    *
-    * @return {function(this:JARS.internals.State):boolean}
-    */
-    function comparerFor(stateToCompare) {
-        return function compareState() {
-            return this._current === stateToCompare;
-        };
     }
 
     /**

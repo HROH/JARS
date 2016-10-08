@@ -41,6 +41,7 @@
                 'RelativeResolutionStrategy',
                 'ResolutionHelpers',
                 'State',
+                'StateInfo',
                 'System',
                 'TypeResolutionStrategies',
                 'Utils',

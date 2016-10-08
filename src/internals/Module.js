@@ -112,7 +112,7 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
                 AutoAborter.clear(module);
 
                 module.deps.request(function onDependenciesLoaded(dependencyRefs) {
-                    if (!state.isLoaded()) {
+                    if (state.setLoaded()) {
                         if(module.isRoot) {
                             module.ref = {};
                         }
@@ -125,8 +125,6 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
 
                             ModulesRegistry.setCurrent();
                         }
-
-                        state.setLoaded();
                     }
                 });
             }
