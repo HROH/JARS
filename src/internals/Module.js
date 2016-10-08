@@ -65,11 +65,10 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
 
             return path + fileName;
         },
-        /**
-         * @param {string} path
-         */
-        load: function(path) {
-            var module = this;
+
+        load: function() {
+            var module = this,
+                path = module.getFullPath();
 
             AutoAborter.setup(module, path);
 
@@ -81,13 +80,10 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
          */
         request: function(onModuleLoaded, onModuleAborted) {
             var module = this,
-                state = module.state,
-                path = module.getFullPath();
+                state = module.state;
 
-            if (state.setLoading({
-                path: path
-            })) {
-                module.load(path);
+            if (state.setLoading()) {
+                module.load();
             }
 
             state.onChange(onModuleLoaded, onModuleAborted);
