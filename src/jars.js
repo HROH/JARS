@@ -8,6 +8,7 @@
                 'AbsoluteResolutionStrategy',
                 'AutoAborter',
                 'Bundle',
+                'BundleAborter',
                 'BundleResolutionStrategy',
                 'BundleResolver',
                 'Config',

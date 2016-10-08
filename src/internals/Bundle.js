@@ -2,6 +2,7 @@ JARS.internal('Bundle', function bundleSetup(InternalsManager) {
     'use strict';
 
     var getInternal = InternalsManager.get,
+        BundleAborter = getInternal('BundleAborter'),
         BundleResolver = getInternal('BundleResolver'),
         ModulesQueue = getInternal('ModulesQueue'),
         Config = getInternal('Config'),
@@ -9,10 +10,7 @@ JARS.internal('Bundle', function bundleSetup(InternalsManager) {
         State = getInternal('State'),
         SEPARATOR = '", "',
         MSG_BUNDLE_DEFINED = 'defined submodules "${bundle}"',
-        MSG_BUNDLE_NOT_DEFINED = 'there are no submodules defined',
-        // Errors when bundle is aborted
-        MSG_BUNDLE_ABORTED = 'parent "${parent}"',
-        MSG_BUNDLE_SUBMODULE_ABORTED = 'submodule "${subModule}"';
+        MSG_BUNDLE_NOT_DEFINED = 'there are no submodules defined';
 
     /**
      * @class
@@ -29,7 +27,7 @@ JARS.internal('Bundle', function bundleSetup(InternalsManager) {
         bundle.name = bundleName;
         bundle.config = new Config(bundle, parentConfig);
         bundle.logger = new Logger(bundleName);
-        bundle._state = new State(bundleName, bundle.logger);
+        bundle.state = new State(bundleName, bundle.logger);
         bundle._module = module;
     }
 
@@ -54,7 +52,7 @@ JARS.internal('Bundle', function bundleSetup(InternalsManager) {
          */
         request: function(onBundleLoaded, onBundleAborted) {
             var bundle = this,
-                bundleState = bundle._state;
+                bundleState = bundle.state;
 
             if(bundleState.trySetRequested()) {
                 new ModulesQueue(bundle, [bundle._module.name]).request(function onModulesLoaded() {
@@ -66,16 +64,8 @@ JARS.internal('Bundle', function bundleSetup(InternalsManager) {
                         if (!bundleState.isLoaded()) {
                             bundleState.setLoaded();
                         }
-                    }, function onModuleAborted(moduleName) {
-                        bundleState.setAborted(MSG_BUNDLE_SUBMODULE_ABORTED, {
-                            subModule: moduleName
-                        });
-                    });
-                }, function onModuleAborted(moduleName) {
-                    bundleState.setAborted(MSG_BUNDLE_ABORTED, {
-                        parent: moduleName
-                    });
-                });
+                    }, BundleAborter.abortBySubModule);
+                }, BundleAborter.abortByParent);
             }
 
             bundleState.onChange(onBundleLoaded, onBundleAborted);
