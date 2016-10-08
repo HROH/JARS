@@ -32,7 +32,6 @@ JARS.internal('Dependencies', function dependenciesSetup(InternalsManager) {
         dependencies._module = module;
         dependencies._logger = logger;
         dependencies._deps = [];
-        dependencies._aborter = new DependenciesAborter(module.state);
 
         dependencies._interceptionDeps = [];
 
@@ -86,11 +85,9 @@ JARS.internal('Dependencies', function dependenciesSetup(InternalsManager) {
                 module = dependencies._module;
 
             if(DependenciesChecker.hasCircular(module)) {
-                dependencies._aborter.abortCircularDeps(DependenciesChecker.getCircular(module));
+                DependenciesAborter.abortByCircularDeps(module, DependenciesChecker.getCircular(module));
             } else {
-                new ModulesQueue(module, dependencies.getAll()).request(onModulesLoaded, function onModuleAborted(dependencyName) {
-                    dependencies._aborter.abortDependency(dependencyName);
-                });
+                new ModulesQueue(module, dependencies.getAll()).request(onModulesLoaded, DependenciesAborter.abortByDependency);
             }
         }
     };
