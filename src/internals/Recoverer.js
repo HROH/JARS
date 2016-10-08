@@ -22,7 +22,7 @@ JARS.internal('Recoverer', function recovererSetup(InternalsManager) {
 
             if (updatedNextRecover) {
                 module.logger.warn(MSG_RECOVERING);
-                module.load();
+                module.load(module.getFullPath());
             }
 
             return updatedNextRecover;
