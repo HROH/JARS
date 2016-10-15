@@ -2,8 +2,8 @@ JARS.internal('DependenciesAborter', function dependenciesAborterSetup() {
     'use strict';
 
     var CIRCULAR_SEPARATOR = '" -> "',
-        MSG_ABORTED_BY_DEPENDENCY = 'dependency "${0}"',
-        MSG_ABORTED_BY_CIRCULAR_DEPENDENCIES = 'circular dependencies "${0}"',
+        MSG_ABORTED_BY_DEPENDENCY = ' - missing dependency "${0}"',
+        MSG_ABORTED_BY_CIRCULAR_DEPENDENCIES = ' - found circular dependencies "${0}"',
         DependenciesAborter;
 
     /**

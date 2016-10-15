@@ -1,8 +1,8 @@
 JARS.internal('BundleAborter', function bundleAborterSetup() {
     'use strict';
 
-    var MSG_ABORTED_BY_BUNDLE_PARENT = 'parent "${0}"',
-        MSG_ABORTED_BY_BUNDLE_SUBMODULE = 'submodule "${0}"',
+    var MSG_ABORTED_BY_BUNDLE_PARENT = ' - missing parent "${0}"',
+        MSG_ABORTED_BY_BUNDLE_SUBMODULE = ' - missing submodule "${0}"',
         BundleAborter;
 
     /**

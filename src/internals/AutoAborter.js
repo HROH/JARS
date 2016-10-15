@@ -6,7 +6,7 @@ JARS.internal('AutoAborter', function autoAborterSetup(InternalsManager) {
         global = getInternal('System').env.global,
         timeoutIDs = {},
         MILLISECONDS_PER_SECOND = 1000,
-        MSG_MODULE_ABORTED = 'given path "${path}" after ${sec} second(s) - file may not exist',
+        MSG_MODULE_ABORTED = ' - timeout after ${sec} second(s) with given path "${path}"',
         AutoAborter;
 
     /**
