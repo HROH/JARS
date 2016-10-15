@@ -33,8 +33,6 @@ JARS.internal('Dependencies', function dependenciesSetup(InternalsManager) {
         dependencies._logger = logger;
         dependencies._deps = [];
 
-        dependencies._interceptionDeps = [];
-
         if(!module.isRoot) {
             parentName = DependenciesResolver.getParentName(module.name);
             dependencies.parent = parentName ? ModulesRegistry.get(parentName) : ModulesRegistry.getRoot();
