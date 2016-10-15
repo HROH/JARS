@@ -2,6 +2,11 @@ JARS.internal('State', function stateSetup(InternalsManager) {
     'use strict';
 
     var StateInfo = InternalsManager.get('StateInfo'),
+        ATTEMPTED_TO = 'attempted to mark as ',
+        BUT_CURRENTLY = ' but is currently ',
+        DONE = 'is ',
+        IS_PREFIX = 'is',
+        SET_PREFIX = 'set',
         QUEUE_LOADED = 0,
         QUEUE_ABORTED = 1;
 
@@ -33,28 +38,39 @@ JARS.internal('State', function stateSetup(InternalsManager) {
         syncQueueWithState(state);
     };
 
-    StateInfo.each(function(methodSuffix, stateToCompare) {
-        State.prototype['is' + methodSuffix] = function() {
-            return this._current === stateToCompare;
+    StateInfo.each(function(stateInfo) {
+        var methods = stateInfo.methods,
+            stateText = stateInfo.text,
+            capitalStateText = stateText.charAt(0).toUpperCase() + stateText.substr(1),
+            attemptMsg = ATTEMPTED_TO + stateText,
+            doneMsg = DONE + stateText;
+
+        State.prototype[IS_PREFIX + capitalStateText] = function() {
+            return this._current === stateInfo;
         };
 
-        State.prototype['set' + methodSuffix] = function(customMessage, logInfo) {
+        State.prototype[SET_PREFIX + capitalStateText] = function(customMessage, logInfo) {
             var state = this,
-                currentState = state._current,
-                canSetNextState = StateInfo.hasNext(currentState, stateToCompare),
-                logMethod = StateInfo.getLogMethod(currentState, stateToCompare),
-                message = StateInfo.getLogMessage(currentState, stateToCompare) + customMessage || '';
+                currentStateInfo = state._current,
+                canTransition = currentStateInfo.hasNext(stateInfo),
+                message = canTransition ? doneMsg  + (customMessage || '') : attemptMsg + BUT_CURRENTLY + currentStateInfo.stateText;
 
-            if(canSetNextState) {
-                state._current = stateToCompare;
+            if(canTransition) {
+                state._current = stateInfo;
                 syncQueueWithState(state);
             }
 
-            state._logger[logMethod](message, logInfo);
+            state._logger[methods[canTransition ? 'done' : 'attempt']](message, logInfo);
 
-            return canSetNextState;
+            return canTransition;
         };
     });
+
+    /**
+     * @method JARS.internals.State#isWaiting
+     *
+     * @return {boolean}
+     */
 
     /**
      * @method JARS.internals.State#isLoading
@@ -76,6 +92,12 @@ JARS.internal('State', function stateSetup(InternalsManager) {
 
     /**
      * @method JARS.internals.State#isAborted
+     *
+     * @return {boolean}
+     */
+
+    /**
+     * @method JARS.internals.State#setWaiting
      *
      * @return {boolean}
      */
