@@ -233,7 +233,7 @@
             $import: delegateToInternal('ExternalBootstrapper', '$import', getJARS),
 
             module: delegateToInternal('ModulesRegistry', 'register', function returnModuleWrapper(moduleName) {
-                var dynamicInternalName = 'Loader:' + moduleName,
+                var dynamicInternalName = 'ModulesRegistry:' + moduleName,
                     ModuleWrapper;
 
                 registerInternal(dynamicInternalName, function internalModuleSetup() {
