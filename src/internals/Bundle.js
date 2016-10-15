@@ -37,14 +37,9 @@ JARS.internal('Bundle', function bundleSetup(InternalsManager) {
          * @param {JARS.internals.Bundle.Declaration} bundleModules
          */
         add: function(bundleModules) {
-            var bundle = this,
-                resolvedBundle = BundleResolver.resolveBundle(bundle._module, bundleModules);
+            var bundle = this;
 
-            resolvedBundle.length && bundle.logger.debug(MSG_BUNDLE_DEFINED, {
-                bundle: resolvedBundle.join(SEPARATOR)
-            });
-
-            bundle._bundle = resolvedBundle;
+            bundle._bundle = BundleResolver.resolveBundle(bundle._module, bundleModules);
         },
         /**
          * @param {JARS.internals.State.LoadedCallback} onBundleLoaded
@@ -52,17 +47,27 @@ JARS.internal('Bundle', function bundleSetup(InternalsManager) {
          */
         request: function(onBundleLoaded, onBundleAborted) {
             var bundle = this,
-                bundleState = bundle.state;
+                bundleState = bundle.state,
+                logger = bundle.logger;
 
             if(bundleState.setLoading()) {
                 new ModulesQueue(bundle, [bundle._module.name]).request(function onModulesLoaded() {
                     var bundleModules = bundle._bundle;
 
-                    bundleModules.length || bundle.logger.warn(MSG_BUNDLE_NOT_DEFINED);
+                    if(bundleState.setRegistered()) {
+                        if(bundleModules.length) {
+                            logger.debug(MSG_BUNDLE_DEFINED, {
+                                bundle: bundleModules.join(SEPARATOR)
+                            });
+                        }
+                        else {
+                            logger.warn(MSG_BUNDLE_NOT_DEFINED);
+                        }
 
-                    new ModulesQueue(bundle, bundleModules).request(function onModulesLoaded() {
-                        bundleState.setLoaded();
-                    }, BundleAborter.abortBySubModule);
+                        new ModulesQueue(bundle, bundleModules).request(function onModulesLoaded() {
+                            bundleState.setLoaded();
+                        }, BundleAborter.abortBySubModule);
+                    }
                 }, BundleAborter.abortByParent);
             }
 
