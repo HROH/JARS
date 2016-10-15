@@ -66,10 +66,7 @@
                     }
 
                     if(!internalsReady) {
-                        if(!internalsInitialized) {
-                            internalsInitialized = true;
-                            loadInternals();
-                        }
+                        initializeInternals();
 
                         readyCallbacks.push(readyCallback);
                     }
@@ -88,9 +85,7 @@
 
                 if(!internal.loaded) {
                     internal.loaded = true;
-                    internalsLoading--;
-
-                    internalsLoading || setupInternals();
+                    --internalsLoading || setupInternals();
                 }
             },
 
@@ -118,12 +113,16 @@
             return object;
         }
 
-        function loadInternals() {
+        function initializeInternals() {
             var SourceManager = getInternal('SourceManager'),
                 index;
 
-            for(index = 0; index < internalsLoading; index++) {
-                SourceManager.loadInternal(internalsToLoad[index]);
+            if(!internalsInitialized) {
+                internalsInitialized = true;
+
+                for(index = 0; index < internalsLoading; index++) {
+                    SourceManager.loadSource('internal:' + internalsToLoad[index], SourceManager.INTERNALS_PATH + internalsToLoad[index] + '.js');
+                }
             }
         }
 
@@ -137,7 +136,6 @@
     registerInternal('SourceManager', function sourceManagerSetup() {
         var doc = envGlobal.document,
             head = doc.getElementsByTagName('head')[0],
-            scripts = {},
             jarsScript = getSelfScript(),
             basePath = getBasePath(),
             SourceManager;
@@ -154,12 +152,6 @@
 
             INTERNALS_PATH: basePath + (jarsScript.getAttribute('data-internals') || '') + 'internals/',
             /**
-             * @param {string} internalName
-             */
-            loadInternal: function(internalName) {
-                SourceManager.loadSource('internal:' + internalName, SourceManager.INTERNALS_PATH + internalName + '.js');
-            },
-            /**
              * @param {string} moduleName
              * @param {string} path
              */
@@ -172,35 +164,6 @@
                 script.type = 'text/javascript';
                 script.src = path;
                 script.async = true;
-
-                scripts[moduleName] = script;
-            },
-            /**
-             * @param {string} moduleName
-             *
-             * @return {boolean}
-             */
-            findSource: function(moduleName) {
-                return doc.currentScript ? doc.currentScript.id === moduleName : !!doc.getElementById(moduleName);
-            },
-            /**
-             * @param {string} moduleName
-             *
-             * @return {string} path
-             */
-            removeSource: function(moduleName) {
-                var script = scripts[moduleName],
-                    path;
-
-                if(script) {
-                        path = script.src;
-
-                    head.removeChild(script);
-
-                    delete scripts[moduleName];
-                }
-
-                return path;
             }
         };
 
