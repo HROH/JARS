@@ -2,7 +2,6 @@ JARS.internal('Logger', function loggerSetup(InternalsManager) {
     'use strict';
 
     var getInternal = InternalsManager.get,
-        BundleResolver = getInternal('BundleResolver'),
         System = getInternal('System');
 
     /**
@@ -10,11 +9,10 @@ JARS.internal('Logger', function loggerSetup(InternalsManager) {
      *
      * @memberof JARS.internals
      *
-     * @param {string} moduleOrBundleName
+     * @param {string} loggerContext
      */
-    function Logger(moduleOrBundleName) {
-        this._moduleOrBundleName = moduleOrBundleName;
-        this._loggerContext = (BundleResolver.isBundle(moduleOrBundleName) ? 'Bundle' : 'Module') + ':' + moduleOrBundleName;
+    function Logger(loggerContext) {
+        this._context = loggerContext;
     }
 
     getInternal('Utils').arrayEach(['debug', 'error', 'info', 'warn'], function addForward(methodName) {
@@ -64,7 +62,7 @@ JARS.internal('Logger', function loggerSetup(InternalsManager) {
         var SystemLogger = System.Logger;
 
         if (SystemLogger) {
-            SystemLogger[logMethod + 'WithContext'](logger._loggerContext, message, values);
+            SystemLogger[logMethod + 'WithContext'](logger._context, message, values);
         }
     }
 

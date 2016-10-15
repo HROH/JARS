@@ -9,6 +9,7 @@ JARS.internal('Bundle', function bundleSetup(InternalsManager) {
         Logger = getInternal('Logger'),
         State = getInternal('State'),
         SEPARATOR = '", "',
+        LOG_CONTEXT_PREFIX = 'Bundle:',
         MSG_BUNDLE_DEFINED = 'defined submodules "${bundle}"',
         MSG_BUNDLE_NOT_DEFINED = 'there are no submodules defined';
 
@@ -26,7 +27,7 @@ JARS.internal('Bundle', function bundleSetup(InternalsManager) {
 
         bundle.name = bundleName;
         bundle.config = new Config(bundle, parentConfig);
-        bundle.logger = new Logger(bundleName);
+        bundle.logger = new Logger(LOG_CONTEXT_PREFIX + bundleName);
         bundle.state = new State(bundleName, bundle.logger);
         bundle._module = module;
     }

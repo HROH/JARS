@@ -7,7 +7,9 @@ JARS.internal('Dependencies', function dependenciesSetup(InternalsManager) {
         DependenciesChecker = getInternal('DependenciesChecker'),
         ModulesQueue = getInternal('ModulesQueue'),
         ModulesRegistry = getInternal('ModulesRegistry'),
+        Logger = getInternal('Logger'),
         SEPARATOR = '", "',
+        LOG_CONTEXT_PREFIX = 'Dependencies:',
         FOUND = 'found ',
         EXPLICIT_DEPENDENCIES = 'explicit',
         INTERCEPTION_DEPENDENCIES = 'interception',
@@ -21,16 +23,15 @@ JARS.internal('Dependencies', function dependenciesSetup(InternalsManager) {
      * @memberof JARS.internals
      *
      * @param {JARS.internals.Module} module
-     * @param {JARS.internals.Logger} logger
      * @param {boolean} [isInterceptionDeps=false]
      */
-    function Dependencies(module, logger, isInterceptionDeps) {
+    function Dependencies(module, isInterceptionDeps) {
         var dependencies = this,
             parentName;
 
         dependencies._isInterceptionDeps = isInterceptionDeps;
         dependencies._module = module;
-        dependencies._logger = logger;
+        dependencies._logger = new Logger(LOG_CONTEXT_PREFIX + module.name);
         dependencies._deps = [];
 
         if(!module.isRoot) {
@@ -38,7 +39,7 @@ JARS.internal('Dependencies', function dependenciesSetup(InternalsManager) {
             dependencies.parent = parentName ? ModulesRegistry.get(parentName) : ModulesRegistry.getRoot();
 
             if(parentName && !isInterceptionDeps) {
-                logger.debug(MSG_DEPENDENCY_FOUND, {
+                dependencies._logger.debug(MSG_DEPENDENCY_FOUND, {
                     dep: parentName
                 });
             }

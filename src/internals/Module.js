@@ -10,7 +10,8 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
         Bundle = getInternal('Bundle'),
         Config = getInternal('Config'),
         Logger = getInternal('Logger'),
-        State = getInternal('State');
+        State = getInternal('State'),
+        LOG_CONTEXT_PREFIX = 'Module:';
 
     /**
      * @callback FactoryCallback
@@ -37,11 +38,11 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
         module.name = moduleName;
         module.isRoot = isRoot || false;
 
-        module.logger = logger = new Logger(moduleName);
+        module.logger = logger = new Logger(LOG_CONTEXT_PREFIX + moduleName);
         module.state = state = new State(moduleName, logger);
 
-        module.deps = dependencies = new Dependencies(module, logger);
-        module.interceptionDeps = new Dependencies(module, logger, true);
+        module.deps = dependencies = new Dependencies(module);
+        module.interceptionDeps = new Dependencies(module, true);
 
         parent = dependencies.parent;
         module.bundle = new Bundle(module, parent && parent.bundle.config);
