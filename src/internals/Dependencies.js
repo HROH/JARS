@@ -65,26 +65,25 @@ JARS.internal('Dependencies', function dependenciesSetup(InternalsManager) {
         add: function(dependencyModules) {
             var dependencies = this;
 
-            dependencyModules = DependenciesResolver.resolveDeps(dependencies._module, dependencyModules);
-
-            dependencyModules.length && dependencies._logger.debug(MSG_DEPENDENCIES_FOUND, {
-                kind: dependencies._isInterceptionDeps ? INTERCEPTION_DEPENDENCIES : EXPLICIT_DEPENDENCIES,
-
-                deps: dependencyModules.join(SEPARATOR)
-            });
-
-            dependencies._deps = dependencies._deps.concat(dependencyModules);
+            dependencies._deps = dependencies._deps.concat(DependenciesResolver.resolveDeps(dependencies._module, dependencyModules));
         },
         /**
          * @param {JARS.internals.ModulesQueue.ModulesLoadedCallback} onModulesLoaded
          */
         request: function(onModulesLoaded) {
             var dependencies = this,
-                module = dependencies._module;
+                module = dependencies._module,
+                dependencyModules = dependencies._deps;
 
             if(DependenciesChecker.hasCircular(module)) {
                 DependenciesAborter.abortByCircularDeps(module, DependenciesChecker.getCircular(module));
             } else {
+                dependencyModules.length && dependencies._logger.debug(MSG_DEPENDENCIES_FOUND, {
+                    kind: dependencies._isInterceptionDeps ? INTERCEPTION_DEPENDENCIES : EXPLICIT_DEPENDENCIES,
+
+                    deps: dependencyModules.join(SEPARATOR)
+                });
+
                 new ModulesQueue(module, dependencies.getAll()).request(onModulesLoaded, DependenciesAborter.abortByDependency);
             }
         }
