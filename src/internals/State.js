@@ -53,14 +53,20 @@ JARS.internal('State', function stateSetup(InternalsManager) {
             var state = this,
                 currentStateInfo = state._current,
                 canTransition = currentStateInfo.hasNext(stateInfo),
-                message = canTransition ? doneMsg  + (customMessage || '') : attemptMsg + BUT_CURRENTLY + currentStateInfo.stateText;
+                message, method;
 
             if(canTransition) {
+                message = doneMsg  + (customMessage || '');
+                method = (logInfo && logInfo.log) || methods.done;
                 state._current = stateInfo;
                 syncQueueWithState(state);
             }
+            else {
+                message = attemptMsg + BUT_CURRENTLY + currentStateInfo.text;
+                method = methods.attempt;
+            }
 
-            state._logger[methods[canTransition ? 'done' : 'attempt']](message, logInfo);
+            state._logger[method](message, logInfo);
 
             return canTransition;
         };

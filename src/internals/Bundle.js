@@ -10,8 +10,12 @@ JARS.internal('Bundle', function bundleSetup(InternalsManager) {
         State = getInternal('State'),
         SEPARATOR = '", "',
         LOG_CONTEXT_PREFIX = 'Bundle:',
-        MSG_BUNDLE_DEFINED = 'defined submodules "${bundle}"',
-        MSG_BUNDLE_NOT_DEFINED = 'there are no submodules defined';
+        MSG_BUNDLE_DEFINED = ' - with submodules "${bundle}"',
+        DEFAULT_REQUEST_INFO = {
+            bundle: 'none',
+
+            log: 'warn'
+        };
 
     /**
      * @class
@@ -48,23 +52,18 @@ JARS.internal('Bundle', function bundleSetup(InternalsManager) {
          */
         request: function(onBundleLoaded, onBundleAborted) {
             var bundle = this,
-                bundleState = bundle.state,
-                logger = bundle.logger;
+                bundleState = bundle.state;
 
             if(bundleState.setLoading()) {
                 new ModulesQueue(bundle, [bundle._module.name]).request(function onModulesLoaded() {
-                    var bundleModules = bundle._bundle;
+                    var bundleModules = bundle._bundle,
+                        requestInfo = bundleModules.length ? {
+                            bundle: bundleModules.join(SEPARATOR),
 
-                    if(bundleState.setRegistered()) {
-                        if(bundleModules.length) {
-                            logger.debug(MSG_BUNDLE_DEFINED, {
-                                bundle: bundleModules.join(SEPARATOR)
-                            });
-                        }
-                        else {
-                            logger.warn(MSG_BUNDLE_NOT_DEFINED);
-                        }
+                            log: 'debug'
+                        } : DEFAULT_REQUEST_INFO;
 
+                    if(bundleState.setRegistered(MSG_BUNDLE_DEFINED, requestInfo)) {
                         new ModulesQueue(bundle, bundleModules).request(function onModulesLoaded() {
                             bundleState.setLoaded();
                         }, BundleAborter.abortBySubModule);
