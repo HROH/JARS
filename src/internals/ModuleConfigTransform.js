@@ -1,7 +1,7 @@
 JARS.internal('ModuleConfigTransform', function moduleConfigTransformSetup(InternalsManager) {
     'use strict';
 
-    var Utils = InternalsManager.get('Utils'),
+    var objectMerge = InternalsManager.get('Utils').objectMerge,
         ModuleConfigTransform;
 
     /**
@@ -16,7 +16,7 @@ JARS.internal('ModuleConfigTransform', function moduleConfigTransformSetup(Inter
          * @return {object}
          */
         transform: function(newConfig, moduleOrBundle) {
-            return Utils.objectMerge(moduleOrBundle.config.get('config'), newConfig);
+            return objectMerge(moduleOrBundle.config.get('config'), newConfig);
         }
     };
 

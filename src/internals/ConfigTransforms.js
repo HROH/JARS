@@ -4,12 +4,6 @@ JARS.internal('ConfigTransforms', function configTransformsSetup(InternalsManage
     var getInternal = InternalsManager.get,
         PathTransform = getInternal('PathTransform'),
         IdentityTransform = getInternal('IdentityTransform'),
-        FileTransform = getInternal('FileTransform'),
-        ModuleConfigTransform = getInternal('ModuleConfigTransform'),
-        ExtensionTransform = getInternal('ExtensionTransform'),
-        MinifyTransform = getInternal('MinifyTransform'),
-        RecoverTransform = getInternal('RecoverTransform'),
-        TimeoutTransform = getInternal('TimeoutTransform'),
         ConfigTransforms;
 
     /**
@@ -26,17 +20,17 @@ JARS.internal('ConfigTransforms', function configTransformsSetup(InternalsManage
 
         checkCircularDeps: IdentityTransform,
 
-        fileName: FileTransform,
+        fileName: getInternal('FileTransform'),
 
-        config: ModuleConfigTransform,
+        config: getInternal('ModuleConfigTransform'),
 
-        extension: ExtensionTransform,
+        extension: getInternal('ExtensionTransform'),
 
-        minified: MinifyTransform,
+        minified: getInternal('MinifyTransform'),
 
-        recover: RecoverTransform,
+        recover: getInternal('RecoverTransform'),
 
-        timeout: TimeoutTransform
+        timeout: getInternal('TimeoutTransform')
     };
 
     return ConfigTransforms;

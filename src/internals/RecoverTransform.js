@@ -1,7 +1,7 @@
 JARS.internal('RecoverTransform', function recoverTransformSetup(InternalsManager) {
     'use strict';
 
-    var Utils = InternalsManager.get('Utils'),
+    var objectMerge = InternalsManager.get('Utils').objectMerge,
         RecoverTransform;
 
     /**
@@ -18,7 +18,7 @@ JARS.internal('RecoverTransform', function recoverTransformSetup(InternalsManage
         transform: function(recoverConfig, moduleOrBundle) {
             // create a copy of the recover-config
             // because it should update for every module independently
-            var recover = Utils.objectMerge({}, recoverConfig);
+            var recover = objectMerge({}, recoverConfig);
 
             recover.restrict = moduleOrBundle.name;
             // if no next recover-config is given set it explicitly
