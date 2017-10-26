@@ -60,7 +60,7 @@ JARS.internal('ModulesRegistry', function modulesRegistrySetup(InternalsManager)
          */
         get: function(moduleName, isRoot) {
             if (BundleResolver.isBundle(moduleName)) {
-                moduleName = BundleResolver.removeBundle(moduleName);
+                moduleName = BundleResolver.removeBundleSuffix(moduleName);
             }
             else {
                 moduleName = InterceptionResolver.removeInterceptionData(moduleName);
