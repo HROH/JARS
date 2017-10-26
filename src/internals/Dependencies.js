@@ -7,7 +7,7 @@ JARS.internal('Dependencies', function dependenciesSetup(InternalsManager) {
         DependenciesChecker = getInternal('DependenciesChecker'),
         ModulesQueue = getInternal('ModulesQueue'),
         ModulesRegistry = getInternal('ModulesRegistry'),
-        Logger = getInternal('Logger'),
+        LogWrap = getInternal('LogWrap'),
         SEPARATOR = '", "',
         LOG_CONTEXT_PREFIX = 'Dependencies:',
         FOUND = 'found ',
@@ -31,7 +31,7 @@ JARS.internal('Dependencies', function dependenciesSetup(InternalsManager) {
 
         dependencies._isInterceptionDeps = isInterceptionDeps;
         dependencies._module = module;
-        dependencies._logger = new Logger(LOG_CONTEXT_PREFIX + module.name);
+        dependencies._logger = new LogWrap(LOG_CONTEXT_PREFIX + module.name);
         dependencies._deps = [];
 
         if(!module.isRoot) {

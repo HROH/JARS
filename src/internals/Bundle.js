@@ -6,7 +6,7 @@ JARS.internal('Bundle', function bundleSetup(InternalsManager) {
         BundleResolver = getInternal('BundleResolver'),
         ModulesQueue = getInternal('ModulesQueue'),
         Config = getInternal('Config'),
-        Logger = getInternal('Logger'),
+        LogWrap = getInternal('LogWrap'),
         State = getInternal('State'),
         SEPARATOR = '", "',
         LOG_CONTEXT_PREFIX = 'Bundle:',
@@ -31,7 +31,7 @@ JARS.internal('Bundle', function bundleSetup(InternalsManager) {
 
         bundle.name = bundleName;
         bundle.config = new Config(bundle, parentConfig);
-        bundle.logger = new Logger(LOG_CONTEXT_PREFIX + bundleName);
+        bundle.logger = new LogWrap(LOG_CONTEXT_PREFIX + bundleName);
         bundle.state = new State(bundleName, bundle.logger);
         bundle._module = module;
     }

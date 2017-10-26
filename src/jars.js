@@ -38,7 +38,7 @@
                 'InternalBootstrapper',
                 'Loader',
                 'LoaderContextHook',
-                'Logger',
+                'LogWrap',
                 'MainHook',
                 'MinifyTransform',
                 'Module',

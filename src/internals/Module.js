@@ -9,7 +9,7 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
         Dependencies = getInternal('Dependencies'),
         Bundle = getInternal('Bundle'),
         Config = getInternal('Config'),
-        Logger = getInternal('Logger'),
+        LogWrap = getInternal('LogWrap'),
         State = getInternal('State'),
         LOG_CONTEXT_PREFIX = 'Module:';
 
@@ -38,7 +38,7 @@ JARS.internal('Module', function moduleSetup(InternalsManager) {
         module.name = moduleName;
         module.isRoot = isRoot || false;
 
-        module.logger = logger = new Logger(LOG_CONTEXT_PREFIX + moduleName);
+        module.logger = logger = new LogWrap(LOG_CONTEXT_PREFIX + moduleName);
         module.state = state = new State(moduleName, logger);
 
         module.deps = dependencies = new Dependencies(module);

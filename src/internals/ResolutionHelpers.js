@@ -13,7 +13,7 @@ JARS.internal('ResolutionHelpers', function resolutionHelpersSetup() {
     ResolutionHelpers = {
         /**
          * @param {JARS.internals.ResolutionStrategy} resolve
-         * @param {function(JARS.internals.Module):JARS.internals.Logger} getLogger
+         * @param {function(JARS.internals.Module):JARS.internals.LogWrap} getLogger
          * @param {string} errorMessage
          *
          * @return {string}
