@@ -1,12 +1,10 @@
-JARS.internal('IdentityTransform', function identityTransformSetup() {
+JARS.internal('transforms/Identity', function identityTransformSetup() {
     'use strict';
-
-    var IdentityTransform;
 
     /**
      * @memberof JARS.internals
      */
-    IdentityTransform = {
+    var Identity = {
         type: 'boolean',
         /**
          * @param {*} value
@@ -18,5 +16,5 @@ JARS.internal('IdentityTransform', function identityTransformSetup() {
         }
     };
 
-    return IdentityTransform;
+    return Identity;
 });

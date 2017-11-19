@@ -1,12 +1,10 @@
-JARS.internal('ExtensionTransform', function extensionTransformSetup() {
+JARS.internal('transforms/Extension', function extensionTransformSetup() {
     'use strict';
-
-    var ExtensionTransform;
 
     /**
      * @memberof JARS.internals
      */
-    ExtensionTransform = {
+    var Extension = {
         type: 'string',
         /**
          * @param {string} extension
@@ -18,5 +16,5 @@ JARS.internal('ExtensionTransform', function extensionTransformSetup() {
         }
     };
 
-    return ExtensionTransform;
+    return Extension;
 });

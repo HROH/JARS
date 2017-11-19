@@ -1,13 +1,13 @@
-JARS.internal('TimeoutTransform', function timeoutTransformSetup() {
+JARS.internal('transforms/Timeout', function timeoutTransformSetup() {
     'use strict';
 
     var MIN_TIMEOUT = 0.5,
-        TimeoutTransform;
+        Timeout;
 
     /**
      * @memberof JARS.internals
      */
-    TimeoutTransform = {
+    Timeout = {
         type: 'number',
         /**
          * @param {number} timeout
@@ -19,5 +19,5 @@ JARS.internal('TimeoutTransform', function timeoutTransformSetup() {
         }
     };
 
-    return TimeoutTransform;
+    return Timeout;
 });

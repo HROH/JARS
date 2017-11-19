@@ -1,13 +1,13 @@
-JARS.internal('ModuleConfigTransform', function moduleConfigTransformSetup(InternalsManager) {
+JARS.internal('transforms/ModuleConfig', function moduleConfigTransformSetup(InternalsManager) {
     'use strict';
 
     var objectMerge = InternalsManager.get('Utils').objectMerge,
-        ModuleConfigTransform;
+        ModuleConfig;
 
     /**
      * @memberof JARS.internals
      */
-    ModuleConfigTransform = {
+    ModuleConfig = {
         type: 'object',
         /**
          * @param {object} newConfig
@@ -20,5 +20,5 @@ JARS.internal('ModuleConfigTransform', function moduleConfigTransformSetup(Inter
         }
     };
 
-    return ModuleConfigTransform;
+    return ModuleConfig;
 });

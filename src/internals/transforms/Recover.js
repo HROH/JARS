@@ -1,13 +1,13 @@
-JARS.internal('RecoverTransform', function recoverTransformSetup(InternalsManager) {
+JARS.internal('transforms/Recover', function recoverTransformSetup(InternalsManager) {
     'use strict';
 
     var objectMerge = InternalsManager.get('Utils').objectMerge,
-        RecoverTransform;
+        Recover;
 
     /**
      * @memberof JARS.internals
      */
-    RecoverTransform = {
+    Recover = {
         type: 'object',
         /**
          * @param {object} recoverConfig
@@ -35,5 +35,5 @@ JARS.internal('RecoverTransform', function recoverTransformSetup(InternalsManage
         }
     };
 
-    return RecoverTransform;
+    return Recover;
 });

@@ -1,12 +1,10 @@
-JARS.internal('MinifyTransform', function minifyTransformSetup() {
+JARS.internal('transforms/Minify', function minifyTransformSetup() {
     'use strict';
-
-    var MinifyTransform;
 
     /**
      * @memberof JARS.internals
      */
-    MinifyTransform = {
+    var Minify = {
         type: 'boolean',
         /**
          * @param {boolean} loadMin
@@ -18,5 +16,5 @@ JARS.internal('MinifyTransform', function minifyTransformSetup() {
         }
     };
 
-    return MinifyTransform;
+    return Minify;
 });

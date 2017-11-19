@@ -1,14 +1,14 @@
-JARS.internal('PathTransform', function pathTransformSetup() {
+JARS.internal('transforms/Path', function pathTransformSetup() {
     'use strict';
 
     var RE_END_SLASH = /\/$/,
         SLASH = '/',
-        PathTransform;
+        Path;
 
     /**
      * @memberof JARS.internals
      */
-    PathTransform = {
+    Path = {
         type: 'string',
         /**
          * @param {string} path
@@ -20,5 +20,5 @@ JARS.internal('PathTransform', function pathTransformSetup() {
         }
     };
 
-    return PathTransform;
+    return Path;
 });

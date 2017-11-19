@@ -1,12 +1,10 @@
-JARS.internal('FileTransform', function fileTransformSetup() {
+JARS.internal('transforms/File', function fileTransformSetup() {
     'use strict';
-
-    var FileTransform;
 
     /**
      * @memberof JARS.internals
      */
-    FileTransform = {
+    var File = {
         type: 'string',
         /**
          * @param {string} fileName
@@ -18,5 +16,5 @@ JARS.internal('FileTransform', function fileTransformSetup() {
         }
     };
 
-    return FileTransform;
+    return File;
 });
