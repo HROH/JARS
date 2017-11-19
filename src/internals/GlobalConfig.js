@@ -3,13 +3,18 @@ JARS.internal('GlobalConfig', function globalConfigSetup(InternalsManager) {
 
     var getInternal = InternalsManager.get,
         System = getInternal('System'),
-        GlobalConfigHooks = getInternal('GlobalConfigHooks'),
         arrayEach = getInternal('Utils').arrayEach,
         objectEach = getInternal('Utils').objectEach,
+        hookKeys = ['debugging', 'environment', 'environments', 'globalAccess', 'interceptors', 'loaderContext', 'main', 'modules'],
+        globalConfigHooks = {},
         globalConfig = {
             environments: {}
         },
         GlobalConfig;
+
+        arrayEach(hookKeys, function(hookKey) {
+            globalConfigHooks[hookKey] = getInternal(hookKey.charAt(0).toUpperCase() + hookKey.substr(1) + 'Hook');
+        });
 
     /**
      * @namespace
@@ -60,7 +65,7 @@ JARS.internal('GlobalConfig', function globalConfigSetup(InternalsManager) {
             });
         }
         else {
-            configHook = GlobalConfigHooks[option];
+            configHook = globalConfigHooks[option];
             globalConfig[option] = System.isFunction(configHook) ? configHook(GlobalConfig, valueOrArray) : valueOrArray;
         }
     }

@@ -28,7 +28,6 @@
                 'FileTransform',
                 'GlobalAccessHook',
                 'GlobalConfig',
-                'GlobalConfigHooks',
                 'IdentityTransform',
                 'Interception',
                 'InterceptionResolver',
