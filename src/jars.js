@@ -25,7 +25,6 @@
                 'EnvironmentHook',
                 'EnvironmentsHook',
                 'ExtensionTransform',
-                'ExternalBootstrapper',
                 'FileTransform',
                 'GlobalAccessHook',
                 'GlobalConfig',
@@ -199,7 +198,9 @@
     });
 
     envGlobal.JARS = (function jarsSetup() {
-        var previousJARS = envGlobal.JARS,
+        var mainCounter = 0,
+            delegatedLoaderImport = delegateToInternal('Loader', '$import'),
+            previousJARS = envGlobal.JARS,
             JARS;
 
         /**
@@ -207,9 +208,21 @@
          * @global
          */
         JARS = {
-            main: delegateToInternal('ExternalBootstrapper', 'main', getJARS),
+            main: function(mainCallback) {
+                JARS.$import().main(mainCallback);
+            },
 
-            $import: delegateToInternal('ExternalBootstrapper', '$import', getJARS),
+            $import: function(moduleNames) {
+                var mainModule = JARS.module('main_$' + mainCounter++).$import(moduleNames);
+
+                mainModule.main = function(mainCallback) {
+                    delegatedLoaderImport('System.*', function() {
+                        mainModule.$export(mainCallback);
+                    });
+                };
+
+                return mainModule;
+            },
 
             module: delegateToInternal('ModulesRegistry', 'register', function returnModuleWrapper(moduleName) {
                 var dynamicInternalName = 'ModulesRegistry:' + moduleName,
