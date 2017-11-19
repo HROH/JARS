@@ -8,10 +8,8 @@ JARS.internal('EnvironmentHook', function() {
      * @return {string}
      */
     var EnvironmentHook = function(globalConfig, environment) {
-        var environmentConfig = globalConfig.get('environments')[environment];
-
-        if (environmentConfig !== globalConfig.get('environment')) {
-            globalConfig.update(environmentConfig);
+        if (environment !== globalConfig.get('environment')) {
+            globalConfig.update(globalConfig.get('environments')[environment]);
         }
 
         return environment;
