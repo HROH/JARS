@@ -1,18 +1,18 @@
-JARS.internal('MainHook', function(InternalsManager) {
+JARS.internal('hooks/Main', function mainHookSetup(InternalsManager) {
     'use strict';
 
     var SourceManager = InternalsManager.get('SourceManager'),
-        MainHook;
-        
+        Main;
+
     /**
      * @param {JARS.internals.GlobalConfig} globalConfig
      * @param {string} mainScript
      *
      * @return {string}
      */
-    MainHook = function(globalConfig, mainScript) {
+    Main = function(globalConfig, mainScript) {
         return globalConfig.get('main') || (mainScript && SourceManager.loadSource('main', mainScript + '.js'));
     };
 
-    return MainHook;
+    return Main;
 });

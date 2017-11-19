@@ -1,14 +1,14 @@
-JARS.internal('DebuggingHook', function(InternalsManager) {
+JARS.internal('hooks/Debugging', function debuggingHookSetup(InternalsManager) {
     'use strict';
 
     var System = InternalsManager.get('System'),
-        DebuggingHook;
+        Debugging;
 
     /**
      * @param {JARS.internals.GlobalConfig} globalConfig
      * @param {(Object|boolean)} debugConfig
      */
-    DebuggingHook = function(globalConfig, debugConfig) {
+    Debugging = function(globalConfig, debugConfig) {
         if (!System.isObject(debugConfig)) {
             debugConfig = {
                 debug: debugConfig
@@ -20,5 +20,5 @@ JARS.internal('DebuggingHook', function(InternalsManager) {
         });
     };
 
-    return DebuggingHook;
+    return Debugging;
 });

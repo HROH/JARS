@@ -13,7 +13,7 @@ JARS.internal('GlobalConfig', function globalConfigSetup(InternalsManager) {
         GlobalConfig;
 
         arrayEach(hookKeys, function(hookKey) {
-            globalConfigHooks[hookKey] = getInternal(hookKey.charAt(0).toUpperCase() + hookKey.substr(1) + 'Hook');
+            globalConfigHooks[hookKey] = getInternal('hooks/' + hookKey.charAt(0).toUpperCase() + hookKey.substr(1));
         });
 
     /**

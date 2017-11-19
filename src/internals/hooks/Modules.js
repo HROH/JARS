@@ -1,4 +1,4 @@
-JARS.internal('ModulesHook', function(InternalsManager) {
+JARS.internal('hooks/Modules', function modulesHookSetup(InternalsManager) {
     'use strict';
 
     var getInternal = InternalsManager.get,
@@ -6,13 +6,13 @@ JARS.internal('ModulesHook', function(InternalsManager) {
         DependenciesResolver = getInternal('DependenciesResolver'),
         BundleResolver = getInternal('BundleResolver'),
         arrayEach = getInternal('Utils').arrayEach,
-        ModulesHook;
+        Modules;
 
     /**
      * @param {JARS.internals.GlobalConfig} globalConfig
      * @param {Object} config
      */
-    ModulesHook = function(globalConfig, config) {
+    Modules = function(globalConfig, config) {
         var rootModule = ModulesRegistry.getRoot();
 
         if(config.restrict) {
@@ -27,5 +27,5 @@ JARS.internal('ModulesHook', function(InternalsManager) {
         }
     };
 
-    return ModulesHook;
+    return Modules;
 });

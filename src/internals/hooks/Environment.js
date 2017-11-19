@@ -1,4 +1,4 @@
-JARS.internal('EnvironmentHook', function() {
+JARS.internal('hooks/Environment', function environmentHookSetup() {
     'use strict';
 
     /**
@@ -7,7 +7,7 @@ JARS.internal('EnvironmentHook', function() {
      *
      * @return {string}
      */
-    var EnvironmentHook = function(globalConfig, environment) {
+    var Environment = function(globalConfig, environment) {
         if (environment !== globalConfig.get('environment')) {
             globalConfig.update(globalConfig.get('environments')[environment]);
         }
@@ -15,5 +15,5 @@ JARS.internal('EnvironmentHook', function() {
         return environment;
     };
 
-    return EnvironmentHook;
+    return Environment;
 });

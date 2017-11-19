@@ -1,8 +1,8 @@
-JARS.internal('LoaderContextHook', function(InternalsManager) {
+JARS.internal('LoaderContextHook', function loaderContextHookSetup(InternalsManager) {
     'use strict';
 
-    var GlobalAccessHook = InternalsManager.get('GlobalAccessHook'),
-        LoaderContextHook;
+    var GlobalAccessHook = InternalsManager.get('hooks/GlobalAccess'),
+        LoaderContext;
 
     /**
      * @param {JARS.internals.GlobalConfig} globalConfig
@@ -10,7 +10,7 @@ JARS.internal('LoaderContextHook', function(InternalsManager) {
      *
      * @return {string}
      */
-    LoaderContextHook = function(globalConfig, loaderContext) {
+    LoaderContext = function(globalConfig, loaderContext) {
         if (loaderContext !== globalConfig.get('loaderContext')) {
             GlobalAccessHook(globalConfig, globalConfig.get('globalAccess'));
         }
@@ -18,5 +18,5 @@ JARS.internal('LoaderContextHook', function(InternalsManager) {
         return loaderContext;
     };
 
-    return LoaderContextHook;
+    return LoaderContext;
 });
