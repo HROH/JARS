@@ -1,7 +1,7 @@
-JARS.internal('hooks/Debugging', function debuggingHookSetup(InternalsManager) {
+JARS.internal('hooks/Debugging', function debuggingHookSetup(getInternal) {
     'use strict';
 
-    var System = InternalsManager.get('System'),
+    var System = getInternal('System'),
         Debugging;
 
     /**

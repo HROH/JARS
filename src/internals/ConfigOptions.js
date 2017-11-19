@@ -1,11 +1,10 @@
-JARS.internal('ConfigOptions', function configOptionsSetup(InternalsManager) {
+JARS.internal('ConfigOptions', function configOptionsSetup(getInternal) {
     'use strict';
 
     var RE_DOT = /\./g,
         RE_STARTS_WITH_LOWERCASE = /^[a-z]/,
         DEFAULT_EXTENSION = 'js',
         SLASH = '/',
-        getInternal = InternalsManager.get,
         BundleResolver = getInternal('BundleResolver'),
         DependenciesResolver = getInternal('DependenciesResolver'),
         VersionResolver = getInternal('VersionResolver'),

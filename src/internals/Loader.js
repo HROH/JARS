@@ -1,8 +1,7 @@
-JARS.internal('Loader', function loaderSetup(InternalsManager) {
+JARS.internal('Loader', function loaderSetup(getInternal) {
     'use strict';
 
-    var getInternal = InternalsManager.get,
-        System = getInternal('System'),
+    var System = getInternal('System'),
         GlobalConfig = getInternal('GlobalConfig'),
         DependenciesResolver = getInternal('DependenciesResolver'),
         ModulesRegistry = getInternal('ModulesRegistry'),

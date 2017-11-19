@@ -1,8 +1,7 @@
-JARS.internal('Bundle', function bundleSetup(InternalsManager) {
+JARS.internal('Bundle', function bundleSetup(getInternal) {
     'use strict';
 
-    var getInternal = InternalsManager.get,
-        BundleAborter = getInternal('BundleAborter'),
+    var BundleAborter = getInternal('BundleAborter'),
         BundleResolver = getInternal('BundleResolver'),
         ModulesQueue = getInternal('ModulesQueue'),
         Config = getInternal('Config'),

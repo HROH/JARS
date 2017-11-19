@@ -1,8 +1,7 @@
-JARS.internal('AbsoluteResolutionStrategy', function absoluteResolutionStrategySetup(InternalsManager) {
+JARS.internal('AbsoluteResolutionStrategy', function absoluteResolutionStrategySetup(getInternal) {
     'use strict';
 
-    var getInternal = InternalsManager.get,
-        VersionResolver = getInternal('VersionResolver'),
+    var VersionResolver = getInternal('VersionResolver'),
         InterceptionResolver = getInternal('InterceptionResolver'),
         isRelative = getInternal('ResolutionHelpers').isRelative,
         MSG_VERSION_RESOLUTION_ERROR = 'a version must not be added when the parent is already versioned',

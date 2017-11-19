@@ -1,8 +1,7 @@
-JARS.internal('NestedResolutionStrategy', function nestedResolutionStrategySetup(InternalsManager) {
+JARS.internal('NestedResolutionStrategy', function nestedResolutionStrategySetup(getInternal) {
     'use strict';
 
-    var getInternal = InternalsManager.get,
-        logResolutionError = getInternal('ResolutionHelpers').logResolutionError,
+    var logResolutionError = getInternal('ResolutionHelpers').logResolutionError,
         resolveAbsolute = getInternal('AbsoluteResolutionStrategy'),
         DOT = '.',
         MSG_NESTED_RESOLUTION_ERROR = 'a nested modulename must contain "." only as a special symbol',

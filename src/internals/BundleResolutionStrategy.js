@@ -1,8 +1,7 @@
-JARS.internal('BundleResolutionStrategy', function bundleResolutionStrategySetup(InternalsManager) {
+JARS.internal('BundleResolutionStrategy', function bundleResolutionStrategySetup(getInternal) {
     'use strict';
 
-    var getInternal = InternalsManager.get,
-        logResolutionError = getInternal('ResolutionHelpers').logResolutionError,
+    var logResolutionError = getInternal('ResolutionHelpers').logResolutionError,
         AbsoluteResolutionStrategy = getInternal('AbsoluteResolutionStrategy'),
         MSG_BUNDLE_RESOLUTION_ERROR = 'a bundle modulename must not start with a "."';
 

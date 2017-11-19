@@ -1,8 +1,7 @@
-JARS.internal('Module', function moduleSetup(InternalsManager) {
+JARS.internal('Module', function moduleSetup(getInternal) {
     'use strict';
 
-    var getInternal = InternalsManager.get,
-        AutoAborter = getInternal('AutoAborter'),
+    var AutoAborter = getInternal('AutoAborter'),
         SourceManager = getInternal('SourceManager'),
         ModulesRegistry = getInternal('ModulesRegistry'),
         DependenciesResolver = getInternal('DependenciesResolver'),

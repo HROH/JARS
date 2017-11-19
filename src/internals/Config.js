@@ -1,8 +1,7 @@
-JARS.internal('Config', function configSetup(InternalsManager) {
+JARS.internal('Config', function configSetup(getInternal) {
     'use strict';
 
-    var getInternal = InternalsManager.get,
-        create = getInternal('Utils').create,
+    var create = getInternal('Utils').create,
         ConfigOptions = getInternal('ConfigOptions');
 
     /**

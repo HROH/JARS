@@ -1,7 +1,7 @@
-JARS.internal('transforms/ModuleConfig', function moduleConfigTransformSetup(InternalsManager) {
+JARS.internal('transforms/ModuleConfig', function moduleConfigTransformSetup(getInternal) {
     'use strict';
 
-    var objectMerge = InternalsManager.get('Utils').objectMerge,
+    var objectMerge = getInternal('Utils').objectMerge,
         ModuleConfig;
 
     /**

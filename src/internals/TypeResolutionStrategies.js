@@ -1,8 +1,7 @@
-JARS.internal('TypeResolutionStrategies', function typeResolutionStrategiesSetup(InternalsManager) {
+JARS.internal('TypeResolutionStrategies', function typeResolutionStrategiesSetup(getInternal) {
     'use strict';
 
-    var getInternal = InternalsManager.get,
-        System = getInternal('System'),
+    var System = getInternal('System'),
         ModulesRegistry = getInternal('ModulesRegistry'),
         NestedResolutionStrategy = getInternal('NestedResolutionStrategy'),
         Utils = getInternal('Utils'),

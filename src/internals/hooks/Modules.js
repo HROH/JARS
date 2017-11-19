@@ -1,8 +1,7 @@
-JARS.internal('hooks/Modules', function modulesHookSetup(InternalsManager) {
+JARS.internal('hooks/Modules', function modulesHookSetup(getInternal) {
     'use strict';
 
-    var getInternal = InternalsManager.get,
-        ModulesRegistry = getInternal('ModulesRegistry'),
+    var ModulesRegistry = getInternal('ModulesRegistry'),
         DependenciesResolver = getInternal('DependenciesResolver'),
         BundleResolver = getInternal('BundleResolver'),
         arrayEach = getInternal('Utils').arrayEach,

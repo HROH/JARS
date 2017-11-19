@@ -1,8 +1,7 @@
-JARS.internal('Dependencies', function dependenciesSetup(InternalsManager) {
+JARS.internal('Dependencies', function dependenciesSetup(getInternal) {
     'use strict';
 
-    var getInternal = InternalsManager.get,
-        DependenciesResolver = getInternal('DependenciesResolver'),
+    var DependenciesResolver = getInternal('DependenciesResolver'),
         DependenciesAborter = getInternal('DependenciesAborter'),
         DependenciesChecker = getInternal('DependenciesChecker'),
         ModulesQueue = getInternal('ModulesQueue'),

@@ -1,15 +1,12 @@
-JARS.internal('InternalBootstrapper', function internalBootstrapperSetup(InternalsManager) {
+JARS.internal('InternalBootstrapper', function internalBootstrapperSetup(getInternal) {
     'use strict';
-
-    var getInternal = InternalsManager.get,
-        InternalBootstrapper;
 
     /**
      * @namespace
      *
      * @memberof JARS.internals
      */
-    InternalBootstrapper = {
+    var InternalBootstrapper = {
         bootstrap: function() {
             var SourceManager = getInternal('SourceManager'),
                 ModulesRegistry = getInternal('ModulesRegistry'),

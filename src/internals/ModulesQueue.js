@@ -1,8 +1,7 @@
-JARS.internal('ModulesQueue', function modulesQueueSetup(InternalsManager) {
+JARS.internal('ModulesQueue', function modulesQueueSetup(getInternal) {
     'use strict';
 
-    var getInternal = InternalsManager.get,
-        arrayEach = getInternal('Utils').arrayEach,
+    var arrayEach = getInternal('Utils').arrayEach,
         ModulesRegistry = getInternal('ModulesRegistry'),
         BundleResolver = getInternal('BundleResolver'),
         Interception = getInternal('Interception'),

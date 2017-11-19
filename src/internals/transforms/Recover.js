@@ -1,7 +1,7 @@
-JARS.internal('transforms/Recover', function recoverTransformSetup(InternalsManager) {
+JARS.internal('transforms/Recover', function recoverTransformSetup(getInternal) {
     'use strict';
 
-    var objectMerge = InternalsManager.get('Utils').objectMerge,
+    var objectMerge = getInternal('Utils').objectMerge,
         Recover;
 
     /**

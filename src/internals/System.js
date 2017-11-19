@@ -1,7 +1,7 @@
-JARS.internal('System', function systemSetup(InternalsManager) {
+JARS.internal('System', function systemSetup(getInternal) {
     'use strict';
 
-    var Utils = InternalsManager.get('Utils'),
+    var Utils = getInternal('Utils'),
         hasOwnProp = Utils.hasOwnProp,
         envGlobal = (1,eval)('this'), // jshint ignore:line
         types = 'Null Undefined String Number Boolean Array Arguments Object Function Date RegExp'.split(' '),
@@ -25,7 +25,7 @@ JARS.internal('System', function systemSetup(InternalsManager) {
             global: envGlobal
         },
 
-        $$internals: InternalsManager,
+        $$internals: getInternal('InternalsManager'),
         /**
          * @param {string} typeDef
          *

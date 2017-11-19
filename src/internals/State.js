@@ -1,7 +1,7 @@
-JARS.internal('State', function stateSetup(InternalsManager) {
+JARS.internal('State', function stateSetup(getInternal) {
     'use strict';
 
-    var StateInfo = InternalsManager.get('StateInfo'),
+    var StateInfo = getInternal('StateInfo'),
         ATTEMPTED_TO = 'attempted to mark as ',
         BUT_CURRENTLY = ' but is currently ',
         DONE = 'is ',

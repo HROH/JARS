@@ -1,8 +1,7 @@
-JARS.internal('DependenciesResolutionStrategy', function dependenciesResolutionStrategySetup(InternalsManager) {
+JARS.internal('DependenciesResolutionStrategy', function dependenciesResolutionStrategySetup(getInternal) {
     'use strict';
 
-    var getInternal = InternalsManager.get,
-        ResolutionHelpers = getInternal('ResolutionHelpers'),
+    var ResolutionHelpers = getInternal('ResolutionHelpers'),
         AbsoluteResolutionStrategy = getInternal('AbsoluteResolutionStrategy'),
         RelativeResolutionStrategy = getInternal('RelativeResolutionStrategy'),
         MSG_DEPENDENCY_RESOLUTION_ERROR = 'a dependency modulename must be absolute or relative to the current module',

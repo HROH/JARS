@@ -121,7 +121,7 @@
                 object;
 
             if(internal){
-                object = internal.object || (internal.object = internal.factory(InternalsManager));
+                object = internal.object || (internal.object = internal.factory(InternalsManager.get));
             }
 
             return object;
@@ -139,6 +139,10 @@
                 }
             }
         }
+
+        internals.InternalsManager = {
+            object: InternalsManager
+        };
 
         return InternalsManager;
     })();

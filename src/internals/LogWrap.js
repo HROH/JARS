@@ -1,8 +1,7 @@
-JARS.internal('LogWrap', function logWrapSetup(InternalsManager) {
+JARS.internal('LogWrap', function logWrapSetup(getInternal) {
     'use strict';
 
-    var getInternal = InternalsManager.get,
-        System = getInternal('System');
+    var System = getInternal('System');
 
     /**
      * @class

@@ -1,9 +1,8 @@
-JARS.internal('Interception', function interceptionSetup(InternalsManager) {
+JARS.internal('Interception', function interceptionSetup(getInternal) {
     'use strict';
 
-    var getInternal = InternalsManager.get,
-        ModulesRegistry = getInternal('ModulesRegistry'),
-        DependenciesResolver = InternalsManager.get('DependenciesResolver'),
+    var ModulesRegistry = getInternal('ModulesRegistry'),
+        DependenciesResolver = getInternal('DependenciesResolver'),
         MSG_INTERCEPTION_ERROR = 'error in interception of this module by interceptor "${type}" with data "${data}"';
 
     /**

@@ -1,8 +1,7 @@
-JARS.internal('AutoAborter', function autoAborterSetup(InternalsManager) {
+JARS.internal('AutoAborter', function autoAborterSetup(getInternal) {
     'use strict';
 
-    var getInternal = InternalsManager.get,
-        Recoverer = getInternal('Recoverer'),
+    var Recoverer = getInternal('Recoverer'),
         global = getInternal('System').env.global,
         timeoutIDs = {},
         MILLISECONDS_PER_SECOND = 1000,

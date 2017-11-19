@@ -1,8 +1,7 @@
-JARS.internal('GlobalConfig', function globalConfigSetup(InternalsManager) {
+JARS.internal('GlobalConfig', function globalConfigSetup(getInternal) {
     'use strict';
 
-    var getInternal = InternalsManager.get,
-        System = getInternal('System'),
+    var System = getInternal('System'),
         arrayEach = getInternal('Utils').arrayEach,
         objectEach = getInternal('Utils').objectEach,
         hookKeys = ['debugging', 'environment', 'environments', 'globalAccess', 'interceptors', 'loaderContext', 'main', 'modules'],

@@ -1,7 +1,7 @@
-JARS.internal('Recoverer', function recovererSetup(InternalsManager) {
+JARS.internal('Recoverer', function recovererSetup(getInternal) {
     'use strict';
 
-    var objectMerge = InternalsManager.get('Utils').objectMerge,
+    var objectMerge = getInternal('Utils').objectMerge,
         nextRecoverConfigs = {},
         MSG_RECOVERING = 'failed to load and tries to recover...',
         Recoverer;

@@ -1,7 +1,7 @@
-JARS.internal('InterceptionResolver', function interceptionResolverSetup(InternalsManager) {
+JARS.internal('InterceptionResolver', function interceptionResolverSetup(getInternal) {
     'use strict';
 
-    var InterceptorRegistry = InternalsManager.get('InterceptorRegistry'),
+    var InterceptorRegistry = getInternal('InterceptorRegistry'),
         interceptionInfoCache = {},
         InterceptionResolver;
 

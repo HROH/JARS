@@ -1,8 +1,7 @@
-JARS.internal('ModulesRegistry', function modulesRegistrySetup(InternalsManager) {
+JARS.internal('ModulesRegistry', function modulesRegistrySetup(getInternal) {
     'use strict';
 
-    var getInternal = InternalsManager.get,
-        System = getInternal('System'),
+    var System = getInternal('System'),
         objectEach = getInternal('Utils').objectEach,
         modulesRegistry = {},
         ROOT_MODULE_NAME = '*',

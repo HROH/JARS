@@ -1,7 +1,7 @@
-JARS.internal('StateInfo', function stateInfoSetup(InternalsManager) {
+JARS.internal('StateInfo', function stateInfoSetup(getInternal) {
     'use strict';
 
-    var Utils = InternalsManager.get('Utils'),
+    var Utils = getInternal('Utils'),
         arrayEach = Utils.arrayEach,
         objectMerge = Utils.objectMerge,
         defaultLogMethods = {

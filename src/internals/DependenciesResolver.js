@@ -1,8 +1,7 @@
-JARS.internal('DependenciesResolver', function dependenciesResolverSetup(InternalsManager) {
+JARS.internal('DependenciesResolver', function dependenciesResolverSetup(getInternal) {
     'use strict';
 
-    var getInternal = InternalsManager.get,
-        resolveAny = getInternal('TypeResolutionStrategies').any,
+    var resolveAny = getInternal('TypeResolutionStrategies').any,
         DependenciesResolutionStrategy = getInternal('DependenciesResolutionStrategy'),
         VersionResolver = getInternal('VersionResolver'),
         DOT = '.',

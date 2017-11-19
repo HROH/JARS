@@ -1,8 +1,7 @@
-JARS.internal('ConfigTransforms', function configTransformsSetup(InternalsManager) {
+JARS.internal('ConfigTransforms', function configTransformsSetup(getInternal) {
     'use strict';
 
-    var getInternal = InternalsManager.get,
-        PathTransform = getInternal('transforms/Path'),
+    var PathTransform = getInternal('transforms/Path'),
         IdentityTransform = getInternal('transforms/Identity'),
         ConfigTransforms;
 

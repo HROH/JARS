@@ -1,8 +1,7 @@
-JARS.internal('BundleResolver', function bundleResolverSetup(InternalsManager) {
+JARS.internal('BundleResolver', function bundleResolverSetup(getInternal) {
     'use strict';
 
-    var getInternal = InternalsManager.get,
-        resolveArray = getInternal('TypeResolutionStrategies').array,
+    var resolveArray = getInternal('TypeResolutionStrategies').array,
         BundleResolutionStrategy = getInternal('BundleResolutionStrategy'),
         VersionResolver = getInternal('VersionResolver'),
         BUNDLE_SUFFIX = '.*',

@@ -1,8 +1,7 @@
-JARS.internal('PathListManager', function pathListManagerSetup(InternalsManager) {
+JARS.internal('PathListManager', function pathListManagerSetup(getInternal) {
     'use strict';
 
-    var getInternal = InternalsManager.get,
-        Utils = getInternal('Utils'),
+    var Utils = getInternal('Utils'),
         hasOwnProp = Utils.hasOwnProp,
         arrayEach = Utils.arrayEach,
         Loader = getInternal('Loader'),

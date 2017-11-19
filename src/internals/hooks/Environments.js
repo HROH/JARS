@@ -1,7 +1,7 @@
-JARS.internal('hooks/Environments', function environmentsHookSetup(InternalsManager) {
+JARS.internal('hooks/Environments', function environmentsHookSetup(getInternal) {
     'use strict';
 
-    var objectMerge = InternalsManager.get('Utils').objectMerge,
+    var objectMerge = getInternal('Utils').objectMerge,
         Environments;
 
     /**

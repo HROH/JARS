@@ -1,7 +1,7 @@
-JARS.internal('hooks/Main', function mainHookSetup(InternalsManager) {
+JARS.internal('hooks/Main', function mainHookSetup(getInternal) {
     'use strict';
 
-    var SourceManager = InternalsManager.get('SourceManager'),
+    var SourceManager = getInternal('SourceManager'),
         Main;
 
     /**

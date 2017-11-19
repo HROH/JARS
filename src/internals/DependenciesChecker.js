@@ -1,8 +1,7 @@
-JARS.internal('DependenciesChecker', function dependenciesCheckerSetup(InternalsManager) {
+JARS.internal('DependenciesChecker', function dependenciesCheckerSetup(getInternal) {
     'use strict';
 
-    var getInternal = InternalsManager.get,
-        ModulesRegistry = getInternal('ModulesRegistry'),
+    var ModulesRegistry = getInternal('ModulesRegistry'),
         DependenciesCollectorGetCircular = getInternal('DependenciesCollectorGetCircular'),
         DependenciesCollectorHasCircular = getInternal('DependenciesCollectorHasCircular'),
         Utils = getInternal('Utils'),

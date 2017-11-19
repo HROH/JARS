@@ -1,7 +1,7 @@
-JARS.internal('hooks/Interceptors', function interceptorsHookSetup(InternalsManager) {
+JARS.internal('hooks/Interceptors', function interceptorsHookSetup(getInternal) {
     'use strict';
 
-    var InterceptorRegistry = InternalsManager.get('InterceptorRegistry'),
+    var InterceptorRegistry = getInternal('InterceptorRegistry'),
         Interceptors;
 
     /**

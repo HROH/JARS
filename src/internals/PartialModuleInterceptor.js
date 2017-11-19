@@ -1,8 +1,8 @@
-JARS.internal('PartialModuleInterceptor', function partialModuleInterceptorSetup(InternalsManager) {
+JARS.internal('PartialModuleInterceptor', function partialModuleInterceptorSetup(getInternal) {
     'use strict';
 
     // TODO allow search for nested properties
-    var hasOwnProp = InternalsManager.get('Utils').hasOwnProp,
+    var hasOwnProp = getInternal('Utils').hasOwnProp,
         PartialModuleInterceptor;
 
     /**

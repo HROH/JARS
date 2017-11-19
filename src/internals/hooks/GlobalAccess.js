@@ -1,7 +1,7 @@
-JARS.internal('hooks/GlobalAccess', function globalAccessHookSetup(InternalsManager) {
+JARS.internal('hooks/GlobalAccess', function globalAccessHookSetup(getInternal) {
     'use strict';
 
-    var ModulesRegistry = InternalsManager.get('ModulesRegistry'),
+    var ModulesRegistry = getInternal('ModulesRegistry'),
         GlobalAccess;
 
     /**
@@ -13,7 +13,7 @@ JARS.internal('hooks/GlobalAccess', function globalAccessHookSetup(InternalsMana
     GlobalAccess = function(globalConfig, makeGlobal) {
         if (makeGlobal) {
             JARS.mods = ModulesRegistry.getRoot().ref;
-            JARS.internals = InternalsManager;
+            JARS.internals = getInternal('InternalsManager');
         }
         else {
             delete JARS.mods;
