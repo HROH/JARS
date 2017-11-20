@@ -1,9 +1,9 @@
-JARS.internal('TypeResolutionStrategies', function typeResolutionStrategiesSetup(getInternal) {
+JARS.internal('resolutionStrategies/Type', function typeResolutionStrategiesSetup(getInternal) {
     'use strict';
 
     var System = getInternal('System'),
         ModulesRegistry = getInternal('ModulesRegistry'),
-        NestedResolutionStrategy = getInternal('NestedResolutionStrategy'),
+        NestedResolutionStrategy = getInternal('resolutionStrategies/Nested'),
         Utils = getInternal('Utils'),
         objectEach = Utils.objectEach,
         arrayEach = Utils.arrayEach,

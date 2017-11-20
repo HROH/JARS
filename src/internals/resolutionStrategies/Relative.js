@@ -1,8 +1,8 @@
-JARS.internal('RelativeResolutionStrategy', function relativeResolutionStrategySetup(getInternal) {
+JARS.internal('resolutionStrategies/Relative', function relativeResolutionStrategySetup(getInternal) {
     'use strict';
 
     var isRelative = getInternal('ResolutionHelpers').isRelative,
-        AbsoluteResolutionStrategy = getInternal('AbsoluteResolutionStrategy');
+        AbsoluteResolutionStrategy = getInternal('resolutionStrategies/Absolute');
 
     /**
      * @memberof JARS.internals
