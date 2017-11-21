@@ -118,7 +118,8 @@
         };
 
         InternalsManager.registerGroup('hooks', ['Debugging', 'Environment', 'Environments', 'GlobalAccess', 'Interceptors', 'LoaderContext', 'Main', 'Modules']);
-        InternalsManager.registerGroup('resolutionStrategies', ['Absolute', 'Bundle', 'Dependencies', 'Nested', 'Relative', 'Type']);
+        InternalsManager.registerGroup('resolutionStrategies', ['Absolute', 'Bundle', 'Dependencies', 'Nested', 'Relative']);
+        InternalsManager.registerGroup('typeStrategies', ['Any', 'Array', 'Object', 'String', 'Undefined']);
         InternalsManager.registerGroup('transforms', ['Extension', 'File', 'Identity', 'Minify', 'ModuleConfig', 'Path', 'Recover', 'Timeout']);
 
         return InternalsManager;
