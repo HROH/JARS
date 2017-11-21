@@ -1,9 +1,7 @@
 (function globalSetup(envGlobal) {
     'use strict';
 
-    var InternalsManager, delegateToInternal, registerInternal, getInternal;
-
-    InternalsManager = (function internalsManagerSetup() {
+    var InternalsManager = (function internalsManagerSetup() {
         var internalsToLoad = [
                 'AutoAborter',
                 'Bundle',
@@ -37,55 +35,28 @@
                 'StateInfo',
                 'System',
                 'Utils',
-                'VersionResolver',
-                'hooks/Debugging',
-                'hooks/Environment',
-                'hooks/Environments',
-                'hooks/GlobalAccess',
-                'hooks/Interceptors',
-                'hooks/LoaderContext',
-                'hooks/Main',
-                'hooks/Modules',
-                'resolutionStrategies/Absolute',
-                'resolutionStrategies/Bundle',
-                'resolutionStrategies/Dependencies',
-                'resolutionStrategies/Nested',
-                'resolutionStrategies/Relative',
-                'resolutionStrategies/Type',
-                'transforms/Extension',
-                'transforms/File',
-                'transforms/Identity',
-                'transforms/Minify',
-                'transforms/ModuleConfig',
-                'transforms/Path',
-                'transforms/Recover',
-                'transforms/Timeout',
+                'VersionResolver'
             ],
-            internalsLoading = internalsToLoad.length + 1,
-            internalsInitialized = false,
-            internalsReady = false,
             internals = {},
-            readyCallbacks = [],
-            InternalsManager;
+            callbacks = [],
+            internalsLoading, InternalsManager;
 
         InternalsManager = {
             createDelegate: function(internalName, methodName, returnFn) {
                 return function internalDelegator() {
                     var args = Array.prototype.slice.call(arguments);
 
-                    function readyCallback() {
-                        var internal = getInternal(internalName);
+                    function callback() {
+                        var internal = InternalsManager.get(internalName);
 
                         internal[methodName].apply(internal, args);
                     }
 
-                    if(!internalsReady) {
-                        initializeInternals();
-
-                        readyCallbacks.push(readyCallback);
+                    if(internalsLoading !== 0) {
+                        callbacks.push(callback);
                     }
                     else {
-                        readyCallback();
+                        callback();
                     }
 
                     return returnFn && returnFn.apply(null, args);
@@ -99,59 +70,61 @@
 
                 if(!internal.loaded) {
                     internal.loaded = true;
-                    --internalsLoading || setupInternals();
+
+                    if(internalsToLoad.indexOf(internalName) != -1 && --internalsLoading === 0) {
+                        InternalsManager.get('InternalBootstrapper').bootstrap();
+
+                        while(callbacks.length) {
+                            callbacks.shift()();
+                        }
+                    }
                 }
             },
 
-            get: getInternal
-        };
+            registerGroup: function (groupName, group) {
+                var length = group.length,
+                    index;
 
-        function setupInternals() {
-            getInternal('InternalBootstrapper').bootstrap();
+                for(index = 0; index < length; index++) {
+                    internalsToLoad.push(groupName + '/' + group[index]);
+                }
+            },
 
-            while(readyCallbacks.length) {
-                readyCallbacks.shift()();
-            }
+            get: function (internalName) {
+                var internal = internals[internalName],
+                    object;
 
-            internalsReady = true;
-        }
+                if(internal){
+                    object = internal.object || (internal.object = internal.factory(InternalsManager.get));
+                }
 
-        function getInternal(internalName) {
-            var internal = internals[internalName],
-                object;
+                return object;
+            },
 
-            if(internal){
-                object = internal.object || (internal.object = internal.factory(InternalsManager.get));
-            }
+            initialize: function() {
+                var SourceManager = InternalsManager.get('SourceManager'),
+                    index;
 
-            return object;
-        }
+                internalsLoading = internalsToLoad.length;
 
-        function initializeInternals() {
-            var SourceManager = getInternal('SourceManager'),
-                index;
-
-            if(!internalsInitialized) {
-                internalsInitialized = true;
+                InternalsManager.register('InternalsManager', function() {
+                    return InternalsManager;
+                });
 
                 for(index = 0; index < internalsLoading; index++) {
                     SourceManager.loadSource('internal:' + internalsToLoad[index], SourceManager.INTERNALS_PATH + internalsToLoad[index] + '.js');
                 }
             }
-        }
-
-        internals.InternalsManager = {
-            object: InternalsManager
         };
+
+        InternalsManager.registerGroup('hooks', ['Debugging', 'Environment', 'Environments', 'GlobalAccess', 'Interceptors', 'LoaderContext', 'Main', 'Modules']);
+        InternalsManager.registerGroup('resolutionStrategies', ['Absolute', 'Bundle', 'Dependencies', 'Nested', 'Relative', 'Type']);
+        InternalsManager.registerGroup('transforms', ['Extension', 'File', 'Identity', 'Minify', 'ModuleConfig', 'Path', 'Recover', 'Timeout']);
 
         return InternalsManager;
     })();
 
-    delegateToInternal = InternalsManager.createDelegate;
-    registerInternal = InternalsManager.register;
-    getInternal = InternalsManager.get;
-
-    registerInternal('SourceManager', function sourceManagerSetup() {
+    InternalsManager.register('SourceManager', function sourceManagerSetup() {
         var doc = envGlobal.document,
             head = doc.getElementsByTagName('head')[0],
             jarsScript = getSelfScript(),
@@ -200,8 +173,12 @@
         return SourceManager;
     });
 
+    InternalsManager.initialize();
+
     envGlobal.JARS = (function jarsSetup() {
-        var mainCounter = 0,
+        var delegateToInternal = InternalsManager.createDelegate,
+            registerInternal = InternalsManager.register,
+            mainCounter = 0,
             delegatedLoaderImport = delegateToInternal('Loader', '$import'),
             previousJARS = envGlobal.JARS,
             JARS;
@@ -232,7 +209,7 @@
                     ModuleWrapper;
 
                 registerInternal(dynamicInternalName, function internalModuleSetup() {
-                    return getInternal('ModulesRegistry').get(moduleName);
+                    return InternalsManager.get('ModulesRegistry').get(moduleName);
                 });
 
                 ModuleWrapper = {
@@ -294,7 +271,7 @@
     })();
 
     (function bootstrapJARS() {
-        var SourceManager = getInternal('SourceManager'),
+        var SourceManager = InternalsManager.get('SourceManager'),
             main = SourceManager.MAIN_FILE,
             config = envGlobal.jarsConfig || main && {};
 
