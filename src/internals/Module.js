@@ -60,8 +60,8 @@ JARS.internal('Module', function moduleSetup(getInternal) {
             var module = this,
                 config = module.config,
                 cache = config.get('cache') ? '' : '?_=' + new Date().getTime(),
-                path = [config.get('basePath'), config.get('dirPath'), config.get('versionDir')].join(''),
-                fileName = [config.get('fileName'), config.get('minified'), (fileType || config.get('extension')), cache].join('');
+                path = [config.get('basePath'), config.get('dirPath'), config.get('versionPath')].join(''),
+                fileName = [config.get('fileName'), config.get('minify'), (fileType || config.get('extension')), cache].join('');
 
             return path + fileName;
         },
@@ -104,32 +104,36 @@ JARS.internal('Module', function moduleSetup(getInternal) {
          */
         $export: function(factory) {
             var module = this,
-                state = module.state,
-                moduleName = module.name,
-                parentRef;
+                state = module.state;
 
             if (state.setRegistered()) {
                 AutoAborter.clear(module);
 
                 module.deps.request(function onDependenciesLoaded(dependencyRefs) {
                     if (state.setLoaded()) {
-                        if(module.isRoot) {
-                            module.ref = {};
-                        }
-                        else {
-                            parentRef = dependencyRefs.shift();
-
-                            ModulesRegistry.setCurrent(module);
-
-                            module.ref = parentRef[DependenciesResolver.removeParentName(moduleName)] = factory ? factory.apply(parentRef, dependencyRefs) || {} : {};
-
-                            ModulesRegistry.setCurrent();
-                        }
+                        setModuleRef(module, dependencyRefs, factory);
                     }
                 });
             }
         }
     };
+
+    function setModuleRef(module, dependencyRefs, factory) {
+        var parentRef;
+
+        if(module.isRoot) {
+            module.ref = {};
+        }
+        else {
+            parentRef = dependencyRefs.shift();
+
+            ModulesRegistry.setCurrent(module);
+
+            module.ref = parentRef[DependenciesResolver.removeParentName(module.name)] = (factory && factory.apply(parentRef, dependencyRefs)) || {};
+
+            ModulesRegistry.setCurrent();
+        }
+    }
 
     return Module;
 });

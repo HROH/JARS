@@ -20,7 +20,7 @@ JARS.internal('InternalBootstrapper', function internalBootstrapperSetup(getInte
 
                     cache: true,
 
-                    minified: false,
+                    minify: false,
 
                     timeout: 5
                 }, {
@@ -35,8 +35,6 @@ JARS.internal('InternalBootstrapper', function internalBootstrapperSetup(getInte
                 ],
 
                 globalAccess: false,
-
-                supressErrors: false,
 
                 loaderContext: 'default'
             });

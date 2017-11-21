@@ -12,8 +12,13 @@ JARS.internal('ConfigOptions', function configOptionsSetup(getInternal) {
         create = Utils.create,
         hasOwnProp = Utils.hasOwnProp,
         objectEach = Utils.objectEach,
-        ConfigTransforms = getInternal('ConfigTransforms'),
-        System = getInternal('System');
+        optionKeys = ['basePath', 'cache', 'checkCircularDeps', 'config', 'dirPath', 'extension', 'fileName', 'minify', 'recover', 'timeout', 'versionPath'],
+        System = getInternal('System'),
+        configTransforms = {};
+
+    Utils.arrayEach(optionKeys, function(key) {
+        configTransforms[key] = getInternal('transforms/' + key.charAt(0).toUpperCase() + key.substr(1));
+    });
 
     /**
      * @class
@@ -55,7 +60,7 @@ JARS.internal('ConfigOptions', function configOptionsSetup(getInternal) {
 
                 dirPath: VersionResolver.removeVersion(RE_STARTS_WITH_LOWERCASE.test(fileName) ? moduleOrBundleName : DependenciesResolver.getParentName(moduleOrBundleName)).replace(RE_DOT, SLASH),
 
-                versionDir: VersionResolver.getVersion(moduleOrBundleName)
+                versionPath: VersionResolver.getVersion(moduleOrBundleName)
             }, moduleOrBundle);
         }
 
@@ -71,7 +76,7 @@ JARS.internal('ConfigOptions', function configOptionsSetup(getInternal) {
      */
     ConfigOptions.transformAndUpdate = function(configOptions, options, moduleOrBundle) {
         objectEach(options, function updateConfig(value, option) {
-            if (hasOwnProp(ConfigTransforms, option)) {
+            if (hasOwnProp(configTransforms, option)) {
                 updateOption(configOptions, option, transformOption(option, value, moduleOrBundle));
             }
         });
@@ -88,7 +93,7 @@ JARS.internal('ConfigOptions', function configOptionsSetup(getInternal) {
      * @return {*}
      */
     function transformOption(option, value, moduleOrBundle) {
-        var transform = ConfigTransforms[option];
+        var transform = configTransforms[option];
 
         return System.getType(value) === transform.type ? transform.transform(value, moduleOrBundle) : null;
     }

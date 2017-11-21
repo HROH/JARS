@@ -9,7 +9,6 @@
                 'BundleResolver',
                 'Config',
                 'ConfigOptions',
-                'ConfigTransforms',
                 'Dependencies',
                 'DependenciesAborter',
                 'DependenciesChecker',
@@ -120,7 +119,7 @@
         InternalsManager.registerGroup('hooks', ['Debugging', 'Environment', 'Environments', 'GlobalAccess', 'Interceptors', 'LoaderContext', 'Main', 'Modules']);
         InternalsManager.registerGroup('resolutionStrategies', ['Absolute', 'Bundle', 'Dependencies', 'Nested', 'Relative']);
         InternalsManager.registerGroup('typeStrategies', ['Any', 'Array', 'Object', 'String', 'Undefined']);
-        InternalsManager.registerGroup('transforms', ['Extension', 'File', 'Identity', 'Minify', 'ModuleConfig', 'Path', 'Recover', 'Timeout']);
+        InternalsManager.registerGroup('transforms', ['BasePath', 'Cache', 'CheckCircularDeps', 'Config', 'DirPath', 'Extension', 'FileName', 'Identity', 'Minify', 'Path', 'Recover', 'Timeout', 'VersionPath']);
 
         return InternalsManager;
     })();
