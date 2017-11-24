@@ -34,11 +34,16 @@
                 'StateInfo',
                 'System',
                 'Utils',
-                'VersionResolver'
+                'VersionResolver',
+                'hooks',
+                'resolutionStrategies',
+                'transforms',
+                'typeStrategies'
             ],
             internals = {},
             callbacks = [],
-            internalsLoading, InternalsManager;
+            internalsLoading = internalsToLoad.length,
+            InternalsManager;
 
         InternalsManager = {
             createDelegate: function(internalName, methodName, returnFn) {
@@ -81,12 +86,31 @@
             },
 
             registerGroup: function (groupName, group) {
-                var length = group.length,
-                    index;
+                var SourceManager = InternalsManager.get('SourceManager'),
+                    groupLength = group.length,
+                    internalNames = [],
+                    index, internalName;
 
-                for(index = 0; index < length; index++) {
-                    internalsToLoad.push(groupName + '/' + group[index]);
+                for(index = 0; index < groupLength; index++) {
+                    internalName = groupName + '/' + group[index];
+                    internalNames.push(internalName);
+                    SourceManager.loadInternal(internalName);
                 }
+
+                internalsToLoad = internalsToLoad.concat(internalNames);
+                internalsLoading += groupLength;
+
+                InternalsManager.register(groupName, function(getInternal) {
+                    var result = {},
+                        key;
+
+                    for(index = 0; index < groupLength; index++) {
+                        key = group[index];
+                        result[key.charAt(0).toLowerCase() + key.substr(1)] = getInternal(internalNames[index]);
+                    }
+
+                    return result;
+                });
             },
 
             get: function (internalName) {
@@ -104,22 +128,15 @@
                 var SourceManager = InternalsManager.get('SourceManager'),
                     index;
 
-                internalsLoading = internalsToLoad.length;
-
                 InternalsManager.register('InternalsManager', function() {
                     return InternalsManager;
                 });
 
                 for(index = 0; index < internalsLoading; index++) {
-                    SourceManager.loadSource('internal:' + internalsToLoad[index], SourceManager.INTERNALS_PATH + internalsToLoad[index] + '.js');
+                    SourceManager.loadInternal(internalsToLoad[index]);
                 }
             }
         };
-
-        InternalsManager.registerGroup('hooks', ['Debugging', 'Environment', 'Environments', 'GlobalAccess', 'Interceptors', 'LoaderContext', 'Main', 'Modules']);
-        InternalsManager.registerGroup('resolutionStrategies', ['Absolute', 'Bundle', 'Dependencies', 'Nested', 'Relative']);
-        InternalsManager.registerGroup('typeStrategies', ['Any', 'Array', 'Object', 'String', 'Undefined']);
-        InternalsManager.registerGroup('transforms', ['BasePath', 'Cache', 'CheckCircularDeps', 'Config', 'DirPath', 'Extension', 'FileName', 'Identity', 'Minify', 'Path', 'Recover', 'Timeout', 'VersionPath']);
 
         return InternalsManager;
     })();
@@ -155,6 +172,10 @@
                 script.type = 'text/javascript';
                 script.src = path;
                 script.async = true;
+            },
+
+            loadInternal: function(internalName) {
+                SourceManager.loadSource('internal:' + internalName, SourceManager.INTERNALS_PATH + internalName + '.js');
             }
         };
 
@@ -231,6 +252,8 @@
             },
 
             internal: registerInternal,
+
+            internalGroup: InternalsManager.registerGroup,
 
             configure: delegateToInternal('GlobalConfig', 'update', getJARS),
 

@@ -12,13 +12,8 @@ JARS.internal('ConfigOptions', function configOptionsSetup(getInternal) {
         create = Utils.create,
         hasOwnProp = Utils.hasOwnProp,
         objectEach = Utils.objectEach,
-        optionKeys = ['basePath', 'cache', 'checkCircularDeps', 'config', 'dirPath', 'extension', 'fileName', 'minify', 'recover', 'timeout', 'versionPath'],
         System = getInternal('System'),
-        configTransforms = {};
-
-    Utils.arrayEach(optionKeys, function(key) {
-        configTransforms[key] = getInternal('transforms/' + key.charAt(0).toUpperCase() + key.substr(1));
-    });
+        configTransforms = getInternal('transforms');
 
     /**
      * @class

@@ -2,18 +2,14 @@ JARS.internal('GlobalConfig', function globalConfigSetup(getInternal) {
     'use strict';
 
     var System = getInternal('System'),
-        arrayEach = getInternal('Utils').arrayEach,
-        objectEach = getInternal('Utils').objectEach,
-        hookKeys = ['debugging', 'environment', 'environments', 'globalAccess', 'interceptors', 'loaderContext', 'main', 'modules'],
-        globalConfigHooks = {},
+        Utils = getInternal('Utils'),
+        arrayEach = Utils.arrayEach,
+        objectEach = Utils.objectEach,
+        globalConfigHooks = getInternal('hooks'),
         globalConfig = {
             environments: {}
         },
         GlobalConfig;
-
-        arrayEach(hookKeys, function(hookKey) {
-            globalConfigHooks[hookKey] = getInternal('hooks/' + hookKey.charAt(0).toUpperCase() + hookKey.substr(1));
-        });
 
     /**
      * @namespace
