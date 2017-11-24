@@ -6,7 +6,6 @@ JARS.internalGroup('transforms', [
     'DirPath',
     'Extension',
     'FileName',
-    'Identity',
     'Minify',
     'Path',
     'Recover',

@@ -1,5 +1,20 @@
-JARS.internal('transforms/CheckCircularDeps', function(getInternal) {
+JARS.internal('transforms/CheckCircularDeps', function() {
     'use strict';
 
-    return getInternal('transforms/Identity');
+    /**
+     * @memberof JARS.internals
+     */
+    var CheckCircularDeps = {
+        type: 'boolean',
+        /**
+         * @param {*} value
+         *
+         * @return {*}
+         */
+        transform: function(checkCircularDeps) {
+            return checkCircularDeps;
+        }
+    };
+
+    return CheckCircularDeps;
 });

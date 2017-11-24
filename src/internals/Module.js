@@ -10,6 +10,7 @@ JARS.internal('Module', function moduleSetup(getInternal) {
         Config = getInternal('Config'),
         LogWrap = getInternal('LogWrap'),
         State = getInternal('State'),
+        arrayEach = getInternal('Utils').arrayEach,
         LOG_CONTEXT_PREFIX = 'Module:';
 
     /**
@@ -52,18 +53,20 @@ JARS.internal('Module', function moduleSetup(getInternal) {
     Module.prototype = {
         constructor: Module,
         /**
-         * @param {string} [fileType]
+         * @param {string} [extension]
          *
          * @return {string}
          */
-        getFullPath: function(fileType) {
+        getFullPath: function(extension) {
             var module = this,
                 config = module.config,
-                cache = config.get('cache') ? '' : '?_=' + new Date().getTime(),
-                path = [config.get('basePath'), config.get('dirPath'), config.get('versionPath')].join(''),
-                fileName = [config.get('fileName'), config.get('minify'), (fileType || config.get('extension')), cache].join('');
+                path = '';
 
-            return path + fileName;
+            arrayEach(['basePath', 'dirPath', 'versionPath', 'fileName', 'minify', 'extension', 'cache'], function(option) {
+                path += (option === 'extension' && extension) ? extension : config.get(option);
+            });
+
+            return path;
         },
 
         load: function() {
