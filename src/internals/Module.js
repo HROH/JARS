@@ -32,18 +32,18 @@ JARS.internal('Module', function moduleSetup(getInternal) {
      */
     function Module(moduleName, isRoot) {
         var module = this,
-            dependencies, bundleConfig, logger, state, parent;
+            bundleConfig, parent;
 
         module.name = moduleName;
         module.isRoot = isRoot || false;
 
-        module.logger = logger = new LogWrap(LOG_CONTEXT_PREFIX + moduleName);
-        module.state = state = new State(moduleName, logger);
+        module.logger = new LogWrap(LOG_CONTEXT_PREFIX + moduleName);
+        module.state = new State(moduleName, module.logger);
 
-        module.deps = dependencies = new Dependencies(module);
+        module.deps = new Dependencies(module);
         module.interceptionDeps = new Dependencies(module, true);
 
-        parent = dependencies.parent;
+        parent = module.deps.parent;
         module.bundle = new Bundle(module, parent && parent.bundle.config);
         bundleConfig = module.bundle.config;
         module.config = isRoot ? bundleConfig : new Config(module, bundleConfig);
