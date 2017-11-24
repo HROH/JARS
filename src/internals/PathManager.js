@@ -4,10 +4,10 @@ JARS.internal('PathManager', function pathListManagerSetup(getInternal) {
     var Utils = getInternal('Utils'),
         hasOwnProp = Utils.hasOwnProp,
         arrayEach = Utils.arrayEach,
-        Loader = getInternal('Loader'),
         ModulesRegistry = getInternal('ModulesRegistry'),
         BundleResolver = getInternal('BundleResolver'),
-        excludedModules = [ModulesRegistry.getRoot().name, 'System', 'System.Logger', 'System.Modules'],
+        ExtensionTransform = getInternal('transforms/Extension'),
+        pathOptions = ['basePath', 'dirPath', 'versionPath', 'fileName', 'minify', 'extension', 'cache'],
         sortedModules = {},
         pathList = [],
         PathManager;
@@ -43,7 +43,7 @@ JARS.internal('PathManager', function pathListManagerSetup(getInternal) {
             });
 
             if (modulesLoading) {
-                Loader.$import(modulesToLoad, function computeSortedPathList() {
+                getInternal('Loader').$import(modulesToLoad, function computeSortedPathList() {
                     PathManager.computeSortedPathList(callback, forceRecompute);
                 });
             }
@@ -56,6 +56,22 @@ JARS.internal('PathManager', function pathListManagerSetup(getInternal) {
 
                 callback(pathList);
             }
+        },
+        /**
+         * @param {JARS.internals.Module} [module]
+         * @param {string} [extension]
+         *
+         * @return {string}
+         */
+        getFullPath: function(module, extension) {
+            var config = module.config,
+                path = '';
+
+            arrayEach(pathOptions, function(option) {
+                path += (option === 'extension' && extension) ? ExtensionTransform.transform(extension) : config.get(option);
+            });
+
+            return path;
         }
     };
 
@@ -86,7 +102,7 @@ JARS.internal('PathManager', function pathListManagerSetup(getInternal) {
             if (!hasOwnProp(sortedModules, moduleName)) {
                 addModules(dependencies);
 
-                pathList.push(module.getFullPath());
+                pathList.push(PathManager.getFullPath(module));
                 sortedModules[moduleName] = true;
             }
 
@@ -104,7 +120,7 @@ JARS.internal('PathManager', function pathListManagerSetup(getInternal) {
         pathList = [];
         sortedModules = {};
 
-        arrayEach(excludedModules, function markModuleSorted(excludedModule) {
+        arrayEach([ModulesRegistry.getRoot().name, 'System', 'System.Logger', 'System.Modules'], function markModuleSorted(excludedModule) {
             sortedModules[excludedModule] = true;
         });
     }

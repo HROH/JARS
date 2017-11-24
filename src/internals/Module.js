@@ -10,7 +10,7 @@ JARS.internal('Module', function moduleSetup(getInternal) {
         Config = getInternal('Config'),
         LogWrap = getInternal('LogWrap'),
         State = getInternal('State'),
-        arrayEach = getInternal('Utils').arrayEach,
+        PathManager = getInternal('PathManager'),
         LOG_CONTEXT_PREFIX = 'Module:';
 
     /**
@@ -52,26 +52,10 @@ JARS.internal('Module', function moduleSetup(getInternal) {
 
     Module.prototype = {
         constructor: Module,
-        /**
-         * @param {string} [extension]
-         *
-         * @return {string}
-         */
-        getFullPath: function(extension) {
-            var module = this,
-                config = module.config,
-                path = '';
-
-            arrayEach(['basePath', 'dirPath', 'versionPath', 'fileName', 'minify', 'extension', 'cache'], function(option) {
-                path += (option === 'extension' && extension) ? extension : config.get(option);
-            });
-
-            return path;
-        },
 
         load: function() {
             var module = this,
-                path = module.getFullPath();
+                path = PathManager.getFullPath(module);
 
             AutoAborter.setup(module, path);
 

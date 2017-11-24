@@ -3,6 +3,7 @@ JARS.internal('Interception', function interceptionSetup(getInternal) {
 
     var ModulesRegistry = getInternal('ModulesRegistry'),
         DependenciesResolver = getInternal('DependenciesResolver'),
+        PathManager = getInternal('PathManager'),
         MSG_INTERCEPTION_ERROR = 'error in interception of this module by interceptor "${type}" with data "${data}"';
 
     /**
@@ -34,7 +35,7 @@ JARS.internal('Interception', function interceptionSetup(getInternal) {
         getFilePath: function(fileType) {
             var listeningModule = this.listeningModule;
 
-            return !listeningModule.isRoot && listeningModule.getFullPath(fileType);
+            return !listeningModule.isRoot && PathManager.getFullPath(listeningModule, fileType);
         },
         /**
          * @param {JARS.internals.Dependencies.Declaration} moduleNames
