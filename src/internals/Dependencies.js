@@ -6,15 +6,7 @@ JARS.internal('Dependencies', function dependenciesSetup(getInternal) {
         DependenciesChecker = getInternal('DependenciesChecker'),
         ModulesQueue = getInternal('ModulesQueue'),
         ModulesRegistry = getInternal('ModulesRegistry'),
-        LogWrap = getInternal('LogWrap'),
-        SEPARATOR = '", "',
-        LOG_CONTEXT_PREFIX = 'Dependencies:',
-        FOUND = 'found ',
-        EXPLICIT_DEPENDENCIES = 'explicit',
-        INTERCEPTION_DEPENDENCIES = 'interception',
-        DEPENDENCIES = ' dependencie(s) "${deps}"',
-        MSG_DEPENDENCY_FOUND = FOUND + 'implicit dependency "${dep}"',
-        MSG_DEPENDENCIES_FOUND = FOUND + '${kind}' + DEPENDENCIES;
+        DependenciesLogger = getInternal('DependenciesLogger');
 
     /**
      * @class
@@ -22,26 +14,21 @@ JARS.internal('Dependencies', function dependenciesSetup(getInternal) {
      * @memberof JARS.internals
      *
      * @param {JARS.internals.Module} module
-     * @param {boolean} [isInterceptionDeps=false]
+     * @param {boolean} [forInterceptionDeps=false]
      */
-    function Dependencies(module, isInterceptionDeps) {
+    function Dependencies(module, forInterceptionDeps) {
         var dependencies = this,
             parentName;
 
-        dependencies._isInterceptionDeps = isInterceptionDeps;
         dependencies._module = module;
-        dependencies._logger = new LogWrap(LOG_CONTEXT_PREFIX + module.name);
+        dependencies._logger = new DependenciesLogger(module, forInterceptionDeps);
         dependencies._deps = [];
 
         if(!module.isRoot) {
             parentName = DependenciesResolver.getParentName(module.name);
             dependencies.parent = parentName ? ModulesRegistry.get(parentName) : ModulesRegistry.getRoot();
 
-            if(parentName && !isInterceptionDeps) {
-                dependencies._logger.debug(MSG_DEPENDENCY_FOUND, {
-                    dep: parentName
-                });
-            }
+            dependencies._logger.debugParentDependency(parentName);
         }
     }
 
@@ -78,11 +65,7 @@ JARS.internal('Dependencies', function dependenciesSetup(getInternal) {
             if(DependenciesChecker.hasCircular(module)) {
                 DependenciesAborter.abortByCircularDeps(module, DependenciesChecker.getCircular(module));
             } else {
-                dependencyModules.length && dependencies._logger.debug(MSG_DEPENDENCIES_FOUND, {
-                    kind: dependencies._isInterceptionDeps ? INTERCEPTION_DEPENDENCIES : EXPLICIT_DEPENDENCIES,
-
-                    deps: dependencyModules.join(SEPARATOR)
-                });
+                this._logger.debugDependencies(dependencyModules);
 
                 new ModulesQueue(module, dependencies.getAll()).request(onModulesLoaded, DependenciesAborter.abortByDependency);
             }

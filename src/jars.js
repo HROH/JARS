@@ -14,6 +14,7 @@
                 'DependenciesChecker',
                 'DependenciesCollectorGetCircular',
                 'DependenciesCollectorHasCircular',
+                'DependenciesLogger',
                 'DependenciesResolver',
                 'GlobalConfig',
                 'Interception',
