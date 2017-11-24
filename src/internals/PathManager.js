@@ -1,4 +1,4 @@
-JARS.internal('PathListManager', function pathListManagerSetup(getInternal) {
+JARS.internal('PathManager', function pathListManagerSetup(getInternal) {
     'use strict';
 
     var Utils = getInternal('Utils'),
@@ -10,14 +10,14 @@ JARS.internal('PathListManager', function pathListManagerSetup(getInternal) {
         excludedModules = [ModulesRegistry.getRoot().name, 'System', 'System.Logger', 'System.Modules'],
         sortedModules = {},
         pathList = [],
-        PathListManager;
+        PathManager;
 
     /**
      * @namespace
      *
      * @memberof JARS.internals
      */
-    PathListManager = {
+    PathManager = {
         /**
          * <p>Computes an array of paths for all the loaded modules
          * in the order they are dependending on each other.
@@ -44,7 +44,7 @@ JARS.internal('PathListManager', function pathListManagerSetup(getInternal) {
 
             if (modulesLoading) {
                 Loader.$import(modulesToLoad, function computeSortedPathList() {
-                    PathListManager.computeSortedPathList(callback, forceRecompute);
+                    PathManager.computeSortedPathList(callback, forceRecompute);
                 });
             }
             else {
@@ -60,7 +60,7 @@ JARS.internal('PathListManager', function pathListManagerSetup(getInternal) {
     };
 
     /**
-     * @memberof JARS.internals.PathListManager
+     * @memberof JARS.internals.PathManager
      * @inner
      *
      * @param {string[]} [modules = []]
@@ -72,7 +72,7 @@ JARS.internal('PathListManager', function pathListManagerSetup(getInternal) {
     }
 
     /**
-     * @memberof JARS.internals.PathListManager
+     * @memberof JARS.internals.PathManager
      * @inner
      *
      * @param {JARS.internals.Module} module
@@ -97,7 +97,7 @@ JARS.internal('PathListManager', function pathListManagerSetup(getInternal) {
     }
 
     /**
-     * @memberof JARS.internals.PathListManager
+     * @memberof JARS.internals.PathManager
      * @inner
      */
     function resetModulesPathList() {
@@ -109,5 +109,5 @@ JARS.internal('PathListManager', function pathListManagerSetup(getInternal) {
         });
     }
 
-    return PathListManager;
+    return PathManager;
 });

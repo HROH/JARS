@@ -27,7 +27,7 @@
                 'ModulesQueue',
                 'ModulesRegistry',
                 'PartialModuleInterceptor',
-                'PathListManager',
+                'PathManager',
                 'PluginInterceptor',
                 'Recoverer',
                 'ResolutionHelpers',
@@ -258,7 +258,7 @@
 
             configure: delegateToInternal('GlobalConfig', 'update', getJARS),
 
-            computeSortedPathList: delegateToInternal('PathListManager', 'computeSortedPathList', getJARS),
+            computeSortedPathList: delegateToInternal('PathManager', 'computeSortedPathList', getJARS),
 
             flush: delegateToInternal('Loader', 'flush', getJARS),
             /**
