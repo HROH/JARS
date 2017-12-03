@@ -42,26 +42,21 @@
                 'typeStrategies'
             ],
             internals = {},
-            callbacks = [],
+            commands = [],
             internalsLoading = internalsToLoad.length,
             InternalsManager;
 
         InternalsManager = {
-            createDelegate: function(internalName, methodName, returnFn) {
+            delegate: function(internalName, methodName, returnFn) {
                 return function internalDelegator() {
-                    var args = Array.prototype.slice.call(arguments);
-
-                    function callback() {
-                        var internal = InternalsManager.get(internalName);
-
-                        internal[methodName].apply(internal, args);
-                    }
+                    var args = Array.prototype.slice.call(arguments),
+                        command = [internalName, methodName, args];
 
                     if(internalsLoading !== 0) {
-                        callbacks.push(callback);
+                        commands.push(command);
                     }
                     else {
-                        callback();
+                        InternalsManager.get('InternalBootstrapper').run(command);
                     }
 
                     return returnFn && returnFn.apply(null, args);
@@ -77,31 +72,26 @@
                     internal.loaded = true;
 
                     if(internalsToLoad.indexOf(internalName) != -1 && --internalsLoading === 0) {
-                        InternalsManager.get('InternalBootstrapper').bootstrap();
-
-                        while(callbacks.length) {
-                            callbacks.shift()();
-                        }
+                        InternalsManager.get('InternalBootstrapper').bootstrap(commands);
                     }
                 }
             },
 
             registerGroup: function (groupName, group) {
-                var SourceManager = InternalsManager.get('SourceManager'),
-                    groupLength = group.length,
+                var groupLength = group.length,
                     internalNames = [],
                     index, internalName;
 
                 for(index = 0; index < groupLength; index++) {
                     internalName = groupName + '/' + group[index];
                     internalNames.push(internalName);
-                    SourceManager.loadInternal(internalName);
+                    InternalsManager.load(internalName);
                 }
 
                 internalsToLoad = internalsToLoad.concat(internalNames);
                 internalsLoading += groupLength;
 
-                InternalsManager.register(groupName, function(getInternal) {
+                InternalsManager.register(groupName, function internalGroupSetup(getInternal) {
                     var result = {},
                         key;
 
@@ -125,16 +115,19 @@
                 return object;
             },
 
-            initialize: function() {
-                var SourceManager = InternalsManager.get('SourceManager'),
-                    index;
+            load: function(internalName) {
+                InternalsManager.get('SourceManager').load('internal:' + internalName, InternalsManager.get('EnvConfig').INTERNALS_PATH + internalName + '.js');
+            },
+
+            init: function() {
+                var index;
 
                 InternalsManager.register('InternalsManager', function() {
                     return InternalsManager;
                 });
 
                 for(index = 0; index < internalsLoading; index++) {
-                    SourceManager.loadInternal(internalsToLoad[index]);
+                    InternalsManager.load(internalsToLoad[index]);
                 }
             }
         };
@@ -142,11 +135,24 @@
         return InternalsManager;
     })();
 
+    InternalsManager.register('EnvConfig', function envConfigSetup() {
+        var scripts = envGlobal.document.getElementsByTagName('script'),
+            jarsScript = scripts[scripts.length - 1],
+            src = jarsScript.src,
+            basePath = src.substring(0, src.lastIndexOf('/') + 1);
+
+        return {
+            MAIN_MODULE: jarsScript.getAttribute('data-main'),
+
+            BASE_PATH: basePath,
+
+            INTERNALS_PATH: jarsScript.getAttribute('data-internals') || (basePath + 'internals/'),
+        };
+    });
+
     InternalsManager.register('SourceManager', function sourceManagerSetup() {
         var doc = envGlobal.document,
             head = doc.getElementsByTagName('head')[0],
-            jarsScript = getSelfScript(),
-            basePath = getBasePath(),
             SourceManager;
 
         /**
@@ -155,16 +161,11 @@
          * @memberof JARS.internals
          */
         SourceManager =  {
-            MAIN_FILE: jarsScript.getAttribute('data-main'),
-
-            BASE_PATH: basePath,
-
-            INTERNALS_PATH: basePath + (jarsScript.getAttribute('data-internals') || '') + 'internals/',
             /**
              * @param {string} moduleName
              * @param {string} path
              */
-            loadSource: function(moduleName, path) {
+            load: function(moduleName, path) {
                 var script = doc.createElement('script');
 
                 head.appendChild(script);
@@ -173,35 +174,18 @@
                 script.type = 'text/javascript';
                 script.src = path;
                 script.async = true;
-            },
-
-            loadInternal: function(internalName) {
-                SourceManager.loadSource('internal:' + internalName, SourceManager.INTERNALS_PATH + internalName + '.js');
             }
         };
-
-        function getSelfScript() {
-            var scripts = doc.getElementsByTagName('script');
-
-            return scripts[scripts.length - 1];
-        }
-
-        function getBasePath() {
-            var src = jarsScript.src;
-
-            return src.substring(0, src.lastIndexOf('/') + 1);
-        }
 
         return SourceManager;
     });
 
-    InternalsManager.initialize();
+    InternalsManager.init();
 
     envGlobal.JARS = (function jarsSetup() {
-        var delegateToInternal = InternalsManager.createDelegate,
+        var getInternal = InternalsManager.get,
+            delegateToInternal = InternalsManager.delegate,
             registerInternal = InternalsManager.register,
-            mainCounter = 0,
-            delegatedLoaderImport = delegateToInternal('Loader', '$import'),
             previousJARS = envGlobal.JARS,
             JARS;
 
@@ -210,20 +194,8 @@
          * @global
          */
         JARS = {
-            main: function(mainCallback) {
-                JARS.$import().main(mainCallback);
-            },
-
-            $import: function(moduleNames) {
-                var mainModule = JARS.module('main_$' + mainCounter++).$import(moduleNames);
-
-                mainModule.main = function(mainCallback) {
-                    delegatedLoaderImport('System.*', function() {
-                        mainModule.$export(mainCallback);
-                    });
-                };
-
-                return mainModule;
+            main: function(mainModule) {
+                mainModule && JARS.configure('main', mainModule);
             },
 
             module: delegateToInternal('ModulesRegistry', 'register', function returnModuleWrapper(moduleName) {
@@ -231,7 +203,7 @@
                     ModuleWrapper;
 
                 registerInternal(dynamicInternalName, function internalModuleSetup() {
-                    return InternalsManager.get('ModulesRegistry').get(moduleName);
+                    return getInternal('ModulesRegistry').get(moduleName);
                 });
 
                 ModuleWrapper = {
@@ -275,6 +247,8 @@
             version: '0.3.0'
         };
 
+        JARS.main(getInternal('EnvConfig').MAIN_MODULE);
+
         /**
          * @namespace internals
          *
@@ -292,19 +266,5 @@
         }
 
         return JARS;
-    })();
-
-    (function bootstrapJARS() {
-        var SourceManager = InternalsManager.get('SourceManager'),
-            main = SourceManager.MAIN_FILE,
-            config = envGlobal.jarsConfig || main && {};
-
-        if(config) {
-            if(main && !config.main) {
-                config.main = main;
-            }
-
-            JARS.configure(config);
-        }
     })();
 })(this);

@@ -7,8 +7,8 @@ JARS.internal('InternalBootstrapper', function internalBootstrapperSetup(getInte
      * @memberof JARS.internals
      */
     var InternalBootstrapper = {
-        bootstrap: function() {
-            var SourceManager = getInternal('SourceManager'),
+        bootstrap: function(commands) {
+            var EnvConfig = getInternal('EnvConfig'),
                 ModulesRegistry = getInternal('ModulesRegistry'),
                 GlobalConfig = getInternal('GlobalConfig');
 
@@ -16,7 +16,7 @@ JARS.internal('InternalBootstrapper', function internalBootstrapperSetup(getInte
 
             GlobalConfig.update({
                 modules: [{
-                    basePath: SourceManager.BASE_PATH,
+                    basePath: EnvConfig.BASE_PATH,
 
                     cache: true,
 
@@ -26,7 +26,7 @@ JARS.internal('InternalBootstrapper', function internalBootstrapperSetup(getInte
                 }, {
                     restrict: 'System.*',
 
-                    basePath: SourceManager.INTERNALS_PATH
+                    basePath: EnvConfig.INTERNALS_PATH
                 }],
 
                 interceptors: [
@@ -38,6 +38,16 @@ JARS.internal('InternalBootstrapper', function internalBootstrapperSetup(getInte
 
                 loaderContext: 'default'
             });
+
+            while(commands.length) {
+                InternalBootstrapper.run(commands.shift());
+            }
+        },
+
+        run: function(command) {
+            var internal = getInternal(command[0]);
+
+            internal[command[1]].apply(internal, command[2]);
         }
     };
 

@@ -59,7 +59,7 @@ JARS.internal('Module', function moduleSetup(getInternal) {
 
             AutoAborter.setup(module, path);
 
-            SourceManager.loadSource(module.name, path);
+            SourceManager.load(module.name, path);
         },
         /**
          * @param {JARS.internals.State.LoadedCallback} onModuleLoaded
