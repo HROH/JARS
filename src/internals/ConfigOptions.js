@@ -13,7 +13,7 @@ JARS.internal('ConfigOptions', function configOptionsSetup(getInternal) {
         hasOwnProp = Utils.hasOwnProp,
         objectEach = Utils.objectEach,
         System = getInternal('System'),
-        configTransforms = getInternal('transforms');
+        configTransforms = getInternal('ConfigTransforms');
 
     /**
      * @class

@@ -5,7 +5,7 @@ JARS.internal('GlobalConfig', function globalConfigSetup(getInternal) {
         Utils = getInternal('Utils'),
         arrayEach = Utils.arrayEach,
         objectEach = Utils.objectEach,
-        globalConfigHooks = getInternal('hooks'),
+        globalConfigHooks = getInternal('GlobalConfigHooks'),
         globalConfig = {
             environments: {}
         },

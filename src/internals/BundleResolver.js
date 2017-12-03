@@ -1,8 +1,8 @@
 JARS.internal('BundleResolver', function bundleResolverSetup(getInternal) {
     'use strict';
 
-    var ArrayResolutionStrategy = getInternal('typeStrategies/Array'),
-        BundleResolutionStrategy = getInternal('resolutionStrategies/Bundle'),
+    var ArrayResolutionStrategy = getInternal('TypeStrategies/Array'),
+        BundleResolutionStrategy = getInternal('ResolutionStrategies/Bundle'),
         VersionResolver = getInternal('VersionResolver'),
         BUNDLE_SUFFIX = '.*',
         EMPTY_STRING = '',

@@ -6,7 +6,7 @@ JARS.internal('PathManager', function pathListManagerSetup(getInternal) {
         arrayEach = Utils.arrayEach,
         ModulesRegistry = getInternal('ModulesRegistry'),
         BundleResolver = getInternal('BundleResolver'),
-        ExtensionTransform = getInternal('transforms/Extension'),
+        ExtensionTransform = getInternal('ConfigTransforms/Extension'),
         pathOptions = ['basePath', 'dirPath', 'versionPath', 'fileName', 'minify', 'extension', 'cache'],
         sortedModules = {},
         pathList = [],
