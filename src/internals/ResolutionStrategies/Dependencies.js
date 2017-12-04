@@ -18,8 +18,6 @@ JARS.internal('ResolutionStrategies/Dependencies', function dependenciesResoluti
      */
     DependenciesResolutionStrategy = ResolutionHelpers.logResolutionError(function resolveDependency(baseModule, moduleName) {
         return ResolutionHelpers.isRelative(moduleName) ? RelativeResolutionStrategy(baseModule, moduleName) : AbsoluteResolutionStrategy(null, moduleName);
-    }, function getLogger(baseModule) {
-        return baseModule.logger;
     }, MSG_DEPENDENCY_RESOLUTION_ERROR);
 
     return DependenciesResolutionStrategy;

@@ -13,17 +13,18 @@ JARS.internal('ResolutionHelpers', function resolutionHelpersSetup() {
     ResolutionHelpers = {
         /**
          * @param {JARS.internals.ResolutionStrategy} resolve
-         * @param {function(JARS.internals.Module):JARS.internals.LogWrap} getLogger
          * @param {string} errorMessage
+         * @param {boolean} useBundleLogger
          *
          * @return {string}
          */
-        logResolutionError: function(resolve, getLogger, errorMessage) {
+        logResolutionError: function(resolve, errorMessage, useBundleLogger) {
             return function wrappedResolve(baseModule, moduleName) {
-                var resolutionData = resolve(baseModule, moduleName);
+                var logger = (useBundleLogger ? baseModule.bundle : baseModule).logger,
+                    resolutionData = resolve(baseModule, moduleName);
 
                 if(resolutionData.error || !resolutionData.moduleName) {
-                    getLogger(baseModule).error(MSG_DEFAULT_RESOLUTION_ERROR + (resolutionData.error || errorMessage), {
+                    logger.error(MSG_DEFAULT_RESOLUTION_ERROR + (resolutionData.error || errorMessage), {
                         mod: moduleName
                     });
                 }

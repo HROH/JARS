@@ -14,9 +14,7 @@ JARS.internal('ResolutionStrategies/Bundle', function bundleResolutionStrategySe
      *
      * @return {string}
      */
-    var BundleResolutionStrategy = logResolutionError(AbsoluteResolutionStrategy, function getBundleLogger(baseModule) {
-        return baseModule.bundle.logger;
-    }, MSG_BUNDLE_RESOLUTION_ERROR);
+    var BundleResolutionStrategy = logResolutionError(AbsoluteResolutionStrategy, MSG_BUNDLE_RESOLUTION_ERROR, true);
 
     return BundleResolutionStrategy;
 });

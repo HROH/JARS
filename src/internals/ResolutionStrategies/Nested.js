@@ -23,8 +23,6 @@ JARS.internal('ResolutionStrategies/Nested', function nestedResolutionStrategySe
         }
 
         return resolveAbsolute(baseModule, moduleName);
-    }, function getLogger(baseModule) {
-        return baseModule.logger;
     }, MSG_NESTED_RESOLUTION_ERROR);
 
     return NestedResolutionStrategy;
