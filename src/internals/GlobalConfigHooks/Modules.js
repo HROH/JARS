@@ -8,6 +8,10 @@ JARS.internal('GlobalConfigHooks/Modules', function modulesHookSetup(getInternal
         Modules;
 
     /**
+     * @method
+     *
+     * @memberof JARS.internals.GlobalConfigHooks
+     *
      * @param {JARS.internals.GlobalConfig} globalConfig
      * @param {Object} config
      */

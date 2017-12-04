@@ -5,6 +5,10 @@ JARS.internal('GlobalConfigHooks/GlobalAccess', function globalAccessHookSetup(g
         GlobalAccess;
 
     /**
+     * @method
+     *
+     * @memberof JARS.internals.GlobalConfigHooks
+     *
      * @param {JARS.internals.GlobalConfig} globalConfig
      * @param {boolean} makeGlobal
      *

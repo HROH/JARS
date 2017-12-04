@@ -5,6 +5,10 @@ JARS.internal('GlobalConfigHooks/Environments', function environmentsHookSetup(g
         Environments;
 
     /**
+     * @method
+     *
+     * @memberof JARS.internals.GlobalConfigHooks
+     *
      * @param {JARS.internals.GlobalConfig} globalConfig
      * @param {Object} environments
      *

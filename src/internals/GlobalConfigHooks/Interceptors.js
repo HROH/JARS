@@ -5,6 +5,10 @@ JARS.internal('GlobalConfigHooks/Interceptors', function interceptorsHookSetup(g
         Interceptors;
 
     /**
+     * @method
+     *
+     * @memberof JARS.internals.GlobalConfigHooks
+     *
      * @param {JARS.internals.GlobalConfig} globalConfig
      * @param {JARS.internals.Interceptor} interceptor
      */

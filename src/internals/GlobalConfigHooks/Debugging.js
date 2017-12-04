@@ -5,6 +5,10 @@ JARS.internal('GlobalConfigHooks/Debugging', function debuggingHookSetup(getInte
         Debugging;
 
     /**
+     * @method
+     *
+     * @memberof JARS.internals.GlobalConfigHooks
+     *
      * @param {JARS.internals.GlobalConfig} globalConfig
      * @param {(Object|boolean)} debugConfig
      */
