@@ -8,8 +8,9 @@ JARS.internal('ResolutionStrategies/Nested', function nestedResolutionStrategySe
         NestedResolutionStrategy;
 
     /**
-     * @method
-     * @memberof JARS.internals
+     * @method Nested
+     *
+     * @memberof JARS.internals.ResolutionStrategies
      *
      * @param {JARS.internals.Module} baseModule
      * @param {string} moduleName

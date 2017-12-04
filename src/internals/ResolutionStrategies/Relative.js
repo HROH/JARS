@@ -5,7 +5,9 @@ JARS.internal('ResolutionStrategies/Relative', function relativeResolutionStrate
         AbsoluteResolutionStrategy = getInternal('ResolutionStrategies/Absolute');
 
     /**
-     * @memberof JARS.internals
+     * @method Relative
+     *
+     * @memberof JARS.internals.ResolutionStrategies
      *
      * @param {JARS.internals.Module} baseModule
      * @param {string} moduleName

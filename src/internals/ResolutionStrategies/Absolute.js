@@ -8,7 +8,9 @@ JARS.internal('ResolutionStrategies/Absolute', function absoluteResolutionStrate
         DOT = '.';
 
     /**
-     * @memberof JARS.internals
+     * @method Absolute
+     *
+     * @memberof JARS.internals.ResolutionStrategies
      *
      * @param {JARS.internals.Module} baseModule
      * @param {string} moduleName
@@ -32,7 +34,7 @@ JARS.internal('ResolutionStrategies/Absolute', function absoluteResolutionStrate
     }
 
     /**
-     * @memberof JARS.internals.AbsoluteResolutionStrategy
+     * @memberof JARS.internals.ResolutionStrategies.Absolute
      * @inner
      *
      * @param {JARS.internals.Module} baseModule

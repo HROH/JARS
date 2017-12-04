@@ -8,8 +8,9 @@ JARS.internal('ResolutionStrategies/Dependencies', function dependenciesResoluti
         DependenciesResolutionStrategy;
 
     /**
-     * @method
-     * @memberof JARS.internals
+     * @method Dependencies
+     *
+     * @memberof JARS.internals.ResolutionStrategies
      *
      * @param {JARS.internals.Module} baseModule
      * @param {string} moduleName

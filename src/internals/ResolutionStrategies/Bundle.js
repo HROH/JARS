@@ -6,8 +6,9 @@ JARS.internal('ResolutionStrategies/Bundle', function bundleResolutionStrategySe
         MSG_BUNDLE_RESOLUTION_ERROR = 'a bundle modulename must not start with a "."';
 
     /**
-     * @method
-     * @memberof JARS.internals
+     * @method Bundle
+     *
+     * @memberof JARS.internals.ResolutionStrategies
      *
      * @param {JARS.internals.Module} baseModule
      * @param {string} moduleName
