@@ -5,9 +5,14 @@ JARS.internal('ConfigTransforms/Recover', function recoverTransformSetup(getInte
         Recover;
 
     /**
-     * @memberof JARS.internals
+     * @namespace
+     *
+     * @memberof JARS.internals.ConfigTransforms
      */
     Recover = {
+        /**
+         * @type {string}
+         */
         type: 'object',
         /**
          * @param {object} recoverConfig

@@ -2,12 +2,17 @@ JARS.internal('ConfigTransforms/Cache', function() {
     'use strict';
 
     /**
-     * @memberof JARS.internals
+     * @namespace
+     *
+     * @memberof JARS.internals.ConfigTransforms
      */
     var Cache = {
+        /**
+         * @type {string}
+         */
         type: 'boolean',
         /**
-         * @param {string} cache
+         * @param {boolean} cache
          *
          * @return {string}
          */

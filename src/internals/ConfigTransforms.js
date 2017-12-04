@@ -1,3 +1,8 @@
+/**
+ * @namespace ConfigTransforms
+ *
+ * @memberof JARS.internals
+ */
 JARS.internalGroup('ConfigTransforms', [
     'BasePath',
     'Cache',

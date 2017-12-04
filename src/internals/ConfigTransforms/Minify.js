@@ -2,9 +2,14 @@ JARS.internal('ConfigTransforms/Minify', function minifyTransformSetup() {
     'use strict';
 
     /**
-     * @memberof JARS.internals
+     * @namespace
+     *
+     * @memberof JARS.internals.ConfigTransforms
      */
     var Minify = {
+        /**
+         * @type {string}
+         */
         type: 'boolean',
         /**
          * @param {boolean} loadMin

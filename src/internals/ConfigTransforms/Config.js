@@ -5,18 +5,23 @@ JARS.internal('ConfigTransforms/Config', function configTransformSetup(getIntern
         Config;
 
     /**
-     * @memberof JARS.internals
+     * @namespace
+     *
+     * @memberof JARS.internals.ConfigTransforms
      */
     Config = {
+        /**
+         * @type {string}
+         */
         type: 'object',
         /**
-         * @param {object} newConfig
+         * @param {object} config
          * @param {(JARS.internals.Module|JARS.internals.Bundle)} [moduleOrBundle]
          *
          * @return {object}
          */
-        transform: function(newConfig, moduleOrBundle) {
-            return objectMerge(moduleOrBundle.config.get('config'), newConfig);
+        transform: function(config, moduleOrBundle) {
+            return objectMerge(moduleOrBundle.config.get('config'), config);
         }
     };
 

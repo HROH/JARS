@@ -6,9 +6,14 @@ JARS.internal('ConfigTransforms/Path', function pathTransformSetup() {
         Path;
 
     /**
-     * @memberof JARS.internals
+     * @namespace
+     *
+     * @memberof JARS.internals.ConfigTransforms
      */
     Path = {
+        /**
+         * @type {string}
+         */
         type: 'string',
         /**
          * @param {string} path

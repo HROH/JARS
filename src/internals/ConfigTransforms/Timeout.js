@@ -5,9 +5,14 @@ JARS.internal('ConfigTransforms/Timeout', function timeoutTransformSetup() {
         Timeout;
 
     /**
-     * @memberof JARS.internals
+     * @namespace
+     *
+     * @memberof JARS.internals.ConfigTransforms
      */
     Timeout = {
+        /**
+         * @type {string}
+         */
         type: 'number',
         /**
          * @param {number} timeout
