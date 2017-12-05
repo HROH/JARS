@@ -2,6 +2,10 @@ JARS.internal('TypeStrategies/String', function() {
     'use strict';
 
     /**
+     * @method String
+     *
+     * @memberof JARS.internals.TypeStrategies
+     *
      * @param {JARS.internals.Module} baseModule
      * @param {string} moduleName
      * @param {JARS.internals.ResolutionStrategy} resolutionStrategy

@@ -5,6 +5,10 @@ JARS.internal('TypeStrategies/Array', function(getInternal) {
         AnyResolutionStrategy = getInternal('TypeStrategies/Any');
 
     /**
+     * @method Array
+     *
+     * @memberof JARS.internals.TypeStrategies
+     *
      * @param {JARS.internals.Module} baseModule
      * @param {(JARS.internals.Dependencies.Declaration[]|JARS.internals.Bundle.Declaration)} modules
      * @param {JARS.internals.ResolutionStrategy} resolutionStrategy

@@ -8,6 +8,10 @@ JARS.internal('TypeStrategies/Object', function(getInternal) {
         ModulesRegistry = getInternal('ModulesRegistry');
 
     /**
+     * @method Object
+     *
+     * @memberof JARS.internals.TypeStrategies
+     *
      * @param {JARS.internals.Module} baseModule
      * @param {Object<string, JARS.internals.Dependencies.Declaration>} modules
      * @param {JARS.internals.ResolutionStrategy} resolutionStrategy

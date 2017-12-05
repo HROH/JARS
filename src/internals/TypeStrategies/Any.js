@@ -5,6 +5,10 @@ JARS.internal('TypeStrategies/Any', function(getInternal) {
         strategies = {};
 
     /**
+     * @method Any
+     *
+     * @memberof JARS.internals.TypeStrategies
+     *
      * @param {JARS.internals.Module} baseModule
      * @param {(JARS.internals.Dependencies.Declaration|JARS.internals.Bundle.Declaration)} modules
      * @param {JARS.internals.ResolutionStrategy} resolutionStrategy
@@ -17,6 +21,14 @@ JARS.internal('TypeStrategies/Any', function(getInternal) {
         return typeResolutionStrategy(baseModule, modules, resolutionStrategy);
     }
 
+    /**
+     * @memberof JARS.internals.TypeStrategies.Any
+     * @inner
+     *
+     * @param {string} type
+     *
+     * @return {function}
+     */
     function getStrategy(type) {
         return strategies[type] || (strategies[type] = getInternal('TypeStrategies')[type]);
     }
