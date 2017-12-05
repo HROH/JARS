@@ -137,17 +137,43 @@
 
     InternalsManager.register('EnvConfig', function envConfigSetup() {
         var scripts = envGlobal.document.getElementsByTagName('script'),
-            jarsScript = scripts[scripts.length - 1],
-            src = jarsScript.src,
-            basePath = src.substring(0, src.lastIndexOf('/') + 1);
+            script = scripts[scripts.length - 1],
+            BASE_PATH = getData('base') || script.src.substring(0, script.src.lastIndexOf('/') + 1),
+            EnvConfig;
 
-        return {
-            MAIN_MODULE: jarsScript.getAttribute('data-main'),
-
-            BASE_PATH: basePath,
-
-            INTERNALS_PATH: jarsScript.getAttribute('data-internals') || (basePath + 'internals/'),
+        /**
+         * @namespace
+         *
+         * @memberof JARS.internals
+         */
+        EnvConfig = {
+            /**
+             * @type {string}
+             */
+            MAIN_MODULE: getData('main'),
+            /**
+             * @type {string}
+             */
+            BASE_PATH: BASE_PATH,
+            /**
+             * @type {string}
+             */
+            INTERNALS_PATH: getData('internals') || (BASE_PATH + 'internals/'),
         };
+
+        /**
+         * @memberof JARS.internals.EnvConfig
+         * @inner
+         *
+         * @param {string} key
+         *
+         * @return {string}
+         */
+        function getData(key) {
+            return script.getAttribute('data-' + key);
+        }
+
+        return EnvConfig;
     });
 
     InternalsManager.register('SourceManager', function sourceManagerSetup() {
