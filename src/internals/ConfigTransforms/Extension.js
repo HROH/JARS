@@ -1,25 +1,18 @@
 JARS.internal('ConfigTransforms/Extension', function extensionTransformSetup() {
     'use strict';
 
+    var DOT = '.';
+
     /**
-     * @namespace
-     *
      * @memberof JARS.internals.ConfigTransforms
+     *
+     * @param {string} extension
+     *
+     * @return {string}
      */
-    var Extension = {
-        /**
-         * @type {string}
-         */
-        type: 'string',
-        /**
-         * @param {string} extension
-         *
-         * @return {string}
-         */
-        transform: function(extension) {
-            return '.' + extension;
-        }
-    };
+    function Extension(extension) {
+        return DOT + extension;
+    }
 
     return Extension;
 });

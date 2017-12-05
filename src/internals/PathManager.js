@@ -68,7 +68,7 @@ JARS.internal('PathManager', function pathListManagerSetup(getInternal) {
                 path = '';
 
             arrayEach(pathOptions, function(option) {
-                path += (option === 'extension' && extension) ? ExtensionTransform.transform(extension) : config.get(option);
+                path += (option === 'extension' && extension) ? ExtensionTransform(extension) : config.get(option);
             });
 
             return path;

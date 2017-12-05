@@ -88,9 +88,7 @@ JARS.internal('ConfigOptions', function configOptionsSetup(getInternal) {
      * @return {*}
      */
     function transformOption(option, value, moduleOrBundle) {
-        var transform = configTransforms[option];
-
-        return System.getType(value) === transform.type ? transform.transform(value, moduleOrBundle) : null;
+        return configTransforms[option](value, moduleOrBundle);
     }
 
     /**

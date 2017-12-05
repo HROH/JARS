@@ -1,25 +1,19 @@
 JARS.internal('ConfigTransforms/Minify', function minifyTransformSetup() {
     'use strict';
 
+    var MIN_SUFFIX = '.min',
+        EMPTY_STRING = '';
+
     /**
-     * @namespace
-     *
      * @memberof JARS.internals.ConfigTransforms
+     *
+     * @param {boolean} loadMin
+     *
+     * @return {string}
      */
-    var Minify = {
-        /**
-         * @type {string}
-         */
-        type: 'boolean',
-        /**
-         * @param {boolean} loadMin
-         *
-         * @return {string}
-         */
-        transform: function(loadMin) {
-            return loadMin ? '.min' : '';
-        }
-    };
+    function Minify(loadMin) {
+        return loadMin ? MIN_SUFFIX : EMPTY_STRING;
+    }
 
     return Minify;
 });

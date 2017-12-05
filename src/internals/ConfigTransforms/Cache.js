@@ -1,25 +1,19 @@
 JARS.internal('ConfigTransforms/Cache', function() {
     'use strict';
 
+    var EMPTY_STRING = '',
+        CACHE_STRING = '?_=';
+
     /**
-     * @namespace
-     *
      * @memberof JARS.internals.ConfigTransforms
+     *
+     * @param {boolean} cache
+     *
+     * @return {string}
      */
-    var Cache = {
-        /**
-         * @type {string}
-         */
-        type: 'boolean',
-        /**
-         * @param {boolean} cache
-         *
-         * @return {string}
-         */
-        transform: function(cache) {
-            return cache ? '' : '?_=' + new Date().getTime();
-        }
-    };
+    function Cache(cache) {
+        return cache ? EMPTY_STRING : CACHE_STRING + new Date().getTime();
+    }
 
     return Cache;
 });

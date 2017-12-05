@@ -2,24 +2,15 @@ JARS.internal('ConfigTransforms/CheckCircularDeps', function() {
     'use strict';
 
     /**
-     * @namespace
-     *
      * @memberof JARS.internals.ConfigTransforms
+     *
+     * @param {boolean} value
+     *
+     * @return {boolean}
      */
-    var CheckCircularDeps = {
-        /**
-         * @type {string}
-         */
-        type: 'boolean',
-        /**
-         * @param {boolean} value
-         *
-         * @return {boolean}
-         */
-        transform: function(checkCircularDeps) {
-            return checkCircularDeps;
-        }
-    };
+    function CheckCircularDeps(checkCircularDeps) {
+        return checkCircularDeps;
+    }
 
     return CheckCircularDeps;
 });

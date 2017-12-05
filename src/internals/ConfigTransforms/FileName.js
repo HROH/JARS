@@ -2,24 +2,15 @@ JARS.internal('ConfigTransforms/FileName', function fileNameTransformSetup() {
     'use strict';
 
     /**
-     * @namespace
-     *
      * @memberof JARS.internals.ConfigTransforms
+     *
+     * @param {string} fileName
+     *
+     * @return {string}
      */
-    var FileName = {
-        /**
-         * @type {string}
-         */
-        type: 'string',
-        /**
-         * @param {string} fileName
-         *
-         * @return {string}
-         */
-        transform: function(fileName) {
-            return fileName;
-        }
-    };
+    function FileName(fileName) {
+        return fileName;
+    }
 
     return FileName;
 });
