@@ -183,9 +183,7 @@
     InternalsManager.init();
 
     envGlobal.JARS = (function jarsSetup() {
-        var getInternal = InternalsManager.get,
-            delegateToInternal = InternalsManager.delegate,
-            registerInternal = InternalsManager.register,
+        var delegateToInternal = InternalsManager.delegate,
             previousJARS = envGlobal.JARS,
             JARS;
 
@@ -202,7 +200,7 @@
                 var dynamicInternalName = 'ModulesRegistry:' + moduleName,
                     ModuleWrapper;
 
-                registerInternal(dynamicInternalName, function internalModuleSetup() {
+                InternalsManager.register(dynamicInternalName, function internalModuleSetup(getInternal) {
                     return getInternal('ModulesRegistry').get(moduleName);
                 });
 
@@ -224,7 +222,7 @@
                 JARS.module(moduleName, bundle).$export();
             },
 
-            internal: registerInternal,
+            internal: InternalsManager.register,
 
             internalGroup: InternalsManager.registerGroup,
 
@@ -247,7 +245,7 @@
             version: '0.3.0'
         };
 
-        JARS.main(getInternal('EnvConfig').MAIN_MODULE);
+        JARS.main(InternalsManager.get('EnvConfig').MAIN_MODULE);
 
         /**
          * @namespace internals
