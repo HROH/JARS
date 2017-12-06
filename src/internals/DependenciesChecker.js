@@ -2,8 +2,6 @@ JARS.internal('DependenciesChecker', function dependenciesCheckerSetup(getIntern
     'use strict';
 
     var ModulesRegistry = getInternal('ModulesRegistry'),
-        DependenciesCollectorGetCircular = getInternal('DependenciesCollectorGetCircular'),
-        DependenciesCollectorHasCircular = getInternal('DependenciesCollectorHasCircular'),
         Utils = getInternal('Utils'),
         hasOwnProp = Utils.hasOwnProp,
         arrayEach = Utils.arrayEach,
@@ -21,15 +19,7 @@ JARS.internal('DependenciesChecker', function dependenciesCheckerSetup(getIntern
          * @return {string[]}
          */
         getCircular: function(module) {
-            return traceCircular(module, DependenciesCollectorGetCircular, []);
-        },
-        /**
-         * @param {JARS.internals.Module} module
-         *
-         * @return {boolean}
-         */
-        hasCircular: function(module) {
-            return !module.isRoot && module.config.get('checkCircularDeps') && traceCircular(module, DependenciesCollectorHasCircular, false);
+            return (!module.isRoot && module.config.get('checkCircularDeps')) ? getCircularDependencies(module) : [];
         }
     };
 
@@ -38,31 +28,28 @@ JARS.internal('DependenciesChecker', function dependenciesCheckerSetup(getIntern
      * @inner
      *
      * @param {JARS.internals.Module} module
-     * @param {JARS.internals.DependenciesChecker.Collector} collector
-     * @param {*} traceResult
      * @param {Object<string, string>} [traversedModules]
      *
      * @return {*}
      */
-    function traceCircular(module, collector, traceResult, traversedModules) {
+    function getCircularDependencies(module, traversedModules) {
         var moduleName = module.name,
-            dependencyModules = module.deps.getAll().concat(module.interceptionDeps.getAll());
+            dependencyModules = module.deps.getAll().concat(module.interceptionDeps.getAll()),
+            circularDependencies;
 
         traversedModules = traversedModules || {};
 
         if (hasOwnProp(traversedModules, moduleName)) {
-            traceResult = collector.match(moduleName);
+            circularDependencies = [moduleName];
         }
         else {
             traversedModules[moduleName] = true;
 
             arrayEach(dependencyModules, function findCircularDeps(dependencyName) {
-                var tmpResult = traceCircular(ModulesRegistry.get(dependencyName), collector, traceResult, traversedModules);
+                circularDependencies = getCircularDependencies(ModulesRegistry.get(dependencyName), traversedModules);
 
-                tmpResult = collector.recursiveMatch(tmpResult, moduleName);
-
-                if(tmpResult) {
-                    traceResult = tmpResult;
+                if(circularDependencies.length) {
+                    circularDependencies.unshift(moduleName);
 
                     return true;
                 }
@@ -71,33 +58,8 @@ JARS.internal('DependenciesChecker', function dependenciesCheckerSetup(getIntern
             delete traversedModules[moduleName];
         }
 
-        return traceResult;
+        return circularDependencies || [];
     }
-
-    /**
-     * @interface JARS.internals.DependenciesChecker.Collector
-     */
-
-    /**
-     * @method match
-     *
-     * @memberof JARS.internals.DependenciesChecker.Collector#
-     *
-     * @param {string} match
-     *
-     * @return {*}
-     */
-
-    /**
-     * @method recursiveMatch
-     *
-     * @memberof JARS.internals.DependenciesChecker.Collector#
-     *
-     * @param {*} result
-     * @param {string} match
-     *
-     * @return {*}
-     */
 
     return DependenciesChecker;
 });

@@ -24,7 +24,11 @@ JARS.internal('DependenciesAborter', function dependenciesAborterSetup() {
          * @param {string[]} circularDependencies
          */
         abortByCircularDeps: function(module, circularDependencies) {
-            module.state.setAborted(MSG_ABORTED_BY_CIRCULAR_DEPENDENCIES, [circularDependencies.join(CIRCULAR_SEPARATOR)]);
+            var isCircular = circularDependencies.length;
+
+            isCircular && module.state.setAborted(MSG_ABORTED_BY_CIRCULAR_DEPENDENCIES, [circularDependencies.join(CIRCULAR_SEPARATOR)]);
+
+            return isCircular;
         }
     };
 

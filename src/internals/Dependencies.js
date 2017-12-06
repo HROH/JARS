@@ -62,10 +62,8 @@ JARS.internal('Dependencies', function dependenciesSetup(getInternal) {
                 module = dependencies._module,
                 dependencyModules = dependencies._deps;
 
-            if(DependenciesChecker.hasCircular(module)) {
-                DependenciesAborter.abortByCircularDeps(module, DependenciesChecker.getCircular(module));
-            } else {
-                this._logger.debugDependencies(dependencyModules);
+            if(!DependenciesAborter.abortByCircularDeps(module, DependenciesChecker.getCircular(module))) {
+                dependencies._logger.debugDependencies(dependencyModules);
 
                 new ModulesQueue(module, dependencies.getAll()).request(onModulesLoaded, DependenciesAborter.abortByDependency);
             }

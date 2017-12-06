@@ -13,8 +13,6 @@
                 'Dependencies',
                 'DependenciesAborter',
                 'DependenciesChecker',
-                'DependenciesCollectorGetCircular',
-                'DependenciesCollectorHasCircular',
                 'DependenciesLogger',
                 'DependenciesResolver',
                 'GlobalConfig',
