@@ -17,10 +17,10 @@ JARS.internal('DependenciesLogger', function(getInternal) {
     DependenciesLogger.prototype = {
         constructor: DependenciesLogger,
 
-        debugParentDependency: function(parentName) {
-            if(parentName && !this._forInterceptionDeps) {
+        debugParent: function(parent) {
+            if(parent && !(parent.isRoot || this._forInterceptionDeps)) {
                 this._logger.debug(MSG_DEPENDENCY_FOUND, {
-                    dep: parentName
+                    dep: parent.name
                 });
             }
         },

@@ -4,7 +4,6 @@ JARS.internal('Module', function moduleSetup(getInternal) {
     var AutoAborter = getInternal('AutoAborter'),
         SourceManager = getInternal('SourceManager'),
         ModulesRegistry = getInternal('ModulesRegistry'),
-        DependenciesResolver = getInternal('DependenciesResolver'),
         Dependencies = getInternal('Dependencies'),
         Bundle = getInternal('Bundle'),
         Config = getInternal('Config'),
@@ -98,29 +97,17 @@ JARS.internal('Module', function moduleSetup(getInternal) {
 
                 module.deps.request(function onDependenciesLoaded(dependencyRefs) {
                     if (state.setLoaded()) {
-                        setModuleRef(module, dependencyRefs, factory);
+                        ModulesRegistry.setCurrent(module);
+
+                        module.ref = (!module.isRoot && factory) ? (factory.apply(dependencyRefs.shift(), dependencyRefs) || {}) : {};
+                        module.deps.linkRefToParent(module.ref);
+
+                        ModulesRegistry.setCurrent();
                     }
                 });
             }
         }
     };
-
-    function setModuleRef(module, dependencyRefs, factory) {
-        var parentRef;
-
-        if(module.isRoot) {
-            module.ref = {};
-        }
-        else {
-            parentRef = dependencyRefs.shift();
-
-            ModulesRegistry.setCurrent(module);
-
-            module.ref = parentRef[DependenciesResolver.removeParentName(module.name)] = (factory && factory.apply(parentRef, dependencyRefs)) || {};
-
-            ModulesRegistry.setCurrent();
-        }
-    }
 
     return Module;
 });

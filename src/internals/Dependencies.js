@@ -5,7 +5,6 @@ JARS.internal('Dependencies', function dependenciesSetup(getInternal) {
         DependenciesAborter = getInternal('DependenciesAborter'),
         DependenciesChecker = getInternal('DependenciesChecker'),
         ModulesQueue = getInternal('ModulesQueue'),
-        ModulesRegistry = getInternal('ModulesRegistry'),
         DependenciesLogger = getInternal('DependenciesLogger');
 
     /**
@@ -17,19 +16,14 @@ JARS.internal('Dependencies', function dependenciesSetup(getInternal) {
      * @param {boolean} [forInterceptionDeps=false]
      */
     function Dependencies(module, forInterceptionDeps) {
-        var dependencies = this,
-            parentName;
+        var dependencies = this;
 
         dependencies._module = module;
         dependencies._logger = new DependenciesLogger(module, forInterceptionDeps);
         dependencies._deps = [];
 
-        if(!module.isRoot) {
-            parentName = DependenciesResolver.getParentName(module.name);
-            dependencies.parent = parentName ? ModulesRegistry.get(parentName) : ModulesRegistry.getRoot();
-
-            dependencies._logger.debugParentDependency(parentName);
-        }
+        dependencies.parent = DependenciesResolver.getParent(module);
+        dependencies._logger.debugParent(dependencies.parent);
     }
 
     Dependencies.prototype = {
@@ -67,6 +61,12 @@ JARS.internal('Dependencies', function dependenciesSetup(getInternal) {
 
                 new ModulesQueue(module, dependencies.getAll()).request(onModulesLoaded, DependenciesAborter.abortByDependency);
             }
+        },
+
+        linkRefToParent: function(ref) {
+            var parent = this.parent;
+
+            parent && (parent.ref[DependenciesResolver.removeParentName(this._module.name)] = ref);
         }
     };
 
