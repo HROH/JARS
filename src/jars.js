@@ -114,7 +114,7 @@
             },
 
             load: function(internalName) {
-                InternalsManager.get('SourceManager').load('internal:' + internalName, InternalsManager.get('EnvConfig').INTERNALS_PATH + internalName + '.js');
+                InternalsManager.get('SourceManager').load('internal:' + internalName, InternalsManager.get('Env').INTERNALS_PATH + internalName + '.js');
             },
 
             init: function() {
@@ -133,18 +133,19 @@
         return InternalsManager;
     })();
 
-    InternalsManager.register('EnvConfig', function envConfigSetup() {
+    InternalsManager.register('Env', function envConfigSetup() {
         var scripts = envGlobal.document.getElementsByTagName('script'),
             script = scripts[scripts.length - 1],
             BASE_PATH = getData('base') || script.src.substring(0, script.src.lastIndexOf('/') + 1),
-            EnvConfig;
+            Env;
 
         /**
          * @namespace
          *
          * @memberof JARS.internals
          */
-        EnvConfig = {
+        Env = {
+            global: envGlobal,
             /**
              * @type {string}
              */
@@ -160,7 +161,7 @@
         };
 
         /**
-         * @memberof JARS.internals.EnvConfig
+         * @memberof JARS.internals.Env
          * @inner
          *
          * @param {string} key
@@ -171,7 +172,7 @@
             return script.getAttribute('data-' + key);
         }
 
-        return EnvConfig;
+        return Env;
     });
 
     InternalsManager.register('SourceManager', function sourceManagerSetup() {
@@ -269,7 +270,7 @@
             version: '0.3.0'
         };
 
-        JARS.main(InternalsManager.get('EnvConfig').MAIN_MODULE);
+        JARS.main(InternalsManager.get('Env').MAIN_MODULE);
 
         /**
          * @namespace internals

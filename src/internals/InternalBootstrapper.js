@@ -8,7 +8,7 @@ JARS.internal('InternalBootstrapper', function internalBootstrapperSetup(getInte
      */
     var InternalBootstrapper = {
         bootstrap: function(commands) {
-            var EnvConfig = getInternal('EnvConfig'),
+            var Env = getInternal('Env'),
                 ModulesRegistry = getInternal('ModulesRegistry'),
                 GlobalConfig = getInternal('GlobalConfig');
 
@@ -16,7 +16,7 @@ JARS.internal('InternalBootstrapper', function internalBootstrapperSetup(getInte
 
             GlobalConfig.update({
                 modules: [{
-                    basePath: EnvConfig.BASE_PATH,
+                    basePath: Env.BASE_PATH,
 
                     cache: true,
 
@@ -26,7 +26,7 @@ JARS.internal('InternalBootstrapper', function internalBootstrapperSetup(getInte
                 }, {
                     restrict: 'System.*',
 
-                    basePath: EnvConfig.INTERNALS_PATH
+                    basePath: Env.INTERNALS_PATH
                 }],
 
                 interceptors: [

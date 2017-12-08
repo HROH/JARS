@@ -3,7 +3,7 @@ JARS.internal('System', function systemSetup(getInternal) {
 
     var Utils = getInternal('Utils'),
         hasOwnProp = Utils.hasOwnProp,
-        envGlobal = (1,eval)('this'), // jshint ignore:line
+        envGlobal = getInternal('Env').global,
         types = 'Null Undefined String Number Boolean Array Arguments Object Function Date RegExp'.split(' '),
         RE_TEMPLATE_KEY = /\$\{(.*?)\}/g,
         UNKNOWN_KEY = '<UNKNOWN KEY>',
