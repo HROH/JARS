@@ -156,10 +156,10 @@ JARS.module('System.Logger').$import([
     function output(logger, level, message, values) {
         var context = logger.context,
             options = logger.options,
-            currentDebugger = getActiveDebugger(options.mode || config.mode),
+            currentDebugger = getActiveDebugger(getOption(options, 'mode')),
             debuggerMethod = currentDebugger[level] ? level : 'log';
 
-        if (isDebuggingEnabled(options.debug || config.debug, level, context) && isFunction(currentDebugger[debuggerMethod])) {
+        if (isDebuggingEnabled(getOption(options, 'debug'), level, context) && isFunction(currentDebugger[debuggerMethod])) {
             message = format(options.tpl[message] || message, values);
 
             currentDebugger[debuggerMethod](context, {
@@ -170,6 +170,10 @@ JARS.module('System.Logger').$import([
                 meta: values
             });
         }
+    }
+
+    function getOption(options, option) {
+        return options[option] || config[option];
     }
 
     /**
