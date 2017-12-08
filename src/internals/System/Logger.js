@@ -9,7 +9,7 @@ JARS.module('System.Logger').$import([
     '.::isNumber',
     '.::isObject',
     '.::isString',
-    '.::format',
+    '.Formatter::format',
     '.ConsoleDebugger',
     '.Modules::getCurrentModuleData'
 ]).$export(function systemLoggerFactory(config, isArray, isFunction, isNumber, isObject, isString, format, ConsoleDebugger, getCurrentModuleData) {

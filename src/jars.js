@@ -35,6 +35,8 @@
                 'State',
                 'StateInfo',
                 'System',
+                'Type',
+                'TypeLookup',
                 'TypeStrategies',
                 'Utils',
                 'VersionResolver'

@@ -1,15 +1,10 @@
 JARS.internal('System', function systemSetup(getInternal) {
     'use strict';
 
-    var Utils = getInternal('Utils'),
-        hasOwnProp = Utils.hasOwnProp,
+    var Type = getInternal('Type'),
+        arrayEach = getInternal('Utils').arrayEach,
         envGlobal = getInternal('Env').global,
         types = 'Null Undefined String Number Boolean Array Arguments Object Function Date RegExp'.split(' '),
-        RE_TEMPLATE_KEY = /\$\{(.*?)\}/g,
-        UNKNOWN_KEY = '<UNKNOWN KEY>',
-        NOTHING = null,
-        typeLookup = {},
-        toString = ({}).toString,
         isArgs, System;
 
     /**
@@ -18,9 +13,12 @@ JARS.internal('System', function systemSetup(getInternal) {
      * @memberof JARS.internals
      */
     System = {
+        /**
+         * @type {object}
+         */
         env: {
             /**
-             * @type Global
+             * @type {global}
              */
             global: envGlobal
         },
@@ -32,61 +30,25 @@ JARS.internal('System', function systemSetup(getInternal) {
          * @return {JARS.internals.System.TypeValidator}
          */
         addTypeValidator: function(typeDef) {
-            var validatorName = 'is' + typeDef,
-                nativeTypeValidator = envGlobal[typeDef] && envGlobal[typeDef][validatorName];
+            var typeValidator = Type.add(typeDef);
 
-            typeLookup['[object ' + typeDef + ']'] = typeDef = typeDef.toLowerCase();
-
-            System[validatorName] = nativeTypeValidator || function typeValidator(value) {
-                return System.getType(value) === typeDef;
-            };
+            System[typeValidator.name] = typeValidator.fn;
         },
         /**
          * @param {*} value
          *
          * @return {string}
          */
-        getType: function getType(value) {
-            var type;
-
-            if (!System.isNil(value)) {
-                if (isElement(value)) {
-                    type = 'element';
-                }
-                else {
-                    type = typeLookup[toString.call(value)];
-
-                    if (type === 'number') {
-                        type = getTypeOfNumber(value);
-                    }
-                }
-            }
-            else {
-                type = String(value);
-            }
-
-            return type || typeof value;
-        },
+        getType: Type.get,
         /**
          * @member {JARS.internals.System.TypeValidator}
          */
-        isNil: function(value) {
-            return value == NOTHING;
-        },
+        isNil: Type.isNil,
         /**
          * @member {JARS.internals.System.TypeValidator}
          */
         isArrayLike: function(value) {
-            var isArrayLike = false,
-                length;
-
-            if (value) {
-                length = value.length;
-
-                isArrayLike = System.isArray(value) || (System.isNumber(length) && length === 0 || (length > 0 && ((length - 1) in value)));
-            }
-
-            return isArrayLike;
+            return System.isArray(value) || (!System.isNil(value) && isIterable(value));
         },
         /**
          * @member {JARS.internals.System.TypeValidator}
@@ -98,7 +60,7 @@ JARS.internal('System', function systemSetup(getInternal) {
          * @member {JARS.internals.System.TypeValidator}
          */
         isInteger: Number.isInteger || function(value) {
-            return System.isNumber(value) && parseInt(value, 10) === value;
+            return System.isNumber(value) && envGlobal.parseInt(value, 10) === value;
         },
         /**
          * @member {JARS.internals.System.TypeValidator}
@@ -114,23 +76,6 @@ JARS.internal('System', function systemSetup(getInternal) {
          */
         isA: function(instance, Class) {
             return instance instanceof Class;
-        },
-        /**
-         * @param {string} message
-         * @param {(Object<string, string>|string[])} data
-         *
-         * @return {string}
-         */
-        format: function(message, data) {
-            if (System.isString(message) && (System.isObject(data) || System.isArray(data))) {
-                formatReplace.data = data;
-
-                message = message.replace(RE_TEMPLATE_KEY, formatReplace);
-
-                formatReplace.data = null;
-            }
-
-            return message;
         },
         /**
          * @param {JARS.internals.Interception} pluginRequest
@@ -198,7 +143,7 @@ JARS.internal('System', function systemSetup(getInternal) {
      * @return {boolean}
      */
 
-    Utils.arrayEach(types, System.addTypeValidator);
+    arrayEach(types, System.addTypeValidator);
 
     isArgs = System.isArguments;
 
@@ -209,50 +154,10 @@ JARS.internal('System', function systemSetup(getInternal) {
         return value && (isArgs(value) || System.isArrayLike(value));
     };
 
-    /**
-     * @member {JARS.internals.System.TypeValidator}
-     *
-     * @memberof JARS.internals.System
-     * @inner
-     */
-    function isElement(value) {
-        return value.nodeType === 1 || value.nodeType === 9;
-    }
+    function isIterable(value) {
+        var length = value.length;
 
-    /**
-     * @memberof JARS.internals.System
-     * @inner
-     *
-     * @param {*} value
-     *
-     * @return {string}
-     */
-    function getTypeOfNumber(value) {
-        var type = 'number';
-
-        if (isNaN(value)) {
-            type = 'nan';
-        }
-        else if (!isFinite(value)) {
-            type = 'infinity';
-        }
-
-        return type;
-    }
-
-    /**
-     * @memberof JARS.internals.System
-     * @inner
-     *
-     * @param {Array} match
-     * @param {string} key
-     *
-     * @return {string}
-     */
-    function formatReplace(match, key) {
-        var data = formatReplace.data;
-
-        return hasOwnProp(data, key) ? data[key] : UNKNOWN_KEY;
+        return System.isNumber(length) && length === 0 || (length > 0 && ((length - 1) in value));
     }
 
     return System;

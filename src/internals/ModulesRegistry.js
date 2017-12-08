@@ -19,9 +19,8 @@ JARS.internal('ModulesRegistry', function modulesRegistrySetup(getInternal) {
             BundleResolver = getInternal('BundleResolver');
 
             ModulesRegistry.getRoot().$export();
-            ModulesRegistry.setCurrent();
 
-            ModulesRegistry.register('System', ['Logger', 'Modules']).$export(function systemFactory() {
+            ModulesRegistry.register('System', ['Formatter', 'Logger', 'Modules']).$export(function systemFactory() {
                 // TODO maybe calling the internal factory for System is the better option
                 // to isolate System on a per context basis but right now this is enough
 
