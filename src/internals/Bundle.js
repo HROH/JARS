@@ -10,7 +10,7 @@ JARS.internal('Bundle', function bundleSetup(getInternal) {
         SEPARATOR = '", "',
         LOG_CONTEXT_PREFIX = 'Bundle:',
         MSG_BUNDLE_DEFINED = ' - with submodules "${bundle}"',
-        DEFAULT_REQUEST_INFO = {
+        DEFAULT_BUNDLE_LOG_INFO = {
             bundle: 'none',
 
             log: 'warn'
@@ -33,6 +33,7 @@ JARS.internal('Bundle', function bundleSetup(getInternal) {
         bundle.logger = new LogWrap(LOG_CONTEXT_PREFIX + bundleName);
         bundle.state = new State(bundleName, bundle.logger);
         bundle._module = module;
+        bundle._modules = [];
     }
 
     Bundle.prototype = {
@@ -43,7 +44,7 @@ JARS.internal('Bundle', function bundleSetup(getInternal) {
         add: function(bundleModules) {
             var bundle = this;
 
-            bundle._bundle = BundleResolver.resolveBundle(bundle._module, bundleModules);
+            bundle._modules = BundleResolver.resolveBundle(bundle._module, bundleModules);
         },
         /**
          * @param {JARS.internals.State.LoadedCallback} onBundleLoaded
@@ -55,15 +56,8 @@ JARS.internal('Bundle', function bundleSetup(getInternal) {
 
             if(bundleState.setLoading()) {
                 new ModulesQueue(bundle, [bundle._module.name]).request(function onModulesLoaded() {
-                    var bundleModules = bundle._bundle,
-                        requestInfo = bundleModules.length ? {
-                            bundle: bundleModules.join(SEPARATOR),
-
-                            log: 'debug'
-                        } : DEFAULT_REQUEST_INFO;
-
-                    if(bundleState.setRegistered(MSG_BUNDLE_DEFINED, requestInfo)) {
-                        new ModulesQueue(bundle, bundleModules).request(function onModulesLoaded() {
+                    if(bundleState.setRegistered(MSG_BUNDLE_DEFINED, getBundleLogInfo(bundle._modules))) {
+                        new ModulesQueue(bundle, bundle._modules).request(function onModulesLoaded() {
                             bundleState.setLoaded();
                         }, BundleAborter.abortBySubModule);
                     }
@@ -73,6 +67,14 @@ JARS.internal('Bundle', function bundleSetup(getInternal) {
             bundleState.onChange(onBundleLoaded, onBundleAborted);
         }
     };
+
+    function getBundleLogInfo(bundleModules) {
+        return bundleModules.length ? {
+            bundle: bundleModules.join(SEPARATOR),
+
+            log: 'debug'
+        } : DEFAULT_BUNDLE_LOG_INFO;
+    }
 
    /**
     * @typeDef {string[]} Declaration

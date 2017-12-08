@@ -18,11 +18,10 @@ JARS.internal('Dependencies', function dependenciesSetup(getInternal) {
     function Dependencies(module, forInterceptionDeps) {
         var dependencies = this;
 
-        dependencies._module = module;
-        dependencies._logger = new DependenciesLogger(module, forInterceptionDeps);
-        dependencies._deps = [];
-
         dependencies.parent = DependenciesResolver.getParent(module);
+        dependencies._module = module;
+        dependencies._modules = [];
+        dependencies._logger = new DependenciesLogger(module, forInterceptionDeps);
         dependencies._logger.debugParent(dependencies.parent);
     }
 
@@ -33,7 +32,7 @@ JARS.internal('Dependencies', function dependenciesSetup(getInternal) {
          */
         getAll: function() {
             var dependencies = this,
-                dependencyModules = dependencies._deps,
+                dependencyModules = dependencies._modules,
                 parent = dependencies.parent;
 
             parent && (dependencyModules = [parent.name].concat(dependencyModules));
@@ -46,7 +45,7 @@ JARS.internal('Dependencies', function dependenciesSetup(getInternal) {
         add: function(dependencyModules) {
             var dependencies = this;
 
-            dependencies._deps = dependencies._deps.concat(DependenciesResolver.resolveDeps(dependencies._module, dependencyModules));
+            dependencies._modules = dependencies._modules.concat(DependenciesResolver.resolveDeps(dependencies._module, dependencyModules));
         },
         /**
          * @param {JARS.internals.ModulesQueue.ModulesLoadedCallback} onModulesLoaded
@@ -54,7 +53,7 @@ JARS.internal('Dependencies', function dependenciesSetup(getInternal) {
         request: function(onModulesLoaded) {
             var dependencies = this,
                 module = dependencies._module,
-                dependencyModules = dependencies._deps;
+                dependencyModules = dependencies._modules;
 
             if(!DependenciesAborter.abortByCircularDeps(module, DependenciesChecker.getCircular(module))) {
                 dependencies._logger.debugDependencies(dependencyModules);
