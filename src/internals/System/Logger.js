@@ -6,43 +6,18 @@ JARS.module('System.Logger').$import([
     '.!',
     '.::isArray',
     '.::isFunction',
-    '.::isNumber',
     '.::isObject',
     '.::isString',
+    '.Transports',
     '.Formatter::format',
-    '.ConsoleDebugger',
+    '.LogLevels',
     '.Modules::getCurrentModuleData'
-]).$export(function systemLoggerFactory(config, isArray, isFunction, isNumber, isObject, isString, format, ConsoleDebugger, getCurrentModuleData) {
+]).$export(function systemLoggerFactory(config, isArray, isFunction, isObject, isString, Transports, format, LogLevels, getCurrentModuleData) {
     'use strict';
 
-    var Utils = this.$$internals.get('Utils'),
-        hasOwnProp = Utils.hasOwnProp,
-        debuggers = {},
-        loggerCache = {},
-        definedLevels = [],
+    var loggerCache = {},
+        CONTEXT_DELIMITER = ',',
         ROOT_LOGCONTEXT = getCurrentModuleData().moduleName;
-
-    /**
-     * @memberof JARS.internals.System.Logger
-     * @inner
-     *
-     * @param {(string|number)} levelOrPriority
-     *
-     * @return {number}
-     */
-    function getPriority(levelOrPriority) {
-        var logLevels = Logger.logLevels,
-            priority = logLevels.ALL;
-
-        if (isString(levelOrPriority) && hasOwnProp(logLevels, (levelOrPriority = levelOrPriority.toUpperCase()))) {
-            priority = logLevels[levelOrPriority];
-        }
-        else if (isNumber(levelOrPriority)) {
-            priority = levelOrPriority;
-        }
-
-        return priority;
-    }
 
     /**
      * @memberof JARS.internals.System.Logger
@@ -67,7 +42,7 @@ JARS.module('System.Logger').$import([
      * @return {boolean}
      */
     function comparePriority(level) {
-        return getPriority(level) >= getPriority(config.level);
+        return LogLevels.getPriority(level) >= LogLevels.getPriority(config.level);
     }
 
     /**
@@ -103,27 +78,11 @@ JARS.module('System.Logger').$import([
      * @return {boolean}
      */
     function inContextList(context, contextList) {
-        var contextDelimiter = ',';
-
-        if (isArray(contextList)) {
-            contextList = contextList.join(contextDelimiter);
+        if(isString(contextList)) {
+            contextList = contextList.split(CONTEXT_DELIMITER);
         }
 
-        contextList = contextDelimiter + contextList + contextDelimiter;
-
-        return contextList.indexOf(contextDelimiter + context + contextDelimiter) > -1;
-    }
-
-    /**
-     * @memberof JARS.internals.System.Logger
-     * @inner
-     *
-     * @param {string} mode
-     *
-     * @return {Object}
-     */
-    function getActiveDebugger(mode) {
-        return debuggers[mode] || debuggers.console;
+        return isArray(contextList) && contextList.indexOf(context) > -1;
     }
 
     /**
@@ -136,8 +95,9 @@ JARS.module('System.Logger').$import([
      */
     function Logger(logContext, options) {
         var logger = this;
+        logContext = logContext || ROOT_LOGCONTEXT;
 
-        logger.context = logContext || ROOT_LOGCONTEXT;
+        logger.context = logContext;
         loggerCache[logContext] = logger;
 
         logger.options = options || {};
@@ -156,13 +116,13 @@ JARS.module('System.Logger').$import([
     function output(logger, level, message, values) {
         var context = logger.context,
             options = logger.options,
-            currentDebugger = getActiveDebugger(getOption(options, 'mode')),
-            debuggerMethod = currentDebugger[level] ? level : 'log';
+            activeTransport = Transports.getActive(getOption(options, 'mode')),
+            methodName = activeTransport[level] ? level : 'log';
 
-        if (isDebuggingEnabled(getOption(options, 'debug'), level, context) && isFunction(currentDebugger[debuggerMethod])) {
+        if (isDebuggingEnabled(getOption(options, 'debug'), level, context) && isFunction(activeTransport[methodName])) {
             message = format(options.tpl[message] || message, values);
 
-            currentDebugger[debuggerMethod](context, {
+            activeTransport[methodName](context, {
                 timestamp: new Date().toUTCString(),
 
                 message: message,
@@ -176,37 +136,8 @@ JARS.module('System.Logger').$import([
         return options[option] || config[option];
     }
 
-    /**
-     * @type {Object<string, number>}
-     */
-    Logger.logLevels = {
-        ALL: -Infinity
-    };
-
-    /**
-     * @param {string} level
-     * @param {number} priority
-     */
-    Logger.addLogLevel = function(level, priority) {
-        var levelConst = level.toUpperCase();
-
-        if (!hasOwnProp(Logger.logLevels, levelConst)) {
-            definedLevels.push(level);
-
-            Logger.logLevels[levelConst] = isNumber(priority) ? priority : Logger.logLevels.ALL;
-
-            Logger.prototype[level] = function loggerFn(data, values) {
-                output(this, level, data, values);
-            };
-
-            Logger[level] = function staticLoggerFn(data, values) {
-                Logger[level + 'WithContext'](ROOT_LOGCONTEXT, data, values);
-            };
-
-            Logger[level + 'WithContext'] = function staticLoggerFnWithContext(logContext, data, values, options) {
-                (loggerCache[logContext] || new Logger(logContext, options))[level](data, values);
-            };
-        }
+    Logger.get = function(logContext, options) {
+        return loggerCache[logContext] || new Logger(logContext, options);
     };
 
     /**
@@ -215,43 +146,24 @@ JARS.module('System.Logger').$import([
      * @return {JARS.internals.System.Logger}
      */
     Logger.forCurrentModule = function(options) {
-        var logContext = getCurrentModuleData().moduleName;
-
-        return loggerCache[logContext] || new Logger(logContext, options);
+        return Logger.get(getCurrentModuleData().moduleName, options);
     };
 
-    /**
-     * @param {JARS.internals.Interception} pluginRequest
-     */
-    Logger.$plugIn = function(pluginRequest) {
-        var data = pluginRequest.info.data.split(':');
+    LogLevels.each(function addLoggerMethod(level) {
+        var levelWithContext = level + 'WithContext';
 
-        pluginRequest.$importAndLink(data[1], function addDebugger(Debugger) {
-            Logger.addDebugger(data[0], Debugger.setup);
+        Logger.prototype[level] = function loggerFn(data, values) {
+            output(this, level, data, values);
+        };
 
-            pluginRequest.success(Logger);
-        });
-    };
+        Logger[level] = function staticLoggerFn(data, values) {
+            Logger[levelWithContext](ROOT_LOGCONTEXT, data, values);
+        };
 
-    /**
-     * @param {string} mode
-     * @param {function(function(string): *, string[])} debuggerSetup
-     */
-    Logger.addDebugger = function(mode, debuggerSetup) {
-        var modeConfig = mode + 'Config';
-
-        if (!hasOwnProp(debuggers, mode) && isFunction(debuggerSetup)) {
-            debuggers[mode] = debuggerSetup(function debuggerConfigGetter(option) {
-                return (config[modeConfig] || {})[option];
-            }, definedLevels);
-        }
-    };
-
-    Utils.arrayEach('log debug info warn error'.split(' '), function addLogLevel(stdLevel, levelIndex) {
-        Logger.addLogLevel(stdLevel, (levelIndex + 1) * 10);
+        Logger[levelWithContext] = function staticLoggerFnWithContext(logContext, data, values, options) {
+            Logger.get(logContext, options)[level](data, values);
+        };
     });
-
-    Logger.addDebugger('console', ConsoleDebugger);
 
     return Logger;
 });

@@ -18,7 +18,7 @@ JARS.internal('InternalBootstrapper', function internalBootstrapperSetup(getInte
                     basePath: Env.INTERNALS_PATH
                 },
                 SYSTEM_NAME = 'System',
-                SYSTEM_BUNDLE = ['Formatter', 'Logger', 'Modules'];
+                SYSTEM_BUNDLE = ['ConsoleTransport', 'Formatter', 'Logger', 'LogLevels', 'Modules', 'Transports'];
 
             ModulesRegistry.init();
 
