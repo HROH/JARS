@@ -10,7 +10,15 @@ JARS.internal('InternalBootstrapper', function internalBootstrapperSetup(getInte
         bootstrap: function(commands) {
             var Env = getInternal('Env'),
                 ModulesRegistry = getInternal('ModulesRegistry'),
-                GlobalConfig = getInternal('GlobalConfig');
+                GlobalConfig = getInternal('GlobalConfig'),
+                System = getInternal('System'),
+                SYSTEM_CONFIG = {
+                    restrict: 'System.*',
+
+                    basePath: Env.INTERNALS_PATH
+                },
+                SYSTEM_NAME = 'System',
+                SYSTEM_BUNDLE = ['Formatter', 'Logger', 'Modules'];
 
             ModulesRegistry.init();
 
@@ -23,11 +31,7 @@ JARS.internal('InternalBootstrapper', function internalBootstrapperSetup(getInte
                     minify: false,
 
                     timeout: 5
-                }, {
-                    restrict: 'System.*',
-
-                    basePath: Env.INTERNALS_PATH
-                }],
+                }, SYSTEM_CONFIG],
 
                 interceptors: [
                     getInternal('PluginInterceptor'),
@@ -37,6 +41,18 @@ JARS.internal('InternalBootstrapper', function internalBootstrapperSetup(getInte
                 globalAccess: false,
 
                 loaderContext: 'default'
+            });
+
+            ModulesRegistry.register(SYSTEM_NAME, SYSTEM_BUNDLE).$export(function systemFactory() {
+                // TODO maybe calling the internal factory for System is the better option
+                // to isolate System on a per context basis but right now this is enough
+
+                /**
+                 * @global
+                 * @module System
+                 * @see JARS.internals.System
+                 */
+                return System;
             });
 
             while(commands.length) {
