@@ -4,15 +4,12 @@
  */
 JARS.module('System.Logger').$import([
     '.!',
-    '.::isArray',
-    '.::isFunction',
-    '.::isObject',
-    '.::isString',
+    '.',
     '.Transports',
     '.Formatter::format',
     '.LogLevels',
     '.Modules::getCurrentModuleData'
-]).$export(function systemLoggerFactory(config, isArray, isFunction, isObject, isString, Transports, format, LogLevels, getCurrentModuleData) {
+]).$export(function systemLoggerSetup(config, System, Transports, format, LogLevels, getCurrentModuleData) {
     'use strict';
 
     var loggerCache = {},
@@ -54,18 +51,15 @@ JARS.module('System.Logger').$import([
      * @return {boolean}
      */
     function compareDebugContext(context) {
-        var debugContext = config.context,
-            includeContext, excludeContext;
+        var debugContext = config.context;
 
-        if (isObject(debugContext)) {
-            includeContext = debugContext.include;
-            excludeContext = debugContext.exclude;
-        }
-        else {
-            includeContext = debugContext;
+        if (!System.isObject(debugContext)) {
+            debugContext = {
+                include: debugContext
+            };
         }
 
-        return includeContext ? inContextList(context, includeContext) : excludeContext ? !inContextList(context, excludeContext) : true;
+        return !inContextList(context, debugContext.exclude) && (inContextList(context, debugContext.include) || !debugContext.include);
     }
 
     /**
@@ -78,11 +72,11 @@ JARS.module('System.Logger').$import([
      * @return {boolean}
      */
     function inContextList(context, contextList) {
-        if(isString(contextList)) {
+        if(System.isString(contextList)) {
             contextList = contextList.split(CONTEXT_DELIMITER);
         }
 
-        return isArray(contextList) && contextList.indexOf(context) > -1;
+        return System.isArray(contextList) && contextList.indexOf(context) > -1;
     }
 
     /**
@@ -95,11 +89,10 @@ JARS.module('System.Logger').$import([
      */
     function Logger(logContext, options) {
         var logger = this;
+
         logContext = logContext || ROOT_LOGCONTEXT;
-
-        logger.context = logContext;
         loggerCache[logContext] = logger;
-
+        logger.context = logContext;
         logger.options = options || {};
         logger.options.tpl = logger.options.tpl || {};
     }
@@ -119,7 +112,7 @@ JARS.module('System.Logger').$import([
             activeTransport = Transports.getActive(getOption(options, 'mode')),
             methodName = activeTransport[level] ? level : 'log';
 
-        if (isDebuggingEnabled(getOption(options, 'debug'), level, context) && isFunction(activeTransport[methodName])) {
+        if (isDebuggingEnabled(getOption(options, 'debug'), level, context) && System.isFunction(activeTransport[methodName])) {
             message = format(options.tpl[message] || message, values);
 
             activeTransport[methodName](context, {
