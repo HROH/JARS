@@ -1,19 +1,14 @@
 JARS.internal('ConfigOptions', function configOptionsSetup(getInternal) {
     'use strict';
 
-    var RE_DOT = /\./g,
-        RE_STARTS_WITH_LOWERCASE = /^[a-z]/,
-        DEFAULT_EXTENSION = 'js',
-        SLASH = '/',
-        BundleResolver = getInternal('BundleResolver'),
-        DependenciesResolver = getInternal('DependenciesResolver'),
-        VersionResolver = getInternal('VersionResolver'),
+    var ConfigOptionsResolver = getInternal('Resolvers/ConfigOptions'),
+        ConfigTransforms = getInternal('ConfigTransforms'),
         Utils = getInternal('Utils'),
         create = Utils.create,
         hasOwnProp = Utils.hasOwnProp,
         objectEach = Utils.objectEach,
-        System = getInternal('System'),
-        configTransforms = getInternal('ConfigTransforms');
+        isBundle = getInternal('BundleResolver').isBundle,
+        isNull = getInternal('System').isNull;
 
     /**
      * @class
@@ -36,28 +31,15 @@ JARS.internal('ConfigOptions', function configOptionsSetup(getInternal) {
     /**
      * @memberof JARS.internals.ConfigOptions
      *
-     * @param {(JARS.internals.Module|JARS.internals.Bundle)} moduleOrBundle
+     * @param {(JARS.internals.Module|JARS.internals.Bundle)} subject
      *
      * @return {JARS.internals.ConfigOptions}
      */
-    ConfigOptions.getDefault = function(moduleOrBundle) {
-        var moduleOrBundleName = moduleOrBundle.name,
-            defaultOptions = new ConfigOptions(),
-            fileName;
+    ConfigOptions.getDefault = function(subject) {
+        var subjectName = subject.name,
+            defaultOptions = new ConfigOptions();
 
-        if(!BundleResolver.isBundle(moduleOrBundleName)) {
-            fileName = VersionResolver.removeVersion(DependenciesResolver.removeParentName(moduleOrBundleName));
-
-            ConfigOptions.transformAndUpdate(defaultOptions, {
-                extension: DEFAULT_EXTENSION,
-
-                fileName: fileName,
-
-                dirPath: VersionResolver.removeVersion(RE_STARTS_WITH_LOWERCASE.test(fileName) ? moduleOrBundleName : DependenciesResolver.getParentName(moduleOrBundleName)).replace(RE_DOT, SLASH),
-
-                versionPath: VersionResolver.getVersion(moduleOrBundleName)
-            }, moduleOrBundle);
-        }
+        isBundle(subjectName) || ConfigOptions.transformAndUpdate(defaultOptions, ConfigOptionsResolver(subjectName), subject);
 
         return defaultOptions;
     };
@@ -67,12 +49,12 @@ JARS.internal('ConfigOptions', function configOptionsSetup(getInternal) {
      *
      * @param {JARS.internals.ConfigOptions} configOptions
      * @param {Object} options
-     * @param {(JARS.internals.Module|JARS.internals.Bundle)} moduleOrBundle
+     * @param {(JARS.internals.Module|JARS.internals.Bundle)} subject
      */
-    ConfigOptions.transformAndUpdate = function(configOptions, options, moduleOrBundle) {
+    ConfigOptions.transformAndUpdate = function(configOptions, options, subject) {
         objectEach(options, function updateConfig(value, option) {
-            if (hasOwnProp(configTransforms, option)) {
-                updateOption(configOptions, option, transformOption(option, value, moduleOrBundle));
+            if (hasOwnProp(ConfigTransforms, option)) {
+                updateOption(configOptions, option, transformOption(option, value, subject));
             }
         });
     };
@@ -83,12 +65,12 @@ JARS.internal('ConfigOptions', function configOptionsSetup(getInternal) {
      *
      * @param {string} option
      * @param {*} value
-     * @param {(JARS.internals.Module|JARS.internals.Bundle)} moduleOrBundle
+     * @param {(JARS.internals.Module|JARS.internals.Bundle)} subject
      *
      * @return {*}
      */
-    function transformOption(option, value, moduleOrBundle) {
-        return configTransforms[option](value, moduleOrBundle);
+    function transformOption(option, value, subject) {
+        return ConfigTransforms[option](value, subject);
     }
 
     /**
@@ -100,7 +82,7 @@ JARS.internal('ConfigOptions', function configOptionsSetup(getInternal) {
      * @param {*} value
      */
     function updateOption(configOptions, option, value) {
-        if (System.isNull(value)) {
+        if (isNull(value)) {
             delete configOptions[option];
         }
         else {

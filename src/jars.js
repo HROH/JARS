@@ -38,6 +38,7 @@
                 'Recoverer',
                 'ResolutionHelpers',
                 'ResolutionStrategies',
+                'Resolvers',
                 'State',
                 'StateInfo',
                 'System',
