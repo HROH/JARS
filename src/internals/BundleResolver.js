@@ -4,6 +4,7 @@ JARS.internal('BundleResolver', function bundleResolverSetup(getInternal) {
     var ArrayResolutionStrategy = getInternal('TypeStrategies/Array'),
         BundleResolutionStrategy = getInternal('ResolutionStrategies/Bundle'),
         VersionResolver = getInternal('VersionResolver'),
+        unwrapVersion = VersionResolver.unwrapVersion,
         BUNDLE_SUFFIX = '.*',
         EMPTY_STRING = '',
         RE_BUNDLE_SUFFIX = /\.\*$/,
@@ -20,7 +21,7 @@ JARS.internal('BundleResolver', function bundleResolverSetup(getInternal) {
          *
          * @return {string}
          */
-        getBundleName: VersionResolver.unwrapVersion(function getBundleName(moduleName) {
+        getBundleName: unwrapVersion(function getBundleName(moduleName) {
             return moduleName + BUNDLE_SUFFIX;
         }),
         /**
@@ -28,7 +29,7 @@ JARS.internal('BundleResolver', function bundleResolverSetup(getInternal) {
          *
          * @return {string}
          */
-        removeBundleSuffix: VersionResolver.unwrapVersion(function(moduleName) {
+        removeBundleSuffix: unwrapVersion(function(moduleName) {
             return moduleName.replace(RE_BUNDLE_SUFFIX, EMPTY_STRING);
         }),
         /**

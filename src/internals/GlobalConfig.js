@@ -3,6 +3,7 @@ JARS.internal('GlobalConfig', function globalConfigSetup(getInternal) {
 
     var System = getInternal('System'),
         Utils = getInternal('Utils'),
+        isArray = System.isArray,
         arrayEach = Utils.arrayEach,
         objectEach = Utils.objectEach,
         globalConfigHooks = getInternal('GlobalConfigHooks'),
@@ -30,7 +31,7 @@ JARS.internal('GlobalConfig', function globalConfigSetup(getInternal) {
                     GlobalConfig.update(option, value);
                 });
             }
-            else if (System.isArray(optionOrConfigOrArray)) {
+            else if (isArray(optionOrConfigOrArray)) {
                 arrayEach(optionOrConfigOrArray, GlobalConfig.update);
             }
         },
@@ -54,7 +55,7 @@ JARS.internal('GlobalConfig', function globalConfigSetup(getInternal) {
     function updateOption(option, valueOrArray) {
         var configHook;
 
-        if(System.isArray(valueOrArray)) {
+        if(isArray(valueOrArray)) {
             arrayEach(valueOrArray, function(value) {
                 updateOption(option, value);
             });

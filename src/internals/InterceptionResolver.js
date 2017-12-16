@@ -1,7 +1,7 @@
 JARS.internal('InterceptionResolver', function interceptionResolverSetup(getInternal) {
     'use strict';
 
-    var InterceptorRegistry = getInternal('InterceptorRegistry'),
+    var eachInterceptor = getInternal('InterceptorRegistry').each,
         interceptionInfoCache = {},
         InterceptionResolver;
 
@@ -29,7 +29,7 @@ JARS.internal('InterceptionResolver', function interceptionResolverSetup(getInte
                 moduleParts;
 
             if (!interceptionInfo) {
-                InterceptorRegistry.each(function findInterceptor(interceptor, interceptorType) {
+                eachInterceptor(function findInterceptor(interceptor, interceptorType) {
                     if (moduleName.indexOf(interceptorType) > -1) {
                         moduleParts = moduleName.split(interceptorType);
 

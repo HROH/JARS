@@ -1,7 +1,7 @@
 JARS.internal('PluginInterceptor', function pluginInterceptorSetup(getInternal) {
     'use strict';
 
-    var System = getInternal('System'),
+    var isFunction = getInternal('System').isFunction,
         PluginInterceptor;
 
     /**
@@ -16,7 +16,7 @@ JARS.internal('PluginInterceptor', function pluginInterceptorSetup(getInternal) 
          * @param {JARS.internals.Intereption} interception
          */
         intercept: function(moduleRef, interception) {
-            if (System.isFunction(moduleRef.$plugIn)) {
+            if (isFunction(moduleRef.$plugIn)) {
                 moduleRef.$plugIn(interception);
             }
             else {
