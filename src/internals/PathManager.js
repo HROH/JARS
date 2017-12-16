@@ -5,8 +5,8 @@ JARS.internal('PathManager', function pathListManagerSetup(getInternal) {
         hasOwnProp = Utils.hasOwnProp,
         arrayEach = Utils.arrayEach,
         ModulesRegistry = getInternal('ModulesRegistry'),
-        BundleResolver = getInternal('BundleResolver'),
         ExtensionTransform = getInternal('ConfigTransforms/Extension'),
+        isBundle = getInternal('BundleResolver').isBundle,
         pathOptions = ['basePath', 'dirPath', 'versionPath', 'fileName', 'minify', 'extension', 'cache'],
         sortedModules = {},
         pathList = [],
@@ -32,22 +32,7 @@ JARS.internal('PathManager', function pathListManagerSetup(getInternal) {
          * @param {boolean} forceRecompute
          */
         computeSortedPathList: function(callback, forceRecompute) {
-            var modulesToLoad = [],
-                modulesLoading = false;
-
-            ModulesRegistry.each(function addModuleToLoad(module) {
-                if (module.state.isLoading()) {
-                    modulesToLoad.push(module.name);
-                    modulesLoading = true;
-                }
-            });
-
-            if (modulesLoading) {
-                getInternal('Loader').$import(modulesToLoad, function computeSortedPathList() {
-                    PathManager.computeSortedPathList(callback, forceRecompute);
-                });
-            }
-            else {
+            if (verifyModulesLoaded(callback, forceRecompute)) {
                 if (forceRecompute || !pathList.length) {
                     resetModulesPathList();
 
@@ -75,6 +60,24 @@ JARS.internal('PathManager', function pathListManagerSetup(getInternal) {
         }
     };
 
+    function verifyModulesLoaded(callback, forceRecompute) {
+        var modulesToLoad = [];
+
+        ModulesRegistry.each(function addModuleToLoad(module) {
+            if (module.state.isLoading()) {
+                modulesToLoad.push(module.name);
+            }
+        });
+
+        if (modulesToLoad.length) {
+            getInternal('Loader').$import(modulesToLoad, function computeSortedPathList() {
+                PathManager.computeSortedPathList(callback, forceRecompute);
+            });
+        }
+
+        return !modulesToLoad.length;
+    }
+
     /**
      * @memberof JARS.internals.PathManager
      * @inner
@@ -83,7 +86,7 @@ JARS.internal('PathManager', function pathListManagerSetup(getInternal) {
      */
     function addModules(modules) {
         arrayEach(modules || [], function addModuleToPathList(moduleName) {
-            addToPathList(ModulesRegistry.get(moduleName), BundleResolver.isBundle(moduleName));
+            addToPathList(ModulesRegistry.get(moduleName), isBundle(moduleName));
         });
     }
 
@@ -107,7 +110,7 @@ JARS.internal('PathManager', function pathListManagerSetup(getInternal) {
             }
 
             if (addBundle) {
-                addModules(module.bundle);
+                addModules(module.bundle.modules);
             }
         }
     }
