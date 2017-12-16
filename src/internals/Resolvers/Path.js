@@ -9,6 +9,7 @@ JARS.internal('Resolvers/Path', function pathResolverSetup(getInternal) {
         isBundle = getInternal('Resolvers/Bundle').isBundle,
         pathOptions = ['basePath', 'dirPath', 'versionPath', 'fileName', 'minify', 'extension', 'cache'],
         sortedModules = {},
+        excludedModules = [],
         pathList = [],
         PathManager;
 
@@ -57,6 +58,10 @@ JARS.internal('Resolvers/Path', function pathResolverSetup(getInternal) {
             });
 
             return path;
+        },
+
+        excludeFromPathList: function(modules) {
+            excludedModules = excludedModules.concat(modules);
         }
     };
 
@@ -123,7 +128,7 @@ JARS.internal('Resolvers/Path', function pathResolverSetup(getInternal) {
         pathList = [];
         sortedModules = {};
 
-        arrayEach([ModulesRegistry.getRoot().name, 'System', 'System.Logger', 'System.Modules'], function markModuleSorted(excludedModule) {
+        arrayEach(excludedModules, function markModuleSorted(excludedModule) {
             sortedModules[excludedModule] = true;
         });
     }

@@ -1,0 +1,43 @@
+JARS.internal('SystemBootstrapper', function(getInternal) {
+    'use strict';
+
+    var System = getInternal('System'),
+        SystemBootstrapper;
+
+    SystemBootstrapper= {
+        bootstrap: function() {
+            var systemModule;
+
+            getInternal('GlobalConfig').update('modules', {
+                restrict: 'System.*',
+
+                basePath: getInternal('Env').INTERNALS_PATH
+            });
+
+            systemModule = getInternal('ModulesRegistry').register('System', [
+                'ConsoleTransport',
+                'Formatter',
+                'Logger',
+                'LogLevels',
+                'Modules',
+                'Transports'
+            ]);
+            
+            systemModule.$export(function systemFactory() {
+                // TODO maybe calling the internal factory for System is the better option
+                // to isolate System on a per context basis but right now this is enough
+
+                /**
+                 * @global
+                 * @module System
+                 * @see JARS.internals.System
+                 */
+                return System;
+            });
+
+            return systemModule;
+        }
+    };
+
+    return SystemBootstrapper;
+});

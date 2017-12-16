@@ -8,30 +8,21 @@ JARS.internal('InternalBootstrapper', function internalBootstrapperSetup(getInte
      */
     var InternalBootstrapper = {
         bootstrap: function(commands) {
-            var Env = getInternal('Env'),
-                ModulesRegistry = getInternal('ModulesRegistry'),
-                GlobalConfig = getInternal('GlobalConfig'),
-                System = getInternal('System'),
-                SYSTEM_CONFIG = {
-                    restrict: 'System.*',
-
-                    basePath: Env.INTERNALS_PATH
-                },
-                SYSTEM_NAME = 'System',
-                SYSTEM_BUNDLE = ['ConsoleTransport', 'Formatter', 'Logger', 'LogLevels', 'Modules', 'Transports'];
+            var ModulesRegistry = getInternal('ModulesRegistry'),
+                systemModule;
 
             ModulesRegistry.init();
 
-            GlobalConfig.update({
-                modules: [{
-                    basePath: Env.BASE_PATH,
+            getInternal('GlobalConfig').update({
+                modules: {
+                    basePath: getInternal('Env').BASE_PATH,
 
                     cache: true,
 
                     minify: false,
 
                     timeout: 5
-                }, SYSTEM_CONFIG],
+                },
 
                 interceptors: [
                     getInternal('PluginInterceptor'),
@@ -43,17 +34,9 @@ JARS.internal('InternalBootstrapper', function internalBootstrapperSetup(getInte
                 loaderContext: 'default'
             });
 
-            ModulesRegistry.register(SYSTEM_NAME, SYSTEM_BUNDLE).$export(function systemFactory() {
-                // TODO maybe calling the internal factory for System is the better option
-                // to isolate System on a per context basis but right now this is enough
+            systemModule = getInternal('SystemBootstrapper').bootstrap();
 
-                /**
-                 * @global
-                 * @module System
-                 * @see JARS.internals.System
-                 */
-                return System;
-            });
+            getInternal('Resolvers/Path').excludeFromPathList([ModulesRegistry.getRoot().name, systemModule.name].concat(systemModule.bundle.modules));
 
             while(commands.length) {
                 InternalBootstrapper.run(commands.shift());

@@ -37,6 +37,7 @@
                 'State',
                 'StateInfo',
                 'System',
+                'SystemBootstrapper',
                 'Tools',
                 'Type',
                 'TypeLookup',
