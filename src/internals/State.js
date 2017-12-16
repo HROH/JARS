@@ -7,35 +7,32 @@ JARS.internal('State', function stateSetup(getInternal) {
         DONE = 'is ',
         IS_PREFIX = 'is',
         SET_PREFIX = 'set',
-        QUEUE_LOADED = 0,
-        QUEUE_ABORTED = 1;
+        QUEUE_LOADED = 'onModuleLoaded',
+        QUEUE_ABORTED = 'onModuleAborted';
 
     /**
      * @class
      *
      * @memberof JARS.internals
      *
-     * @param {string} moduleOrBundleName
-     * @param {JARS.internals.LogWrap} logger
+     * @param {(JARS.internals.Module|JARS.internals.Bundle)} subject
      */
-    function State(moduleOrBundleName, logger) {
+    function State(subject) {
         var state = this;
 
-        state._moduleOrBundleName = moduleOrBundleName;
-        state._logger = logger;
+        state._subject = subject;
         state._current = StateInfo.initial();
         state._queue = [];
     }
 
     /**
-     * @param {JARS.internals.State.LoadedCallback} onModuleLoaded
-     * @param {JARS.internals.State.AbortedCallback} onModuleAborted
+     * @param {(JARS.internals.StateChangeHandler|JARS.internals.InterceptionHandler)} changeHandler
      */
-    State.prototype.onChange = function(onModuleLoaded, onModuleAborted) {
+    State.prototype.onChange = function(changeHandler) {
         var state = this;
 
-        state._queue.push([onModuleLoaded, onModuleAborted]);
-        syncQueueWithState(state);
+        state._queue.push(changeHandler);
+        state._syncQueue();
     };
 
     StateInfo.each(function(stateInfo) {
@@ -59,18 +56,41 @@ JARS.internal('State', function stateSetup(getInternal) {
                 message = doneMsg  + (customMessage || '');
                 method = (logInfo && logInfo.log) || methods.done;
                 state._current = stateInfo;
-                syncQueueWithState(state);
+                state._syncQueue();
             }
             else {
                 message = attemptMsg + BUT_CURRENTLY + currentStateInfo.text;
                 method = methods.attempt;
             }
 
-            state._logger[method](message, logInfo);
+            state._subject.logger[method](message, logInfo);
 
             return canTransition;
         };
     });
+
+   /**
+    * @private
+    */
+    State.prototype._syncQueue = function() {
+        var state = this,
+            isLoaded = state.isLoaded(),
+            queue = state._queue,
+            subject = state._subject,
+            callbackMethod;
+
+        if(isLoaded || state.isAborted()) {
+            callbackMethod = isLoaded ? QUEUE_LOADED : QUEUE_ABORTED;
+
+            setTimeout(function() {
+                while (queue.length) {
+                    queue.shift()[callbackMethod](subject.name, {
+                        ref: subject.ref
+                    });
+                }
+            }, 0);
+        }
+   };
 
     /**
      * @method JARS.internals.State#isWaiting
@@ -133,41 +153,6 @@ JARS.internal('State', function stateSetup(getInternal) {
      * @param {Object} abortionInfo
      *
      * @return {boolean}
-     */
-
-    /**
-     * @memberof JARS.internals.State
-     * @inner
-     *
-     * @param {JARS.internals.State} state
-     */
-    function syncQueueWithState(state) {
-        var isLoaded = state.isLoaded(),
-            queue = state._queue,
-            moduleOrBundleName = state._moduleOrBundleName,
-            callbackIndex;
-
-        if(isLoaded || state.isAborted()) {
-            callbackIndex = isLoaded ? QUEUE_LOADED : QUEUE_ABORTED;
-
-            setTimeout(function() {
-                while (queue.length) {
-                    queue.shift()[callbackIndex](moduleOrBundleName);
-                }
-            }, 0);
-        }
-    }
-
-    /**
-     * @callback JARS.internals.State.LoadedCallback
-     *
-     * @param {string} loadedModuleName
-     */
-
-    /**
-     * @callback JARS.internals.State.AbortedCallback
-     *
-     * @param {string} abortedModuleName
      */
 
     return State;

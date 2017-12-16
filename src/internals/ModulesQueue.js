@@ -1,15 +1,11 @@
 JARS.internal('ModulesQueue', function modulesQueueSetup(getInternal) {
     'use strict';
 
-    var arrayEach = getInternal('Utils').arrayEach,
-        ModulesRegistry = getInternal('ModulesRegistry'),
-        BundleResolver = getInternal('BundleResolver'),
-        Interception = getInternal('Interception'),
-        InterceptionResolver = getInternal('InterceptionResolver'),
-        InterceptorRegistry = getInternal('InterceptorRegistry'),
-        SEPARATOR = '", "',
-        MSG_SUBSCRIBED_TO = 'subscribed to "${subs}"',
-        MSG_NOTIFIED_BY = 'was notified by "${pub}"';
+    var InterceptionHandler = getInternal('Handlers/Interception'),
+        StateChangeHandler = getInternal('Handlers/StateChange'),
+        arrayEach = getInternal('Utils').arrayEach,
+        getModule = getInternal('ModulesRegistry').get,
+        isBundle = getInternal('BundleResolver').isBundle;
 
     /**
      * @callback ModuleLoadedCallback
@@ -38,91 +34,64 @@ JARS.internal('ModulesQueue', function modulesQueueSetup(getInternal) {
      * @param {Array<*>} moduleRefs
      */
 
-    /**
-     * @class
-     *
-     * @memberof JARS.internals
-     *
-     * @param {(JARS.internals.Module|JARS.internals.Bundle)} moduleOrBundle
-     * @param {string[]} moduleNames
-     */
-    function ModulesQueue(moduleOrBundle, moduleNames) {
-        var loaderQueue = this;
 
-        loaderQueue._moduleOrBundle = moduleOrBundle;
-        loaderQueue._moduleNames = moduleNames;
+    function ModulesQueueHandler(requestHandler) {
+        var handler = this;
+
+        handler.requestor = requestHandler.requestor;
+        handler._nextHandler = requestHandler;
+        handler._modules = requestHandler.modules;
+        handler._total = handler._modules.length;
+        handler._refs = [];
+        handler._loaded = 0;
+
+        handler.onModulesLoaded();
     }
 
-    ModulesQueue.prototype = {
-        constructor: ModulesQueue,
-        /**
-         * @param {JARS.internals.ModulesQueue.ModulesLoadedCallback} onModulesLoaded
-         * @param {JARS.internals.ModulesQueue.ModuleAbortedCallback} onModuleAborted
-         * @param {JARS.internals.ModulesQueue.ModuleLoadedCallback} [onModuleLoaded]
-         */
-        request: function(onModulesLoaded, onModuleAborted, onModuleLoaded) {
-            var loaderQueue = this,
-                moduleOrBundle = loaderQueue._moduleOrBundle,
-                logger = moduleOrBundle.logger,
-                moduleNames = loaderQueue._moduleNames,
-                refsIndexLookUp = {},
-                refs = [],
-                counter = 0,
-                total = moduleNames.length;
+    ModulesQueueHandler.prototype = {
+        request: function() {
+            var handler = this;
 
-            if(total) {
-                onModuleLoaded = onModuleLoaded || onModuleLoadedNoop;
+            arrayEach(handler._modules, function requestModule(requested, index) {
+                handler.requestModule(requested, index);
+            });
+        },
 
-                logger.debug(MSG_SUBSCRIBED_TO, {
-                    subs: moduleNames.join(SEPARATOR)
-                });
+        requestModule: function(requested, index) {
+            var module = getModule(requested),
+                moduleOrBundle = isBundle(requested) ? module.bundle : module;
 
-                arrayEach(moduleNames, function loadModule(requestedModuleName, moduleIndex) {
-                    var requestedModule = ModulesRegistry.get(requestedModuleName),
-                        requestedModuleOrBundle = BundleResolver.isBundle(requestedModuleName) ? requestedModule.bundle : requestedModule;
+            moduleOrBundle.processor.load();
+            moduleOrBundle.state.onChange(InterceptionHandler.intercept(requested, new StateChangeHandler(index, this)));
+        },
 
-                    refsIndexLookUp[requestedModuleName] = moduleIndex;
+        onModuleLoaded: function(publisherName, data) {
+            var handler = this;
 
-                    requestedModuleOrBundle.request(function interceptorListener() {
-                        var interceptionInfo = InterceptionResolver.extractInterceptionInfo(requestedModuleName),
-                            interceptor = InterceptorRegistry.get(interceptionInfo.type),
-                            ref = requestedModule.ref;
+            handler._refs[data.index] = data.ref;
 
-                        if(interceptor) {
-                            interceptor.intercept(ref, new Interception(moduleOrBundle, interceptionInfo, processOnModuleLoaded, processOnModuleAborted));
-                        }
-                        else {
-                            processOnModuleLoaded(requestedModuleName, ref);
-                        }
-                    }, processOnModuleAborted);
-                });
-            }
-            else {
-                onModulesLoaded(refs);
-            }
+            handler._nextHandler.onModuleLoaded(publisherName, data.ref, getPercentage(handler._loaded++, handler._total));
+            handler.onModulesLoaded();
+        },
 
-            function processOnModuleLoaded(publishingModuleName, refOrData) {
-                refs[refsIndexLookUp[publishingModuleName]] = refOrData;
+        onModuleAborted: function(abortedModuleName) {
+            this._nextHandler.onModuleAborted(abortedModuleName);
+        },
 
-                logger.debug(MSG_NOTIFIED_BY, {
-                    pub: publishingModuleName
-                });
+        onModulesLoaded: function() {
+            var handler = this;
 
-                onModuleLoaded(publishingModuleName, refOrData, Number((counter++/total).toFixed(2)));
-                (counter === total) && onModulesLoaded(refs);
-            }
-
-            function processOnModuleAborted(abortedModuleName) {
-                onModuleAborted(moduleOrBundle, abortedModuleName);
-            }
+            (handler._loaded === handler._total) && handler._nextHandler.onModulesLoaded(handler._refs);
         }
     };
 
-    /**
-     * @memberof JARS.internals.ModulesQueue
-     * @inner
-     */
-    function onModuleLoadedNoop() {}
+    ModulesQueueHandler.request = function(requestHandler) {
+        new ModulesQueueHandler(requestHandler).request();
+    };
 
-    return ModulesQueue;
+    function getPercentage(count, total) {
+        return Number((count/total).toFixed(2));
+    }
+
+    return ModulesQueueHandler;
 });

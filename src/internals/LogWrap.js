@@ -1,7 +1,9 @@
 JARS.internal('LogWrap', function logWrapSetup(getInternal) {
     'use strict';
 
-    var System = getInternal('System');
+    var System = getInternal('System'),
+        BUNDLE_LOG_CONTEXT_PREFIX = 'Bundle:',
+        MODULE_LOG_CONTEXT_PREFIX = 'Module:';
 
     /**
      * @class
@@ -13,6 +15,14 @@ JARS.internal('LogWrap', function logWrapSetup(getInternal) {
     function LogWrap(loggerContext) {
         this._context = loggerContext;
     }
+
+    LogWrap.forBundle = function(bundle) {
+        return new LogWrap(BUNDLE_LOG_CONTEXT_PREFIX + bundle.name);
+    };
+
+    LogWrap.forModule = function(module) {
+        return new LogWrap(MODULE_LOG_CONTEXT_PREFIX + module.name);
+    };
 
     getInternal('Utils').arrayEach(['debug', 'error', 'info', 'warn'], function addForward(methodName) {
         LogWrap.prototype[methodName] = function(message, values) {

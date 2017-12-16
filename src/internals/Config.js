@@ -47,5 +47,17 @@ JARS.internal('Config', function configSetup(getInternal) {
         }
     };
 
+    Config.forModule = function(module) {
+        var parentConfig = module.bundle.config;
+
+        return module.isRoot ? parentConfig : new Config(module, parentConfig);
+    };
+
+    Config.forBundle = function(bundle) {
+        var parent = bundle.module.deps.parent;
+
+        return new Config(bundle, parent && parent.bundle.config);
+    };
+
     return Config;
 });

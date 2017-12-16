@@ -1,10 +1,11 @@
 JARS.internal('DependenciesChecker', function dependenciesCheckerSetup(getInternal) {
     'use strict';
 
-    var ModulesRegistry = getInternal('ModulesRegistry'),
-        Utils = getInternal('Utils'),
-        hasOwnProp = Utils.hasOwnProp,
-        arrayEach = Utils.arrayEach,
+    var getModule = getInternal('ModulesRegistry').get,
+        isBundle = getInternal('BundleResolver').isBundle,
+        arrayEach = getInternal('Utils').arrayEach,
+        CIRCULAR_SEPARATOR = '" -> "',
+        MSG_ABORTED_CIRCULAR_DEPENDENCIES = ' - found circular dependencies "${0}"',
         DependenciesChecker;
 
     /**
@@ -16,10 +17,17 @@ JARS.internal('DependenciesChecker', function dependenciesCheckerSetup(getIntern
         /**
          * @param {JARS.internals.Module} module
          *
-         * @return {string[]}
+         * @return {boolean}
          */
-        getCircular: function(module) {
-            return (!module.isRoot && module.config.get('checkCircularDeps')) ? getCircularDependencies(module) : [];
+        abortIfCircular: function(module) {
+            var circularDeps;
+
+            if(!module.isRoot && module.config.get('checkCircularDeps')) {
+                circularDeps = getCircularDeps(module);
+                circularDeps && module.state.setAborted(MSG_ABORTED_CIRCULAR_DEPENDENCIES, [circularDeps.join(CIRCULAR_SEPARATOR)]);
+            }
+
+            return !!circularDeps;
         }
     };
 
@@ -28,37 +36,36 @@ JARS.internal('DependenciesChecker', function dependenciesCheckerSetup(getIntern
      * @inner
      *
      * @param {JARS.internals.Module} module
-     * @param {Object<string, string>} [traversedModules]
+     * @param {JARS.internals.Module} [entryModule]
      *
-     * @return {*}
+     * @return {string[]}
      */
-    function getCircularDependencies(module, traversedModules) {
-        var moduleName = module.name,
-            dependencyModules = module.deps.getAll().concat(module.interceptionDeps.getAll()),
-            circularDependencies;
+    function getCircularDeps(module, entryModule) {
+        return (entryModule === module) ? [module.name] : getCircularDepsModule(module, entryModule);
+    }
 
-        traversedModules = traversedModules || {};
+    function getCircularDepsModule(module, entryModule) {
+        return module.state.isRegistered() && getCircularDepsEach(module.deps.getAll().concat(module.interceptionDeps.getAll()), entryModule || module, module);
+    }
 
-        if (hasOwnProp(traversedModules, moduleName)) {
-            circularDependencies = [moduleName];
-        }
-        else {
-            traversedModules[moduleName] = true;
+    function getCircularDepsBundle(bundle, entryModule) {
+        return getCircularDepsEach(bundle.modules, entryModule, bundle);
+    }
 
-            arrayEach(dependencyModules, function findCircularDeps(dependencyName) {
-                circularDependencies = getCircularDependencies(ModulesRegistry.get(dependencyName), traversedModules);
+    function getCircularDepsEach(modules, entryModule, owner) {
+        var circularDeps;
 
-                if(circularDependencies.length) {
-                    circularDependencies.unshift(moduleName);
+        arrayEach(modules, function getCircularDepsFor(moduleName) {
+            var depModule = getModule(moduleName);
 
-                    return true;
-                }
-            });
+            circularDeps = isBundle(moduleName) ? getCircularDepsBundle(depModule.bundle, entryModule) : getCircularDeps(depModule, entryModule);
 
-            delete traversedModules[moduleName];
-        }
+            return circularDeps;
+        });
 
-        return circularDependencies || [];
+        circularDeps && circularDeps.unshift(owner.name);
+
+        return circularDeps;
     }
 
     return DependenciesChecker;

@@ -3,9 +3,9 @@ JARS.internal('Loader', function loaderSetup(getInternal) {
 
     var System = getInternal('System'),
         GlobalConfig = getInternal('GlobalConfig'),
-        DependenciesResolver = getInternal('DependenciesResolver'),
         ModulesRegistry = getInternal('ModulesRegistry'),
         ModulesQueue = getInternal('ModulesQueue'),
+        resolveDeps = getInternal('DependenciesResolver').resolveDeps,
         Loader;
 
     /**
@@ -37,11 +37,23 @@ JARS.internal('Loader', function loaderSetup(getInternal) {
         $import: function(moduleNames, onModulesImported, onModuleAborted, onModuleImported) {
             var rootModule = ModulesRegistry.getRoot();
 
-            new ModulesQueue(rootModule, DependenciesResolver.resolveDeps(rootModule, moduleNames)).request(function onModulesLoaded(refs) {
-                onModulesImported.apply(null, refs);
-            }, onModuleAborted, onModuleImported);
+            ModulesQueue.request({
+                requestor: rootModule,
+
+                modules: resolveDeps(rootModule, moduleNames),
+
+                onModuleLoaded: onModuleImported || noop,
+
+                onModuleAborted: onModuleAborted || noop,
+
+                onModulesLoaded: function(refs) {
+                    (onModulesImported || noop).apply(null, refs);
+                }
+            });
         }
     };
+
+    function noop() {}
 
     return Loader;
 });

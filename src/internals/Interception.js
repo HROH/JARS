@@ -1,9 +1,9 @@
 JARS.internal('Interception', function interceptionSetup(getInternal) {
     'use strict';
 
-    var ModulesRegistry = getInternal('ModulesRegistry'),
-        DependenciesResolver = getInternal('DependenciesResolver'),
-        PathManager = getInternal('PathManager'),
+    var getModule = getInternal('ModulesRegistry').get,
+        resolveDeps = getInternal('DependenciesResolver').resolveDeps,
+        getFullPath = getInternal('PathManager').getFullPath,
         MSG_INTERCEPTION_ERROR = 'error in interception of this module by interceptor "${type}" with data "${data}"';
 
     /**
@@ -11,18 +11,16 @@ JARS.internal('Interception', function interceptionSetup(getInternal) {
      *
      * @memberof JARS.internals
      *
-     * @param {JARS.internals.Module} listeningModule
+     * @param {JARS.internals.Module} requestor
      * @param {JARS.internals.InterceptionInfo} interceptionInfo
-     * @param {JARS.internals.State.LoadedCallback} onModuleLoaded
-     * @param {JARS.internals.State.AbortedCallback} onModuleAborted
+     * @param {JARS.internals.StateChangeHandler} handler
      */
-    function Interception(listeningModule, interceptionInfo, onModuleLoaded, onModuleAborted) {
+    function Interception(requestor, interceptionInfo, handler) {
         var interception = this;
 
-        interception.listeningModule = listeningModule;
+        interception.requestor = requestor;
         interception.info = interceptionInfo;
-        interception.success = createSuccessHandler(interceptionInfo, onModuleLoaded);
-        interception.fail = createFailHandler(interceptionInfo, onModuleAborted);
+        interception._handler = handler;
     }
 
     Interception.prototype = {
@@ -33,65 +31,33 @@ JARS.internal('Interception', function interceptionSetup(getInternal) {
          * @return {string}
          */
         getFilePath: function(fileType) {
-            var listeningModule = this.listeningModule;
-
-            return !listeningModule.isRoot && PathManager.getFullPath(listeningModule, fileType);
+            return getFullPath(this.requestor, fileType);
         },
         /**
          * @param {JARS.internals.Dependencies.Declaration} moduleNames
          * @param {JARS.internals.ModulesQueue.ModulesLoadedCallback} onModulesLoaded
-         * @param {JARS.internals.ModulesQueue.ModuleAbortedCallback} onModuleAborted
-         * @param {JARS.internals.ModulesQueue.ModuleLoadedCallback} onModuleLoaded
          */
-        $importAndLink: function(moduleNames, onModulesLoaded, onModuleAborted, onModuleLoaded) {
-            var listeningModule = this.listeningModule,
-                interceptionDeps = listeningModule.interceptionDeps;
+        $importAndLink: function(moduleNames, onModulesLoaded) {
+            var interceptionDeps = this.requestor.interceptionDeps;
 
-            moduleNames = DependenciesResolver.resolveDeps(ModulesRegistry.get(this.info.moduleName), moduleNames);
-
-            if (!listeningModule.isRoot) {
-                interceptionDeps.add(moduleNames);
-                interceptionDeps.request(onModulesLoaded);
-            }
-            else {
-                getInternal('Loader').$import(moduleNames, onModulesLoaded, onModuleAborted, onModuleLoaded);
-            }
+            interceptionDeps.add(resolveDeps(getModule(this.info.moduleName), moduleNames));
+            interceptionDeps.request(onModulesLoaded);
         },
+
+        success: function(data) {
+            this._handler.onModuleLoaded(this.info.fullModuleName, {
+                ref: data
+            });
+        },
+
+        fail: function(error) {
+            var interceptedModuleName = this.info.fullModuleName;
+
+            getModule(interceptedModuleName).logger.error(error || MSG_INTERCEPTION_ERROR, this.info);
+
+            this._handler.onModuleAborted(interceptedModuleName);
+        }
     };
-
-    /**
-     * @memberof JARS.internals.Interception
-     * @inner
-     *
-     * @param {JARS.internals.InterceptionInfo} interceptionInfo
-     * @param {JARS.internals.State.AbortedCallback} onModuleAborted
-     *
-     * @return {function(string)}
-     */
-    function createFailHandler(interceptionInfo, onModuleAborted) {
-        var interceptedModuleName = interceptionInfo.fullModuleName;
-
-        return function onInterceptionFail(error) {
-            ModulesRegistry.get(interceptedModuleName).logger.error(error || MSG_INTERCEPTION_ERROR, interceptionInfo);
-
-            onModuleAborted(interceptedModuleName);
-        };
-    }
-
-    /**
-     * @memberof JARS.internals.Interception
-     * @inner
-     *
-     * @param {JARS.internals.InterceptionInfo} interceptionInfo
-     * @param {JARS.internals.State.LoadedCallback} onModuleLoaded
-     *
-     * @return {function(*)}
-     */
-    function createSuccessHandler(interceptionInfo, onModuleLoaded) {
-        return function onInterceptionSuccess(data) {
-            onModuleLoaded(interceptionInfo.fullModuleName, data);
-        };
-    }
 
     return Interception;
 });
