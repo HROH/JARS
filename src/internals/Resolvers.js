@@ -1,1 +1,10 @@
-JARS.internalGroup('Resolvers', ['ConfigOptions', 'DirPath', 'FileName']);
+JARS.internalGroup('Resolvers', [
+    'Bundle',
+    'ConfigOptions',
+    'Dependencies',
+    'DirPath',
+    'FileName',
+    'Interception',
+    'Path',
+    'Version'
+]);

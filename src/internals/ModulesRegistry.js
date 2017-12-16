@@ -15,8 +15,8 @@ JARS.internal('ModulesRegistry', function modulesRegistrySetup(getInternal) {
     ModulesRegistry = {
         init: function() {
             Module = getInternal('Module');
-            InterceptionResolver = getInternal('InterceptionResolver');
-            BundleResolver = getInternal('BundleResolver');
+            InterceptionResolver = getInternal('Resolvers/Interception');
+            BundleResolver = getInternal('Resolvers/Bundle');
 
             ModulesRegistry.getRoot().$export();
         },

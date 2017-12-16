@@ -7,7 +7,7 @@ JARS.internal('ConfigOptions', function configOptionsSetup(getInternal) {
         create = Utils.create,
         hasOwnProp = Utils.hasOwnProp,
         objectEach = Utils.objectEach,
-        isBundle = getInternal('BundleResolver').isBundle,
+        isBundle = getInternal('Resolvers/Bundle').isBundle,
         isNull = getInternal('System').isNull;
 
     /**

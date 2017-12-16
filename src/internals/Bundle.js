@@ -1,7 +1,7 @@
 JARS.internal('Bundle', function bundleSetup(getInternal) {
     'use strict';
 
-    var BundleResolver = getInternal('BundleResolver'),
+    var BundleResolver = getInternal('Resolvers/Bundle'),
         Tools = getInternal('Tools');
 
     /**

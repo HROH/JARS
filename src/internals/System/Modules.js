@@ -10,8 +10,8 @@ JARS.module('System.Modules').$export(function systemModulesFactory() {
         arrayEach = getInternal('Utils').arrayEach,
         Loader = getInternal('Loader'),
         ModulesRegistry = getInternal('ModulesRegistry'),
-        DependenciesResolver = getInternal('DependenciesResolver'),
-        PathManager = getInternal('PathManager'),
+        DependenciesResolver = getInternal('Resolvers/Dependencies'),
+        getFullPath = getInternal('Resolvers/Path').getFullPath,
         Modules;
 
     /**
@@ -57,7 +57,7 @@ JARS.module('System.Modules').$export(function systemModulesFactory() {
             return {
                 moduleName: module.name,
 
-                path: PathManager.getFullPath(module)
+                path: getFullPath(module)
             };
         }
     };

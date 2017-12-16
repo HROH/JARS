@@ -1,7 +1,7 @@
 JARS.internal('Resolvers/FileName', function(getInternal) {
     'use strict';
 
-    var removeVersion = getInternal('VersionResolver').removeVersion,
+    var removeVersion = getInternal('Resolvers/Version').removeVersion,
         DOT = '.';
 
     function FileNameResolver(moduleName) {

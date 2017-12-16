@@ -1,4 +1,4 @@
-JARS.internal('InterceptionResolver', function interceptionResolverSetup(getInternal) {
+JARS.internal('Resolvers/Interception', function interceptionResolverSetup(getInternal) {
     'use strict';
 
     var eachInterceptor = getInternal('InterceptorRegistry').each,

@@ -2,7 +2,7 @@ JARS.internal('Processors/Module', function(getInternal) {
     'use strict';
 
     var AutoAborter = getInternal('AutoAborter'),
-        getFullPath = getInternal('PathManager').getFullPath,
+        getFullPath = getInternal('Resolvers/Path').getFullPath,
         loadSource = getInternal('SourceManager').load;
 
     function ModuleProcessor(module) {

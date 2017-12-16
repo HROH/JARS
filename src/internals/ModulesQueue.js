@@ -5,7 +5,7 @@ JARS.internal('ModulesQueue', function modulesQueueSetup(getInternal) {
         StateChangeHandler = getInternal('Handlers/StateChange'),
         arrayEach = getInternal('Utils').arrayEach,
         getModule = getInternal('ModulesRegistry').get,
-        isBundle = getInternal('BundleResolver').isBundle;
+        isBundle = getInternal('Resolvers/Bundle').isBundle;
 
     /**
      * @callback ModuleLoadedCallback

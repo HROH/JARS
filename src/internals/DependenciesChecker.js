@@ -2,7 +2,7 @@ JARS.internal('DependenciesChecker', function dependenciesCheckerSetup(getIntern
     'use strict';
 
     var getModule = getInternal('ModulesRegistry').get,
-        isBundle = getInternal('BundleResolver').isBundle,
+        isBundle = getInternal('Resolvers/Bundle').isBundle,
         arrayEach = getInternal('Utils').arrayEach,
         CIRCULAR_SEPARATOR = '" -> "',
         MSG_ABORTED_CIRCULAR_DEPENDENCIES = ' - found circular dependencies "${0}"',

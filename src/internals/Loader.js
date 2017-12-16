@@ -5,7 +5,7 @@ JARS.internal('Loader', function loaderSetup(getInternal) {
         GlobalConfig = getInternal('GlobalConfig'),
         ModulesRegistry = getInternal('ModulesRegistry'),
         ModulesQueue = getInternal('ModulesQueue'),
-        resolveDeps = getInternal('DependenciesResolver').resolveDeps,
+        resolveDeps = getInternal('Resolvers/Dependencies').resolveDeps,
         Loader;
 
     /**

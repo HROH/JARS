@@ -2,8 +2,8 @@ JARS.internal('GlobalConfigHooks/Modules', function modulesHookSetup(getInternal
     'use strict';
 
     var ModulesRegistry = getInternal('ModulesRegistry'),
-        DependenciesResolver = getInternal('DependenciesResolver'),
-        BundleResolver = getInternal('BundleResolver'),
+        DependenciesResolver = getInternal('Resolvers/Dependencies'),
+        BundleResolver = getInternal('Resolvers/Bundle'),
         arrayEach = getInternal('Utils').arrayEach,
         Modules;
 

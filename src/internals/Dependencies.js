@@ -1,7 +1,7 @@
 JARS.internal('Dependencies', function dependenciesSetup(getInternal) {
     'use strict';
 
-    var DependenciesResolver = getInternal('DependenciesResolver'),
+    var DependenciesResolver = getInternal('Resolvers/Dependencies'),
         DependenciesHandler = getInternal('Handlers/Dependencies'),
         ModulesQueue = getInternal('ModulesQueue'),
         abortIfCircular = getInternal('DependenciesChecker').abortIfCircular;

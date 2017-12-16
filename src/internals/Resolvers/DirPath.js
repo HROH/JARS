@@ -1,8 +1,8 @@
 JARS.internal('Resolvers/DirPath', function(getInternal) {
     'use strict';
 
-    var removeVersion = getInternal('VersionResolver').removeVersion,
-        getParentName = getInternal('DependenciesResolver').getParentName,
+    var removeVersion = getInternal('Resolvers/Version').removeVersion,
+        getParentName = getInternal('Resolvers/Dependencies').getParentName,
         RE_DOT = /\./g,
         RE_STARTS_WITH_LOWERCASE = /^[a-z]/,
         SLASH = '/';

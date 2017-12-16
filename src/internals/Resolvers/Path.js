@@ -1,4 +1,4 @@
-JARS.internal('PathManager', function pathListManagerSetup(getInternal) {
+JARS.internal('Resolvers/Path', function pathResolverSetup(getInternal) {
     'use strict';
 
     var Utils = getInternal('Utils'),
@@ -6,7 +6,7 @@ JARS.internal('PathManager', function pathListManagerSetup(getInternal) {
         arrayEach = Utils.arrayEach,
         ModulesRegistry = getInternal('ModulesRegistry'),
         ExtensionTransform = getInternal('ConfigTransforms/Extension'),
-        isBundle = getInternal('BundleResolver').isBundle,
+        isBundle = getInternal('Resolvers/Bundle').isBundle,
         pathOptions = ['basePath', 'dirPath', 'versionPath', 'fileName', 'minify', 'extension', 'cache'],
         sortedModules = {},
         pathList = [],

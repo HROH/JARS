@@ -2,8 +2,8 @@ JARS.internal('Interception', function interceptionSetup(getInternal) {
     'use strict';
 
     var getModule = getInternal('ModulesRegistry').get,
-        resolveDeps = getInternal('DependenciesResolver').resolveDeps,
-        getFullPath = getInternal('PathManager').getFullPath,
+        resolveDeps = getInternal('Resolvers/Dependencies').resolveDeps,
+        getFullPath = getInternal('Resolvers/Path').getFullPath,
         MSG_INTERCEPTION_ERROR = 'error in interception of this module by interceptor "${type}" with data "${data}"';
 
     /**

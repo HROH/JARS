@@ -1,10 +1,10 @@
-JARS.internal('DependenciesResolver', function dependenciesResolverSetup(getInternal) {
+JARS.internal('Resolvers/Dependencies', function dependenciesResolverSetup(getInternal) {
     'use strict';
 
     var ModulesRegistry = getInternal('ModulesRegistry'),
         AnyResolutionStrategy = getInternal('TypeStrategies/Any'),
         DependenciesResolutionStrategy = getInternal('ResolutionStrategies/Dependencies'),
-        VersionResolver = getInternal('VersionResolver'),
+        unwrapVersion = getInternal('Resolvers/Version').unwrapVersion,
         DOT = '.',
         DependenciesResolver;
 
@@ -19,7 +19,7 @@ JARS.internal('DependenciesResolver', function dependenciesResolverSetup(getInte
          *
          * @return {string}
          */
-        getParentName: VersionResolver.unwrapVersion(function getParentName(moduleName) {
+        getParentName: unwrapVersion(function getParentName(moduleName) {
             return moduleName.substr(0, moduleName.lastIndexOf(DOT));
         }),
         /**

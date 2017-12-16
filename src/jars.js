@@ -11,18 +11,15 @@
         var internalsToLoad = [
                 'AutoAborter',
                 'Bundle',
-                'BundleResolver',
                 'Config',
                 'ConfigOptions',
                 'ConfigTransforms',
                 'Dependencies',
                 'DependenciesChecker',
-                'DependenciesResolver',
                 'GlobalConfig',
                 'GlobalConfigHooks',
                 'Handlers',
                 'Interception',
-                'InterceptionResolver',
                 'InterceptorRegistry',
                 'InternalBootstrapper',
                 'Loader',
@@ -31,7 +28,6 @@
                 'ModulesQueue',
                 'ModulesRegistry',
                 'PartialModuleInterceptor',
-                'PathManager',
                 'PluginInterceptor',
                 'Processors',
                 'Recoverer',
@@ -45,8 +41,7 @@
                 'Type',
                 'TypeLookup',
                 'TypeStrategies',
-                'Utils',
-                'VersionResolver'
+                'Utils'
             ],
             internals = {},
             commands = [],
@@ -331,7 +326,7 @@
 
             configure: delegateToInternal('GlobalConfig', 'update', getJARS),
 
-            computeSortedPathList: delegateToInternal('PathManager', 'computeSortedPathList', getJARS),
+            computeSortedPathList: delegateToInternal('Resolvers/Path', 'computeSortedPathList', getJARS),
 
             flush: delegateToInternal('Loader', 'flush', getJARS),
             /**
