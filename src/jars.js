@@ -1,6 +1,12 @@
 (function globalSetup(envGlobal) {
     'use strict';
 
+    /**
+     * @namespace internals
+     *
+     * @memberof JARS
+     */
+
     var InternalsManager = (function internalsManagerSetup() {
         var internalsToLoad = [
                 'AutoAborter',
@@ -46,7 +52,19 @@
             internalsLoading = internalsToLoad.length,
             InternalsManager;
 
+        /**
+         * @namespace
+         *
+         * @memberof JARS.internals
+         */
         InternalsManager = {
+            /**
+             * @param {string} internalName
+             * @param {string} methodName
+             * @param {function()} returnFn
+             *
+             * @return {function()}
+             */
             delegate: function(internalName, methodName, returnFn) {
                 return function internalDelegator() {
                     var args = Array.prototype.slice.call(arguments),
@@ -62,7 +80,10 @@
                     return returnFn && returnFn.apply(null, args);
                 };
             },
-
+            /**
+             * @param {string} internalName
+             * @param {JARS.internals.InternalsManager~InternalsFactory} factory
+             */
             register: function(internalName, factory) {
                 var internal = internals[internalName] || (internals[internalName] = {});
 
@@ -76,7 +97,10 @@
                     }
                 }
             },
-
+            /**
+             * @param {string} groupName
+             * @param {string[]} group
+             */
             registerGroup: function (groupName, group) {
                 var groupLength = group.length,
                     internalNames = [],
@@ -103,7 +127,11 @@
                     return result;
                 });
             },
-
+            /**
+             * @param {string} internalName
+             *
+             * @return {*}
+             */
             get: function (internalName) {
                 var internal = internals[internalName],
                     object;
@@ -114,11 +142,15 @@
 
                 return object;
             },
-
+            /**
+             * @param {string} internalName
+             */
             load: function(internalName) {
                 InternalsManager.get('SourceManager').load('internal:' + internalName, InternalsManager.get('Env').INTERNALS_PATH + internalName + '.js');
             },
-
+            /**
+             * @method
+             */
             init: function() {
                 var index;
 
@@ -131,6 +163,17 @@
                 }
             }
         };
+
+        /**
+         * @callback InternalsFactory
+         *
+         * @memberof JARS.internals.InternalsManager
+         * @inner
+         *
+         * @param {JARS.internals.InternalsManager.get} getInternal
+         *
+         * @return {*}
+         */
 
         return InternalsManager;
     })();
@@ -147,6 +190,9 @@
          * @memberof JARS.internals
          */
         Env = {
+            /**
+             * @type {object}
+             */
             global: envGlobal,
             /**
              * @type {string}
@@ -217,12 +263,24 @@
         /**
          * @namespace
          * @global
+         *
+         * @borrows JARS.internals.InternalsManager.register as internal
+         * @borrows JARS.internals.InternalsManager.registerGroup as internalGroup
          */
         JARS = {
+            /**
+             * @param {string} mainModule
+             */
             main: function(mainModule) {
                 mainModule && JARS.configure('main', mainModule);
             },
-
+            /**
+             * @method
+             *
+             * @param {string} moduleName
+             *
+             * @return {JARS~ModuleWrapper}
+             */
             module: delegateToInternal('ModulesRegistry', 'register', function returnModuleWrapper(moduleName) {
                 var dynamicInternalName = 'ModulesRegistry:' + moduleName,
                     ModuleWrapper;
@@ -231,11 +289,28 @@
                     return getInternal('ModulesRegistry').get(moduleName);
                 });
 
+                /**
+                 * @namespace
+                 *
+                 * @memberof JARS
+                 * @inner
+                 */
                 ModuleWrapper = {
+                    /**
+                     * @method
+                     *
+                     * @param {JARS.internals.Dependencies.Declaration}
+                     *
+                     * @return {JARS~ModuleWrapper}
+                     */
                     $import: delegateToInternal(dynamicInternalName, '$import', function returnSelf() {
                         return ModuleWrapper;
                     }),
-
+                    /**
+                     * @method
+                     *
+                     * @param {JARS.internals.Module.ModuleFactory} factory
+                     */
                     $export: delegateToInternal(dynamicInternalName, '$export')
                 };
 
@@ -267,18 +342,13 @@
                 return JARS;
             },
             /**
-             * @type {string}
+             * @const {string}
+             * @default
              */
             version: '0.3.0'
         };
 
         JARS.main(InternalsManager.get('Env').MAIN_MODULE);
-
-        /**
-         * @namespace internals
-         *
-         * @memberof JARS
-         */
 
         /**
          * @memberof JARS
