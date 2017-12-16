@@ -4,13 +4,16 @@ JARS.internal('StateInfo', function stateInfoSetup(getInternal) {
     var Utils = getInternal('Utils'),
         arrayEach = Utils.arrayEach,
         objectMerge = Utils.objectMerge,
-        defaultLogMethods = {
-            attempt: 'warn',
+        LOG_METHODS = {
+            all: {
+                attempt: 'warn',
 
-            done: 'info'
-        },
-        loadLogMethods = {
-            attempt: 'info'
+                done: 'info'
+            },
+
+            load: {
+                attempt: 'info'
+            }
         },
         waiting, loading, registered, loaded, aborted;
 
@@ -28,7 +31,7 @@ JARS.internal('StateInfo', function stateInfoSetup(getInternal) {
         logMethods || (logMethods = {});
 
         stateInfo.text = stateText;
-        stateInfo.methods = objectMerge(objectMerge({}, defaultLogMethods), logMethods);
+        stateInfo.methods = objectMerge(objectMerge({}, LOG_METHODS.all), logMethods);
     }
 
     /**
@@ -65,11 +68,11 @@ JARS.internal('StateInfo', function stateInfoSetup(getInternal) {
 
     waiting = new StateInfo('waiting');
 
-    loading = new StateInfo('loading', loadLogMethods);
+    loading = new StateInfo('loading', LOG_METHODS.load);
 
     registered = new StateInfo('registered');
 
-    loaded = new StateInfo('loaded', loadLogMethods);
+    loaded = new StateInfo('loaded', LOG_METHODS.load);
 
     aborted = new StateInfo('aborted', {
         done: 'error'
