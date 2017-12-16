@@ -12,10 +12,10 @@ JARS.module('System.LogLevels').$import(['.::$$internals', '.::isNumber', '.::is
         ALL: -Infinity,
 
         add: function(level, priority) {
-            if (!hasLevel(level)) {
+            if (!hasLevelPriority(level)) {
                 definedLevels.push(level);
 
-                setLevel(level, priority);
+                setLevelPriority(level, priority);
             }
         },
 
@@ -28,7 +28,11 @@ JARS.module('System.LogLevels').$import(['.::$$internals', '.::isNumber', '.::is
          * @return {number}
          */
         getPriority: function(level) {
-            return hasLevel(level) ? getLevel(level) : LogLevels.ALL;
+            return hasLevelPriority(level) ? getLevelPriority(level) : LogLevels.ALL;
+        },
+
+        comparePriority: function(level, requiredLevel) {
+            return LogLevels.getPriority(level) >= LogLevels.getPriority(requiredLevel);
         }
     };
 
@@ -36,15 +40,15 @@ JARS.module('System.LogLevels').$import(['.::$$internals', '.::isNumber', '.::is
         LogLevels.add(stdLevel, (levelIndex + 1) * 10);
     });
 
-    function hasLevel(level) {
+    function hasLevelPriority(level) {
         return isString(level) && hasOwnProp(LogLevels, level.toUpperCase());
     }
 
-    function getLevel(level) {
+    function getLevelPriority(level) {
         return LogLevels[level.toUpperCase()];
     }
 
-    function setLevel(level, priority) {
+    function setLevelPriority(level, priority) {
         LogLevels[level.toUpperCase()] = isNumber(priority) ? priority : LogLevels.ALL;
     }
 

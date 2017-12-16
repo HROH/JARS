@@ -27,19 +27,7 @@ JARS.module('System.Logger').$import([
      * @return {boolean}
      */
     function isDebuggingEnabled(debug, level, context) {
-        return debug && comparePriority(level) && compareDebugContext(context);
-    }
-
-    /**
-     * @memberof JARS.internals.System.Logger
-     * @inner
-     *
-     * @param {string} level
-     *
-     * @return {boolean}
-     */
-    function comparePriority(level) {
-        return LogLevels.getPriority(level) >= LogLevels.getPriority(config.level);
+        return debug && LogLevels.comparePriority(level, config.level) && compareDebugContext(context);
     }
 
     /**
