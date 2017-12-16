@@ -157,7 +157,7 @@ JARS.internal('System', function systemSetup(getInternal) {
     function isIterable(value) {
         var length = value.length;
 
-        return System.isNumber(length) && length === 0 || (length > 0 && ((length - 1) in value));
+        return length === 0 || (length > 0 && ((length - 1) in value));
     }
 
     return System;
