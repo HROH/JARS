@@ -9,16 +9,16 @@ JARS.internal('Config', function configSetup(getInternal) {
      *
      * @memberof JARS.internals
      *
-     * @param {(JARS.internals.Module|JARS.internals.Bundle)} moduleOrBundle
+     * @param {(JARS.internals.Module|JARS.internals.Bundle)} subject
      * @param {JARS.internals.Config} [parentConfig]
      */
-    function Config(moduleOrBundle, parentConfig) {
+    function Config(subject, parentConfig) {
         var config = this;
 
         config.parentConfig = parentConfig;
-        config._moduleOrBundle = moduleOrBundle;
+        config._subject = subject;
         config._options = parentConfig ? parentConfig.inheritOptions() : new ConfigOptions();
-        config._defaultOptions = ConfigOptions.getDefault(moduleOrBundle);
+        config._defaultOptions = ConfigOptions.getDefault(subject);
     }
 
     Config.prototype = {
@@ -27,9 +27,7 @@ JARS.internal('Config', function configSetup(getInternal) {
          * @param {Object} newOptions
          */
         update: function(newOptions) {
-            var config = this;
-
-            ConfigOptions.transformAndUpdate(config._options, newOptions, config._moduleOrBundle);
+            ConfigOptions.transformAndUpdate(this._options, newOptions, this._subject);
         },
         /**
          * @param {string} option
@@ -37,19 +35,9 @@ JARS.internal('Config', function configSetup(getInternal) {
          * @return {*}
          */
         get: function(option) {
-            var config = this,
-                options = config._options,
-                defaultValue = config._defaultOptions[option],
-                result;
+            var options = this._options;
 
-            if (option in options) {
-                result = options[option];
-            }
-            else {
-                result = defaultValue;
-            }
-
-            return result;
+            return (option in options) ? options[option]: this._defaultOptions[option];
         },
         /**
          * @return {JARS.internals.ConfigOptions}
