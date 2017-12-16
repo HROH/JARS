@@ -3,31 +3,25 @@ JARS.internal('Recoverer', function recovererSetup(getInternal) {
 
     var objectMerge = getInternal('Utils').objectMerge,
         nextRecoverConfigs = {},
-        MSG_RECOVERING = 'failed to load and tries to recover...',
-        Recoverer;
+        MSG_RECOVERING = 'failed to load and tries to recover...';
 
     /**
-     * @namespace
-     *
      * @memberof JARS.internals
+     *
+     * @param {JARS.internals.Module} module
+     *
+     * @return {boolean}
      */
-    Recoverer = {
-        /**
-         * @param {JARS.internals.Module} module
-         *
-         * @return {boolean}
-         */
-        recover: function(module) {
-            var updatedNextRecover = updateNextRecover(module.name, module.config);
+    function Recoverer(module) {
+        var updatedNextRecover = updateNextRecover(module.name, module.config);
 
-            if (updatedNextRecover) {
-                module.logger.warn(MSG_RECOVERING);
-                module.load();
-            }
-
-            return updatedNextRecover;
+        if (updatedNextRecover) {
+            module.logger.warn(MSG_RECOVERING);
+            module.load();
         }
-    };
+
+        return updatedNextRecover;
+    }
 
     /**
      * @memberof JARS.internals.Recoverer

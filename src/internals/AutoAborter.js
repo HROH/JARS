@@ -2,7 +2,7 @@ JARS.internal('AutoAborter', function autoAborterSetup(getInternal) {
     'use strict';
 
     var Recoverer = getInternal('Recoverer'),
-        global = getInternal('System').env.global,
+        global = getInternal('Env').global,
         timeoutIDs = {},
         MILLISECONDS_PER_SECOND = 1000,
         MSG_MODULE_ABORTED = ' - timeout after ${sec} second(s) with given path "${path}"',
@@ -22,7 +22,7 @@ JARS.internal('AutoAborter', function autoAborterSetup(getInternal) {
             var timeout = module.config.get('timeout');
 
             timeoutIDs[module.name] = global.setTimeout(function abortModule() {
-                Recoverer.recover(module) || module.state.setAborted(MSG_MODULE_ABORTED, {
+                Recoverer(module) || module.state.setAborted(MSG_MODULE_ABORTED, {
                     path: path,
 
                     sec: timeout
