@@ -3,7 +3,7 @@ JARS.internal('Processors/Bundle', function(getInternal) {
 
     var BundleCoremoduleHandler = getInternal('Handlers/BundleCoremodule'),
         BundleSubmoduleHandler = getInternal('Handlers/BundleSubmodule'),
-        ModulesQueue = getInternal('ModulesQueue'),
+        Modules = getInternal('Handlers/Modules'),
         DEFAULT_BUNDLE_LOG_INFO = {
             bundle: 'none',
 
@@ -23,7 +23,7 @@ JARS.internal('Processors/Bundle', function(getInternal) {
             var bundle = this.bundle;
 
             if(bundle.state.setLoading()) {
-                ModulesQueue.request(BundleCoremoduleHandler(bundle));
+                Modules.request(BundleCoremoduleHandler(bundle));
             }
         },
 
@@ -31,7 +31,7 @@ JARS.internal('Processors/Bundle', function(getInternal) {
             var bundle = this.bundle;
 
             if(bundle.state.setRegistered(MSG_BUNDLE_DEFINED, getBundleLogInfo(bundle.modules))) {
-                ModulesQueue.request(BundleSubmoduleHandler(bundle));
+                Modules.request(BundleSubmoduleHandler(bundle));
             }
         }
     };

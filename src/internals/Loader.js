@@ -4,7 +4,7 @@ JARS.internal('Loader', function loaderSetup(getInternal) {
     var System = getInternal('System'),
         GlobalConfig = getInternal('GlobalConfig'),
         ModulesRegistry = getInternal('ModulesRegistry'),
-        ModulesQueue = getInternal('ModulesQueue'),
+        Modules = getInternal('Handlers/Modules'),
         resolveDeps = getInternal('Resolvers/Dependencies').resolveDeps,
         Loader;
 
@@ -31,13 +31,13 @@ JARS.internal('Loader', function loaderSetup(getInternal) {
         /**
          * @param {JARS.internals.Dependencies.Declaration} moduleNames
          * @param {function(...*)} onModulesImported
-         * @param {JARS.internals.ModulesQueue.ModuleAbortedCallback} onModuleAborted
-         * @param {JARS.internals.ModulesQueue.ModuleLoadedCallback} onModuleImported
+         * @param {function()} onModuleAborted
+         * @param {function()} onModuleImported
          */
         $import: function(moduleNames, onModulesImported, onModuleAborted, onModuleImported) {
             var rootModule = ModulesRegistry.getRoot();
 
-            ModulesQueue.request({
+            Modules.request({
                 requestor: rootModule,
 
                 modules: resolveDeps(rootModule, moduleNames),

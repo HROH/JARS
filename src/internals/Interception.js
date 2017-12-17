@@ -35,7 +35,7 @@ JARS.internal('Interception', function interceptionSetup(getInternal) {
         },
         /**
          * @param {JARS.internals.Dependencies.Declaration} moduleNames
-         * @param {JARS.internals.ModulesQueue.ModulesLoadedCallback} onModulesLoaded
+         * @param {function()} onModulesLoaded
          */
         $importAndLink: function(moduleNames, onModulesLoaded) {
             var interceptionDeps = this.requestor.interceptionDeps;

@@ -1,4 +1,4 @@
-JARS.internal('ModulesQueue', function modulesQueueSetup(getInternal) {
+JARS.internal('Handlers/Modules', function modulesQueueSetup(getInternal) {
     'use strict';
 
     var InterceptionHandler = getInternal('Handlers/Interception'),
@@ -8,34 +8,13 @@ JARS.internal('ModulesQueue', function modulesQueueSetup(getInternal) {
         isBundle = getInternal('Resolvers/Bundle').isBundle;
 
     /**
-     * @callback ModuleLoadedCallback
+     * @memberof JARS.internals.Handlers
      *
-     * @memberof JARS.internals.ModulesQueue
+     * @class
      *
-     * @param {string} moduleName
-     * @param {*} moduleRefOrData
-     * @param {number} [percentageLoaded]
+     * @param {JARS.internals.Handlers.Request} requestHandler
      */
-
-    /**
-     * @callback ModuleAbortedCallback
-     *
-     * @memberof JARS.internals.ModulesQueue
-     *
-     * @param {(JARS.internals.Module|JARS.internals.Bundle)} moduleOrBundle
-     * @param {string} abortedModuleName
-     */
-
-    /**
-     * @callback ModulesLoadedCallback
-     *
-     * @memberof JARS.internals.ModulesQueue
-     *
-     * @param {Array<*>} moduleRefs
-     */
-
-
-    function ModulesQueueHandler(requestHandler) {
+    function ModulesHandler(requestHandler) {
         var handler = this;
 
         handler.requestor = requestHandler.requestor;
@@ -48,7 +27,10 @@ JARS.internal('ModulesQueue', function modulesQueueSetup(getInternal) {
         handler.onModulesLoaded();
     }
 
-    ModulesQueueHandler.prototype = {
+    ModulesHandler.prototype = {
+        /**
+         * @method
+         */
         request: function() {
             var handler = this;
 
@@ -56,7 +38,10 @@ JARS.internal('ModulesQueue', function modulesQueueSetup(getInternal) {
                 handler.requestModule(requested, index);
             });
         },
-
+        /**
+         * @param {string} requested
+         * @param {number} index
+         */
         requestModule: function(requested, index) {
             var module = getModule(requested),
                 moduleOrBundle = isBundle(requested) ? module.bundle : module;
@@ -64,7 +49,10 @@ JARS.internal('ModulesQueue', function modulesQueueSetup(getInternal) {
             moduleOrBundle.processor.load();
             moduleOrBundle.state.onChange(InterceptionHandler.intercept(requested, new StateChangeHandler(index, this)));
         },
-
+        /**
+         * @param {string} publisherName
+         * @param {object} data
+         */
         onModuleLoaded: function(publisherName, data) {
             var handler = this;
 
@@ -73,11 +61,15 @@ JARS.internal('ModulesQueue', function modulesQueueSetup(getInternal) {
             handler._nextHandler.onModuleLoaded(publisherName, data.ref, getPercentage(handler._loaded++, handler._total));
             handler.onModulesLoaded();
         },
-
+        /**
+         * @param {string} abortedModuleName
+         */
         onModuleAborted: function(abortedModuleName) {
             this._nextHandler.onModuleAborted(abortedModuleName);
         },
-
+        /**
+         * @method
+         */
         onModulesLoaded: function() {
             var handler = this;
 
@@ -85,13 +77,25 @@ JARS.internal('ModulesQueue', function modulesQueueSetup(getInternal) {
         }
     };
 
-    ModulesQueueHandler.request = function(requestHandler) {
-        new ModulesQueueHandler(requestHandler).request();
+    /**
+     * @param {JARS.internals.Handlers.Request} requestHandler
+     */
+    ModulesHandler.request = function(requestHandler) {
+        new ModulesHandler(requestHandler).request();
     };
 
+    /**
+     * @memberof JARS.internals.Handlers.Modules
+     * @inner
+     *
+     * @param {number} count
+     * @param {number} total
+     *
+     * @return {number}
+     */
     function getPercentage(count, total) {
         return Number((count/total).toFixed(2));
     }
 
-    return ModulesQueueHandler;
+    return ModulesHandler;
 });

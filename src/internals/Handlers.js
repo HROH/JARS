@@ -1,1 +1,1 @@
-JARS.internalGroup('Handlers', ['BundleCoremodule', 'BundleSubmodule', 'Dependencies', 'Interception', 'Request', 'StateChange']);
+JARS.internalGroup('Handlers', ['BundleCoremodule', 'BundleSubmodule', 'Dependencies', 'Interception', 'Modules', 'Request', 'StateChange']);

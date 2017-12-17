@@ -3,7 +3,7 @@ JARS.internal('Dependencies', function dependenciesSetup(getInternal) {
 
     var DependenciesResolver = getInternal('Resolvers/Dependencies'),
         DependenciesHandler = getInternal('Handlers/Dependencies'),
-        ModulesQueue = getInternal('ModulesQueue'),
+        Modules = getInternal('Handlers/Modules'),
         abortIfCircular = getInternal('DependenciesChecker').abortIfCircular;
 
     /**
@@ -36,11 +36,11 @@ JARS.internal('Dependencies', function dependenciesSetup(getInternal) {
             this._modules = this._modules.concat(DependenciesResolver.resolveDeps(this.module, dependencyModules));
         },
         /**
-         * @param {JARS.internals.ModulesQueue.ModulesLoadedCallback} onModulesLoaded
+         * @param {function()} onModulesLoaded
          */
         request: function(onModulesLoaded) {
             if(!abortIfCircular(this.module)) {
-                ModulesQueue.request(DependenciesHandler(this, onModulesLoaded));
+                Modules.request(DependenciesHandler(this, onModulesLoaded));
             }
         }
     };

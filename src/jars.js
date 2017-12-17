@@ -25,7 +25,6 @@
                 'Loader',
                 'LogWrap',
                 'Module',
-                'ModulesQueue',
                 'ModulesRegistry',
                 'PartialModuleInterceptor',
                 'PluginInterceptor',
