@@ -30,7 +30,6 @@
                 'PluginInterceptor',
                 'Processors',
                 'Recoverer',
-                'ResolutionHelpers',
                 'ResolutionStrategies',
                 'Resolvers',
                 'State',

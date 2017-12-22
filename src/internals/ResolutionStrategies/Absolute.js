@@ -2,9 +2,9 @@ JARS.internal('ResolutionStrategies/Absolute', function absoluteResolutionStrate
     'use strict';
 
     var VersionResolver = getInternal('Resolvers/Version'),
-        removeInterceptionData = getInternal('Resolvers/Interception').removeInterceptionData,
         isRelative = getInternal('Resolvers/Relative').isRelative,
-        MSG_VERSION_RESOLUTION_ERROR = 'a version must not be added when the parent is already versioned',
+        MSG_VERSION_RESOLUTION_ERROR = 'a version must only be added to the base module',
+        MSG_ABSOLUTE_RESOLUTION_ERROR = 'a module can not be resolved beyond the root',
         DOT = '.';
 
     /**
@@ -18,32 +18,15 @@ JARS.internal('ResolutionStrategies/Absolute', function absoluteResolutionStrate
      * @return {string}
      */
     function AbsoluteResolutionStrategy(baseModule, moduleName) {
-        var moduleNameWithoutInterceptionData = removeInterceptionData(moduleName),
-            resolutionData = {};
-
-        if(VersionResolver.getVersion(moduleNameWithoutInterceptionData) && baseModule && VersionResolver.getVersion(baseModule.name)) {
-            resolutionData.error = MSG_VERSION_RESOLUTION_ERROR;
-        }
-        else if(canMakeAbsolute(baseModule, moduleNameWithoutInterceptionData)) {
-            resolutionData.moduleName = baseModule ? VersionResolver.unwrapVersion(function resolveAbsolute(baseModuleName) {
-                return baseModuleName + (moduleNameWithoutInterceptionData ? DOT + moduleName : moduleName);
-            })(baseModule.name) : moduleName;
-        }
-
-        return resolutionData;
-    }
-
-    /**
-     * @memberof JARS.internals.ResolutionStrategies.Absolute
-     * @inner
-     *
-     * @param {JARS.internals.Module} baseModule
-     * @param {string} moduleName
-     *
-     * @return {boolean}
-     */
-    function canMakeAbsolute(baseModule, moduleName) {
-        return (baseModule ? !baseModule.isRoot : moduleName) && !isRelative(moduleName);
+        return VersionResolver.getVersion(moduleName) ? {
+            error: MSG_VERSION_RESOLUTION_ERROR
+        } : (baseModule.isRoot || isRelative(moduleName)) ? {
+            error: MSG_ABSOLUTE_RESOLUTION_ERROR
+        } : {
+            moduleName: VersionResolver.unwrapVersion(function resolveAbsolute(baseModuleName) {
+                return baseModuleName + (moduleName ? DOT + moduleName : moduleName);
+            })(baseModule.name)
+        };
     }
 
     return AbsoluteResolutionStrategy;

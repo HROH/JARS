@@ -1,9 +1,9 @@
 JARS.internal('ResolutionStrategies/Bundle', function bundleResolutionStrategySetup(getInternal) {
     'use strict';
 
-    var logResolutionError = getInternal('ResolutionHelpers').logResolutionError,
-        AbsoluteResolutionStrategy = getInternal('ResolutionStrategies/Absolute'),
-        MSG_BUNDLE_RESOLUTION_ERROR = 'a bundle modulename must not start with a "."';
+    var AbsoluteResolutionStrategy = getInternal('ResolutionStrategies/Absolute'),
+        isRelative = getInternal('Resolvers/Relative').isRelative,
+        MSG_BUNDLE_RESOLUTION_ERROR = 'a bundle module is already relative to the base module by default';
 
     /**
      * @method Bundle
@@ -15,7 +15,13 @@ JARS.internal('ResolutionStrategies/Bundle', function bundleResolutionStrategySe
      *
      * @return {string}
      */
-    var BundleResolutionStrategy = logResolutionError(AbsoluteResolutionStrategy, MSG_BUNDLE_RESOLUTION_ERROR, true);
+    function BundleResolutionStrategy(baseModule, moduleName) {
+        return isRelative(moduleName) ? {
+            error: MSG_BUNDLE_RESOLUTION_ERROR
+        } : AbsoluteResolutionStrategy(baseModule, moduleName);
+    }
+
+    BundleResolutionStrategy.logBundle = true;
 
     return BundleResolutionStrategy;
 });
