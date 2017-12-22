@@ -2,7 +2,7 @@ JARS.internal('ResolutionStrategies/Nested', function nestedResolutionStrategySe
     'use strict';
 
     var logResolutionError = getInternal('ResolutionHelpers').logResolutionError,
-        resolveAbsolute = getInternal('ResolutionStrategies/Absolute'),
+        AbsoluteResolutionStrategy = getInternal('ResolutionStrategies/Absolute'),
         DOT = '.',
         MSG_NESTED_RESOLUTION_ERROR = 'a nested modulename must contain "." only as a special symbol',
         NestedResolutionStrategy;
@@ -23,8 +23,12 @@ JARS.internal('ResolutionStrategies/Nested', function nestedResolutionStrategySe
             baseModule = null;
         }
 
-        return resolveAbsolute(baseModule, moduleName);
-    }, MSG_NESTED_RESOLUTION_ERROR);
+        return moduleName !== DOT ? AbsoluteResolutionStrategy(baseModule, moduleName) : baseModule.isRoot ? {
+            error: MSG_NESTED_RESOLUTION_ERROR
+        } : {
+            moduleName: baseModule.name
+        };
+    });
 
     return NestedResolutionStrategy;
 });
