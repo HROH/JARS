@@ -1,8 +1,7 @@
 JARS.internal('ResolutionHelpers', function resolutionHelpersSetup() {
     'use strict';
 
-    var RE_LEADING_DOT = /^\./,
-        MSG_DEFAULT_RESOLUTION_ERROR = 'Could not resolve "${mod}": ',
+    var MSG_DEFAULT_RESOLUTION_ERROR = 'Could not resolve "${mod}": ',
         ResolutionHelpers;
 
     /**
@@ -31,14 +30,6 @@ JARS.internal('ResolutionHelpers', function resolutionHelpersSetup() {
 
                 return resolutionData.moduleName;
             };
-        },
-        /**
-         * @param {string} moduleName
-         *
-         * @return {boolean}
-         */
-        isRelative: function(moduleName) {
-            return RE_LEADING_DOT.test(moduleName);
         }
     };
 

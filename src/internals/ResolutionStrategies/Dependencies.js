@@ -1,7 +1,8 @@
 JARS.internal('ResolutionStrategies/Dependencies', function dependenciesResolutionStrategySetup(getInternal) {
     'use strict';
 
-    var ResolutionHelpers = getInternal('ResolutionHelpers'),
+    var isRelative = getInternal('Resolvers/Relative').isRelative,
+        logResolutionError = getInternal('ResolutionHelpers').logResolutionError,
         AbsoluteResolutionStrategy = getInternal('ResolutionStrategies/Absolute'),
         RelativeResolutionStrategy = getInternal('ResolutionStrategies/Relative'),
         MSG_DEPENDENCY_RESOLUTION_ERROR = 'a dependency modulename must be absolute or relative to the current module',
@@ -17,8 +18,8 @@ JARS.internal('ResolutionStrategies/Dependencies', function dependenciesResoluti
      *
      * @return {string}
      */
-    DependenciesResolutionStrategy = ResolutionHelpers.logResolutionError(function resolveDependency(baseModule, moduleName) {
-        return ResolutionHelpers.isRelative(moduleName) ? RelativeResolutionStrategy(baseModule, moduleName) : AbsoluteResolutionStrategy(null, moduleName);
+    DependenciesResolutionStrategy = logResolutionError(function resolveDependency(baseModule, moduleName) {
+        return isRelative(moduleName) ? RelativeResolutionStrategy(baseModule, moduleName) : AbsoluteResolutionStrategy(null, moduleName);
     }, MSG_DEPENDENCY_RESOLUTION_ERROR);
 
     return DependenciesResolutionStrategy;

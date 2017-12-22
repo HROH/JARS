@@ -1,7 +1,7 @@
 JARS.internal('ResolutionStrategies/Relative', function relativeResolutionStrategySetup(getInternal) {
     'use strict';
 
-    var isRelative = getInternal('ResolutionHelpers').isRelative,
+    var isRelative = getInternal('Resolvers/Relative').isRelative,
         AbsoluteResolutionStrategy = getInternal('ResolutionStrategies/Absolute');
 
     /**
