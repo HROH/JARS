@@ -2,6 +2,7 @@ JARS.internal('State', function stateSetup(getInternal) {
     'use strict';
 
     var StateInfo = getInternal('StateInfo'),
+        envGlobal = getInternal('Env').global,
         ATTEMPTED_TO = 'attempted to mark as ',
         BUT_CURRENTLY = ' but is currently ',
         DONE = 'is ',
@@ -76,21 +77,22 @@ JARS.internal('State', function stateSetup(getInternal) {
         var state = this,
             isLoaded = state.isLoaded(),
             queue = state._queue,
-            subject = state._subject,
-            callbackMethod;
+            subject = state._subject;
 
         if(isLoaded || state.isAborted()) {
-            callbackMethod = isLoaded ? QUEUE_LOADED : QUEUE_ABORTED;
-
-            setTimeout(function() {
-                while (queue.length) {
-                    queue.shift()[callbackMethod](subject.name, {
-                        ref: subject.ref
-                    });
-                }
-            }, 0);
+            drainQueue(queue, isLoaded ? QUEUE_LOADED : QUEUE_ABORTED, subject);
         }
    };
+
+   function drainQueue(queue, method, subject) {
+       envGlobal.setTimeout(function() {
+           queue.length && queue.shift()[method](subject.name, {
+               ref: subject.ref
+           });
+
+           drainQueue(queue, method, subject);
+       }, 0);
+   }
 
     /**
      * @method JARS.internals.State#isWaiting
