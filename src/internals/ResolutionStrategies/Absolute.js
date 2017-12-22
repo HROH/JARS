@@ -2,8 +2,8 @@ JARS.internal('ResolutionStrategies/Absolute', function absoluteResolutionStrate
     'use strict';
 
     var VersionResolver = getInternal('Resolvers/Version'),
-        InterceptionResolver = getInternal('Resolvers/Interception'),
         isRelative = getInternal('ResolutionHelpers').isRelative,
+        removeInterceptionData = getInternal('Resolvers/Interception').removeInterceptionData,
         MSG_VERSION_RESOLUTION_ERROR = 'a version must not be added when the parent is already versioned',
         DOT = '.';
 
@@ -18,7 +18,7 @@ JARS.internal('ResolutionStrategies/Absolute', function absoluteResolutionStrate
      * @return {string}
      */
     function AbsoluteResolutionStrategy(baseModule, moduleName) {
-        var moduleNameWithoutInterceptionData = InterceptionResolver.removeInterceptionData(moduleName),
+        var moduleNameWithoutInterceptionData = removeInterceptionData(moduleName),
             resolutionData = {};
 
         if(VersionResolver.getVersion(moduleNameWithoutInterceptionData) && baseModule && VersionResolver.getVersion(baseModule.name)) {

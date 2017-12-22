@@ -2,8 +2,8 @@ JARS.internal('GlobalConfigHooks/Modules', function modulesHookSetup(getInternal
     'use strict';
 
     var ModulesRegistry = getInternal('ModulesRegistry'),
-        DependenciesResolver = getInternal('Resolvers/Dependencies'),
-        BundleResolver = getInternal('Resolvers/Bundle'),
+        resolveDeps = getInternal('Resolvers/Dependencies').resolveDeps,
+        isBundle = getInternal('Resolvers/Bundle').isBundle,
         arrayEach = getInternal('Utils').arrayEach,
         Modules;
 
@@ -19,10 +19,10 @@ JARS.internal('GlobalConfigHooks/Modules', function modulesHookSetup(getInternal
         var rootModule = ModulesRegistry.getRoot();
 
         if(config.restrict) {
-            arrayEach(DependenciesResolver.resolveDeps(rootModule, config.restrict), function updateConfig(moduleName) {
+            arrayEach(resolveDeps(rootModule, config.restrict), function updateConfig(moduleName) {
                 var module = ModulesRegistry.get(moduleName);
 
-                (BundleResolver.isBundle(moduleName) ? module.bundle : module).config.update(config);
+                (isBundle(moduleName) ? module.bundle : module).config.update(config);
             });
         }
         else {
