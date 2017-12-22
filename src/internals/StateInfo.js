@@ -1,21 +1,25 @@
 JARS.internal('StateInfo', function stateInfoSetup(getInternal) {
     'use strict';
 
-    var Utils = getInternal('Utils'),
-        arrayEach = Utils.arrayEach,
-        objectMerge = Utils.objectMerge,
-        LOG_METHODS = {
-            all: {
-                attempt: 'warn',
+    var arrayEach = getInternal('Utils').arrayEach,
+        LOG_METHODS = {},
+        stateInfos = [];
 
-                done: 'info'
-            },
+    LOG_METHODS.registered = LOG_METHODS.waiting = {
+        attempt: 'warn',
 
-            load: {
-                attempt: 'debug'
-            }
-        },
-        waiting, loading, registered, loaded, aborted;
+        done: 'info'
+    };
+    LOG_METHODS.loaded = LOG_METHODS.loading = {
+        attempt: 'debug',
+
+        done: LOG_METHODS.waiting.done
+    };
+    LOG_METHODS.aborted = {
+        attempt: LOG_METHODS.waiting.attempt,
+
+        done: 'error'
+    };
 
     /**
      * @class
@@ -26,26 +30,22 @@ JARS.internal('StateInfo', function stateInfoSetup(getInternal) {
      * @param {Object} logMethods
      */
     function StateInfo(stateText, logMethods) {
-        var stateInfo = this;
-
-        logMethods || (logMethods = {});
-
-        stateInfo.text = stateText;
-        stateInfo.methods = objectMerge(objectMerge({}, LOG_METHODS.all), logMethods);
+        this.text = stateText;
+        this.methods = logMethods;
     }
 
     /**
      * @return {JARS.internals.StateInfo}
      */
     StateInfo.initial = function() {
-        return waiting;
+        return stateInfos[0];
     };
 
     /**
      * @param {function(JARS.internals.StateInfo)} callback
      */
     StateInfo.each = function(callback) {
-        arrayEach([waiting, loading, registered, loaded, aborted], callback);
+        arrayEach(stateInfos, callback);
     };
 
     StateInfo.prototype = {
@@ -66,23 +66,15 @@ JARS.internal('StateInfo', function stateInfoSetup(getInternal) {
         }
     };
 
-    waiting = new StateInfo('waiting');
-
-    loading = new StateInfo('loading', LOG_METHODS.load);
-
-    registered = new StateInfo('registered');
-
-    loaded = new StateInfo('loaded', LOG_METHODS.load);
-
-    aborted = new StateInfo('aborted', {
-        done: 'error'
+    arrayEach(['waiting', 'loading', 'registered', 'loaded', 'aborted'], function(stateText) {
+        stateInfos.push(new StateInfo(stateText, LOG_METHODS[stateText]));
     });
 
-    waiting.setNext([loading, registered]);
-    loading.setNext([registered, aborted]);
-    registered.setNext([loaded, aborted]);
-    loaded.setNext([waiting]);
-    aborted.setNext([waiting]);
+    stateInfos[0].setNext([stateInfos[1], stateInfos[2]]);
+    stateInfos[1].setNext([stateInfos[2], stateInfos[4]]);
+    stateInfos[2].setNext([stateInfos[3], stateInfos[4]]);
+    stateInfos[3].setNext([stateInfos[0]]);
+    stateInfos[4].setNext([stateInfos[0]]);
 
     return StateInfo;
 });
