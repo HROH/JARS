@@ -15,14 +15,14 @@ JARS.internal('SystemBootstrapper', function(getInternal) {
             });
 
             systemModule = getInternal('ModulesRegistry').register('System', [
-                'ConsoleTransport',
                 'Formatter',
                 'Logger',
+                'LogContext',
                 'LogLevels',
                 'Modules',
-                'Transports'
+                'Transports.*'
             ]);
-            
+
             systemModule.$export(function systemFactory() {
                 // TODO maybe calling the internal factory for System is the better option
                 // to isolate System on a per context basis but right now this is enough

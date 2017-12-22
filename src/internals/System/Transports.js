@@ -1,6 +1,4 @@
-JARS.module('System.Transports').$import([
-    '.!', '.::$$internals', '.::isFunction', '.ConsoleTransport', '.LogLevels'
-]).$export(function(config, internals, isFunction, ConsoleTransport, LogLevels) {
+JARS.module('System.Transports', ['Console']).$import(['.!', '.::$$internals']).$export(function(config, internals) {
     'use strict';
 
     var hasOwnProp = internals.get('Utils').hasOwnProp,
@@ -10,24 +8,18 @@ JARS.module('System.Transports').$import([
     Transports = {
         /**
          * @param {string} mode
-         * @param {function()} Transport
+         * @param {object} transport
          */
-        add: function(mode, Transport) {
-            var modeConfig = mode + 'Config';
-
-            if (!hasOwnProp(transports, mode) && isFunction(Transport)) {
-                transports[mode] = new Transport(function transportConfigGetter(option) {
-                    return (config[modeConfig] || {})[option];
-                }, LogLevels);
+        add: function(mode, transport) {
+            if (!hasOwnProp(transports, mode)) {
+                transports[mode] = transport;
             }
         },
-        /**
-         * @param {string} mode
-         *
-         * @return {Object}
-         */
-        getActive: function(mode) {
-            return transports[mode] || transports.console;
+
+        write: function(mode, level, context, data) {
+            var transport = transports[mode];
+
+            transport && (transport[level] ? transport[level](context, data) : transport.write(level, context, data));
         },
         /**
          * @param {JARS.internals.Interception} pluginRequest
@@ -36,14 +28,12 @@ JARS.module('System.Transports').$import([
             var data = pluginRequest.info.data.split(':');
 
             pluginRequest.$importAndLink(data[1], function addTransport(Transport) {
-                Transports.add(data[0], Transport);
+                Transports.add(data[0], new Transport());
 
                 pluginRequest.success(Transports);
             });
         }
     };
-
-    Transports.add('console', ConsoleTransport);
 
     return Transports;
 });

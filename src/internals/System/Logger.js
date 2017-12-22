@@ -4,16 +4,15 @@
  */
 JARS.module('System.Logger').$import([
     '.!',
-    '.',
     '.Transports',
     '.Formatter::format',
+    '.LogContext',
     '.LogLevels',
     '.Modules::getCurrentModuleData'
-]).$export(function systemLoggerSetup(config, System, Transports, format, LogLevels, getCurrentModuleData) {
+]).$export(function systemLoggerSetup(config, Transports, format, LogContext, LogLevels, getCurrentModuleData) {
     'use strict';
 
     var loggerCache = {},
-        CONTEXT_DELIMITER = ',',
         ROOT_LOGCONTEXT = getCurrentModuleData().moduleName;
 
     /**
@@ -26,45 +25,12 @@ JARS.module('System.Logger').$import([
      *
      * @return {boolean}
      */
-    function isDebuggingEnabled(debug, level, context) {
-        return debug && LogLevels.comparePriority(level, config.level) && compareDebugContext(context);
+    function isDebuggingEnabled(options, level, context) {
+        return getOption(options, 'debug') && LogLevels.comparePriority(level, getOption(options, 'level')) && LogContext.isCurrent(context);
     }
 
-    /**
-     * @memberof JARS.internals.System.Logger
-     * @inner
-     *
-     * @param {string} context
-     *
-     * @return {boolean}
-     */
-    function compareDebugContext(context) {
-        var debugContext = config.context;
-
-        if (!System.isObject(debugContext)) {
-            debugContext = {
-                include: debugContext
-            };
-        }
-
-        return !inContextList(context, debugContext.exclude) && (inContextList(context, debugContext.include) || !debugContext.include);
-    }
-
-    /**
-     * @memberof JARS.internals.System.Logger
-     * @inner
-     *
-     * @param {string} context
-     * @param {(string[]|string)} contextList
-     *
-     * @return {boolean}
-     */
-    function inContextList(context, contextList) {
-        if(System.isString(contextList)) {
-            contextList = contextList.split(CONTEXT_DELIMITER);
-        }
-
-        return System.isArray(contextList) && contextList.indexOf(context) > -1;
+    function getOption(options, option) {
+        return options[option] || config[option];
     }
 
     /**
@@ -78,47 +44,12 @@ JARS.module('System.Logger').$import([
     function Logger(logContext, options) {
         var logger = this;
 
-        logContext = logContext || ROOT_LOGCONTEXT;
-        loggerCache[logContext] = logger;
         logger.context = logContext;
         logger.options = options || {};
-        logger.options.tpl = logger.options.tpl || {};
-    }
-
-    /**
-     * @memberof JARS.internals.System.Logger
-     * @inner
-     *
-     * @param {JARS.internals.System.Logger} logger
-     * @param {string} level
-     * @param {*} message
-     * @param {(Object|Array)} values
-     */
-    function output(logger, level, message, values) {
-        var context = logger.context,
-            options = logger.options,
-            activeTransport = Transports.getActive(getOption(options, 'mode')),
-            methodName = activeTransport[level] ? level : 'log';
-
-        if (isDebuggingEnabled(getOption(options, 'debug'), level, context) && System.isFunction(activeTransport[methodName])) {
-            message = format(options.tpl[message] || message, values);
-
-            activeTransport[methodName](context, {
-                timestamp: new Date().toUTCString(),
-
-                message: message,
-
-                meta: values
-            });
-        }
-    }
-
-    function getOption(options, option) {
-        return options[option] || config[option];
     }
 
     Logger.get = function(logContext, options) {
-        return loggerCache[logContext] || new Logger(logContext, options);
+        return loggerCache[logContext] || (loggerCache[logContext] = new Logger(logContext, options));
     };
 
     /**
@@ -130,11 +61,31 @@ JARS.module('System.Logger').$import([
         return Logger.get(getCurrentModuleData().moduleName, options);
     };
 
+    /**
+     * @param {string} level
+     * @param {*} message
+     * @param {(Object|Array)} values
+     */
+    Logger.prototype.write = function(level, message, values) {
+        var options = this.options,
+            context = this.context;
+
+        if (isDebuggingEnabled(options, level, context)) {
+            Transports.write(getOption(options, 'mode'), level, context, {
+                timestamp: new Date().toUTCString(),
+
+                message: format(message, values),
+
+                meta: values
+            });
+        }
+    };
+
     LogLevels.each(function addLoggerMethod(level) {
         var levelWithContext = level + 'WithContext';
 
         Logger.prototype[level] = function loggerFn(data, values) {
-            output(this, level, data, values);
+            this.write(level, data, values);
         };
 
         Logger[level] = function staticLoggerFn(data, values) {
