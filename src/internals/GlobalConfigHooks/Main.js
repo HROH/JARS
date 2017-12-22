@@ -2,7 +2,6 @@ JARS.internal('GlobalConfigHooks/Main', function mainHookSetup(getInternal) {
     'use strict';
 
     var MAIN_CONTEXT = 'Main:',
-        EMPTY_PATH = '',
         SUCCESS_MESSAGE = 'successfully loaded',
         ERROR_MESSAGE = 'aborted',
         Main;
@@ -28,9 +27,9 @@ JARS.internal('GlobalConfigHooks/Main', function mainHookSetup(getInternal) {
             JARS.configure('modules', {
                 restrict: mainModule,
 
-                basePath: EMPTY_PATH,
+                basePath: './',
 
-                dirPath: EMPTY_PATH
+                dirPath: ''
             });
 
             Loader.$import(mainModule, function mainModuleLoaded() {
