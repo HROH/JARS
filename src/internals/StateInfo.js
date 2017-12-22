@@ -12,7 +12,7 @@ JARS.internal('StateInfo', function stateInfoSetup(getInternal) {
             },
 
             load: {
-                attempt: 'info'
+                attempt: 'debug'
             }
         },
         waiting, loading, registered, loaded, aborted;
