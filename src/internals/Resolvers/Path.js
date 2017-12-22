@@ -8,17 +8,21 @@ JARS.internal('Resolvers/Path', function pathResolverSetup(getInternal) {
         ExtensionTransform = getInternal('ConfigTransforms/Extension'),
         isBundle = getInternal('Resolvers/Bundle').isBundle,
         pathOptions = ['basePath', 'dirPath', 'versionPath', 'fileName', 'minify', 'extension', 'cache'],
-        sortedModules = {},
-        excludedModules = [],
-        pathList = [],
-        PathManager;
+        cache = {
+            sorted: {},
+
+            excluded: [],
+
+            paths: []
+        },
+        PathResolver;
 
     /**
      * @namespace
      *
      * @memberof JARS.internals
      */
-    PathManager = {
+    PathResolver = {
         /**
          * <p>Computes an array of paths for all the loaded modules
          * in the order they are dependending on each other.
@@ -33,14 +37,15 @@ JARS.internal('Resolvers/Path', function pathResolverSetup(getInternal) {
          * @param {boolean} forceRecompute
          */
         computeSortedPathList: function(callback, forceRecompute) {
-            if (verifyModulesLoaded(callback, forceRecompute)) {
-                if (forceRecompute || !pathList.length) {
-                    resetModulesPathList();
+            var modulesStillLoading = getModulesStillLoading();
 
-                    ModulesRegistry.each(addToPathList);
-                }
-
-                callback(pathList);
+            if(modulesStillLoading.length) {
+                getInternal('Loader').$import(modulesStillLoading, function computeSortedPathList() {
+                    PathResolver.computeSortedPathList(callback, forceRecompute);
+                });
+            }
+            else {
+                callback(computeModulesPathList(forceRecompute));
             }
         },
         /**
@@ -50,88 +55,84 @@ JARS.internal('Resolvers/Path', function pathResolverSetup(getInternal) {
          * @return {string}
          */
         getFullPath: function(module, extension) {
-            var config = module.config,
-                path = '';
+            var path = '';
 
             arrayEach(pathOptions, function(option) {
-                path += (option === 'extension' && extension) ? ExtensionTransform(extension) : config.get(option);
+                path += (option === 'extension' && extension) ? ExtensionTransform(extension) : module.config.get(option);
             });
 
             return path;
         },
 
         excludeFromPathList: function(modules) {
-            excludedModules = excludedModules.concat(modules);
+            cache.excluded = cache.excluded.concat(modules);
         }
     };
 
-    function verifyModulesLoaded(callback, forceRecompute) {
-        var modulesToLoad = [];
+    function getModulesStillLoading() {
+        var modulesStillLoading = [];
 
         ModulesRegistry.each(function addModuleToLoad(module) {
-            if (module.state.isLoading()) {
-                modulesToLoad.push(module.name);
-            }
+            module.state.isLoading() && modulesStillLoading.push(module.name);
         });
 
-        if (modulesToLoad.length) {
-            getInternal('Loader').$import(modulesToLoad, function computeSortedPathList() {
-                PathManager.computeSortedPathList(callback, forceRecompute);
-            });
-        }
-
-        return !modulesToLoad.length;
+        return modulesStillLoading;
     }
 
     /**
-     * @memberof JARS.internals.PathManager
+     * @memberof JARS.internals.PathResolver
      * @inner
      *
-     * @param {string[]} [modules = []]
+     * @param {string[]} modules
      */
-    function addModules(modules) {
-        arrayEach(modules || [], function addModuleToPathList(moduleName) {
-            addToPathList(ModulesRegistry.get(moduleName), isBundle(moduleName));
+    function addModules(modules, paths) {
+        arrayEach(modules, function addModuleToPathList(moduleName) {
+            addToPathList(ModulesRegistry.get(moduleName), paths, isBundle(moduleName));
         });
     }
 
     /**
-     * @memberof JARS.internals.PathManager
+     * @memberof JARS.internals.PathResolver
      * @inner
      *
      * @param {JARS.internals.Module} module
      * @param {boolean} [addBundle = false]
      */
-    function addToPathList(module, addBundle) {
-        var moduleName = module.name,
-            dependencies = module.deps.getAll().concat(module.interceptionDeps.getAll());
-
+    function addToPathList(module, paths, addBundle) {
         if (module.state.isLoaded()) {
-            if (!hasOwnProp(sortedModules, moduleName)) {
-                addModules(dependencies);
-
-                pathList.push(PathManager.getFullPath(module));
-                sortedModules[moduleName] = true;
+            if (!hasOwnProp(cache.sorted, module.name)) {
+                addModules(module.deps.getAll().concat(module.interceptionDeps.getAll()));
+                cache.paths.push(PathResolver.getFullPath(module));
+                cache.sorted[module.name] = true;
             }
 
-            if (addBundle) {
-                addModules(module.bundle.modules);
-            }
+            addBundle && addModules(module.bundle.modules);
         }
     }
 
     /**
-     * @memberof JARS.internals.PathManager
+     * @memberof JARS.internals.PathResolver
      * @inner
      */
-    function resetModulesPathList() {
-        pathList = [];
-        sortedModules = {};
+    function computeModulesPathList(forceRecompute) {
+        var paths = cache.paths;
 
-        arrayEach(excludedModules, function markModuleSorted(excludedModule) {
-            sortedModules[excludedModule] = true;
-        });
+        if (forceRecompute || !paths.length) {
+            paths.length = 0;
+            cache.sorted = {};
+
+            arrayEach(cache.excluded, function markModuleSorted(excludedModule) {
+                cache.sorted[excludedModule] = true;
+            });
+
+            // TODO maybe start with entry module
+            ModulesRegistry.each(function(module) {
+                addToPathList(module, paths);
+            });
+        }
+
+        return paths;
     }
 
-    return PathManager;
+    return PathResolver;
 });
