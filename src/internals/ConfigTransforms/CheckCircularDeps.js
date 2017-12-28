@@ -9,7 +9,7 @@ JARS.internal('ConfigTransforms/CheckCircularDeps', function() {
      * @return {boolean}
      */
     function CheckCircularDeps(checkCircularDeps) {
-        return checkCircularDeps;
+        return !!checkCircularDeps;
     }
 
     return CheckCircularDeps;
