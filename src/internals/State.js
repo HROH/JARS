@@ -70,9 +70,9 @@ JARS.internal('State', function stateSetup(getInternal) {
         };
     });
 
-   /**
-    * @private
-    */
+    /**
+     * @private
+     */
     State.prototype._syncQueue = function() {
         var state = this,
             isLoaded = state.isLoaded(),
@@ -82,17 +82,19 @@ JARS.internal('State', function stateSetup(getInternal) {
         if(isLoaded || state.isAborted()) {
             drainQueue(queue, isLoaded ? QUEUE_LOADED : QUEUE_ABORTED, subject);
         }
-   };
+    };
 
-   function drainQueue(queue, method, subject) {
-       envGlobal.setTimeout(function() {
-           queue.length && queue.shift()[method](subject.name, {
-               ref: subject.ref
-           });
+    function drainQueue(queue, method, subject) {
+        envGlobal.setTimeout(function() {
+            if(queue.length) {
+                queue.shift()[method](subject.name, {
+                    ref: subject.ref
+                });
 
-           drainQueue(queue, method, subject);
-       }, 0);
-   }
+                drainQueue(queue, method, subject);
+            }
+        }, 0);
+    }
 
     /**
      * @method JARS.internals.State#isWaiting
