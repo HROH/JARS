@@ -6,7 +6,7 @@ JARS.internal('GlobalConfig', function globalConfigSetup(getInternal) {
         isArray = System.isArray,
         arrayEach = Utils.arrayEach,
         objectEach = Utils.objectEach,
-        globalConfigHooks = getInternal('GlobalConfigHooks'),
+        GlobalConfigHooks = getInternal('GlobalConfigHooks'),
         globalConfig = {
             environments: {}
         },
@@ -61,7 +61,7 @@ JARS.internal('GlobalConfig', function globalConfigSetup(getInternal) {
             });
         }
         else {
-            configHook = globalConfigHooks[option];
+            configHook = GlobalConfigHooks[option];
             globalConfig[option] = System.isFunction(configHook) ? configHook(GlobalConfig, valueOrArray) : valueOrArray;
         }
     }
