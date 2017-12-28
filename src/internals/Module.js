@@ -55,12 +55,13 @@ JARS.internal('Module', function moduleSetup(getInternal) {
             var module = this;
 
             module.processor.register(function onDependenciesLoaded(dependencyRefs) {
-                if (module.state.setLoaded()) {
+                if (!module.state.isLoaded()) {
                     ModulesRegistry.setCurrent(module);
 
                     module.ref = (!module.isRoot && factory) ? (factory.apply(dependencyRefs.shift(), dependencyRefs) || {}) : {};
 
                     ModulesRegistry.setCurrent();
+                    module.state.setLoaded();
                 }
             });
         }

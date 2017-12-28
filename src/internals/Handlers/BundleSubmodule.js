@@ -13,8 +13,9 @@ JARS.internal('Handlers/BundleSubmodule', function(getInternal) {
      */
     function BundleSubmoduleHandler(bundle) {
         return new RequestHandler(bundle, bundle.modules, MSG_STRINGS, function() {
-            if(bundle.state.setLoaded()) {
+            if(!bundle.state.isLoaded()) {
                 bundle.ref = bundle.module.ref;
+                bundle.state.setLoaded();
             }
         });
     }

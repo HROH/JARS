@@ -2,12 +2,9 @@ JARS.internal('State', function stateSetup(getInternal) {
     'use strict';
 
     var StateInfo = getInternal('StateInfo'),
-        envGlobal = getInternal('Env').global,
-        ATTEMPTED_TO = 'attempted to mark as ',
-        BUT_CURRENTLY = ' but is currently ',
-        DONE = 'is ',
-        IS_PREFIX = 'is',
-        SET_PREFIX = 'set',
+        objectMerge = getInternal('Utils').objectMerge,
+        ATTEMPT_MSG = 'attempted to mark as ${nextState} but is currently ${curState}',
+        DONE_MSG = 'is ${nextState}',
         QUEUE_LOADED = 'onModuleLoaded',
         QUEUE_ABORTED = 'onModuleAborted';
 
@@ -37,34 +34,26 @@ JARS.internal('State', function stateSetup(getInternal) {
     };
 
     StateInfo.each(function(stateInfo) {
-        var methods = stateInfo.methods,
-            stateText = stateInfo.text,
-            capitalStateText = stateText.charAt(0).toUpperCase() + stateText.substr(1),
-            attemptMsg = ATTEMPTED_TO + stateText,
-            doneMsg = DONE + stateText;
-
-        State.prototype[IS_PREFIX + capitalStateText] = function() {
+        State.prototype[stateInfo.is] = function() {
             return this._current === stateInfo;
         };
 
-        State.prototype[SET_PREFIX + capitalStateText] = function(customMessage, logInfo) {
+        State.prototype[stateInfo.set] = function(customMessage, logInfo) {
             var state = this,
-                currentStateInfo = state._current,
-                canTransition = currentStateInfo.hasNext(stateInfo),
-                message, method;
+                canTransition = state._current.hasNext(stateInfo);
+
+            logInfo = objectMerge(objectMerge({
+                curState: state._current.text,
+
+                nextState: stateInfo.text
+            }, stateInfo.methods), logInfo);
+
+            state._subject.logger[logInfo[canTransition ? 'done' : 'attempt']](canTransition ? DONE_MSG + (customMessage || '') : ATTEMPT_MSG, logInfo);
 
             if(canTransition) {
-                message = doneMsg  + (customMessage || '');
-                method = (logInfo && logInfo.log) || methods.done;
                 state._current = stateInfo;
                 state._syncQueue();
             }
-            else {
-                message = attemptMsg + BUT_CURRENTLY + currentStateInfo.text;
-                method = methods.attempt;
-            }
-
-            state._subject.logger[method](message, logInfo);
 
             return canTransition;
         };
@@ -75,25 +64,19 @@ JARS.internal('State', function stateSetup(getInternal) {
      */
     State.prototype._syncQueue = function() {
         var state = this,
-            isLoaded = state.isLoaded(),
-            queue = state._queue,
-            subject = state._subject;
+            isLoaded = state.isLoaded();
 
         if(isLoaded || state.isAborted()) {
-            drainQueue(queue, isLoaded ? QUEUE_LOADED : QUEUE_ABORTED, subject);
+            drainQueue(state._queue, isLoaded ? QUEUE_LOADED : QUEUE_ABORTED, state._subject);
         }
     };
 
     function drainQueue(queue, method, subject) {
-        envGlobal.setTimeout(function() {
-            if(queue.length) {
-                queue.shift()[method](subject.name, {
-                    ref: subject.ref
-                });
-
-                drainQueue(queue, method, subject);
-            }
-        }, 0);
+        while(queue.length) {
+            queue.shift()[method](subject.name, {
+                ref: subject.ref
+            });
+        }
     }
 
     /**

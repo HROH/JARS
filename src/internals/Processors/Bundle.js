@@ -7,7 +7,7 @@ JARS.internal('Processors/Bundle', function(getInternal) {
         DEFAULT_BUNDLE_LOG_INFO = {
             bundle: 'none',
 
-            log: 'warn'
+            done: 'warn'
         },
         SEPARATOR = '", "',
         MSG_BUNDLE_DEFINED = ' - with submodules "${bundle}"';
@@ -40,7 +40,7 @@ JARS.internal('Processors/Bundle', function(getInternal) {
         return bundleModules.length ? {
             bundle: bundleModules.join(SEPARATOR),
 
-            log: 'debug'
+            done: 'debug'
         } : DEFAULT_BUNDLE_LOG_INFO;
     }
 

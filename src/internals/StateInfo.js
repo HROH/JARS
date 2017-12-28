@@ -2,6 +2,8 @@ JARS.internal('StateInfo', function stateInfoSetup(getInternal) {
     'use strict';
 
     var arrayEach = getInternal('Utils').arrayEach,
+        IS_PREFIX = 'is',
+        SET_PREFIX = 'set',
         LOG_METHODS = {},
         stateInfos = [];
 
@@ -29,9 +31,11 @@ JARS.internal('StateInfo', function stateInfoSetup(getInternal) {
      * @param {string} stateText
      * @param {Object} logMethods
      */
-    function StateInfo(stateText, logMethods) {
+    function StateInfo(stateText, stateMethodText, logMethods) {
         this.text = stateText;
         this.methods = logMethods;
+        this.is = IS_PREFIX + stateMethodText;
+        this.set = SET_PREFIX + stateMethodText;
     }
 
     /**
@@ -67,7 +71,7 @@ JARS.internal('StateInfo', function stateInfoSetup(getInternal) {
     };
 
     arrayEach(['waiting', 'loading', 'registered', 'loaded', 'aborted'], function(stateText) {
-        stateInfos.push(new StateInfo(stateText, LOG_METHODS[stateText]));
+        stateInfos.push(new StateInfo(stateText, stateText.charAt(0).toUpperCase() + stateText.substr(1), LOG_METHODS[stateText]));
     });
 
     stateInfos[0].setNext([stateInfos[1], stateInfos[2]]);
