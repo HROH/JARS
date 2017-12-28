@@ -25,8 +25,8 @@ JARS.internal('InternalBootstrapper', function internalBootstrapperSetup(getInte
                 },
 
                 interceptors: [
-                    getInternal('PluginInterceptor'),
-                    getInternal('PartialModuleInterceptor')
+                    getInternal('Interceptors/Plugin'),
+                    getInternal('Interceptors/Property')
                 ],
 
                 globalAccess: false,

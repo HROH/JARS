@@ -1,4 +1,4 @@
-JARS.internal('PluginInterceptor', function pluginInterceptorSetup(getInternal) {
+JARS.internal('Interceptors/Plugin', function pluginInterceptorSetup(getInternal) {
     'use strict';
 
     var isFunction = getInternal('System').isFunction,
