@@ -7,8 +7,112 @@
      * @memberof JARS
      */
 
-    var InternalsManager = (function internalsManagerSetup() {
-        var internalsToLoad = [
+    /**
+     * @namespace
+     *
+     * @memberof JARS.internals
+     */
+    var InternalsManager = {
+        factories: {},
+
+        queue: {
+            counter: 0,
+
+            loading: [],
+
+            commands: [],
+
+            add: function(internalNames) {
+                for(var index = 0; index < internalNames.length; index++) {
+                    InternalsManager.load(internalNames[index]);
+                }
+
+                this.loading = this.loading.concat(internalNames);
+                this.counter += internalNames.length;
+            },
+
+            mark: function(internalName) {
+                if(this.loading.indexOf(internalName) != -1 && --this.counter === 0) {
+                    InternalsManager.get('InternalBootstrapper').bootstrap(this.commands);
+                }
+            },
+
+            run: function(command) {
+                this.counter ? this.commands.push(command) : InternalsManager.get('InternalBootstrapper').run(command);
+            }
+        },
+        /**
+         * @param {string} internalName
+         * @param {string} methodName
+         * @param {function()} returnFn
+         *
+         * @return {function()}
+         */
+        delegate: function(internalName, methodName, returnFn) {
+            return function internalDelegator() {
+                var args = Array.prototype.slice.call(arguments);
+
+                InternalsManager.queue.run([internalName, methodName, args]);
+
+                return returnFn && returnFn.apply(null, args);
+            };
+        },
+        /**
+         * @param {string} internalName
+         * @param {JARS.internals.InternalsManager~InternalsFactory} factory
+         */
+        register: function(internalName, factory) {
+            if(!InternalsManager.factories[internalName]) {
+                InternalsManager.factories[internalName] = factory;
+
+                InternalsManager.queue.mark(internalName);
+            }
+        },
+        /**
+         * @param {string} groupName
+         * @param {string[]} group
+         */
+        registerGroup: function (groupName, group) {
+            var internalNames = [],
+                index;
+
+            for(index = 0; index < group.length; index++) {
+                internalNames.push(groupName + '/' + group[index]);
+            }
+
+            InternalsManager.queue.add(internalNames);
+
+            InternalsManager.register(groupName, function internalGroupSetup(getInternal) {
+                var result = {};
+
+                for(index = 0; index < internalNames.length; index++) {
+                    result[group[index].charAt(0).toLowerCase() + group[index].substr(1)] = getInternal(internalNames[index]);
+                }
+
+                return result;
+            });
+        },
+        /**
+         * @param {string} internalName
+         *
+         * @return {*}
+         */
+        get: function (internalName) {
+            var factory = InternalsManager.factories[internalName];
+
+            return factory && (factory.ref || (factory.ref = factory(InternalsManager.get)));
+        },
+        /**
+         * @param {string} internalName
+         */
+        load: function(internalName) {
+            InternalsManager.get('SourceManager').load('internal:' + internalName, InternalsManager.get('Env').INTERNALS_PATH + internalName + '.js');
+        },
+        /**
+         * @method
+         */
+        init: function() {
+            InternalsManager.queue.add([
                 'AutoAborter',
                 'Bundle',
                 'Config',
@@ -40,137 +144,24 @@
                 'TypeLookup',
                 'TypeStrategies',
                 'Utils'
-            ],
-            internals = {},
-            commands = [],
-            internalsLoading = internalsToLoad.length,
-            InternalsManager;
+            ]);
+        }
+    };
 
-        /**
-         * @namespace
-         *
-         * @memberof JARS.internals
-         */
-        InternalsManager = {
-            /**
-             * @param {string} internalName
-             * @param {string} methodName
-             * @param {function()} returnFn
-             *
-             * @return {function()}
-             */
-            delegate: function(internalName, methodName, returnFn) {
-                return function internalDelegator() {
-                    var args = Array.prototype.slice.call(arguments),
-                        command = [internalName, methodName, args];
+    /**
+     * @callback InternalsFactory
+     *
+     * @memberof JARS.internals.InternalsManager
+     * @inner
+     *
+     * @param {JARS.internals.InternalsManager.get} getInternal
+     *
+     * @return {*}
+     */
 
-                    if(internalsLoading !== 0) {
-                        commands.push(command);
-                    }
-                    else {
-                        InternalsManager.get('InternalBootstrapper').run(command);
-                    }
-
-                    return returnFn && returnFn.apply(null, args);
-                };
-            },
-            /**
-             * @param {string} internalName
-             * @param {JARS.internals.InternalsManager~InternalsFactory} factory
-             */
-            register: function(internalName, factory) {
-                var internal = internals[internalName] || (internals[internalName] = {});
-
-                internal.factory = factory;
-
-                if(!internal.loaded) {
-                    internal.loaded = true;
-
-                    if(internalsToLoad.indexOf(internalName) != -1 && --internalsLoading === 0) {
-                        InternalsManager.get('InternalBootstrapper').bootstrap(commands);
-                    }
-                }
-            },
-            /**
-             * @param {string} groupName
-             * @param {string[]} group
-             */
-            registerGroup: function (groupName, group) {
-                var groupLength = group.length,
-                    internalNames = [],
-                    index, internalName;
-
-                for(index = 0; index < groupLength; index++) {
-                    internalName = groupName + '/' + group[index];
-                    internalNames.push(internalName);
-                    InternalsManager.load(internalName);
-                }
-
-                internalsToLoad = internalsToLoad.concat(internalNames);
-                internalsLoading += groupLength;
-
-                InternalsManager.register(groupName, function internalGroupSetup(getInternal) {
-                    var result = {},
-                        key;
-
-                    for(index = 0; index < groupLength; index++) {
-                        key = group[index];
-                        result[key.charAt(0).toLowerCase() + key.substr(1)] = getInternal(internalNames[index]);
-                    }
-
-                    return result;
-                });
-            },
-            /**
-             * @param {string} internalName
-             *
-             * @return {*}
-             */
-            get: function (internalName) {
-                var internal = internals[internalName],
-                    object;
-
-                if(internal){
-                    object = internal.object || (internal.object = internal.factory(InternalsManager.get));
-                }
-
-                return object;
-            },
-            /**
-             * @param {string} internalName
-             */
-            load: function(internalName) {
-                InternalsManager.get('SourceManager').load('internal:' + internalName, InternalsManager.get('Env').INTERNALS_PATH + internalName + '.js');
-            },
-            /**
-             * @method
-             */
-            init: function() {
-                var index;
-
-                InternalsManager.register('InternalsManager', function() {
-                    return InternalsManager;
-                });
-
-                for(index = 0; index < internalsLoading; index++) {
-                    InternalsManager.load(internalsToLoad[index]);
-                }
-            }
-        };
-
-        /**
-         * @callback InternalsFactory
-         *
-         * @memberof JARS.internals.InternalsManager
-         * @inner
-         *
-         * @param {JARS.internals.InternalsManager.get} getInternal
-         *
-         * @return {*}
-         */
-
+    InternalsManager.register('InternalsManager', function() {
         return InternalsManager;
-    })();
+    });
 
     InternalsManager.register('Env', function envConfigSetup() {
         var scripts = envGlobal.document.getElementsByTagName('script'),
