@@ -14,7 +14,7 @@ JARS.internal('Resolvers/ConfigOptions', function(getInternal) {
 
             fileName: fileName,
 
-            dirPath: DirPathResolver(moduleName, fileName),
+            dirPath: DirPathResolver(moduleName),
 
             versionPath: getVersion(moduleName)
         };
