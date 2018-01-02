@@ -1,7 +1,7 @@
-JARS.internal('ResolutionStrategies/Bundle', function bundleResolutionStrategySetup(getInternal) {
+JARS.internal('Strategies/Resolution/Bundle', function bundleResolutionStrategySetup(getInternal) {
     'use strict';
 
-    var AbsoluteResolutionStrategy = getInternal('ResolutionStrategies/Absolute'),
+    var AbsoluteResolutionStrategy = getInternal('Strategies/Resolution/Absolute'),
         isRelative = getInternal('Resolvers/Relative').isRelative,
         MSG_BUNDLE_RESOLUTION_ERROR = 'a bundle module is already relative to the base module by default';
 

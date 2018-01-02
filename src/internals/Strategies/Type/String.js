@@ -1,4 +1,4 @@
-JARS.internal('TypeStrategies/String', function(getInternal) {
+JARS.internal('Strategies/Type/String', function(getInternal) {
     'use strict';
 
     var extractInterceptionInfo = getInternal('Resolvers/Interception').extractInterceptionInfo,

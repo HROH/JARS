@@ -1,8 +1,8 @@
-JARS.internal('TypeStrategies/Array', function(getInternal) {
+JARS.internal('Strategies/Type/Array', function(getInternal) {
     'use strict';
 
     var arrayEach = getInternal('Utils').arrayEach,
-        AnyResolutionStrategy = getInternal('TypeStrategies/Any');
+        AnyResolutionStrategy = getInternal('Strategies/Type/Any');
 
     /**
      * @method Array

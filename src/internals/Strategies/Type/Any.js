@@ -1,4 +1,4 @@
-JARS.internal('TypeStrategies/Any', function(getInternal) {
+JARS.internal('Strategies/Type/Any', function(getInternal) {
     'use strict';
 
     var System = getInternal('System'),
@@ -30,7 +30,7 @@ JARS.internal('TypeStrategies/Any', function(getInternal) {
      * @return {function}
      */
     function getStrategy(type) {
-        return strategies[type] || (strategies[type] = getInternal('TypeStrategies')[type]);
+        return strategies[type] || (strategies[type] = getInternal('Strategies/Type')[type]);
     }
 
     return AnyResolutionStrategy;

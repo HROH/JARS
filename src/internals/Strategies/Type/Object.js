@@ -1,10 +1,10 @@
-JARS.internal('TypeStrategies/Object', function(getInternal) {
+JARS.internal('Strategies/Type/Object', function(getInternal) {
     'use strict';
 
     var objectEach = getInternal('Utils').objectEach,
-        AnyResolutionStrategy = getInternal('TypeStrategies/Any'),
-        StringResolutionStrategy = getInternal('TypeStrategies/String'),
-        NestedResolutionStrategy = getInternal('ResolutionStrategies/Nested'),
+        AnyResolutionStrategy = getInternal('Strategies/Type/Any'),
+        StringResolutionStrategy = getInternal('Strategies/Type/String'),
+        NestedResolutionStrategy = getInternal('Strategies/Resolution/Nested'),
         ModulesRegistry = getInternal('Registries/Modules');
 
     /**

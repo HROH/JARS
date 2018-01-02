@@ -1,4 +1,4 @@
-JARS.internal('TypeStrategies/Undefined', function() {
+JARS.internal('Strategies/Type/Undefined', function() {
     'use strict';
 
     /**

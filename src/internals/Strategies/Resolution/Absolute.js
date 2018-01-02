@@ -1,7 +1,7 @@
-JARS.internal('ResolutionStrategies/Absolute', function absoluteResolutionStrategySetup(getInternal) {
+JARS.internal('Strategies/Resolution/Absolute', function absoluteResolutionStrategySetup(getInternal) {
     'use strict';
 
-    var VersionResolutionStrategy = getInternal('ResolutionStrategies/Version'),
+    var VersionResolutionStrategy = getInternal('Strategies/Resolution/Version'),
         isRelative = getInternal('Resolvers/Relative').isRelative,
         MSG_ABSOLUTE_RESOLUTION_ERROR = 'a module can not be resolved beyond the root';
 

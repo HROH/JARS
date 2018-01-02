@@ -131,16 +131,15 @@ JARS.init(function setupInternalsManager(commands) {
                 'Recoverer',
                 'Refs',
                 'Registries',
-                'ResolutionStrategies',
                 'Resolvers',
                 'State',
                 'StateInfo',
+                'Strategies',
                 'System',
                 'SystemBootstrapper',
                 'Tools',
                 'Type',
                 'TypeLookup',
-                'TypeStrategies',
                 'Utils'
             ]);
 

@@ -1,4 +1,4 @@
-JARS.internal('ResolutionStrategies/Version', function(getInternal) {
+JARS.internal('Strategies/Resolution/Version', function(getInternal) {
     'use strict';
 
     var VersionResolver = getInternal('Resolvers/Version'),
