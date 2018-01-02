@@ -191,7 +191,7 @@
     };
 
     JARS.main(Env.MAIN_MODULE);
-    SourceManager.load('InternalsManager', Env.BASE_PATH + 'InternalsManager.js');
+    SourceManager.load('InternalsManager', Env.INTERNALS_PATH + 'InternalsManager.js');
 
     /**
      * @param {string} internalName
