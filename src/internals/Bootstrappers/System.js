@@ -1,4 +1,4 @@
-JARS.internal('SystemBootstrapper', function(getInternal) {
+JARS.internal('Bootstrappers/System', function(getInternal) {
     'use strict';
 
     var System = getInternal('System'),

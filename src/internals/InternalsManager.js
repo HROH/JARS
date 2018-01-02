@@ -52,12 +52,12 @@ JARS.init(function setupInternalsManager(commands) {
 
             mark: function(internalName) {
                 if(this.loading.indexOf(internalName) != -1 && --this.counter === 0) {
-                    InternalsManager.get('InternalBootstrapper').bootstrap(this.commands);
+                    InternalsManager.get('Bootstrappers/Internal').bootstrap(this.commands);
                 }
             },
 
             run: function(command) {
-                this.counter ? this.commands.push(command) : InternalsManager.get('InternalBootstrapper').run(command);
+                this.counter ? this.commands.push(command) : InternalsManager.get('Bootstrappers/Internal').run(command);
             }
         },
         /**
@@ -111,6 +111,7 @@ JARS.init(function setupInternalsManager(commands) {
         init: function() {
             InternalsManager.queue.addGroup([
                 'AutoAborter',
+                'Bootstrappers',
                 'Bundle',
                 'Config',
                 'ConfigOptions',
@@ -123,7 +124,6 @@ JARS.init(function setupInternalsManager(commands) {
                 'Interception',
                 'InterceptionDependencies',
                 'Interceptors',
-                'InternalBootstrapper',
                 'Loader',
                 'LogWrap',
                 'Module',
@@ -136,7 +136,6 @@ JARS.init(function setupInternalsManager(commands) {
                 'StateInfo',
                 'Strategies',
                 'System',
-                'SystemBootstrapper',
                 'Tools',
                 'Type',
                 'TypeLookup',

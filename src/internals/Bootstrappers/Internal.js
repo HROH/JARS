@@ -1,4 +1,4 @@
-JARS.internal('InternalBootstrapper', function internalBootstrapperSetup(getInternal) {
+JARS.internal('Bootstrappers/Internal', function internalBootstrapperSetup(getInternal) {
     'use strict';
 
     /**
@@ -36,7 +36,7 @@ JARS.internal('InternalBootstrapper', function internalBootstrapperSetup(getInte
                 loaderContext: 'default'
             });
 
-            systemModule = getInternal('SystemBootstrapper').bootstrap();
+            systemModule = getInternal('Bootstrappers/System').bootstrap();
 
             getInternal('Resolvers/Path').excludeFromPathList([ModulesRegistry.getRoot().name, systemModule.name].concat(systemModule.bundle.modules));
 
