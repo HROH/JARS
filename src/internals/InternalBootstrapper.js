@@ -19,6 +19,8 @@ JARS.internal('InternalBootstrapper', function internalBootstrapperSetup(getInte
 
                     cache: true,
 
+                    context: 'default',
+
                     minify: false,
 
                     timeout: 5

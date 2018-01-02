@@ -16,6 +16,9 @@ JARS.internal('GlobalConfigHooks/LoaderContext', function loaderContextHookSetup
      */
     LoaderContext = function(globalConfig, loaderContext) {
         if (loaderContext !== globalConfig.get('loaderContext')) {
+            globalConfig.update('modules', {
+                context: loaderContext
+            });
             GlobalAccessHook(globalConfig, globalConfig.get('globalAccess'));
         }
 
