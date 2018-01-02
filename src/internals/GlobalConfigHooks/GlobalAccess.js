@@ -16,7 +16,7 @@ JARS.internal('GlobalConfigHooks/GlobalAccess', function globalAccessHookSetup(g
      */
     GlobalAccess = function(globalConfig, makeGlobal) {
         if (makeGlobal) {
-            JARS.mods = getRootModule().ref;
+            JARS.mods = getRootModule().ref.get();
             JARS.internals = getInternal('InternalsManager');
         }
         else {

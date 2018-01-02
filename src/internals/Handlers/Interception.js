@@ -5,13 +5,12 @@ JARS.internal('Handlers/Interception', function(getInternal) {
         extractInterceptionInfo = getInternal('Resolvers/Interception').extractInterceptionInfo,
         getInterceptor = getInternal('InterceptorRegistry').get;
 
-    function InterceptionHandler(interceptionInfo, interceptor, nextHandler) {
+    function InterceptionHandler(interceptionInfo, nextHandler) {
         var handler = this;
 
         handler.requestor = nextHandler.requestor;
         handler._nextHandler = nextHandler;
         handler._info = interceptionInfo;
-        handler._interceptor = interceptor;
     }
 
     InterceptionHandler.prototype = {
@@ -20,7 +19,7 @@ JARS.internal('Handlers/Interception', function(getInternal) {
         onModuleLoaded: function(publisherName, data) {
             var handler = this;
 
-            handler._interceptor.intercept(data.ref, new Interception(handler.requestor, handler._info, handler._nextHandler));
+            getInterceptor(handler._info.type).intercept(new Interception(handler.requestor, handler._info, handler._nextHandler, data.ref));
         },
 
         onModuleAborted: function() {
@@ -29,10 +28,9 @@ JARS.internal('Handlers/Interception', function(getInternal) {
     };
 
     InterceptionHandler.intercept = function(moduleName, nextHandler) {
-        var interceptionInfo = extractInterceptionInfo(moduleName),
-            interceptor = getInterceptor(interceptionInfo.type);
+        var interceptionInfo = extractInterceptionInfo(moduleName);
 
-        return interceptor ? new InterceptionHandler(interceptionInfo, interceptor, nextHandler) : nextHandler;
+        return interceptionInfo.type ? new InterceptionHandler(interceptionInfo, nextHandler) : nextHandler;
     };
 
     return InterceptionHandler;

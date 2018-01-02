@@ -76,12 +76,6 @@ JARS.internal('System', function systemSetup(getInternal) {
          */
         isA: function(instance, Class) {
             return instance instanceof Class;
-        },
-        /**
-         * @param {JARS.internals.Interception} pluginRequest
-         */
-        $plugIn: function(pluginRequest) {
-            pluginRequest.success(pluginRequest.requestor.config.get('config'));
         }
     };
 

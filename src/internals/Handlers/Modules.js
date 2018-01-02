@@ -3,6 +3,7 @@ JARS.internal('Handlers/Modules', function modulesQueueSetup(getInternal) {
 
     var InterceptionHandler = getInternal('Handlers/Interception'),
         StateChangeHandler = getInternal('Handlers/StateChange'),
+        ModulesRef = getInternal('Refs/Modules'),
         arrayEach = getInternal('Utils').arrayEach,
         getModule = getInternal('ModulesRegistry').get,
         isBundle = getInternal('Resolvers/Bundle').isBundle;
@@ -21,7 +22,7 @@ JARS.internal('Handlers/Modules', function modulesQueueSetup(getInternal) {
         handler._nextHandler = requestHandler;
         handler._modules = requestHandler.modules;
         handler._total = handler._modules.length;
-        handler._refs = [];
+        handler._ref = new ModulesRef();
         handler._loaded = 0;
 
         handler.onModulesLoaded();
@@ -44,10 +45,11 @@ JARS.internal('Handlers/Modules', function modulesQueueSetup(getInternal) {
          */
         requestModule: function(requested, index) {
             var module = getModule(requested),
-                moduleOrBundle = isBundle(requested) ? module.bundle : module;
+                moduleOrBundle = isBundle(requested) ? module.bundle : module,
+                changeHandler = new StateChangeHandler(index, this);
 
             moduleOrBundle.processor.load();
-            moduleOrBundle.state.onChange(InterceptionHandler.intercept(requested, new StateChangeHandler(index, this)));
+            moduleOrBundle.state.onChange(isBundle(requested) ? changeHandler : InterceptionHandler.intercept(requested, changeHandler));
         },
         /**
          * @param {string} publisherName
@@ -56,7 +58,7 @@ JARS.internal('Handlers/Modules', function modulesQueueSetup(getInternal) {
         onModuleLoaded: function(publisherName, data) {
             var handler = this;
 
-            handler._refs[data.index] = data.ref;
+            handler._ref.add(data.index, data.ref);
 
             handler._nextHandler.onModuleLoaded(publisherName, data.ref, getPercentage(handler._loaded++, handler._total));
             handler.onModulesLoaded();
@@ -73,7 +75,7 @@ JARS.internal('Handlers/Modules', function modulesQueueSetup(getInternal) {
         onModulesLoaded: function() {
             var handler = this;
 
-            (handler._loaded === handler._total) && handler._nextHandler.onModulesLoaded(handler._refs);
+            (handler._loaded === handler._total) && handler._nextHandler.onModulesLoaded(handler._ref);
         }
     };
 

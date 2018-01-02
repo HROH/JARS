@@ -23,6 +23,15 @@ JARS.internal('SystemBootstrapper', function(getInternal) {
                 'Transports.*'
             ]);
 
+            systemModule.setMeta({
+                /**
+                 * @param {JARS.internals.Interception} pluginRequest
+                 */
+                plugIn: function(pluginRequest) {
+                    pluginRequest.success(pluginRequest.requestor.config.get('config'));
+                }
+            });
+
             systemModule.$export(function systemFactory() {
                 // TODO maybe calling the internal factory for System is the better option
                 // to isolate System on a per context basis but right now this is enough

@@ -15,16 +15,15 @@ JARS.internal('Loader', function loaderSetup(getInternal) {
      */
     Loader = {
         /**
-         * @param {string} loaderContext
+         * @param {string} context
          * @param {string} switchToContext
          */
-        flush: function(loaderContext, switchToContext) {
-            // TODO remove refs in modules with given loaderContext
+        flush: function(context, switchToContext) {
             ModulesRegistry.each(function flushModule(module) {
-                module.flush(loaderContext);
+                module.ref.flush(context);
             });
 
-            System.Logger.info('Successfully flushed Loader with context "${0}"', [loaderContext]);
+            System.Logger.info('Successfully flushed modules with context "${0}"', [context]);
 
             switchToContext && GlobalConfig.update('loaderContext', switchToContext);
         },
@@ -47,7 +46,7 @@ JARS.internal('Loader', function loaderSetup(getInternal) {
                 onModuleAborted: onModuleAborted || noop,
 
                 onModulesLoaded: function(refs) {
-                    (onModulesImported || noop).apply(null, refs);
+                    (onModulesImported || noop).apply(null, refs.get());
                 }
             });
         }

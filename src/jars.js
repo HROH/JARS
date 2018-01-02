@@ -139,6 +139,7 @@
              * @inner
              */
             ModuleWrapper = {
+                meta: delegate(dynamicInternalName, 'setMeta', returnSelf),
                 /**
                  * @method
                  *
@@ -146,9 +147,7 @@
                  *
                  * @return {JARS~ModuleWrapper}
                  */
-                $import: delegate(dynamicInternalName, '$import', function returnSelf() {
-                    return ModuleWrapper;
-                }),
+                $import: delegate(dynamicInternalName, '$import', returnSelf),
                 /**
                  * @method
                  *
@@ -156,6 +155,10 @@
                  */
                 $export: delegate(dynamicInternalName, '$export')
             };
+
+            function returnSelf() {
+                return ModuleWrapper;
+            }
 
             return ModuleWrapper;
         }),

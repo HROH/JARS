@@ -1,7 +1,8 @@
 JARS.internal('Interceptors/Plugin', function pluginInterceptorSetup(getInternal) {
     'use strict';
 
-    var isFunction = getInternal('System').isFunction,
+    var getModule = getInternal('ModulesRegistry').get,
+        isFunction = getInternal('System').isFunction,
         PluginInterceptor;
 
     /**
@@ -12,16 +13,12 @@ JARS.internal('Interceptors/Plugin', function pluginInterceptorSetup(getInternal
     */
     PluginInterceptor = {
         /**
-         * @param {*} moduleRef
-         * @param {JARS.internals.Intereption} interception
+         * @param {JARS.internals.Interception} interception
          */
-        intercept: function(moduleRef, interception) {
-            if (isFunction(moduleRef.$plugIn)) {
-                moduleRef.$plugIn(interception);
-            }
-            else {
-                interception.fail('Could not call method "$plugIn" on this module');
-            }
+        intercept: function(interception) {
+            var plugIn = getModule(interception.info.moduleName).getMeta('plugIn');
+
+            isFunction(plugIn) ? plugIn(interception) : interception.fail('Could not call method "plugIn" on this module');
         },
         /**
          * @type {string}

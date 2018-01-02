@@ -2,6 +2,7 @@ JARS.internal('Handlers/BundleSubmodule', function(getInternal) {
     'use strict';
 
     var RequestHandler = getInternal('Handlers/Request'),
+        BundleRef = getInternal('Refs/Bundle'),
         MSG_STRINGS = ['submodule', 'submodules'];
 
     /**
@@ -12,9 +13,9 @@ JARS.internal('Handlers/BundleSubmodule', function(getInternal) {
      * @return {JARS.internals.RequestHandler}
      */
     function BundleSubmoduleHandler(bundle) {
-        return new RequestHandler(bundle, bundle.modules, MSG_STRINGS, function() {
+        return new RequestHandler(bundle, bundle.modules, MSG_STRINGS, function(bundleRefs) {
             if(!bundle.state.isLoaded()) {
-                bundle.ref = bundle.module.ref;
+                bundle.ref = new BundleRef(bundle, bundleRefs);
                 bundle.state.setLoaded();
             }
         });

@@ -1,10 +1,11 @@
 JARS.internal('Module', function moduleSetup(getInternal) {
     'use strict';
 
-    var ModulesRegistry = getInternal('ModulesRegistry'),
-        Dependencies = getInternal('Dependencies'),
+    var Dependencies = getInternal('Dependencies'),
+        InterceptionDependencies = getInternal('InterceptionDependencies'),
         Bundle = getInternal('Bundle'),
-        Tools = getInternal('Tools');
+        Tools = getInternal('Tools'),
+        ModuleRef = getInternal('Refs/Module');
 
     /**
      * @callback ModuleFactory
@@ -29,8 +30,9 @@ JARS.internal('Module', function moduleSetup(getInternal) {
 
         module.name = moduleName;
         module.isRoot = isRoot || false;
+        module._meta = {};
         module.deps = new Dependencies(module);
-        module.interceptionDeps = new Dependencies(module);
+        module.interceptionDeps = new InterceptionDependencies(module);
         module.bundle = new Bundle(module);
 
         Tools.addToModule(module);
@@ -38,6 +40,14 @@ JARS.internal('Module', function moduleSetup(getInternal) {
 
     Module.prototype = {
         constructor: Module,
+
+        setMeta: function(meta) {
+            this._meta = meta;
+        },
+
+        getMeta: function(metaProp) {
+            return this._meta[metaProp];
+        },
         /**
          * @param {JARS.internals.Dependencies.Declaration} dependencies
          */
@@ -56,11 +66,7 @@ JARS.internal('Module', function moduleSetup(getInternal) {
 
             module.processor.register(function onDependenciesLoaded(dependencyRefs) {
                 if (!module.state.isLoaded()) {
-                    ModulesRegistry.setCurrent(module);
-
-                    module.ref = (!module.isRoot && factory) ? (factory.apply(dependencyRefs.shift(), dependencyRefs) || {}) : {};
-
-                    ModulesRegistry.setCurrent();
+                    module.ref = new ModuleRef(module, dependencyRefs, factory);
                     module.state.setLoaded();
                 }
             });

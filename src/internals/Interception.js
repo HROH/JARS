@@ -1,10 +1,10 @@
 JARS.internal('Interception', function interceptionSetup(getInternal) {
     'use strict';
 
-    var getModule = getInternal('ModulesRegistry').get,
-        resolveDeps = getInternal('Resolvers/Dependencies').resolveDeps,
+    var InterceptionRef = getInternal('Refs/Interception'),
         getFullPath = getInternal('Resolvers/Path').getFullPath,
-        MSG_INTERCEPTION_ERROR = 'error in interception of this module by interceptor "${type}" with data "${data}"';
+        MSG_MODULE_INTERCEPTED = ' - handling request of "${fullModuleName}"',
+        MSG_INTERCEPTION_ERROR = ' - error in interception of module "${moduleName}" by interceptor "${type}" with data "${data}"';
 
     /**
      * @class
@@ -15,16 +15,35 @@ JARS.internal('Interception', function interceptionSetup(getInternal) {
      * @param {JARS.internals.InterceptionInfo} interceptionInfo
      * @param {JARS.internals.StateChangeHandler} handler
      */
-    function Interception(requestor, interceptionInfo, handler) {
+    function Interception(requestor, interceptionInfo, handler, ref) {
         var interception = this;
 
         interception.requestor = requestor;
+        interception.deps = requestor.interceptionDeps.get(interceptionInfo.fullModuleName);
+        interception.ref = ref;
         interception.info = interceptionInfo;
         interception._handler = handler;
+
+        requestor.state.setIntercepted(MSG_MODULE_INTERCEPTED, interceptionInfo);
     }
 
     Interception.prototype = {
         constructor: Interception,
+
+        $import: function(dependencies) {
+            this._exported || this.deps.add(dependencies);
+        },
+
+        $export: function(provide) {
+            var interception = this;
+
+            interception._exported = true;
+            interception.deps.request(function(dependencyRefs) {
+                interception._handler.onModuleLoaded(interception.info.fullModuleName, {
+                    ref: new InterceptionRef(interception.ref, dependencyRefs, provide)
+                });
+            });
+        },
         /**
          * @param {string} fileType
          *
@@ -38,24 +57,21 @@ JARS.internal('Interception', function interceptionSetup(getInternal) {
          * @param {function()} onModulesLoaded
          */
         $importAndLink: function(moduleNames, onModulesLoaded) {
-            var interceptionDeps = this.requestor.interceptionDeps;
-
-            interceptionDeps.add(resolveDeps(getModule(this.info.moduleName), moduleNames));
-            interceptionDeps.request(onModulesLoaded);
+            this.$import(moduleNames);
+            this.$export(onModulesLoaded);
         },
 
         success: function(data) {
-            this._handler.onModuleLoaded(this.info.fullModuleName, {
-                ref: data
+            this.$export(function() {
+                return data;
             });
         },
 
         fail: function(error) {
-            var interceptedModuleName = this.info.fullModuleName;
+            var info = this.info;
 
-            getModule(interceptedModuleName).logger.error(error || MSG_INTERCEPTION_ERROR, this.info);
-
-            this._handler.onModuleAborted(interceptedModuleName);
+            this.requestor.state.setAborted(MSG_INTERCEPTION_ERROR + (error ? ': ' + error : ''), info);
+            this._handler.onModuleAborted(info.fullModuleName);
         }
     };
 

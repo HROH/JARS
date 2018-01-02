@@ -7,7 +7,7 @@ JARS.internal('StateInfo', function stateInfoSetup(getInternal) {
         LOG_METHODS = {},
         stateInfos = [];
 
-    LOG_METHODS.registered = LOG_METHODS.waiting = {
+    LOG_METHODS.registered = LOG_METHODS.waiting = LOG_METHODS.intercepted = {
         attempt: 'warn',
 
         done: 'info'
@@ -70,15 +70,16 @@ JARS.internal('StateInfo', function stateInfoSetup(getInternal) {
         }
     };
 
-    arrayEach(['waiting', 'loading', 'registered', 'loaded', 'aborted'], function(stateText) {
+    arrayEach(['waiting', 'loading', 'registered', 'intercepted', 'loaded', 'aborted'], function(stateText) {
         stateInfos.push(new StateInfo(stateText, stateText.charAt(0).toUpperCase() + stateText.substr(1), LOG_METHODS[stateText]));
     });
 
-    stateInfos[0].setNext([stateInfos[1], stateInfos[2]]);
-    stateInfos[1].setNext([stateInfos[2], stateInfos[4]]);
-    stateInfos[2].setNext([stateInfos[3], stateInfos[4]]);
-    stateInfos[3].setNext([stateInfos[0]]);
+    stateInfos[0].setNext(stateInfos.slice(1, 3));
+    stateInfos[1].setNext([stateInfos[2], stateInfos[5]]);
+    stateInfos[2].setNext(stateInfos.slice(3));
+    stateInfos[3].setNext(stateInfos.slice(3));
     stateInfos[4].setNext([stateInfos[0]]);
+    stateInfos[5].setNext([stateInfos[0]]);
 
     return StateInfo;
 });

@@ -13,18 +13,19 @@ JARS.internal('Interceptors/Property', function partialModuleInterceptorSetup(ge
     */
     PartialModuleInterceptor = {
         /**
-         * @param {*} moduleRef
-         * @param {JARS.internals.Intereption} interception
+         * @param {JARS.internals.Interception} interception
          */
-        intercept: function(moduleRef, interception) {
-            var property = interception.info.data;
+        intercept: function(interception) {
+            interception.$export(function() {
+                var property = interception.info.data;
 
-            if (moduleRef && hasOwnProp(moduleRef, property)) {
-                interception.success(moduleRef[property]);
-            }
-            else {
-                interception.fail('The module has no property "' + property + '"');
-            }
+                if (!hasOwnProp(this, property)) {
+                    interception.fail('The module has no property "' + property + '"');
+                }
+                else {
+                    return this[property];
+                }
+            });
         },
         /**
          * @type {string}
