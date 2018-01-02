@@ -1,7 +1,7 @@
 JARS.internal('Resolvers/Interception', function interceptionResolverSetup(getInternal) {
     'use strict';
 
-    var eachInterceptor = getInternal('InterceptorRegistry').each,
+    var eachInterceptor = getInternal('Registries/Interceptor').each,
         interceptionInfoCache = {},
         InterceptionResolver;
 

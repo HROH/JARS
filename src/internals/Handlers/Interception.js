@@ -3,7 +3,7 @@ JARS.internal('Handlers/Interception', function(getInternal) {
 
     var Interception = getInternal('Interception'),
         extractInterceptionInfo = getInternal('Resolvers/Interception').extractInterceptionInfo,
-        getInterceptor = getInternal('InterceptorRegistry').get;
+        getInterceptor = getInternal('Registries/Interceptor').get;
 
     function InterceptionHandler(interceptionInfo, nextHandler) {
         var handler = this;

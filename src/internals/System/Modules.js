@@ -9,7 +9,7 @@ JARS.module('System.Modules').$export(function systemModulesFactory() {
         getInternal = internals.get,
         arrayEach = getInternal('Utils').arrayEach,
         Loader = getInternal('Loader'),
-        ModulesRegistry = getInternal('ModulesRegistry'),
+        ModulesRegistry = getInternal('Registries/Modules'),
         DependenciesResolver = getInternal('Resolvers/Dependencies'),
         getFullPath = getInternal('Resolvers/Path').getFullPath,
         Modules;

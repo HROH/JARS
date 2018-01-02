@@ -1,7 +1,7 @@
 JARS.internal('GlobalConfigHooks/Interceptors', function interceptorsHookSetup(getInternal) {
     'use strict';
 
-    var InterceptorRegistry = getInternal('InterceptorRegistry'),
+    var InterceptorRegistry = getInternal('Registries/Interceptor'),
         Interceptors;
 
     /**

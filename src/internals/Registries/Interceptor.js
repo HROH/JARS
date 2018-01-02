@@ -1,4 +1,4 @@
-JARS.internal('InterceptorRegistry', function interceptorRegistrySetup(getInternal) {
+JARS.internal('Registries/Interceptor', function interceptorRegistrySetup(getInternal) {
     'use strict';
 
     var Utils = getInternal('Utils'),

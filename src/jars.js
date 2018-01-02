@@ -124,12 +124,12 @@
          *
          * @return {JARS~ModuleWrapper}
          */
-        module: delegate('ModulesRegistry', 'register', function returnModuleWrapper(moduleName) {
+        module: delegate('Registries/Modules', 'register', function returnModuleWrapper(moduleName) {
             var dynamicInternalName = 'ModulesRegistry:' + moduleName,
                 ModuleWrapper;
 
             delegate('InternalsManager', 'register')(dynamicInternalName, function internalModuleSetup(getInternal) {
-                return getInternal('ModulesRegistry').get(moduleName);
+                return getInternal('Registries/Modules').get(moduleName);
             });
 
             /**

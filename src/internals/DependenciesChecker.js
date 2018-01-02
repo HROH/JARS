@@ -1,7 +1,7 @@
 JARS.internal('DependenciesChecker', function dependenciesCheckerSetup(getInternal) {
     'use strict';
 
-    var getModule = getInternal('ModulesRegistry').get,
+    var getModule = getInternal('Registries/Modules').get,
         isBundle = getInternal('Resolvers/Bundle').isBundle,
         arrayEach = getInternal('Utils').arrayEach,
         CIRCULAR_SEPARATOR = '" -> "',

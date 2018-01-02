@@ -1,4 +1,4 @@
-JARS.internal('ModulesRegistry', function modulesRegistrySetup(getInternal) {
+JARS.internal('Registries/Modules', function modulesRegistrySetup(getInternal) {
     'use strict';
 
     var System = getInternal('System'),

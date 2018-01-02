@@ -5,7 +5,7 @@ JARS.internal('TypeStrategies/Object', function(getInternal) {
         AnyResolutionStrategy = getInternal('TypeStrategies/Any'),
         StringResolutionStrategy = getInternal('TypeStrategies/String'),
         NestedResolutionStrategy = getInternal('ResolutionStrategies/Nested'),
-        ModulesRegistry = getInternal('ModulesRegistry');
+        ModulesRegistry = getInternal('Registries/Modules');
 
     /**
      * @method Object

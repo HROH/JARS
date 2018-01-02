@@ -3,7 +3,7 @@ JARS.internal('Loader', function loaderSetup(getInternal) {
 
     var System = getInternal('System'),
         GlobalConfig = getInternal('GlobalConfig'),
-        ModulesRegistry = getInternal('ModulesRegistry'),
+        ModulesRegistry = getInternal('Registries/Modules'),
         Modules = getInternal('Handlers/Modules'),
         resolveDeps = getInternal('Resolvers/Dependencies').resolveDeps,
         Loader;

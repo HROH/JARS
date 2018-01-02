@@ -1,7 +1,7 @@
 JARS.internal('Resolvers/Dependencies', function dependenciesResolverSetup(getInternal) {
     'use strict';
 
-    var ModulesRegistry = getInternal('ModulesRegistry'),
+    var ModulesRegistry = getInternal('Registries/Modules'),
         AnyResolutionStrategy = getInternal('TypeStrategies/Any'),
         DependenciesResolutionStrategy = getInternal('ResolutionStrategies/Dependencies'),
         unwrapVersion = getInternal('Resolvers/Version').unwrapVersion,

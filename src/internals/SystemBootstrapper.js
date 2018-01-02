@@ -14,7 +14,7 @@ JARS.internal('SystemBootstrapper', function(getInternal) {
                 basePath: getInternal('Env').INTERNALS_PATH
             });
 
-            systemModule = getInternal('ModulesRegistry').register('System', [
+            systemModule = getInternal('Registries/Modules').register('System', [
                 'Formatter',
                 'Logger',
                 'LogContext',

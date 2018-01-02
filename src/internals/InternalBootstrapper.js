@@ -8,7 +8,7 @@ JARS.internal('InternalBootstrapper', function internalBootstrapperSetup(getInte
      */
     var InternalBootstrapper = {
         bootstrap: function(commands) {
-            var ModulesRegistry = getInternal('ModulesRegistry'),
+            var ModulesRegistry = getInternal('Registries/Modules'),
                 systemModule;
 
             ModulesRegistry.init();

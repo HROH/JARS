@@ -1,7 +1,7 @@
 JARS.internal('Interceptors/Plugin', function pluginInterceptorSetup(getInternal) {
     'use strict';
 
-    var getModule = getInternal('ModulesRegistry').get,
+    var getModule = getInternal('Registries/Modules').get,
         isFunction = getInternal('System').isFunction,
         PluginInterceptor;
 

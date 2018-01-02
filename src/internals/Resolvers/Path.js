@@ -4,7 +4,7 @@ JARS.internal('Resolvers/Path', function pathResolverSetup(getInternal) {
     var Utils = getInternal('Utils'),
         hasOwnProp = Utils.hasOwnProp,
         arrayEach = Utils.arrayEach,
-        ModulesRegistry = getInternal('ModulesRegistry'),
+        ModulesRegistry = getInternal('Registries/Modules'),
         ExtensionTransform = getInternal('ConfigTransforms/Extension'),
         isBundle = getInternal('Resolvers/Bundle').isBundle,
         pathOptions = ['basePath', 'dirPath', 'versionPath', 'fileName', 'minify', 'extension', 'cache'],

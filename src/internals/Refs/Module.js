@@ -2,7 +2,7 @@ JARS.internal('Refs/Module', function(getInternal) {
     'use strict';
 
     var FileNameResolver = getInternal('Resolvers/FileName'),
-        setCurrent = getInternal('ModulesRegistry').setCurrent;
+        setCurrent = getInternal('Registries/Modules').setCurrent;
 
     function ModuleRef(module, refs, factory) {
         this._module = module;
