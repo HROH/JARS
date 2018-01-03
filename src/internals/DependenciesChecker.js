@@ -45,7 +45,7 @@ JARS.internal('DependenciesChecker', function dependenciesCheckerSetup(getIntern
     }
 
     function getCircularDepsModule(module, entryModule) {
-        return module.state.isRegistered() && getCircularDepsEach(module.deps.getAll().concat(module.interceptionDeps.getAll()), entryModule || module, module);
+        return (module.state.isRegistered() || module.state.isIntercepted()) && getCircularDepsEach(module.deps.getAll().concat(module.interceptionDeps.getAll()), entryModule || module, module);
     }
 
     function getCircularDepsBundle(bundle, entryModule) {
