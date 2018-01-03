@@ -137,6 +137,7 @@ JARS.init(function setupInternalsManager(commands) {
                 'Strategies',
                 'System',
                 'Tools',
+                'Traverser',
                 'Type',
                 'TypeLookup',
                 'Utils'

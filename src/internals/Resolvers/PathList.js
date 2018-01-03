@@ -1,20 +1,13 @@
 JARS.internal('Resolvers/PathList', function(getInternal) {
     'use strict';
 
-    var Utils = getInternal('Utils'),
-        hasOwnProp = Utils.hasOwnProp,
-        arrayEach = Utils.arrayEach,
-        Loader = getInternal('Loader'),
-        ModulesRegistry = getInternal('Registries/Modules'),
-        PathResolver = getInternal('Resolvers/Path'),
+    var PathListTraverser = getInternal('Traverser/PathList'),
+        traverse = getInternal('Traverser/Modules').traverse,
+        importModules = getInternal('Loader').$import,
+        arrayEach = getInternal('Utils').arrayEach,
+        getModule = getInternal('Registries/Modules').get,
         isBundle = getInternal('Resolvers/Bundle').isBundle,
-        cache = {
-            sorted: {},
-
-            excluded: ['*', 'System.*'],
-
-            paths: []
-        },
+        excluded = ['*', 'System.*'],
         PathListResolver;
 
     /**
@@ -34,97 +27,34 @@ JARS.internal('Resolvers/PathList', function(getInternal) {
          * Even without recomputation the list will still be valid.</p>
          *
          * @param {function(sting[])} callback
-         * @param {boolean} forceRecompute
          */
-        computeSortedPathList: function(callback, forceRecompute) {
-            var modulesStillLoading = getModulesStillLoading();
+        computeSortedPathList: function(entryModuleName, callback) {
+            var entryModule = getModule(entryModuleName);
 
-            if(modulesStillLoading.length) {
-                Loader.$import(modulesStillLoading, function computeSortedPathList() {
-                    PathListResolver.computeSortedPathList(callback, forceRecompute);
-                });
-            }
-            else {
-                callback(computeModulesPathList(forceRecompute));
-            }
+            importModules([entryModule.name], function computeSortedPathList() {
+                callback(traverse(entryModule, PathListTraverser, markModulesSorted(excluded, {
+                    sorted: {},
+
+                    paths: []
+                })).paths);
+            });
         }
     };
 
-    function getModulesStillLoading() {
-        var modulesStillLoading = [];
-
-        ModulesRegistry.each(function addModuleToLoad(module) {
-            module.state.isLoading() && modulesStillLoading.push(module.name);
-        });
-
-        return modulesStillLoading;
-    }
-
-    /**
-     * @memberof JARS.internals.PathResolver
-     * @inner
-     *
-     * @param {string[]} modules
-     */
-    function addModules(modules, paths) {
-        arrayEach(modules, function addModuleToPathList(moduleName) {
-            addToPathList(ModulesRegistry.get(moduleName), paths, isBundle(moduleName));
-        });
-    }
-
-    /**
-     * @memberof JARS.internals.PathResolver
-     * @inner
-     *
-     * @param {JARS.internals.Module} module
-     * @param {boolean} [addBundle = false]
-     */
-    function addToPathList(module, paths, addBundle) {
-        if (module.state.isLoaded()) {
-            if (!hasOwnProp(cache.sorted, module.name)) {
-                addModules(module.deps.getAll().concat(module.interceptionDeps.getAll()));
-                cache.paths.push(PathResolver.getFullPath(module));
-                cache.sorted[module.name] = true;
-            }
-
-            addBundle && addModules(module.bundle.modules);
-        }
-    }
-
-    /**
-     * @memberof JARS.internals.PathResolver
-     * @inner
-     */
-    function computeModulesPathList(forceRecompute) {
-        var paths = cache.paths;
-
-        if (forceRecompute || !paths.length) {
-            paths.length = 0;
-            cache.sorted = {};
-
-            markModulesSorted(cache.excluded);
-
-            // TODO maybe start with entry module
-            ModulesRegistry.each(function(module) {
-                addToPathList(module, paths);
-            });
-        }
-
-        return paths;
-    }
-
-    function markModulesSorted(modules) {
+    function markModulesSorted(modules, value) {
         arrayEach(modules, function markModuleSorted(excludedModule) {
             var module;
 
-            cache.sorted[excludedModule] = true;
+            value.sorted[excludedModule] = true;
 
             if(isBundle(excludedModule)) {
-                module = ModulesRegistry.get(excludedModule);
-                cache.sorted[module.name] = true;
-                markModulesSorted(module.bundle.modules);
+                module = getModule(excludedModule);
+                value.sorted[module.name] = true;
+                value = markModulesSorted(module.bundle.modules, value);
             }
         });
+
+        return value;
     }
 
     return PathListResolver;
