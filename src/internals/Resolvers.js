@@ -6,6 +6,7 @@ JARS.internalGroup('Resolvers', [
     'FileName',
     'Interception',
     'Path',
+    'PathList',
     'Relative',
     'Version'
 ]);

@@ -172,7 +172,7 @@
 
         configure: delegate('GlobalConfig', 'update', getJARS),
 
-        computeSortedPathList: delegate('Resolvers/Path', 'computeSortedPathList', getJARS),
+        computeSortedPathList: delegate('Resolvers/PathList', 'computeSortedPathList', getJARS),
 
         flush: delegate('Loader', 'flush', getJARS),
         /**

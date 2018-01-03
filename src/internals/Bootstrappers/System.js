@@ -1,10 +1,7 @@
 JARS.internal('Bootstrappers/System', function(getInternal) {
     'use strict';
 
-    var System = getInternal('System'),
-        SystemBootstrapper;
-
-    SystemBootstrapper= {
+    var SystemBootstrapper= {
         bootstrap: function() {
             var systemModule;
 
@@ -41,10 +38,8 @@ JARS.internal('Bootstrappers/System', function(getInternal) {
                  * @module System
                  * @see JARS.internals.System
                  */
-                return System;
+                return getInternal('System');
             });
-
-            return systemModule;
         }
     };
 

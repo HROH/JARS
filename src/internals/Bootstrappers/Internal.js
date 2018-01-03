@@ -8,10 +8,7 @@ JARS.internal('Bootstrappers/Internal', function internalBootstrapperSetup(getIn
      */
     var InternalBootstrapper = {
         bootstrap: function(commands) {
-            var ModulesRegistry = getInternal('Registries/Modules'),
-                systemModule;
-
-            ModulesRegistry.init();
+            getInternal('Registries/Modules').init();
 
             getInternal('GlobalConfig').update({
                 modules: {
@@ -36,9 +33,7 @@ JARS.internal('Bootstrappers/Internal', function internalBootstrapperSetup(getIn
                 loaderContext: 'default'
             });
 
-            systemModule = getInternal('Bootstrappers/System').bootstrap();
-
-            getInternal('Resolvers/Path').excludeFromPathList([ModulesRegistry.getRoot().name, systemModule.name].concat(systemModule.bundle.modules));
+            getInternal('Bootstrappers/System').bootstrap();
 
             while(commands.length) {
                 InternalBootstrapper.run(commands.shift());
