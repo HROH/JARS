@@ -11,7 +11,7 @@ JARS.internal('Refs/Interception', function() {
         constructor: InterceptionRef,
 
         get: function(context) {
-            return this._provide.apply(this._ref.get(context), this._refs.get(context).slice(1));
+            return this._provide.apply(this._ref.get(context), this._refs.get(context));
         }
     };
 

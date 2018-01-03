@@ -13,7 +13,7 @@ JARS.internal('InterceptionDependencies', function(getInternal) {
         constructor: InterceptionDependencies,
 
         get: function(interceptionName) {
-            return this._deps[interceptionName] || (this._deps[interceptionName] = new Dependencies(this.module));
+            return this._deps[interceptionName] || (this._deps[interceptionName] = new Dependencies(this.module, true));
         },
 
         getAll: function() {
