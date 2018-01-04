@@ -11,13 +11,13 @@ JARS.internal('GlobalConfigHooks/Environment', function environmentHookSetup() {
      *
      * @return {string}
      */
-    var Environment = function(globalConfig, environment) {
+    function Environment(globalConfig, environment) {
         if (environment !== globalConfig.get('environment')) {
             globalConfig.update(globalConfig.get('environments')[environment]);
         }
 
         return environment;
-    };
+    }
 
     return Environment;
 });

@@ -14,11 +14,9 @@ JARS.internal('Dependencies', function dependenciesSetup(getInternal) {
      * @param {JARS.internals.Module} module
      */
     function Dependencies(module, ignoreParent) {
-        var dependencies = this;
-
-        dependencies.parent = ignoreParent ? null : DependenciesResolver.getParent(module);
-        dependencies.module = module;
-        dependencies._modules = [];
+        this.parent = ignoreParent ? null : DependenciesResolver.getParent(module);
+        this.module = module;
+        this._modules = [];
     }
 
     Dependencies.prototype = {

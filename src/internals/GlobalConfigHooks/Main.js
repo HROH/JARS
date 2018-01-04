@@ -3,8 +3,7 @@ JARS.internal('GlobalConfigHooks/Main', function mainHookSetup(getInternal) {
 
     var MAIN_CONTEXT = 'Main:',
         SUCCESS_MESSAGE = 'successfully loaded',
-        ERROR_MESSAGE = 'aborted',
-        Main;
+        ERROR_MESSAGE = 'aborted';
 
     /**
      * @method
@@ -16,7 +15,7 @@ JARS.internal('GlobalConfigHooks/Main', function mainHookSetup(getInternal) {
      *
      * @return {string}
      */
-    Main = function(globalConfig, mainModule) {
+    function Main(globalConfig, mainModule) {
         var Loader = getInternal('Loader');
 
         Loader.$import('System.*', function(System) {
@@ -24,7 +23,7 @@ JARS.internal('GlobalConfigHooks/Main', function mainHookSetup(getInternal) {
                 debug: true
             });
 
-            JARS.configure('modules', {
+            globalConfig.update('modules', {
                 restrict: mainModule,
 
                 basePath: './',
@@ -40,7 +39,7 @@ JARS.internal('GlobalConfigHooks/Main', function mainHookSetup(getInternal) {
         });
 
         return mainModule;
-    };
+    }
 
     return Main;
 });

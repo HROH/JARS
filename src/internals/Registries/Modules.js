@@ -5,7 +5,7 @@ JARS.internal('Registries/Modules', function modulesRegistrySetup(getInternal) {
         objectEach = getInternal('Utils').objectEach,
         modulesRegistry = {},
         ROOT_MODULE_NAME = '*',
-        ModulesRegistry, Module, InterceptionResolver, BundleResolver, currentModule;
+        ModulesRegistry, Module, BundleResolver, removeInterceptionData, currentModule;
 
     /**
      * @namespace
@@ -15,8 +15,8 @@ JARS.internal('Registries/Modules', function modulesRegistrySetup(getInternal) {
     ModulesRegistry = {
         init: function() {
             Module = getInternal('Module');
-            InterceptionResolver = getInternal('Resolvers/Interception');
             BundleResolver = getInternal('Resolvers/Bundle');
+            removeInterceptionData = getInternal('Resolvers/Interception').removeInterceptionData;
 
             ModulesRegistry.getRoot().$export();
         },
@@ -29,12 +29,7 @@ JARS.internal('Registries/Modules', function modulesRegistrySetup(getInternal) {
         register: function(moduleName, bundleModules) {
             var module = ModulesRegistry.get(moduleName);
 
-            if(module) {
-                module.bundle.add(bundleModules);
-            }
-            else {
-                System.Logger.error('No modulename provided');
-            }
+            module ? module.bundle.add(bundleModules) : System.Logger.error('No modulename provided');
 
             return module;
         },
@@ -45,12 +40,7 @@ JARS.internal('Registries/Modules', function modulesRegistrySetup(getInternal) {
          * @return {JARS.internals.Module}
          */
         get: function(moduleName, isRoot) {
-            if (BundleResolver.isBundle(moduleName)) {
-                moduleName = BundleResolver.removeBundleSuffix(moduleName);
-            }
-            else {
-                moduleName = InterceptionResolver.removeInterceptionData(moduleName);
-            }
+            moduleName = BundleResolver.isBundle(moduleName) ? BundleResolver.removeBundleSuffix(moduleName) : removeInterceptionData(moduleName);
 
             return moduleName ? modulesRegistry[moduleName] || (modulesRegistry[moduleName] = new Module(moduleName, isRoot)) : null;
         },

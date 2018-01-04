@@ -1,8 +1,7 @@
 JARS.internal('GlobalConfigHooks/LoaderContext', function loaderContextHookSetup(getInternal) {
     'use strict';
 
-    var GlobalAccessHook = getInternal('GlobalConfigHooks/GlobalAccess'),
-        LoaderContext;
+    var GlobalAccessHook = getInternal('GlobalConfigHooks/GlobalAccess');
 
     /**
      * @method
@@ -14,7 +13,7 @@ JARS.internal('GlobalConfigHooks/LoaderContext', function loaderContextHookSetup
      *
      * @return {string}
      */
-    LoaderContext = function(globalConfig, loaderContext) {
+    function LoaderContext(globalConfig, loaderContext) {
         if (loaderContext !== globalConfig.get('loaderContext')) {
             globalConfig.update('modules', {
                 context: loaderContext
@@ -23,7 +22,7 @@ JARS.internal('GlobalConfigHooks/LoaderContext', function loaderContextHookSetup
         }
 
         return loaderContext;
-    };
+    }
 
     return LoaderContext;
 });

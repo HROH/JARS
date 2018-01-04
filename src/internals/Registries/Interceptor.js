@@ -17,10 +17,8 @@ JARS.internal('Registries/Interceptor', function interceptorRegistrySetup(getInt
          * @param {JARS.internals.Interceptor} interceptor
          */
         register: function(interceptor) {
-            var interceptorType = interceptor.type;
-
-            if (!hasOwnProp(interceptors, interceptorType)) {
-                interceptors[interceptorType] = interceptor;
+            if (!hasOwnProp(interceptors, interceptor.type)) {
+                interceptors[interceptor.type] = interceptor;
             }
         },
         /**

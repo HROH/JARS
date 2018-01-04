@@ -26,11 +26,7 @@ JARS.internal('LogWrap', function logWrapSetup(getInternal) {
 
     getInternal('Utils').arrayEach(['debug', 'error', 'info', 'warn'], function addForward(methodName) {
         LogWrap.prototype[methodName] = function(message, values) {
-            var SystemLogger = System.Logger;
-
-            if (SystemLogger) {
-                SystemLogger[methodName + 'WithContext'](this._context, message, values);
-            }
+            System.Logger && System.Logger[methodName + 'WithContext'](this._context, message, values);
         };
     });
 

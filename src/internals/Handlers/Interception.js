@@ -6,20 +6,16 @@ JARS.internal('Handlers/Interception', function(getInternal) {
         getInterceptor = getInternal('Registries/Interceptor').get;
 
     function InterceptionHandler(interceptionInfo, nextHandler) {
-        var handler = this;
-
-        handler.requestor = nextHandler.requestor;
-        handler._nextHandler = nextHandler;
-        handler._info = interceptionInfo;
+        this.requestor = nextHandler.requestor;
+        this._nextHandler = nextHandler;
+        this._info = interceptionInfo;
     }
 
     InterceptionHandler.prototype = {
         constructor: InterceptionHandler,
 
         onModuleLoaded: function(publisherName, data) {
-            var handler = this;
-
-            getInterceptor(handler._info.type).intercept(new Interception(handler.requestor, handler._info, handler._nextHandler, data.ref));
+            getInterceptor(this._info.type).intercept(new Interception(this.requestor, this._info, this._nextHandler, data.ref));
         },
 
         onModuleAborted: function() {

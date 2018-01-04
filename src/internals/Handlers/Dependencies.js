@@ -5,9 +5,7 @@ JARS.internal('Handlers/Dependencies', function(getInternal) {
         MSG_STRINGS = ['dependency', 'dependencies'];
 
     function DependenciesHandler(dependencies, onModulesLoaded) {
-        var module = dependencies.module;
-
-        return new RequestHandler(module, dependencies.getAll(), MSG_STRINGS, onModulesLoaded);
+        return new RequestHandler(dependencies.module, dependencies.getAll(), MSG_STRINGS, onModulesLoaded);
     }
 
     return DependenciesHandler;

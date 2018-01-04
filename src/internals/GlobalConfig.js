@@ -53,16 +53,13 @@ JARS.internal('GlobalConfig', function globalConfigSetup(getInternal) {
      * @param {(*|Array<*>)} valueOrArray
      */
     function updateOption(option, valueOrArray) {
-        var configHook;
-
         if(isArray(valueOrArray)) {
             arrayEach(valueOrArray, function(value) {
                 updateOption(option, value);
             });
         }
         else {
-            configHook = GlobalConfigHooks[option];
-            globalConfig[option] = System.isFunction(configHook) ? configHook(GlobalConfig, valueOrArray) : valueOrArray;
+            globalConfig[option] = System.isFunction(GlobalConfigHooks[option]) ? GlobalConfigHooks[option](GlobalConfig, valueOrArray) : valueOrArray;
         }
     }
 

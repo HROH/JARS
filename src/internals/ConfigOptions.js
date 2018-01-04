@@ -36,10 +36,9 @@ JARS.internal('ConfigOptions', function configOptionsSetup(getInternal) {
      * @return {JARS.internals.ConfigOptions}
      */
     ConfigOptions.getDefault = function(subject) {
-        var subjectName = subject.name,
-            defaultOptions = new ConfigOptions();
+        var defaultOptions = new ConfigOptions();
 
-        isBundle(subjectName) || ConfigOptions.transformAndUpdate(defaultOptions, ConfigOptionsResolver(subjectName), subject);
+        isBundle(subject.name) || ConfigOptions.transformAndUpdate(defaultOptions, ConfigOptionsResolver(subject.name), subject);
 
         return defaultOptions;
     };

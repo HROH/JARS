@@ -7,12 +7,10 @@ JARS.internal('Resolvers/ConfigOptions', function(getInternal) {
         DEFAULT_EXTENSION = 'js';
 
     function ConfigOptionsResolver(moduleName) {
-        var fileName = FileNameResolver(moduleName);
-
         return {
             extension: DEFAULT_EXTENSION,
 
-            fileName: fileName,
+            fileName: FileNameResolver(moduleName),
 
             dirPath: DirPathResolver(moduleName),
 

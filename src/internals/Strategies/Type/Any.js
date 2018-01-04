@@ -1,8 +1,7 @@
 JARS.internal('Strategies/Type/Any', function(getInternal) {
     'use strict';
 
-    var System = getInternal('System'),
-        strategies = {};
+    var getType = getInternal('System').getType;
 
     /**
      * @method Any
@@ -16,21 +15,7 @@ JARS.internal('Strategies/Type/Any', function(getInternal) {
      * @return {string[]}
      */
     function AnyResolutionStrategy(baseModule, modules, resolutionStrategy) {
-        var typeResolutionStrategy = getStrategy(System.getType(modules));
-
-        return typeResolutionStrategy(baseModule, modules, resolutionStrategy);
-    }
-
-    /**
-     * @memberof JARS.internals.TypeStrategies.Any
-     * @inner
-     *
-     * @param {string} type
-     *
-     * @return {function}
-     */
-    function getStrategy(type) {
-        return strategies[type] || (strategies[type] = getInternal('Strategies/Type')[type]);
+        return getInternal('Strategies/Type')[getType(modules)](baseModule, modules, resolutionStrategy);
     }
 
     return AnyResolutionStrategy;

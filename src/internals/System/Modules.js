@@ -5,8 +5,7 @@
 JARS.module('System.Modules').$export(function systemModulesFactory() {
     'use strict';
 
-    var internals = this.$$internals,
-        getInternal = internals.get,
+    var getInternal = this.$$internals.get,
         arrayEach = getInternal('Utils').arrayEach,
         Loader = getInternal('Loader'),
         ModulesRegistry = getInternal('Registries/Modules'),

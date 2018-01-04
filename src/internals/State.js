@@ -16,21 +16,17 @@ JARS.internal('State', function stateSetup(getInternal) {
      * @param {(JARS.internals.Module|JARS.internals.Bundle)} subject
      */
     function State(subject) {
-        var state = this;
-
-        state._subject = subject;
-        state._current = StateInfo.initial();
-        state._queue = [];
+        this._subject = subject;
+        this._current = StateInfo.initial();
+        this._queue = [];
     }
 
     /**
      * @param {(JARS.internals.StateChangeHandler|JARS.internals.InterceptionHandler)} changeHandler
      */
     State.prototype.onChange = function(changeHandler) {
-        var state = this;
-
-        state._queue.push(changeHandler);
-        state._syncQueue();
+        this._queue.push(changeHandler);
+        this._syncQueue();
     };
 
     StateInfo.each(function(stateInfo) {

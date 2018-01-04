@@ -11,7 +11,7 @@ JARS.internal('ConfigTransforms/Timeout', function timeoutTransformSetup() {
      * @return {number}
      */
     function Timeout(timeout) {
-        return (timeout > MIN_TIMEOUT ? timeout : MIN_TIMEOUT);
+        return timeout > MIN_TIMEOUT ? timeout : MIN_TIMEOUT;
     }
 
     return Timeout;

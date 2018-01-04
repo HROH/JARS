@@ -35,9 +35,7 @@ JARS.internal('Config', function configSetup(getInternal) {
          * @return {*}
          */
         get: function(option) {
-            var options = this._options;
-
-            return (option in options) ? options[option]: this._defaultOptions[option];
+            return (option in this._options) ? this._options[option] : this._defaultOptions[option];
         },
         /**
          * @return {JARS.internals.ConfigOptions}

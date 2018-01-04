@@ -1,8 +1,7 @@
 JARS.internal('GlobalConfigHooks/Debugging', function debuggingHookSetup(getInternal) {
     'use strict';
 
-    var isObject = getInternal('System').isObject,
-        Debugging;
+    var isObject = getInternal('System').isObject;
 
     /**
      * @method
@@ -12,17 +11,13 @@ JARS.internal('GlobalConfigHooks/Debugging', function debuggingHookSetup(getInte
      * @param {JARS.internals.GlobalConfig} globalConfig
      * @param {(Object|boolean)} debugConfig
      */
-    Debugging = function(globalConfig, debugConfig) {
-        if (!isObject(debugConfig)) {
-            debugConfig = {
-                debug: debugConfig
-            };
-        }
-
+    function Debugging(globalConfig, debugConfig) {
         globalConfig.update('modules', {
-            config: debugConfig
+            config: isObject(debugConfig) ? debugConfig : {
+                debug: debugConfig
+            }
         });
-    };
+    }
 
     return Debugging;
 });

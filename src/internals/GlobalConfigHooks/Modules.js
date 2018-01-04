@@ -4,8 +4,7 @@ JARS.internal('GlobalConfigHooks/Modules', function modulesHookSetup(getInternal
     var ModulesRegistry = getInternal('Registries/Modules'),
         resolveDeps = getInternal('Resolvers/Dependencies').resolveDeps,
         isBundle = getInternal('Resolvers/Bundle').isBundle,
-        arrayEach = getInternal('Utils').arrayEach,
-        Modules;
+        arrayEach = getInternal('Utils').arrayEach;
 
     /**
      * @method
@@ -15,7 +14,7 @@ JARS.internal('GlobalConfigHooks/Modules', function modulesHookSetup(getInternal
      * @param {JARS.internals.GlobalConfig} globalConfig
      * @param {Object} config
      */
-    Modules = function(globalConfig, config) {
+    function Modules(globalConfig, config) {
         var rootModule = ModulesRegistry.getRoot();
 
         if(config.restrict) {
@@ -28,7 +27,7 @@ JARS.internal('GlobalConfigHooks/Modules', function modulesHookSetup(getInternal
         else {
             rootModule.config.update(config);
         }
-    };
+    }
 
     return Modules;
 });

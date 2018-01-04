@@ -73,9 +73,7 @@ JARS.internal('Handlers/Modules', function modulesQueueSetup(getInternal) {
          * @method
          */
         onModulesLoaded: function() {
-            var handler = this;
-
-            (handler._loaded === handler._total) && handler._nextHandler.onModulesLoaded(handler._ref);
+            this._loaded === this._total && this._nextHandler.onModulesLoaded(this._ref);
         }
     };
 

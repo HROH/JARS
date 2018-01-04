@@ -2,11 +2,9 @@ JARS.internal('Handlers/StateChange', function() {
     'use strict';
 
     function StateChangeHandler(index, nextHandler) {
-        var handler = this;
-
-        handler.requestor = nextHandler.requestor;
-        handler._index = index;
-        handler._nextHandler = nextHandler;
+        this.requestor = nextHandler.requestor;
+        this._index = index;
+        this._nextHandler = nextHandler;
     }
 
     StateChangeHandler.prototype = {

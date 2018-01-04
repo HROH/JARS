@@ -20,18 +20,14 @@ JARS.internal('Processors/Bundle', function(getInternal) {
         constructor: BundleProcessor,
 
         load: function() {
-            var bundle = this.bundle;
-
-            if(bundle.state.setLoading()) {
-                Modules.request(BundleCoremoduleHandler(bundle));
+            if(this.bundle.state.setLoading()) {
+                Modules.request(BundleCoremoduleHandler(this.bundle));
             }
         },
 
         register: function() {
-            var bundle = this.bundle;
-
-            if(bundle.state.setRegistered(MSG_BUNDLE_DEFINED, getBundleLogInfo(bundle.modules))) {
-                Modules.request(BundleSubmoduleHandler(bundle));
+            if(this.bundle.state.setRegistered(MSG_BUNDLE_DEFINED, getBundleLogInfo(this.bundle.modules))) {
+                Modules.request(BundleSubmoduleHandler(this.bundle));
             }
         }
     };

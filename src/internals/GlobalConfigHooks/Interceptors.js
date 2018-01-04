@@ -1,8 +1,7 @@
 JARS.internal('GlobalConfigHooks/Interceptors', function interceptorsHookSetup(getInternal) {
     'use strict';
 
-    var InterceptorRegistry = getInternal('Registries/Interceptor'),
-        Interceptors;
+    var registerInterceptor = getInternal('Registries/Interceptor').register;
 
     /**
      * @method
@@ -12,9 +11,9 @@ JARS.internal('GlobalConfigHooks/Interceptors', function interceptorsHookSetup(g
      * @param {JARS.internals.GlobalConfig} globalConfig
      * @param {JARS.internals.Interceptor} interceptor
      */
-    Interceptors = function(globalConfig, interceptor) {
-        InterceptorRegistry.register(interceptor);
-    };
+    function Interceptors(globalConfig, interceptor) {
+        registerInterceptor(interceptor);
+    }
 
     return Interceptors;
 });
