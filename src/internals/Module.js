@@ -52,11 +52,7 @@ JARS.internal('Module', function moduleSetup(getInternal) {
          * @param {JARS.internals.Dependencies.Declaration} dependencies
          */
         $import: function(dependencies) {
-            var state = this.state;
-
-            if (!(state.isRegistered() || state.isLoaded())) {
-                this.deps.add(dependencies);
-            }
+            (this.state.isWaiting() || this.state.isLoading()) && this.deps.add(dependencies);
         },
         /**
          * @param {JARS.internals.Module.ModuleFactory} factory
