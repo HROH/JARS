@@ -23,7 +23,7 @@ JARS.internal('System', function systemSetup(getInternal) {
             global: envGlobal
         },
 
-        $$internals: getInternal('InternalsManager'),
+        $$internals: getInternal('Registries/Internals'),
         /**
          * @param {string} typeDef
          *

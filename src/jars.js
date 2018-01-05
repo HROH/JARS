@@ -87,29 +87,29 @@
      * @namespace
      * @global
      *
-     * @borrows JARS.internals.InternalsManager.register as internal
-     * @borrows JARS.internals.InternalsManager.registerGroup as internalGroup
+     * @borrows JARS.internals.InternalsRegistry.register as internal
+     * @borrows JARS.internals.InternalsRegistry.registerGroup as internalGroup
      */
     envGlobal.JARS = JARS = {
-        init: function(bootstrapInternalsManager) {
-            var InternalsManager = bootstrapInternalsManager(commands);
+        init: function(bootstrapInternalsRegistry) {
+            var InternalsRegistry = bootstrapInternalsRegistry(commands);
 
-            InternalsManager.register('Env', function() {
+            InternalsRegistry.register('Env', function() {
                 return Env;
             });
 
-            InternalsManager.register('SourceManager', function() {
+            InternalsRegistry.register('SourceManager', function() {
                 return SourceManager;
             });
 
-            JARS.internal = InternalsManager.register;
-            JARS.internalGroup = InternalsManager.registerGroup;
+            JARS.internal = InternalsRegistry.register;
+            JARS.internalGroup = InternalsRegistry.registerGroup;
 
             pushCommand = function(command) {
-                InternalsManager.queue.run(command);
+                InternalsRegistry.queue.run(command);
             };
 
-            InternalsManager.init();
+            InternalsRegistry.init();
         },
         /**
          * @param {string} mainModule
@@ -128,7 +128,7 @@
             var dynamicInternalName = 'ModulesRegistry:' + moduleName,
                 ModuleWrapper;
 
-            delegate('InternalsManager', 'register')(dynamicInternalName, function internalModuleSetup(getInternal) {
+            delegate('Registries/Internals', 'register')(dynamicInternalName, function internalModuleSetup(getInternal) {
                 return getInternal('Registries/Modules').get(moduleName);
             });
 
@@ -191,7 +191,7 @@
     };
 
     JARS.main(Env.MAIN_MODULE);
-    SourceManager.load('InternalsManager', Env.INTERNALS_PATH + 'InternalsManager.js');
+    SourceManager.load('InternalsRegistry', Env.INTERNALS_PATH + 'Registries/Internals.js');
 
     /**
      * @param {string} internalName

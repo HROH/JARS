@@ -1,1 +1,1 @@
-JARS.internalGroup('Registries', ['Interceptor', 'Modules']);
+JARS.internalGroup('Registries', ['Interceptor', 'Internals', 'Modules']);
