@@ -2,7 +2,7 @@ JARS.internal('Strategies/Resolution/Absolute', function absoluteResolutionStrat
     'use strict';
 
     var VersionResolutionStrategy = getInternal('Strategies/Resolution/Version'),
-        isRelative = getInternal('Resolvers/Relative').isRelative,
+        RelativeResolver = getInternal('Resolvers/Relative'),
         MSG_ABSOLUTE_RESOLUTION_ERROR = 'a module can not be resolved beyond the root';
 
     /**
@@ -16,7 +16,7 @@ JARS.internal('Strategies/Resolution/Absolute', function absoluteResolutionStrat
      * @return {string}
      */
     function AbsoluteResolutionStrategy(baseModule, moduleName) {
-        return (baseModule.isRoot || isRelative(moduleName)) ? {
+        return (baseModule.isRoot || RelativeResolver(moduleName)) ? {
             error: MSG_ABSOLUTE_RESOLUTION_ERROR
         } : VersionResolutionStrategy(baseModule, moduleName);
     }

@@ -2,7 +2,7 @@ JARS.internal('Strategies/Resolution/Bundle', function bundleResolutionStrategyS
     'use strict';
 
     var AbsoluteResolutionStrategy = getInternal('Strategies/Resolution/Absolute'),
-        isRelative = getInternal('Resolvers/Relative').isRelative,
+        RelativeResolver = getInternal('Resolvers/Relative'),
         MSG_BUNDLE_RESOLUTION_ERROR = 'a bundle module is already relative to the base module by default';
 
     /**
@@ -16,7 +16,7 @@ JARS.internal('Strategies/Resolution/Bundle', function bundleResolutionStrategyS
      * @return {string}
      */
     function BundleResolutionStrategy(baseModule, moduleName) {
-        return isRelative(moduleName) ? {
+        return RelativeResolver(moduleName) ? {
             error: MSG_BUNDLE_RESOLUTION_ERROR
         } : AbsoluteResolutionStrategy(baseModule, moduleName);
     }

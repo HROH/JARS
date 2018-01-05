@@ -1,7 +1,7 @@
 JARS.internal('Strategies/Resolution/Relative', function relativeResolutionStrategySetup(getInternal) {
     'use strict';
 
-    var isRelative = getInternal('Resolvers/Relative').isRelative,
+    var RelativeResolver = getInternal('Resolvers/Relative'),
         AbsoluteResolutionStrategy = getInternal('Strategies/Resolution/Absolute');
 
     /**
@@ -15,7 +15,7 @@ JARS.internal('Strategies/Resolution/Relative', function relativeResolutionStrat
      * @return {string}
      */
     function RelativeResolutionStrategy(baseModule, moduleName) {
-        return ((!baseModule.isRoot && isRelative(moduleName)) ?
+        return ((!baseModule.isRoot && RelativeResolver(moduleName)) ?
             RelativeResolutionStrategy(baseModule.deps.parent, moduleName.substr(1)) :
             AbsoluteResolutionStrategy(baseModule, moduleName));
     }

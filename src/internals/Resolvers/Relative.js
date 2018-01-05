@@ -1,24 +1,18 @@
 JARS.internal('Resolvers/Relative', function() {
     'use strict';
 
-    var RE_LEADING_DOT = /^\./,
-        RelativeResolver;
+    var RE_LEADING_DOT = /^\./;
 
     /**
-     * @namespace
-     *
      * @memberof JARS.internals
+     *
+     * @param {string} moduleName
+     *
+     * @return {boolean}
      */
-    RelativeResolver = {
-        /**
-         * @param {string} moduleName
-         *
-         * @return {boolean}
-         */
-        isRelative: function(moduleName) {
-            return RE_LEADING_DOT.test(moduleName);
-        }
-    };
+    function RelativeResolver(moduleName) {
+        return RE_LEADING_DOT.test(moduleName);
+    }
 
     return RelativeResolver;
 });
