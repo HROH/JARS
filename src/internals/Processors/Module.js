@@ -20,7 +20,7 @@ JARS.internal('Processors/Module', function(getInternal) {
 
                 AutoAborter.setup(module, path);
 
-                loadSource(module.name, path);
+                loadSource(path);
             }
         },
 

@@ -58,7 +58,7 @@ JARS.init(function setupInternalsRegistry(commands) {
          * @param {string} internalName
          */
         load: function(internalName) {
-            InternalsRegistry.get('SourceManager').load('internal:' + internalName, InternalsRegistry.get('Env').INTERNALS_PATH + internalName + '.js');
+            InternalsRegistry.get('SourceManager').load(InternalsRegistry.get('Env').INTERNALS_PATH + internalName + '.js');
         },
 
         run: function(command) {

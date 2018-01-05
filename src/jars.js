@@ -69,15 +69,13 @@
          */
         SourceManager =  {
             /**
-             * @param {string} moduleName
              * @param {string} path
              */
-            load: function(moduleName, path) {
+            load: function(path) {
                 var script = doc.createElement('script');
 
                 head.appendChild(script);
 
-                script.id = moduleName;
                 script.type = 'text/javascript';
                 script.src = path;
                 script.async = true;
@@ -193,7 +191,7 @@
     };
 
     JARS.main(Env.MAIN_MODULE);
-    SourceManager.load('InternalsRegistry', Env.INTERNALS_PATH + 'Registries/Internals.js');
+    SourceManager.load(Env.INTERNALS_PATH + 'Registries/Internals.js');
 
     /**
      * @param {string} internalName
