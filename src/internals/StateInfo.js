@@ -74,7 +74,7 @@ JARS.internal('StateInfo', function stateInfoSetup(getInternal) {
         stateInfos.push(new StateInfo(stateText, stateText.charAt(0).toUpperCase() + stateText.substr(1), LOG_METHODS[stateText]));
     });
 
-    stateInfos[0].setNext(stateInfos.slice(1, 3));
+    stateInfos[0].setNext([stateInfos[1], stateInfos[2], stateInfos[5]]);
     stateInfos[1].setNext([stateInfos[2], stateInfos[5]]);
     stateInfos[2].setNext(stateInfos.slice(3));
     stateInfos[3].setNext(stateInfos.slice(3));

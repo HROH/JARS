@@ -21,7 +21,7 @@ JARS.internal('Strategies/Resolution/Bundle', function bundleResolutionStrategyS
         } : AbsoluteResolutionStrategy(baseModule, moduleName);
     }
 
-    BundleResolutionStrategy.logBundle = true;
+    BundleResolutionStrategy.abortBundle = true;
 
     return BundleResolutionStrategy;
 });

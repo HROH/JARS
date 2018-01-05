@@ -2,7 +2,7 @@ JARS.internal('Strategies/Type/String', function(getInternal) {
     'use strict';
 
     var extractInterceptionInfo = getInternal('Resolvers/Interception').extractInterceptionInfo,
-        MSG_DEFAULT_RESOLUTION_ERROR = 'Could not resolve "${mod}": ';
+        MSG_DEFAULT_RESOLUTION_ERROR = ' - could not resolve "${mod}": ';
 
     /**
      * @method String
@@ -18,14 +18,14 @@ JARS.internal('Strategies/Type/String', function(getInternal) {
     function StringResolutionStrategy(baseModule, moduleName, resolutionStrategy) {
         var info = extractInterceptionInfo(moduleName),
             resolutionData = resolutionStrategy(baseModule, info.moduleName);
-            
-        logResolutionError((resolutionStrategy.logBundle ? baseModule.bundle : baseModule).logger, resolutionData.error, moduleName);
+
+        abortOnResolutionError((resolutionStrategy.abortBundle ? baseModule.bundle : baseModule).state, resolutionData.error, moduleName);
 
         return resolutionData.moduleName ? [resolutionData.moduleName + (info.type ? (info.type + info.data) : '')] : [];
     }
 
-    function logResolutionError(logger, error, moduleName) {
-        error && logger.error(MSG_DEFAULT_RESOLUTION_ERROR + error, {
+    function abortOnResolutionError(state, error, moduleName) {
+        error && state.setAborted(MSG_DEFAULT_RESOLUTION_ERROR + error, {
             mod: moduleName
         });
     }
