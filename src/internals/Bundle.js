@@ -28,6 +28,12 @@ JARS.internal('Bundle', function bundleSetup(getInternal) {
          */
         add: function(bundleModules) {
             this.modules = BundleResolver.resolveBundle(this.module, bundleModules);
+        },
+
+        find: function(bundleModule) {
+            var index = this.modules.indexOf(BundleResolver.resolveBundle(this.module, [bundleModule])[0]);
+
+            return index > -1 ? this.modules[index] : null;
         }
     };
 
