@@ -2,7 +2,11 @@
     'use strict';
 
     var previousJARS = envGlobal.JARS,
-        commands = [],
+        commands = [
+            ['Bootstrappers/Modules', 'bootstrap'],
+            ['Bootstrappers/GlobalConfig', 'bootstrap'],
+            ['Bootstrappers/System', 'bootstrap']
+        ],
         pushCommand = function(command) {
             commands.push(command);
         },
@@ -105,9 +109,7 @@
             JARS.internal = InternalsRegistry.register;
             JARS.internalGroup = InternalsRegistry.registerGroup;
 
-            pushCommand = function(command) {
-                InternalsRegistry.queue.run(command);
-            };
+            pushCommand = InternalsRegistry.run;
 
             InternalsRegistry.init();
         },

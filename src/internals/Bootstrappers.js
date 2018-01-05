@@ -1,1 +1,1 @@
-JARS.internalGroup('Bootstrappers', ['Internal', 'System']);
+JARS.internalGroup('Bootstrappers', ['GlobalConfig', 'Modules', 'System']);

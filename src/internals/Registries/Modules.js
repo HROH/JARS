@@ -2,10 +2,12 @@ JARS.internal('Registries/Modules', function modulesRegistrySetup(getInternal) {
     'use strict';
 
     var System = getInternal('System'),
+        BundleResolver = getInternal('Resolvers/Bundle'),
+        removeInterceptionData = getInternal('Resolvers/Interception').removeInterceptionData,
         objectEach = getInternal('Utils').objectEach,
-        modulesRegistry = {},
+        modules = {},
         ROOT_MODULE_NAME = '*',
-        ModulesRegistry, Module, BundleResolver, removeInterceptionData, currentModule;
+        ModulesRegistry, currentModule;
 
     /**
      * @namespace
@@ -13,13 +15,6 @@ JARS.internal('Registries/Modules', function modulesRegistrySetup(getInternal) {
      * @memberof JARS.internals
      */
     ModulesRegistry = {
-        init: function() {
-            Module = getInternal('Module');
-            BundleResolver = getInternal('Resolvers/Bundle');
-            removeInterceptionData = getInternal('Resolvers/Interception').removeInterceptionData;
-
-            ModulesRegistry.getRoot().$export();
-        },
         /**
          * @param {string} moduleName
          * @param {JARS.internals.Bundle.Declaration} bundleModules
@@ -42,7 +37,7 @@ JARS.internal('Registries/Modules', function modulesRegistrySetup(getInternal) {
         get: function(moduleName, isRoot) {
             moduleName = BundleResolver.isBundle(moduleName) ? BundleResolver.removeBundleSuffix(moduleName) : removeInterceptionData(moduleName);
 
-            return moduleName ? modulesRegistry[moduleName] || (modulesRegistry[moduleName] = new Module(moduleName, isRoot)) : null;
+            return moduleName ? modules[moduleName] || (modules[moduleName] = new ModulesRegistry.Module(moduleName, isRoot)) : null;
         },
         /**
          * @return {JARS.internals.Module}
@@ -66,7 +61,7 @@ JARS.internal('Registries/Modules', function modulesRegistrySetup(getInternal) {
          * @param {function(JARS.internals.Module, string)} callback
          */
         each: function(callback) {
-            objectEach(modulesRegistry, callback);
+            objectEach(modules, callback);
         }
     };
 

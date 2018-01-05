@@ -1,4 +1,4 @@
-JARS.internal('Bootstrappers/Internal', function internalBootstrapperSetup(getInternal) {
+JARS.internal('Bootstrappers/GlobalConfig', function globalConfigBootstrapperSetup(getInternal) {
     'use strict';
 
     /**
@@ -6,10 +6,8 @@ JARS.internal('Bootstrappers/Internal', function internalBootstrapperSetup(getIn
      *
      * @memberof JARS.internals
      */
-    var InternalBootstrapper = {
-        bootstrap: function(commands) {
-            getInternal('Registries/Modules').init();
-
+    var GlobalConfigBootstrapper = {
+        bootstrap: function() {
             getInternal('GlobalConfig').update({
                 modules: {
                     basePath: getInternal('Env').BASE_PATH,
@@ -29,23 +27,9 @@ JARS.internal('Bootstrappers/Internal', function internalBootstrapperSetup(getIn
                 ],
 
                 globalAccess: false,
-
-                loaderContext: 'default'
             });
-
-            getInternal('Bootstrappers/System').bootstrap();
-
-            while(commands.length) {
-                InternalBootstrapper.run(commands.shift());
-            }
-        },
-
-        run: function(command) {
-            var internal = getInternal(command[0]);
-
-            internal[command[1]].apply(internal, command[2]);
         }
     };
 
-    return InternalBootstrapper;
+    return GlobalConfigBootstrapper;
 });
