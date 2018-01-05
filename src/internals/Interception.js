@@ -37,12 +37,14 @@ JARS.internal('Interception', function interceptionSetup(getInternal) {
         $export: function(provide) {
             var interception = this;
 
-            interception._exported = true;
-            interception.deps.request(function(dependencyRefs) {
-                interception._handler.onModuleLoaded(interception.info.fullModuleName, {
-                    ref: new InterceptionRef(interception.ref, dependencyRefs, provide)
+            if(!interception._exported) {
+                interception._exported = true;
+                interception.deps.request(function(dependencyRefs) {
+                    interception._handler.onModuleLoaded(interception.info.fullModuleName, {
+                        ref: new InterceptionRef(interception.ref, dependencyRefs, provide)
+                    });
                 });
-            });
+            }
         },
         /**
          * @param {string} fileType
@@ -68,10 +70,8 @@ JARS.internal('Interception', function interceptionSetup(getInternal) {
         },
 
         fail: function(error) {
-            var info = this.info;
-
-            this.requestor.state.setAborted(MSG_INTERCEPTION_ERROR + (error ? ': ' + error : ''), info);
-            this._handler.onModuleAborted(info.fullModuleName);
+            this.requestor.state.setAborted(MSG_INTERCEPTION_ERROR + (error ? ': ' + error : ''), this.info);
+            this._handler.onModuleAborted(this.info.fullModuleName);
         }
     };
 
