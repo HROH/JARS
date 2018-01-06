@@ -1,12 +1,16 @@
 JARS.internal('Traverser/Circular', function() {
     'use strict';
 
+    var CIRCULAR_SEPARATOR = '" -> "',
+        MSG_ABORTED_CIRCULAR_DEPENDENCIES = ' - found circular dependencies "${0}"',
+        Circular;
+
     /**
      * @namespace
      *
      * @memberof JARS~internals.Traverser
      */
-    var Circular = {
+    Circular = {
         /**
          * @param {JARS~internals.Module} module
          * @param {JARS~internals.Module} entryModule
@@ -28,8 +32,12 @@ JARS.internal('Traverser/Circular', function() {
         onModuleLeave: function(module, entryModule, depth, circularList) {
             (circularList || (equalsEntryModule(module, entryModule, depth) && (circularList = []))) && circularList.push(module.name);
 
+            if(circularList && !depth) {
+                entryModule.state.setAborted(MSG_ABORTED_CIRCULAR_DEPENDENCIES, [circularList.join(CIRCULAR_SEPARATOR)]);
+            }
+
             return {
-                value: circularList,
+                value: depth ? circularList : !!circularList,
 
                 done: !!circularList
             };

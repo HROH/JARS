@@ -91,7 +91,6 @@ JARS.init(function(commands) {
                 'ConfigOptions',
                 'ConfigTransforms',
                 'Dependencies',
-                'DependenciesChecker',
                 'GlobalConfig',
                 'GlobalConfigHooks',
                 'Handlers',
