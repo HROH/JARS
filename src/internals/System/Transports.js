@@ -30,7 +30,7 @@ JARS.module('System.Transports', ['Console']).meta({
     Transports = {
         /**
          * @param {string} mode
-         * @param {object} transport
+         * @param {Object} transport
          */
         add: function(mode, transport) {
             if (!hasOwnProp(transports, mode)) {
@@ -41,7 +41,7 @@ JARS.module('System.Transports', ['Console']).meta({
          * @param {string} mode
          * @param {string} level
          * @param {string} context
-         * @param {object} data
+         * @param {Object} data
          */
         write: function(mode, level, context, data) {
             var transport = transports[mode];

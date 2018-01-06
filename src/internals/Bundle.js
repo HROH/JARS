@@ -24,7 +24,7 @@ JARS.internal('Bundle', function(getInternal) {
     Bundle.prototype = {
         constructor: Bundle,
         /**
-         * @param {JARS~internals.Bundle.Declaration} bundleModules
+         * @param {JARS~internals.Bundle~Declaration} bundleModules
          */
         add: function(bundleModules) {
             this.modules = BundleResolver.resolveBundle(this.module, bundleModules);
@@ -45,6 +45,7 @@ JARS.internal('Bundle', function(getInternal) {
     * @typedef {string[]} Declaration
     *
     * @memberof JARS~internals.Bundle
+    * @inner
     */
 
     return Bundle;

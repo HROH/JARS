@@ -15,6 +15,8 @@ JARS.internal('Resolvers/Dependencies', function dependenciesResolverSetup(getIn
      */
     Dependencies = {
         /**
+         * @method
+         *
          * @param {string} moduleName
          *
          * @return {string}

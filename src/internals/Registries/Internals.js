@@ -192,7 +192,7 @@ JARS.init(function(commands) {
      * @memberof JARS~internals.Registries.Internals
      * @inner
      *
-     * @param {JARS.internals.InternalsRegistry.get} getInternal
+     * @param {JARS~internals.Registries.Internals.get} getInternal
      *
      * @return {*}
      */

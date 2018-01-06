@@ -46,7 +46,7 @@ JARS.internal('Registries/Modules', function modulesRegistrySetup(getInternal) {
             return Modules.get(ROOT_MODULE_NAME, true);
         },
         /**
-         * @param {JARS.internals~Module} module
+         * @param {JARS~internals.Module} module
          */
         setCurrent: function(module) {
             currentModule = module || Modules.getRoot();

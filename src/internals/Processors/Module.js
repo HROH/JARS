@@ -8,7 +8,7 @@ JARS.internal('Processors/Module', function(getInternal) {
     /**
      * @class
      *
-     * @memberof JARS~internals
+     * @memberof JARS~internals.Processors
      *
      * @param {JARS~internals.Module}
      */

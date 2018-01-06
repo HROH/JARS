@@ -20,7 +20,7 @@ JARS.internal('Helpers/Subject', function(getInternal) {
             addToSubject(bundle, true);
         },
         /**
-         * @param {JARS~internals.Module}
+         * @param {JARS~internals.Module} module
          */
         addToModule: function(module) {
             addToSubject(module);

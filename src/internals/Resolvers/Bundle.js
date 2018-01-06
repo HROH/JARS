@@ -17,6 +17,8 @@ JARS.internal('Resolvers/Bundle', function bundleResolverSetup(getInternal) {
      */
     Bundle = {
         /**
+         * @method
+         *
          * @param {string} moduleName
          *
          * @return {string}
@@ -25,6 +27,8 @@ JARS.internal('Resolvers/Bundle', function bundleResolverSetup(getInternal) {
             return moduleName + BUNDLE_SUFFIX;
         }),
         /**
+         * @method
+         *
          * @param {string} moduleName
          *
          * @return {string}
