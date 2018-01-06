@@ -1,11 +1,11 @@
-JARS.internal('ConfigTransforms/Path', function pathTransformSetup() {
+JARS.internal('ConfigTransforms/Path', function() {
     'use strict';
 
     var RE_END_SLASH = /\/$/,
         SLASH = '/';
 
     /**
-     * @memberof JARS.internals.ConfigTransforms
+     * @memberof JARS~internals.Config.Transforms
      *
      * @param {string} path
      *

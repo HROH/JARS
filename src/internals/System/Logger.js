@@ -1,6 +1,6 @@
 /**
  * @module System.Logger
- * @see JARS.internals.System.Logger
+ * @see JARS~internals.System.Logger
  */
 JARS.module('System.Logger').$import([
     '.!',
@@ -16,10 +16,10 @@ JARS.module('System.Logger').$import([
         ROOT_LOGCONTEXT = getCurrentModuleData().moduleName;
 
     /**
-     * @memberof JARS.internals.System.Logger
+     * @memberof JARS~internals.System.Logger
      * @inner
      *
-     * @param {boolean} debug
+     * @param {object} options
      * @param {string} level
      * @param {string} context
      *
@@ -29,17 +29,26 @@ JARS.module('System.Logger').$import([
         return getOption(options, 'debug') && LogLevels.comparePriority(level, getOption(options, 'level')) && LogContext.isCurrent(context);
     }
 
+    /**
+     * @memberof JARS~internals.System.Logger
+     * @inner
+     *
+     * @param {object} options
+     * @param {string} option
+     *
+     * @return {*}
+     */
     function getOption(options, option) {
         return options[option] || config[option];
     }
 
     /**
-     * @memberof JARS.internals.System
-     *
      * @class
      *
+     * @memberof JARS~internals.System
+     *
      * @param {string} logContext
-     * @param {Object} options
+     * @param {object} options
      */
     function Logger(logContext, options) {
         var logger = this;
@@ -48,14 +57,20 @@ JARS.module('System.Logger').$import([
         logger.options = options || {};
     }
 
+    /**
+     * @param {string} logContext
+     * @param {object} options
+     *
+     * @return {JARS~internals.System.Logger}
+     */
     Logger.get = function(logContext, options) {
         return loggerCache[logContext] || (loggerCache[logContext] = new Logger(logContext, options));
     };
 
     /**
-     * @param {Object} options
+     * @param {object} options
      *
-     * @return {JARS.internals.System.Logger}
+     * @return {JARS~internals.System.Logger}
      */
     Logger.forCurrentModule = function(options) {
         return Logger.get(getCurrentModuleData().moduleName, options);
@@ -64,7 +79,7 @@ JARS.module('System.Logger').$import([
     /**
      * @param {string} level
      * @param {*} message
-     * @param {(Object|Array)} values
+     * @param {(object|array)} values
      */
     Logger.prototype.write = function(level, message, values) {
         var options = this.options,

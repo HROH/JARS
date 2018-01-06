@@ -6,22 +6,20 @@ JARS.internal('Strategies/Resolution/Bundle', function bundleResolutionStrategyS
         MSG_BUNDLE_RESOLUTION_ERROR = 'a bundle module is already relative to the base module by default';
 
     /**
-     * @method Bundle
+     * @memberof JARS~internals.Strategies.Resolution
      *
-     * @memberof JARS.internals.ResolutionStrategies
-     *
-     * @param {JARS.internals.Module} baseModule
+     * @param {JARS~internals.Module} baseModule
      * @param {string} moduleName
      *
      * @return {string}
      */
-    function BundleResolutionStrategy(baseModule, moduleName) {
+    function Bundle(baseModule, moduleName) {
         return RelativeResolver(moduleName) ? {
             error: MSG_BUNDLE_RESOLUTION_ERROR
         } : AbsoluteResolutionStrategy(baseModule, moduleName);
     }
 
-    BundleResolutionStrategy.abortBundle = true;
+    Bundle.abortBundle = true;
 
-    return BundleResolutionStrategy;
+    return Bundle;
 });

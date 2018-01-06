@@ -1,17 +1,15 @@
-JARS.internal('GlobalConfigHooks/Environments', function environmentsHookSetup(getInternal) {
+JARS.internal('GlobalConfigHooks/Environments', function(getInternal) {
     'use strict';
 
     var objectMerge = getInternal('Utils').objectMerge;
 
     /**
-     * @method
+     * @memberof JARS~internals.GlobalConfig.Hooks
      *
-     * @memberof JARS.internals.GlobalConfigHooks
+     * @param {JARS~internals.GlobalConfig} globalConfig
+     * @param {Object<string, JARS~internals.GlobalConfig~Options>} environments
      *
-     * @param {JARS.internals.GlobalConfig} globalConfig
-     * @param {Object} environments
-     *
-     * @return {Object<string, Object>}
+     * @return {Object<string, JARS~internals.GlobalConfig~Options>}
      */
     function Environments(globalConfig, environments) {
         return objectMerge(globalConfig.get('environments'), environments);

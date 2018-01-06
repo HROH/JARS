@@ -12,19 +12,30 @@ JARS.internal('Processors/Bundle', function(getInternal) {
         SEPARATOR = '", "',
         MSG_BUNDLE_DEFINED = ' - with submodules "${bundle}"';
 
-    function BundleProcessor(bundle) {
+    /**
+     * @class
+     *
+     * @memberof JARS~internals.Processors
+     *
+     * @param {JARS~internals.Bundle}
+     */
+    function Bundle(bundle) {
         this.bundle = bundle;
     }
 
-    BundleProcessor.prototype = {
-        constructor: BundleProcessor,
-
+    Bundle.prototype = {
+        constructor: Bundle,
+        /**
+         * @method
+         */
         load: function() {
             if(this.bundle.state.setLoading()) {
                 Modules.request(BundleCoremoduleHandler(this.bundle));
             }
         },
-
+        /**
+         * @method
+         */
         register: function() {
             if(this.bundle.state.setRegistered(MSG_BUNDLE_DEFINED, getBundleLogInfo(this.bundle.modules))) {
                 Modules.request(BundleSubmoduleHandler(this.bundle));
@@ -32,6 +43,14 @@ JARS.internal('Processors/Bundle', function(getInternal) {
         }
     };
 
+    /**
+     * @memberof JARS~internals.Processors.Bundle
+     * @inner
+     *
+     * @param {string[]} bundleModules
+     *
+     * @return {Object}
+     */
     function getBundleLogInfo(bundleModules) {
         return bundleModules.length ? {
             bundle: bundleModules.join(SEPARATOR),
@@ -40,5 +59,5 @@ JARS.internal('Processors/Bundle', function(getInternal) {
         } : DEFAULT_BUNDLE_LOG_INFO;
     }
 
-    return BundleProcessor;
+    return Bundle;
 });

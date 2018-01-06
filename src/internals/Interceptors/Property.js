@@ -1,19 +1,20 @@
-JARS.internal('Interceptors/Property', function partialModuleInterceptorSetup(getInternal) {
+JARS.internal('Interceptors/Property', function(getInternal) {
     'use strict';
 
     // TODO allow search for nested properties
     var hasOwnProp = getInternal('Utils').hasOwnProp,
-        PartialModuleInterceptor;
+        Property;
 
     /**
     * @namespace
-    * @implements JARS.internals.Interceptor
     *
-    * @memberof JARS.internals
+    * @memberof JARS~internals.Interceptors
+    *
+    * @implements {JARS~internals.Interceptors~Interceptor}
     */
-    PartialModuleInterceptor = {
+    Property = {
         /**
-         * @param {JARS.internals.Interception} interception
+         * @param {JARS~internals.Interception} interception
          */
         intercept: function(interception) {
             interception.$export(function() {
@@ -33,5 +34,5 @@ JARS.internal('Interceptors/Property', function partialModuleInterceptorSetup(ge
         type: '::'
     };
 
-    return PartialModuleInterceptor;
+    return Property;
 });

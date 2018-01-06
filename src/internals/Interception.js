@@ -1,4 +1,4 @@
-JARS.internal('Interception', function interceptionSetup(getInternal) {
+JARS.internal('Interception', function(getInternal) {
     'use strict';
 
     var InterceptionRef = getInternal('Refs/Interception'),
@@ -9,11 +9,11 @@ JARS.internal('Interception', function interceptionSetup(getInternal) {
     /**
      * @class
      *
-     * @memberof JARS.internals
+     * @memberof JARS~internals
      *
-     * @param {JARS.internals.Module} requestor
-     * @param {JARS.internals.InterceptionInfo} interceptionInfo
-     * @param {JARS.internals.StateChangeHandler} handler
+     * @param {JARS~internals.Module} requestor
+     * @param {JARS~internals.Resolvers.Interception~Info} interceptionInfo
+     * @param {JARS~internals.Handlers.StateChange} handler
      */
     function Interception(requestor, interceptionInfo, handler, ref) {
         var interception = this;
@@ -29,11 +29,15 @@ JARS.internal('Interception', function interceptionSetup(getInternal) {
 
     Interception.prototype = {
         constructor: Interception,
-
+        /**
+         * @param {JARS~internals.Dependencies~Declaration} dependencies
+         */
         $import: function(dependencies) {
             this._exported || this.deps.add(dependencies);
         },
-
+        /**
+         * @param {function()} provide
+         */
         $export: function(provide) {
             var interception = this;
 
@@ -55,20 +59,24 @@ JARS.internal('Interception', function interceptionSetup(getInternal) {
             return getFullPath(this.requestor, fileType);
         },
         /**
-         * @param {JARS.internals.Dependencies.Declaration} moduleNames
-         * @param {function()} onModulesLoaded
+         * @param {JARS~internals.Dependencies~Declaration} moduleNames
+         * @param {function()} provide
          */
-        $importAndLink: function(moduleNames, onModulesLoaded) {
+        $importAndLink: function(moduleNames, provide) {
             this.$import(moduleNames);
-            this.$export(onModulesLoaded);
+            this.$export(provide);
         },
-
+        /**
+         * @param {*} data
+         */
         success: function(data) {
             this.$export(function() {
                 return data;
             });
         },
-
+        /**
+         * @param {string} error
+         */
         fail: function(error) {
             this.requestor.state.setAborted(MSG_INTERCEPTION_ERROR + (error ? ': ' + error : ''), this.info);
             this._handler.onModuleAborted(this.info.fullModuleName);

@@ -4,16 +4,16 @@ JARS.internal('Resolvers/Path', function pathResolverSetup(getInternal) {
     var ExtensionTransform = getInternal('ConfigTransforms/Extension'),
         arrayEach = getInternal('Utils').arrayEach,
         pathOptions = ['basePath', 'dirPath', 'versionPath', 'fileName', 'minify', 'extension', 'cache'],
-        PathResolver;
+        Path;
 
     /**
      * @namespace
      *
-     * @memberof JARS.internals
+     * @memberof JARS~internals.Resolvers
      */
-    PathResolver = {
+    Path = {
         /**
-         * @param {JARS.internals.Module} [module]
+         * @param {JARS~internals.Module} module
          * @param {string} [extension]
          *
          * @return {string}
@@ -29,5 +29,5 @@ JARS.internal('Resolvers/Path', function pathResolverSetup(getInternal) {
         }
     };
 
-    return PathResolver;
+    return Path;
 });

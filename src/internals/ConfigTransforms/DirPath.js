@@ -4,7 +4,7 @@ JARS.internal('ConfigTransforms/DirPath', function(getInternal) {
     /**
      * @method DirPath
      *
-     * @memberof JARS.internals.ConfigTransforms
+     * @memberof JARS~internals.Config.Transforms
      *
      * @param {string} path
      *

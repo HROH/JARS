@@ -8,17 +8,15 @@ JARS.internal('Strategies/Type/Object', function(getInternal) {
         ModulesRegistry = getInternal('Registries/Modules');
 
     /**
-     * @method Object
+     * @memberof JARS~internals.Strategies.Type
      *
-     * @memberof JARS.internals.TypeStrategies
-     *
-     * @param {JARS.internals.Module} baseModule
-     * @param {Object<string, JARS.internals.Dependencies.Declaration>} modules
-     * @param {JARS.internals.ResolutionStrategy} resolutionStrategy
+     * @param {JARS~internals.Module} baseModule
+     * @param {Object<string, JARS~internals.Dependencies~Declaration>} modules
+     * @param {JARS~internals.Strategies.Resolution~Strategy} resolutionStrategy
      *
      * @return {string[]}
      */
-    function ObjectResolutionStrategy(baseModule, modules, resolutionStrategy) {
+    function Object(baseModule, modules, resolutionStrategy) {
         var resolvedModules = [];
 
         objectEach(modules, function concatResolvedModules(nestedModules, moduleName) {
@@ -32,5 +30,5 @@ JARS.internal('Strategies/Type/Object', function(getInternal) {
         return resolvedModules;
     }
 
-    return ObjectResolutionStrategy;
+    return Object;
 });

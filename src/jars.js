@@ -21,11 +21,11 @@
         /**
          * @namespace
          *
-         * @memberof JARS.internals
+         * @memberof JARS~internals
          */
         Env = {
             /**
-             * @type {object}
+             * @type {Global}
              */
             global: envGlobal,
             /**
@@ -43,7 +43,7 @@
         };
 
         /**
-         * @memberof JARS.internals.Env
+         * @memberof JARS~internals.Env
          * @inner
          *
          * @param {string} key
@@ -65,7 +65,7 @@
         /**
          * @namespace
          *
-         * @memberof JARS.internals
+         * @memberof JARS~internals
          */
         SourceManager =  {
             /**
@@ -89,10 +89,13 @@
      * @namespace
      * @global
      *
-     * @borrows JARS.internals.InternalsRegistry.register as internal
-     * @borrows JARS.internals.InternalsRegistry.registerGroup as internalGroup
+     * @borrows JARS~internals.Registries.Internals.register as internal
+     * @borrows JARS~internals.Registries.Internals.registerGroup as internalGroup
      */
     envGlobal.JARS = JARS = {
+        /**
+         * @param {function()} bootstrapInternalsRegistry
+         */
         init: function(bootstrapInternalsRegistry) {
             var InternalsRegistry = bootstrapInternalsRegistry(commands);
 
@@ -121,6 +124,7 @@
          * @method
          *
          * @param {string} moduleName
+         * @param {JARS~internals.Bundle~Declaration} bundle
          *
          * @return {JARS~ModuleWrapper}
          */
@@ -128,7 +132,7 @@
             var dynamicInternalName = 'ModulesRegistry:' + moduleName,
                 ModuleWrapper;
 
-            delegate('Registries/Internals', 'register')(dynamicInternalName, function internalModuleSetup(getInternal) {
+            delegate('Registries/Internals', 'register')(dynamicInternalName, function(getInternal) {
                 return getInternal('Registries/Modules').get(moduleName);
             });
 
@@ -143,7 +147,7 @@
                 /**
                  * @method
                  *
-                 * @param {JARS.internals.Dependencies.Declaration}
+                 * @param {JARS~internals.Dependencies~Declaration}
                  *
                  * @return {JARS~ModuleWrapper}
                  */
@@ -151,11 +155,17 @@
                 /**
                  * @method
                  *
-                 * @param {JARS.internals.Module.ModuleFactory} factory
+                 * @param {JARS~internals.Module~Factory} factory
                  */
                 $export: delegate(dynamicInternalName, '$export')
             };
 
+            /**
+             * @memberof JARS
+             * @inner
+             *
+             * @return {JARS~ModuleWrapper}
+             */
             function returnSelf() {
                 return ModuleWrapper;
             }
@@ -164,16 +174,31 @@
         }),
         /**
          * @param {string} moduleName
-         * @param {JARS.internals.Bundle.Declaration} bundle
+         * @param {JARS~internals.Bundle~Declaration} bundle
          */
         moduleAuto: function(moduleName, bundle) {
             JARS.module(moduleName, bundle).$export();
         },
-
+        /**
+         * @param {(JARS~internals.GlobalConfig~Option|JARS~internals.GlobalConfig~Options)} optionOrConfigOrArray
+         * @param {*} [valueOrArray]
+         *
+         * @return {JARS}
+         */
         configure: delegate('GlobalConfig', 'update', getJARS),
-
+        /**
+         * @param {string} entryModuleName
+         * @param {function(string[])} callback
+         *
+         * @return {JARS}
+         */
         computeSortedPathList: delegate('Resolvers/PathList', 'computeSortedPathList', getJARS),
-
+        /**
+         * @param {string} context
+         * @param {string} switchToContext
+         *
+         * @return {JARS}
+         */
         flush: delegate('Loader', 'flush', getJARS),
         /**
          * @return {JARS}

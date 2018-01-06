@@ -1,4 +1,4 @@
-JARS.internal('Dependencies', function dependenciesSetup(getInternal) {
+JARS.internal('Dependencies', function(getInternal) {
     'use strict';
 
     var DependenciesResolver = getInternal('Resolvers/Dependencies'),
@@ -9,9 +9,10 @@ JARS.internal('Dependencies', function dependenciesSetup(getInternal) {
     /**
      * @class
      *
-     * @memberof JARS.internals
+     * @memberof JARS~internals
      *
-     * @param {JARS.internals.Module} module
+     * @param {JARS~internals.Module} module
+     * @param {boolean} ignoreParent
      */
     function Dependencies(module, ignoreParent) {
         this.parent = ignoreParent ? null : DependenciesResolver.getParent(module);
@@ -28,13 +29,13 @@ JARS.internal('Dependencies', function dependenciesSetup(getInternal) {
             return this.parent ? [this.parent.name].concat(this._modules) : this._modules;
         },
         /**
-         * @param {JARS.internals.Dependencies.Declaration} dependencyModules
+         * @param {JARS~internals.Dependencies~Declaration} dependencyModules
          */
         add: function(dependencyModules) {
             this._modules = this._modules.concat(DependenciesResolver.resolveDeps(this.module, dependencyModules));
         },
         /**
-         * @param {function()} onModulesLoaded
+         * @param {JAR~internals.Handlers.Request#onModulesLoaded} onModulesLoaded
          */
         request: function(onModulesLoaded) {
             if(!abortIfCircular(this.module)) {
@@ -44,9 +45,10 @@ JARS.internal('Dependencies', function dependenciesSetup(getInternal) {
     };
 
    /**
-    * @typeDef {(string|JARS.internals.Dependencies.Declaration[]|Object<string, JARS.internals.Dependencies.Declaration>)} Declaration
+    * @typedef {(string|JARS~internals.Dependencies~Declaration[]|Object<string, JARS~internals.Dependencies~Declaration>)} Declaration
     *
-    * @memberof JARS.internals.Dependencies
+    * @memberof JARS~internals.Dependencies
+    * @inner
     */
 
     return Dependencies;

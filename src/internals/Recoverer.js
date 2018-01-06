@@ -1,4 +1,4 @@
-JARS.internal('Recoverer', function recovererSetup(getInternal) {
+JARS.internal('Recoverer', function(getInternal) {
     'use strict';
 
     var objectMerge = getInternal('Utils').objectMerge,
@@ -6,9 +6,9 @@ JARS.internal('Recoverer', function recovererSetup(getInternal) {
         MSG_RECOVERING = 'failed to load and tries to recover...';
 
     /**
-     * @memberof JARS.internals
+     * @memberof JARS~internals
      *
-     * @param {JARS.internals.Module} module
+     * @param {JARS~internals.Module} module
      *
      * @return {boolean}
      */
@@ -24,11 +24,11 @@ JARS.internal('Recoverer', function recovererSetup(getInternal) {
     }
 
     /**
-     * @memberof JARS.internals.Recoverer
+     * @memberof JARS~internals.Recoverer
      * @inner
      *
      * @param {string} moduleName
-     * @param {JARS.internals.Config} config
+     * @param {JARS~internals.Config} config
      *
      * @return {boolean}
      */
@@ -49,24 +49,24 @@ JARS.internal('Recoverer', function recovererSetup(getInternal) {
     }
 
     /**
-     * @memberof JARS.internals.Recoverer
+     * @memberof JARS~internals.Recoverer
      * @inner
      *
      * @param {string} moduleName
-     * @param {JARS.internals.Config} fallbackConfig
+     * @param {JARS~internals.Config} fallbackConfig
      *
-     * @return {(JARS.internals.Config|boolean)}
+     * @return {(JARS~internals.Config|boolean)}
      */
     function getCurrentRecoverConfig(moduleName, fallbackConfig) {
         return nextRecoverConfigs[moduleName] === false ? false : nextRecoverConfigs[moduleName] || (nextRecoverConfigs[moduleName] = fallbackConfig);
     }
 
     /**
-     * @memberof JARS.internals.Recoverer
+     * @memberof JARS~internals.Recoverer
      * @inner
      *
      * @param {string} moduleName
-     * @param {JARS.internals.Config} currentRecoverConfig
+     * @param {JARS~internals.Config} currentRecoverConfig
      */
     function setNextRecoverConfig(moduleName, currentRecoverConfig) {
         nextRecoverConfigs[moduleName] = currentRecoverConfig.parentConfig || false;

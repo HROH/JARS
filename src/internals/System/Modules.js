@@ -1,6 +1,6 @@
 /**
  * @module System.Modules
- * @see JARS.internals.System.Modules
+ * @see JARS~internals.System.Modules
  */
 JARS.module('System.Modules').$export(function systemModulesFactory() {
     'use strict';
@@ -16,13 +16,13 @@ JARS.module('System.Modules').$export(function systemModulesFactory() {
     /**
      * @namespace
      *
-     * @memberof JARS.internals.System
+     * @memberof JARS~internals.System
      *
-     * @borrows JARS.internals.Loader.$import as $import
+     * @borrows JARS~internals.Loader.$import as $import
      */
     Modules = {
         /**
-         * @param {JARS.internals.Dependencies.Declaration} moduleNames
+         * @param {JARS~internals.Dependencies.Declaration} moduleNames
          *
          * @return {Array<*>}
          */

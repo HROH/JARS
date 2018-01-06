@@ -6,16 +6,14 @@ JARS.internal('Strategies/Resolution/Dependencies', function dependenciesResolut
         MSG_DEPENDENCY_RESOLUTION_ERROR = 'a dependency module must be absolute or relative to the base module';
 
     /**
-     * @method Dependencies
+     * @memberof JARS~internals.Strategies.Resolution
      *
-     * @memberof JARS.internals.ResolutionStrategies
-     *
-     * @param {JARS.internals.Module} baseModule
+     * @param {JARS~internals.Module} baseModule
      * @param {string} moduleName
      *
      * @return {string}
      */
-    function DependenciesResolutionStrategy(baseModule, moduleName) {
+    function Dependencies(baseModule, moduleName) {
         return RelativeResolver(moduleName) ? RelativeResolutionStrategy(baseModule, moduleName) : moduleName ? {
             moduleName: moduleName
         } : {
@@ -23,5 +21,5 @@ JARS.internal('Strategies/Resolution/Dependencies', function dependenciesResolut
         };
     }
 
-    return DependenciesResolutionStrategy;
+    return Dependencies;
 });

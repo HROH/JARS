@@ -1,7 +1,5 @@
 /**
- * @namespace ConfigTransforms
- *
- * @memberof JARS.internals
+ * @namespace JARS~internals.Config.Transforms
  */
 JARS.internalGroup('ConfigTransforms', [
     'BasePath',

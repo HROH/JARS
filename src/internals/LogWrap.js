@@ -1,4 +1,4 @@
-JARS.internal('LogWrap', function logWrapSetup(getInternal) {
+JARS.internal('LogWrap', function(getInternal) {
     'use strict';
 
     var System = getInternal('System'),
@@ -8,7 +8,7 @@ JARS.internal('LogWrap', function logWrapSetup(getInternal) {
     /**
      * @class
      *
-     * @memberof JARS.internals
+     * @memberof JARS~internals
      *
      * @param {string} loggerContext
      */
@@ -16,10 +16,20 @@ JARS.internal('LogWrap', function logWrapSetup(getInternal) {
         this._context = loggerContext;
     }
 
+    /**
+     * @param {JARS~internals.Bundle} bundle
+     *
+     * @return {JARS~internals.LogWrap}
+     */
     LogWrap.forBundle = function(bundle) {
         return new LogWrap(BUNDLE_LOG_CONTEXT_PREFIX + bundle.name);
     };
 
+    /**
+     * @param {JARS~internals.Module} module
+     *
+     * @return {JARS~internals.LogWrap}
+     */
     LogWrap.forModule = function(module) {
         return new LogWrap(MODULE_LOG_CONTEXT_PREFIX + module.name);
     };
@@ -31,28 +41,28 @@ JARS.internal('LogWrap', function logWrapSetup(getInternal) {
     });
 
     /**
-     * @method JARS.internals.LogWrap#debug
+     * @method JARS~internals.LogWrap#debug
      *
      * @param {string} message
      * @param {Object} [values]
      */
 
     /**
-     * @method JARS.internals.LogWrap#error
+     * @method JARS~internals.LogWrap#error
      *
      * @param {string} message
      * @param {Object} [values]
      */
 
     /**
-     * @method JARS.internals.LogWrap#info
+     * @method JARS~internals.LogWrap#info
      *
      * @param {string} message
      * @param {Object} [values]
      */
 
     /**
-     * @method JARS.internals.LogWrap#warn
+     * @method JARS~internals.LogWrap#warn
      *
      * @param {string} message
      * @param {Object} [values]

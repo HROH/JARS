@@ -1,40 +1,38 @@
-JARS.init(function setupInternalsRegistry(commands) {
+JARS.init(function(commands) {
     'use strict';
 
     var internals = {},
-        InternalsRegistry, Queue, Group;
+        Internals, Queue, Group;
 
     /**
-     * @namespace internals
-     *
-     * @memberof JARS
+     * @namespace JARS~internals
      */
 
     /**
      * @namespace
      *
-     * @memberof JARS.internals
+     * @memberof JARS~internals.Registries
      */
-    InternalsRegistry = {
+    Internals = {
         /**
          * @param {string} internalName
-         * @param {JARS.internals.InternalsRegistry~InternalsFactory} factory
+         * @param {JARS~internals.Registries.Internals~Factory} factory
          */
         register: function(internalName, factory) {
             if(!internals[internalName]) {
                 internals[internalName] = factory;
 
-                Queue.mark(internalName) && InternalsRegistry.runAll();
+                Queue.mark(internalName) && Internals.runAll();
             }
         },
         /**
          * @param {string} groupName
-         * @param {string[]} group
+         * @param {string[]} groupList
          */
         registerGroup: function (groupName, groupList) {
             Queue.addGroup(groupList, groupName);
 
-            InternalsRegistry.register(groupName, function internalGroupSetup(getInternal) {
+            Internals.register(groupName, function(getInternal) {
                 var result = {};
 
                 Group.each(groupList, function(groupMember) {
@@ -52,29 +50,33 @@ JARS.init(function setupInternalsRegistry(commands) {
         get: function (internalName) {
             var factory = internals[internalName];
 
-            return factory && (factory.ref || (factory.ref = factory(InternalsRegistry.get)));
+            return factory && (factory.ref || (factory.ref = factory(Internals.get)));
         },
         /**
          * @param {string} internalName
          */
         load: function(internalName) {
-            InternalsRegistry.get('SourceManager').load(InternalsRegistry.get('Env').INTERNALS_PATH + internalName + '.js');
+            Internals.get('SourceManager').load(Internals.get('Env').INTERNALS_PATH + internalName + '.js');
         },
-
+        /**
+         * @param {JARS~internals.Registries.Internals~Command} command
+         */
         run: function(command) {
             var internal;
 
             if(Queue.counter) {
                 commands.push(command);
             } else {
-                internal = InternalsRegistry.get(command[0]);
+                internal = Internals.get(command[0]);
                 internal[command[1]].apply(internal, command[2]);
             }
         },
-
+        /**
+         * @method
+         */
         runAll: function() {
             while(commands.length) {
-                InternalsRegistry.run(commands.shift());
+                Internals.run(commands.shift());
             }
         },
         /**
@@ -117,15 +119,32 @@ JARS.init(function setupInternalsRegistry(commands) {
         }
     };
 
+    /**
+     * @namespace
+     *
+     * @memberof JARS~internals.Registries.Internals
+     * @inner
+     */
     Group = {
+        /**
+         * @param {string} groupMember
+         */
         getKey: function(groupMember) {
             return groupMember.charAt(0).toLowerCase() + groupMember.substr(1);
         },
-
+        /**
+         * @param {string} groupName
+         * @param {string} groupMember
+         *
+         * @return {string}
+         */
         getName: function(groupName, groupMember) {
             return groupName ? groupName + '/' + groupMember : groupMember;
         },
-
+        /**
+         * @param {string[]} groupList
+         * @param {function()} callback
+         */
         each: function(groupList, callback) {
             for(var index = 0; index < groupList.length; index++) {
                 callback(groupList[index]);
@@ -133,34 +152,49 @@ JARS.init(function setupInternalsRegistry(commands) {
         }
     };
 
+    /**
+     * @namespace
+     *
+     * @memberof JARS~internals.Registries.Internals
+     * @inner
+     */
     Queue = {
         counter: 0,
 
         loading: [],
-
+        /**
+         * @param {string[]} internalNames
+         * @param {string} groupName
+         */
         addGroup: function(internalNames, groupName) {
             Group.each(internalNames, function(internalName) {
                 Queue.add(Group.getName(groupName, internalName));
             });
         },
-
+        /**
+         * @param {string} internalName
+         */
         add: function(internalName) {
             if(!internals[internalName]) {
-                InternalsRegistry.load(internalName);
+                Internals.load(internalName);
                 Queue.loading.push(internalName);
                 Queue.counter++;
             }
         },
-
+        /**
+         * @param {string} internalName
+         *
+         * @return {boolean}
+         */
         mark: function(internalName) {
             return Queue.loading.indexOf(internalName) !== -1 && --Queue.counter === 0;
         }
     };
 
     /**
-     * @callback InternalsFactory
+     * @callback Factory
      *
-     * @memberof JARS.internals.InternalsRegistry
+     * @memberof JARS~internals.Registries.Internals
      * @inner
      *
      * @param {JARS.internals.InternalsRegistry.get} getInternal
@@ -168,9 +202,16 @@ JARS.init(function setupInternalsRegistry(commands) {
      * @return {*}
      */
 
-    InternalsRegistry.register('Registries/Internals', function() {
-        return InternalsRegistry;
+    /**
+     * @typedef {Array} Command
+     *
+     * @memberof JARS~internals.Registries.Internals
+     * @inner
+     */
+
+    Internals.register('Registries/Internals', function() {
+        return Internals;
     });
 
-    return InternalsRegistry;
+    return Internals;
 });

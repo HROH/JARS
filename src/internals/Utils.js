@@ -1,4 +1,4 @@
-JARS.internal('Utils', function utilsSetup() {
+JARS.internal('Utils', function() {
     'use strict';
 
     var hasOwn = ({}).hasOwnProperty,
@@ -7,11 +7,11 @@ JARS.internal('Utils', function utilsSetup() {
     /**
      * @namespace
      *
-     * @memberof JARS.internals
+     * @memberof JARS~internals
      */
     Utils = {
         /**
-         * @param {Function} Constructor
+         * @param {function()} Constructor
          * @param {Object} [newProto]
          *
          * @return {Object}

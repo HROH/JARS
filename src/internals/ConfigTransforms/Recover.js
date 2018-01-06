@@ -1,22 +1,22 @@
-JARS.internal('ConfigTransforms/Recover', function recoverTransformSetup(getInternal) {
+JARS.internal('ConfigTransforms/Recover', function(getInternal) {
     'use strict';
 
     var objectMerge = getInternal('Utils').objectMerge;
 
     /**
-     * @memberof JARS.internals.ConfigTransforms
+     * @memberof JARS~internals.Config.Transforms
      *
-     * @param {object} recoverConfig
-     * @param {(JARS.internals.Module|JARS.internals.Bundle)} [moduleOrBundle]
+     * @param {JARS~internals.GlobalConfig~Options.Modules} recoverConfig
+     * @param {(JARS~internals.Module|JARS~internals.Bundle)} subject
      *
-     * @return {object}
+     * @return {JARS~internals.GlobalConfig~Options.Modules}
      */
-    function Recover(recoverConfig, moduleOrBundle) {
+    function Recover(recoverConfig, subject) {
         // create a copy of the recover-config
         // because it should update for every module independently
         var recover = objectMerge({}, recoverConfig);
 
-        recover.restrict = moduleOrBundle.name;
+        recover.restrict = subject.name;
         // if no next recover-config is given set it explicitly
         // this is important because the recoverflow is as follows:
         // - if the module has a recover-config, use it to update its config

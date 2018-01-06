@@ -5,17 +5,17 @@ JARS.internal('Handlers/BundleCoremodule', function(getInternal) {
         MSG_STRINGS = ['core module'];
 
     /**
-     * @memberof JARS.internals
+     * @memberof JARS~internals.Handlers
      *
-     * @param {JARS.internals.Bundle} bundle
+     * @param {JARS~internals.Bundle} bundle
      *
-     * @return {JARS.internals.RequestHandler}
+     * @return {JARS~internals.Handlers.Request}
      */
-    function BundleCoremoduleHandler(bundle) {
+    function BundleCoremodule(bundle) {
         return new RequestHandler(bundle, [bundle.module.name], MSG_STRINGS, function() {
             bundle.processor.register();
         });
     }
 
-    return BundleCoremoduleHandler;
+    return BundleCoremodule;
 });

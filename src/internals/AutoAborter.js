@@ -1,4 +1,4 @@
-JARS.internal('AutoAborter', function autoAborterSetup(getInternal) {
+JARS.internal('AutoAborter', function(getInternal) {
     'use strict';
 
     var Recoverer = getInternal('Recoverer'),
@@ -11,11 +11,11 @@ JARS.internal('AutoAborter', function autoAborterSetup(getInternal) {
     /**
      * @namespace
      *
-     * @memberof JARS.internals
+     * @memberof JARS~internals
      */
     AutoAborter = {
         /**
-         * @param {JARS.internals.Module}
+         * @param {JARS~internals.Module} module
          * @param {string} path
          */
         setup: function(module, path) {
@@ -30,7 +30,7 @@ JARS.internal('AutoAborter', function autoAborterSetup(getInternal) {
             }, timeout * MILLISECONDS_PER_SECOND);
         },
         /**
-         * @param {JARS.internals.Module}
+         * @param {JARS~internals.Module} module
          */
         clear: function(module) {
             global.clearTimeout(timeoutIDs[module.name]);

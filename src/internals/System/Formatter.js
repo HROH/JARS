@@ -1,3 +1,7 @@
+/**
+ * @module System.Formatter
+ * @see JARS~internals.System.Formatter
+ */
 JARS.module('System.Formatter').$import([
     '.::$$internals', '.::isString', '.::isArray', '.::isObject'
 ]).$export(function(internals, isString, isArray, isObject) {
@@ -8,6 +12,11 @@ JARS.module('System.Formatter').$import([
         UNKNOWN_KEY = '<UNKNOWN KEY>',
         Formatter;
 
+    /**
+     * @namespace
+     *
+     * @memberof JARS~internals.System
+     */
     Formatter = {
         /**
          * @param {string} message
@@ -29,10 +38,10 @@ JARS.module('System.Formatter').$import([
     };
 
     /**
-     * @memberof JARS.internals.System.Formatter
+     * @memberof JARS~internals.System.Formatter
      * @inner
      *
-     * @param {Array} match
+     * @param {array} match
      * @param {string} key
      *
      * @return {string}

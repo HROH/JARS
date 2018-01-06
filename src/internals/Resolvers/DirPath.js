@@ -8,9 +8,16 @@ JARS.internal('Resolvers/DirPath', function(getInternal) {
         RE_STARTS_WITH_LOWERCASE = /^[a-z]/,
         SLASH = '/';
 
-    function DirPathResolver(moduleName) {
+    /**
+     * @memberof JARS~internals.Resolvers
+     *
+     * @param {string} moduleName
+     *
+     * @return {string}
+     */
+    function DirPath(moduleName) {
         return removeVersion(RE_STARTS_WITH_LOWERCASE.test(FileNameResolver(moduleName)) ? moduleName : getParentName(moduleName)).replace(RE_DOT, SLASH);
     }
 
-    return DirPathResolver;
+    return DirPath;
 });

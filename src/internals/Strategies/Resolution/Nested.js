@@ -6,16 +6,14 @@ JARS.internal('Strategies/Resolution/Nested', function nestedResolutionStrategyS
         MSG_NESTED_RESOLUTION_ERROR = 'a nested module must contain "." only as a special symbol';
 
     /**
-     * @method Nested
+     * @memberof JARS~internals.Strategies.Resolution
      *
-     * @memberof JARS.internals.ResolutionStrategies
-     *
-     * @param {JARS.internals.Module} baseModule
+     * @param {JARS~internals.Module} baseModule
      * @param {string} moduleName
      *
      * @return {string}
      */
-    function NestedResolutionStrategy(baseModule, moduleName) {
+    function Nested(baseModule, moduleName) {
         return moduleName !== DOT ? AbsoluteResolutionStrategy(baseModule, moduleName) : baseModule.isRoot ? {
             error: MSG_NESTED_RESOLUTION_ERROR
         } : {
@@ -23,5 +21,5 @@ JARS.internal('Strategies/Resolution/Nested', function nestedResolutionStrategyS
         };
     }
 
-    return NestedResolutionStrategy;
+    return Nested;
 });

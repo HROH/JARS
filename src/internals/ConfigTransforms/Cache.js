@@ -5,7 +5,7 @@ JARS.internal('ConfigTransforms/Cache', function() {
         CACHE_STRING = '?_=';
 
     /**
-     * @memberof JARS.internals.ConfigTransforms
+     * @memberof JARS~internals.Config.Transforms
      *
      * @param {boolean} cache
      *

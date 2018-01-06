@@ -1,10 +1,10 @@
-JARS.internal('ConfigTransforms/Extension', function extensionTransformSetup() {
+JARS.internal('ConfigTransforms/Extension', function() {
     'use strict';
 
     var DOT = '.';
 
     /**
-     * @memberof JARS.internals.ConfigTransforms
+     * @memberof JARS~internals.Config.Transforms
      *
      * @param {string} extension
      *

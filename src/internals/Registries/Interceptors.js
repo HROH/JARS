@@ -1,20 +1,20 @@
-JARS.internal('Registries/Interceptor', function interceptorRegistrySetup(getInternal) {
+JARS.internal('Registries/Interceptors', function(getInternal) {
     'use strict';
 
     var Utils = getInternal('Utils'),
         objectEach = Utils.objectEach,
         hasOwnProp = Utils.hasOwnProp,
         interceptors = {},
-        InterceptorRegistry;
+        Interceptors;
 
     /**
      * @namespace
      *
-     * @memberof JARS.internals
+     * @memberof JARS~internals.Registries
      */
-    InterceptorRegistry = {
+    Interceptors = {
         /**
-         * @param {JARS.internals.Interceptor} interceptor
+         * @param {JARS~internals.Interceptors~Interceptor} interceptor
          */
         register: function(interceptor) {
             if (!hasOwnProp(interceptors, interceptor.type)) {
@@ -22,7 +22,7 @@ JARS.internal('Registries/Interceptor', function interceptorRegistrySetup(getInt
             }
         },
         /**
-         * @param {function(JARS.internals.Interceptor, string)} callback
+         * @param {function(JARS~internals.Interceptors~Interceptor, string)} callback
          */
         each: function(callback) {
             objectEach(interceptors, callback);
@@ -30,12 +30,12 @@ JARS.internal('Registries/Interceptor', function interceptorRegistrySetup(getInt
         /**
          * @param {string} type
          *
-         * @return {JARS.internals.Interceptor}
+         * @return {JARS~internals.Interceptors~Interceptor}
          */
         get: function(type) {
             return interceptors[type];
         }
     };
 
-    return InterceptorRegistry;
+    return Interceptors;
 });

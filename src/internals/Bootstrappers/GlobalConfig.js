@@ -1,12 +1,15 @@
-JARS.internal('Bootstrappers/GlobalConfig', function globalConfigBootstrapperSetup(getInternal) {
+JARS.internal('Bootstrappers/GlobalConfig', function(getInternal) {
     'use strict';
 
     /**
      * @namespace
      *
-     * @memberof JARS.internals
+     * @memberof JARS~internals.Bootstrappers
      */
-    var GlobalConfigBootstrapper = {
+    var GlobalConfig = {
+        /**
+         * @method
+         */
         bootstrap: function() {
             getInternal('GlobalConfig').update({
                 modules: {
@@ -31,5 +34,5 @@ JARS.internal('Bootstrappers/GlobalConfig', function globalConfigBootstrapperSet
         }
     };
 
-    return GlobalConfigBootstrapper;
+    return GlobalConfig;
 });

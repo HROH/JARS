@@ -1,4 +1,4 @@
-JARS.internal('GlobalConfig', function globalConfigSetup(getInternal) {
+JARS.internal('GlobalConfig', function(getInternal) {
     'use strict';
 
     var System = getInternal('System'),
@@ -15,11 +15,11 @@ JARS.internal('GlobalConfig', function globalConfigSetup(getInternal) {
     /**
      * @namespace
      *
-     * @memberof JARS.internals
+     * @memberof JARS~internals
      */
     GlobalConfig = {
         /**
-         * @param {(JARS.internals.GlobalConfig.Option|Object<JARS.internals.GlobalConfig.Option, *>)} optionOrConfigOrArray
+         * @param {(JARS~internals.GlobalConfig~Option|JARS~internals.GlobalConfig~Options)} optionOrConfigOrArray
          * @param {*} [valueOrArray]
          */
         update: function(optionOrConfigOrArray, valueOrArray) {
@@ -36,7 +36,7 @@ JARS.internal('GlobalConfig', function globalConfigSetup(getInternal) {
             }
         },
         /**
-         * @param {JARS.internals.GlobalConfig.Option} option
+         * @param {JARS~internals.GlobalConfig~Option} option
          *
          * @return {*}
          */
@@ -46,7 +46,7 @@ JARS.internal('GlobalConfig', function globalConfigSetup(getInternal) {
     };
 
     /**
-     * @memberof JARS.internals.GlobalConfig
+     * @memberof JARS~internals.GlobalConfig
      * @inner
      *
      * @param {string} option
@@ -64,11 +64,27 @@ JARS.internal('GlobalConfig', function globalConfigSetup(getInternal) {
     }
 
     /**
-     * @memberof JARS.internals.GlobalConfig
-     * @inner
-     *
      * @typedef {('debugging'|'environment'|'environments'|'globalAccess'|'interceptors'|'loaderContext'|'main'|'modules')} Option
+     *
+     * @memberof JARS~internals.GlobalConfig
+     * @inner
      */
+
+     /**
+      * @typedef {Object} Options
+      *
+      * @memberof JARS~internals.GlobalConfig
+      * @inner
+      *
+      * @property {(JARS~internals.GlobalConfig~Options.Debugging|boolean)} debugging
+      * @property {string} environment
+      * @property {Object<string, JARS~internals.GlobalConfig~Options>} environments
+      * @property {boolean} globalAccess
+      * @property {JARS~internals.Interceptors~Interceptor} interceptors
+      * @property {string} loaderContext
+      * @property {string} main
+      * @property {JARS~internals.GlobalConfig~Options.Modules} modules
+      */
 
     return GlobalConfig;
 });

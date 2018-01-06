@@ -1,12 +1,12 @@
-JARS.internal('GlobalConfigHooks/Environment', function environmentHookSetup() {
+JARS.internal('GlobalConfigHooks/Environment', function() {
     'use strict';
 
     /**
      * @method
      *
-     * @memberof JARS.internals.GlobalConfigHooks
+     * @memberof JARS~internals.GlobalConfig.Hooks
      *
-     * @param {JARS.internals.GlobalConfig} globalConfig
+     * @param {JARS~internals.GlobalConfig} globalConfig
      * @param {string} environment
      *
      * @return {string}

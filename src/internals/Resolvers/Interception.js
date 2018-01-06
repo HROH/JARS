@@ -1,28 +1,28 @@
 JARS.internal('Resolvers/Interception', function interceptionResolverSetup(getInternal) {
     'use strict';
 
-    var eachInterceptor = getInternal('Registries/Interceptor').each,
+    var eachInterceptor = getInternal('Registries/Interceptors').each,
         interceptionInfoCache = {},
-        InterceptionResolver;
+        Interception;
 
     /**
      * @namespace
      *
-     * @memberof JARS.internals
+     * @memberof JARS~internals.Resolvers
      */
-    InterceptionResolver = {
+    Interception = {
         /**
          * @param {string} moduleName
          *
          * @return {string}
          */
         removeInterceptionData: function(moduleName) {
-            return InterceptionResolver.extractInterceptionInfo(moduleName).moduleName;
+            return Interception.extractInterceptionInfo(moduleName).moduleName;
         },
         /**
          * @param {string} moduleName
          *
-         * @return {JARS.internals.InterceptionInfo}
+         * @return {JARS~internals.Resolvers.Interception~Info}
          */
         extractInterceptionInfo: function(moduleName) {
             var interceptionInfo = interceptionInfoCache[moduleName],
@@ -59,14 +59,16 @@ JARS.internal('Resolvers/Interception', function interceptionResolverSetup(getIn
     };
 
     /**
-     * @typedef InterceptionInfo
+     * @typedef {Object} Info
      *
-     * @memberof JARS.internals
+     * @memberof JARS~internals.Resolvers.Interception
+     * @inner
      *
+     * @property {string} fullModuleName
      * @property {string} moduleName
      * @property {string} type
      * @property {string} data
      */
 
-    return InterceptionResolver;
+    return Interception;
 });

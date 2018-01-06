@@ -8,25 +8,22 @@ JARS.internal('Resolvers/PathList', function(getInternal) {
         getModule = getInternal('Registries/Modules').get,
         isBundle = getInternal('Resolvers/Bundle').isBundle,
         excluded = ['*', 'System.*'],
-        PathListResolver;
+        PathList;
 
     /**
      * @namespace
      *
-     * @memberof JARS.internals
+     * @memberof JARS~internals.Resolvers
      */
-    PathListResolver = {
+    PathList = {
         /**
-         * <p>Computes an array of paths for all the loaded modules
-         * in the order they are dependending on each other.
-         * This method can be used to create a custom build
-         * preferable with a build tool and phantomjs.</p>
+         * <p>Computes an array of paths for the given module and
+         * all its dependencies in the order they are dependending
+         * on each other. This method can be used to create a custom
+         * build.</p>
          *
-         * <p>It is possible to recompute the list.
-         * This is only for aesthetics.
-         * Even without recomputation the list will still be valid.</p>
-         *
-         * @param {function(sting[])} callback
+         * @param {string} entryModuleName
+         * @param {function(string[])} callback
          */
         computeSortedPathList: function(entryModuleName, callback) {
             var entryModule = getModule(entryModuleName);
@@ -41,21 +38,28 @@ JARS.internal('Resolvers/PathList', function(getInternal) {
         }
     };
 
-    function markModulesSorted(modules, value) {
+    /**
+     * @memberof JARS~internals.Resolvers.PathList
+     * @inner
+     *
+     * @param {string[]} modules
+     * @param {Object} trackList
+     */
+    function markModulesSorted(modules, trackList) {
         arrayEach(modules, function markModuleSorted(excludedModule) {
             var module;
 
-            value.sorted[excludedModule] = true;
+            trackList.sorted[excludedModule] = true;
 
             if(isBundle(excludedModule)) {
                 module = getModule(excludedModule);
-                value.sorted[module.name] = true;
-                value = markModulesSorted(module.bundle.modules, value);
+                trackList.sorted[module.name] = true;
+                trackList = markModulesSorted(module.bundle.modules, trackList);
             }
         });
 
-        return value;
+        return trackList;
     }
 
-    return PathListResolver;
+    return PathList;
 });

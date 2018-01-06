@@ -1,7 +1,5 @@
 /**
- * @namespace GlobalConfigHooks
- *
- * @memberof JARS.internals
+ * @namespace JARS~internals.GlobalConfig.Hooks
  */
 JARS.internalGroup('GlobalConfigHooks', [
     'Debugging',

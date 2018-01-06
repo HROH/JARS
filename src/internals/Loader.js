@@ -1,4 +1,4 @@
-JARS.internal('Loader', function loaderSetup(getInternal) {
+JARS.internal('Loader', function(getInternal) {
     'use strict';
 
     var System = getInternal('System'),
@@ -11,7 +11,7 @@ JARS.internal('Loader', function loaderSetup(getInternal) {
     /**
      * @namespace
      *
-     * @memberof JARS.internals
+     * @memberof JARS~internals
      */
     Loader = {
         /**
@@ -28,7 +28,7 @@ JARS.internal('Loader', function loaderSetup(getInternal) {
             switchToContext && GlobalConfig.update('loaderContext', switchToContext);
         },
         /**
-         * @param {JARS.internals.Dependencies.Declaration} moduleNames
+         * @param {JARS~internals.Dependencies~Declaration} moduleNames
          * @param {function(...*)} onModulesImported
          * @param {function()} onModuleAborted
          * @param {function()} onModuleImported
@@ -52,6 +52,10 @@ JARS.internal('Loader', function loaderSetup(getInternal) {
         }
     };
 
+    /**
+     * @memberof JARS~internals.Loader
+     * @inner
+     */
     function noop() {}
 
     return Loader;

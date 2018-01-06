@@ -3,17 +3,29 @@ JARS.internal('Refs/Modules', function(getInternal) {
 
     var arrayEach = getInternal('Utils').arrayEach;
 
-    function ModulesRef() {
+    /**
+     * @class
+     *
+     * @memberof JARS~internals.Refs
+     */
+    function Modules() {
         this._refs = [];
     }
 
-    ModulesRef.prototype = {
-        constructor: ModulesRef,
-
+    Modules.prototype = {
+        constructor: Modules,
+        /**
+         * @param {number} index
+         * @param {(JARS~internals.Refs.Module|JARS~internals.Refs.Interception)} ref
+         */
         add: function(index, ref) {
             this._refs[index] = ref;
         },
-
+        /**
+         * @param {string} [context]
+         *
+         * @return {Array<*>}
+         */
         get: function(context) {
             var refs = [];
 
@@ -25,5 +37,5 @@ JARS.internal('Refs/Modules', function(getInternal) {
         }
     };
 
-    return ModulesRef;
+    return Modules;
 });

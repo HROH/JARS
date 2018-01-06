@@ -1,14 +1,26 @@
 JARS.internal('Refs/Bundle', function() {
     'use strict';
 
-    function BundleRef(bundle, bundleRefs) {
+    /**
+     * @class
+     *
+     * @memberof JARS~internals.Refs
+     *
+     * @param {JARS~internals.Bundle} bundle
+     * @param {JARS~internals.Refs.Modules} bundleRefs
+     */
+    function Bundle(bundle, bundleRefs) {
         this._ref = bundle.module.ref;
         this._refs = bundleRefs;
     }
 
-    BundleRef.prototype = {
-        constructor: BundleRef,
-
+    Bundle.prototype = {
+        constructor: Bundle,
+        /**
+         * @param {string} [context]
+         *
+         * @return {*}
+         */
         get: function(context) {
             this._refs.get(context);
 
@@ -16,5 +28,5 @@ JARS.internal('Refs/Bundle', function() {
         }
     };
 
-    return BundleRef;
+    return Bundle;
 });

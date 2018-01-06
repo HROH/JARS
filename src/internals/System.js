@@ -1,4 +1,4 @@
-JARS.internal('System', function systemSetup(getInternal) {
+JARS.internal('System', function(getInternal) {
     'use strict';
 
     var Type = getInternal('Type'),
@@ -10,15 +10,15 @@ JARS.internal('System', function systemSetup(getInternal) {
     /**
      * @namespace
      *
-     * @memberof JARS.internals
+     * @memberof JARS~internals
      */
     System = {
         /**
-         * @type {object}
+         * @type {Object}
          */
         env: {
             /**
-             * @type {global}
+             * @type {Global}
              */
             global: envGlobal
         },
@@ -27,7 +27,7 @@ JARS.internal('System', function systemSetup(getInternal) {
         /**
          * @param {string} typeDef
          *
-         * @return {JARS.internals.System.TypeValidator}
+         * @return {JARS~internals.System~TypeValidator}
          */
         addTypeValidator: function(typeDef) {
             var typeValidator = Type.add(typeDef);
@@ -41,29 +41,29 @@ JARS.internal('System', function systemSetup(getInternal) {
          */
         getType: Type.get,
         /**
-         * @member {JARS.internals.System.TypeValidator}
+         * @member {JARS~internals.System~TypeValidator}
          */
         isNil: Type.isNil,
         /**
-         * @member {JARS.internals.System.TypeValidator}
+         * @member {JARS~internals.System~TypeValidator}
          */
         isArrayLike: function(value) {
             return System.isArray(value) || (!System.isNil(value) && isIterable(value));
         },
         /**
-         * @member {JARS.internals.System.TypeValidator}
+         * @member {JARS~internals.System~TypeValidator}
          */
         isDefined: function(value) {
             return !System.isUndefined(value);
         },
         /**
-         * @member {JARS.internals.System.TypeValidator}
+         * @member {JARS~internals.System~TypeValidator}
          */
         isInteger: Number.isInteger || function(value) {
             return System.isNumber(value) && envGlobal.parseInt(value, 10) === value;
         },
         /**
-         * @member {JARS.internals.System.TypeValidator}
+         * @member {JARS~internals.System~TypeValidator}
          */
         isNaN: function(value) {
             return envGlobal.isNaN(value) && value !== value;
@@ -80,57 +80,57 @@ JARS.internal('System', function systemSetup(getInternal) {
     };
 
     /**
-     * @name JARS.internals.System.isNull
-     * @type {JARS.internals.System.TypeValidator}
+     * @name JARS~internals.System.isNull
+     * @type {JARS~internals.System~TypeValidator}
      */
 
     /**
-     * @name JARS.internals.System.isUndefined
-     * @type {JARS.internals.System.TypeValidator}
+     * @name JARS~internals.System.isUndefined
+     * @type {JARS~internals.System~TypeValidator}
      */
 
     /**
-     * @name JARS.internals.System.isString
-     * @type {JARS.internals.System.TypeValidator}
+     * @name JARS~internals.System.isString
+     * @type {JARS~internals.System~TypeValidator}
      */
 
     /**
-     * @name JARS.internals.System.isNumber
-     * @type {JARS.internals.System.TypeValidator}
+     * @name JARS~internals.System.isNumber
+     * @type {JARS~internals.System~TypeValidator}
      */
 
     /**
-     * @name JARS.internals.System.isBoolean
-     * @type {JARS.internals.System.TypeValidator}
+     * @name JARS~internals.System.isBoolean
+     * @type {JARS~internals.System~TypeValidator}
      */
 
     /**
-     * @name JARS.internals.System.isArray
-     * @type {JARS.internals.System.TypeValidator}
+     * @name JARS~internals.System.isArray
+     * @type {JARS~internals.System~TypeValidator}
      */
 
     /**
-     * @name JARS.internals.System.isObject
-     * @type {JARS.internals.System.TypeValidator}
+     * @name JARS~internals.System.isObject
+     * @type {JARS~internals.System~TypeValidator}
      */
 
     /**
-     * @name JARS.internals.System.isFunction
-     * @type {JARS.internals.System.TypeValidator}
+     * @name JARS~internals.System.isFunction
+     * @type {JARS~internals.System~TypeValidator}
      */
 
     /**
-     * @name JARS.internals.System.isDate
-     * @type {JARS.internals.System.TypeValidator}
+     * @name JARS~internals.System.isDate
+     * @type {JARS~internals.System~TypeValidator}
      */
 
     /**
-     * @name JARS.internals.System.isRegExp
-     * @type {JARS.internals.System.TypeValidator}
+     * @name JARS~internals.System.isRegExp
+     * @type {JARS~internals.System~TypeValidator}
      */
 
     /**
-     * @typedef {function} JARS.internals.System.TypeValidator
+     * @typedef {function} JARS~internals.System~TypeValidator
      *
      * @param {*} value
      *
@@ -142,12 +142,20 @@ JARS.internal('System', function systemSetup(getInternal) {
     isArgs = System.isArguments;
 
     /**
-     * @member {JARS.internals.System.TypeValidator}
+     * @member {JARS~internals.System~TypeValidator}
      */
     System.isArguments = function(value) {
         return value && (isArgs(value) || System.isArrayLike(value));
     };
 
+    /**
+     * @memberof JARS~internals.System
+     * @inner
+     *
+     * @param {*} value
+     *
+     * @return {boolean}
+     */
     function isIterable(value) {
         var length = value.length;
 

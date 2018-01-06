@@ -8,14 +8,14 @@ JARS.internal('Resolvers/Bundle', function bundleResolverSetup(getInternal) {
         BUNDLE_SUFFIX = '.*',
         EMPTY_STRING = '',
         RE_BUNDLE_SUFFIX = /\.\*$/,
-        BundleResolver;
+        Bundle;
 
     /**
      * @namespace
      *
-     * @memberof JARS.internals
+     * @memberof JARS~internals.Resolvers
      */
-    BundleResolver = {
+    Bundle = {
         /**
          * @param {string} moduleName
          *
@@ -41,8 +41,8 @@ JARS.internal('Resolvers/Bundle', function bundleResolverSetup(getInternal) {
             return RE_BUNDLE_SUFFIX.test(VersionResolver.removeVersion(moduleName));
         },
         /**
-         * @param {JARS.internals.Module} baseModule
-         * @param {JARS.internals.Bundle.Declaration} bundleModules
+         * @param {JARS~internals.Module} baseModule
+         * @param {JARS~internals.Bundle~Declaration} bundleModules
          *
          * @return {string[]}
          */
@@ -51,5 +51,5 @@ JARS.internal('Resolvers/Bundle', function bundleResolverSetup(getInternal) {
         }
     };
 
-    return BundleResolver;
+    return Bundle;
 });

@@ -5,20 +5,18 @@ JARS.internal('Strategies/Resolution/Relative', function relativeResolutionStrat
         AbsoluteResolutionStrategy = getInternal('Strategies/Resolution/Absolute');
 
     /**
-     * @method Relative
+     * @memberof JARS~internals.Strategies.Resolution
      *
-     * @memberof JARS.internals.ResolutionStrategies
-     *
-     * @param {JARS.internals.Module} baseModule
+     * @param {JARS~internals.Module} baseModule
      * @param {string} moduleName
      *
      * @return {string}
      */
-    function RelativeResolutionStrategy(baseModule, moduleName) {
+    function Relative(baseModule, moduleName) {
         return ((!baseModule.isRoot && RelativeResolver(moduleName)) ?
-            RelativeResolutionStrategy(baseModule.deps.parent, moduleName.substr(1)) :
+            Relative(baseModule.deps.parent, moduleName.substr(1)) :
             AbsoluteResolutionStrategy(baseModule, moduleName));
     }
 
-    return RelativeResolutionStrategy;
+    return Relative;
 });

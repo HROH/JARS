@@ -1,10 +1,10 @@
-JARS.internal('ConfigTransforms/Timeout', function timeoutTransformSetup() {
+JARS.internal('ConfigTransforms/Timeout', function() {
     'use strict';
 
     var MIN_TIMEOUT = 0.5;
 
     /**
-     * @memberof JARS.internals.ConfigTransforms
+     * @memberof JARS~internals.Config.Transforms
      *
      * @param {number} timeout
      *

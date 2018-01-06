@@ -1,8 +1,8 @@
-JARS.internal('ConfigTransforms/FileName', function fileNameTransformSetup() {
+JARS.internal('ConfigTransforms/FileName', function() {
     'use strict';
 
     /**
-     * @memberof JARS.internals.ConfigTransforms
+     * @memberof JARS~internals.Config.Transforms
      *
      * @param {string} fileName
      *

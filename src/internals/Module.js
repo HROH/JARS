@@ -1,4 +1,4 @@
-JARS.internal('Module', function moduleSetup(getInternal) {
+JARS.internal('Module', function(getInternal) {
     'use strict';
 
     var Dependencies = getInternal('Dependencies'),
@@ -8,9 +8,10 @@ JARS.internal('Module', function moduleSetup(getInternal) {
         ModuleRef = getInternal('Refs/Module');
 
     /**
-     * @callback ModuleFactory
+     * @callback Factory
      *
-     * @memberof JARS.internals.Module
+     * @memberof JARS~internals.Module
+     * @inner
      *
      * @param {...*} dependencyRefs
      *
@@ -20,7 +21,7 @@ JARS.internal('Module', function moduleSetup(getInternal) {
     /**
      * @class
      *
-     * @memberof JARS.internals
+     * @memberof JARS~internals
      *
      * @param {string} moduleName
      * @param {boolean} [isRoot=false]
@@ -40,22 +41,28 @@ JARS.internal('Module', function moduleSetup(getInternal) {
 
     Module.prototype = {
         constructor: Module,
-
+        /**
+         * @param {Object} meta
+         */
         setMeta: function(meta) {
             this._meta = meta;
         },
-
+        /**
+         * @param {string} metaProp
+         *
+         * @return {*}
+         */
         getMeta: function(metaProp) {
             return this._meta[metaProp];
         },
         /**
-         * @param {JARS.internals.Dependencies.Declaration} dependencies
+         * @param {JARS~internals.Dependencies~Declaration} dependencies
          */
         $import: function(dependencies) {
             (this.state.isWaiting() || this.state.isLoading()) && this.deps.add(dependencies);
         },
         /**
-         * @param {JARS.internals.Module.ModuleFactory} factory
+         * @param {JARS~internals.Module~Factory} factory
          */
         $export: function(factory) {
             var module = this;

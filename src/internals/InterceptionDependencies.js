@@ -4,6 +4,13 @@ JARS.internal('InterceptionDependencies', function(getInternal) {
     var Dependencies = getInternal('Dependencies'),
         objectEach = getInternal('Utils').objectEach;
 
+    /**
+     * @class
+     *
+     * @memberof JARS~internals
+     *
+     * @param {JARS~internals.Module}
+     */
     function InterceptionDependencies(module) {
         this.module = module;
         this._deps = {};
@@ -11,11 +18,17 @@ JARS.internal('InterceptionDependencies', function(getInternal) {
 
     InterceptionDependencies.prototype = {
         constructor: InterceptionDependencies,
-
+        /**
+         * @param {string} interceptionName
+         *
+         * @return {JARS~internals.Dependencies}
+         */
         get: function(interceptionName) {
             return this._deps[interceptionName] || (this._deps[interceptionName] = new Dependencies(this.module, true));
         },
-
+        /**
+         * @return {string[]}
+         */
         getAll: function() {
             var dependencies = [];
 

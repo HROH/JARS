@@ -2,30 +2,56 @@ JARS.internal('Traverser/PathList', function(getInternal) {
     'use strict';
 
     var getFullPath = getInternal('Resolvers/Path').getFullPath,
-        PathListTraverser;
+        PathList;
 
-    PathListTraverser = {
-        onModuleEnter: function(module, entryModule, depth, value) {
-            return !isModuleSorted(module, value) && module.state.isLoaded();
+    /**
+     * @namespace
+     *
+     * @memberof JARS~internals.Traverser
+     */
+    PathList = {
+        /**
+         * @param {JARS~internals.Module} module
+         * @param {JARS~internals.Module} entryModule
+         * @param {number} depth
+         * @param {*} trackList
+         *
+         * @return {boolean}
+         */
+        onModuleEnter: function(module, entryModule, depth, trackList) {
+            return !isModuleSorted(module, trackList) && module.state.isLoaded();
         },
-
-        onModuleLeave: function(module, entryModule, depth, value) {
-            if(!isModuleSorted(module, value)) {
-                value.sorted[module.name] = true;
-                value.paths.push(getFullPath(module));
+        /**
+         * @param {JARS~internals.Module} module
+         * @param {JARS~internals.Module} entryModule
+         * @param {number} depth
+         * @param {*} trackList
+         *
+         * @return {JARS~internals.Traverser.Modules~Result}
+         */
+        onModuleLeave: function(module, entryModule, depth, trackList) {
+            if(!isModuleSorted(module, trackList)) {
+                trackList.sorted[module.name] = true;
+                trackList.paths.push(getFullPath(module));
             }
 
             return {
-                value: value,
+                value: trackList,
 
                 done: false
             };
         }
     };
 
-    function isModuleSorted(module, value) {
-        return value.sorted[module.name];
+    /**
+     * @param {JARS~internals.Module} module
+     * @param {*} trackList
+     *
+     * @return {boolean}
+     */
+    function isModuleSorted(module, trackList) {
+        return trackList.sorted[module.name];
     }
 
-    return PathListTraverser;
+    return PathList;
 });

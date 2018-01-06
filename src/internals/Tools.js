@@ -7,16 +7,33 @@ JARS.internal('Tools', function(getInternal) {
         Processors = getInternal('Processors'),
         Tools;
 
+    /**
+     * @namespace
+     *
+     * @memberof JARS~internals
+     */
     Tools = {
+        /**
+         * @param {JARS~internals.Bundle} bundle
+         */
         addToBundle: function (bundle) {
             addToSubject(bundle, true);
         },
-
+        /**
+         * @param {JARS~internals.Module}
+         */
         addToModule: function(module) {
             addToSubject(module);
         }
     };
 
+    /**
+     * @memberof JARS~internals.Tools
+     * @inner
+     *
+     * @param {(JARS~internals.Module|JARS~internals.Bundle)} subject
+     * @param {boolean} isBundle
+     */
     function addToSubject(subject, isBundle) {
         var factoryName = isBundle ? 'forBundle': 'forModule',
             Processor = Processors[isBundle ? 'bundle' : 'module'];

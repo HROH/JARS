@@ -1,4 +1,4 @@
-JARS.internal('Bundle', function bundleSetup(getInternal) {
+JARS.internal('Bundle', function(getInternal) {
     'use strict';
 
     var BundleResolver = getInternal('Resolvers/Bundle'),
@@ -7,9 +7,9 @@ JARS.internal('Bundle', function bundleSetup(getInternal) {
     /**
      * @class
      *
-     * @memberof JARS.internals
+     * @memberof JARS~internals
      *
-     * @param {JARS.internals.Module} module
+     * @param {JARS~internals.Module} module
      */
     function Bundle(module) {
         var bundle = this;
@@ -24,12 +24,16 @@ JARS.internal('Bundle', function bundleSetup(getInternal) {
     Bundle.prototype = {
         constructor: Bundle,
         /**
-         * @param {JARS.internals.Bundle.Declaration} bundleModules
+         * @param {JARS~internals.Bundle.Declaration} bundleModules
          */
         add: function(bundleModules) {
             this.modules = BundleResolver.resolveBundle(this.module, bundleModules);
         },
-
+        /**
+         * @param {string} bundleModule
+         *
+         * @return {(string|null)}
+         */
         find: function(bundleModule) {
             var index = this.modules.indexOf(BundleResolver.resolveBundle(this.module, [bundleModule])[0]);
 
@@ -38,9 +42,9 @@ JARS.internal('Bundle', function bundleSetup(getInternal) {
     };
 
    /**
-    * @typeDef {string[]} Declaration
+    * @typedef {string[]} Declaration
     *
-    * @memberof JARS.internals.Bundle
+    * @memberof JARS~internals.Bundle
     */
 
     return Bundle;

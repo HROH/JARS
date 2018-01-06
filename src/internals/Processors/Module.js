@@ -5,13 +5,22 @@ JARS.internal('Processors/Module', function(getInternal) {
         getFullPath = getInternal('Resolvers/Path').getFullPath,
         loadSource = getInternal('SourceManager').load;
 
-    function ModuleProcessor(module) {
+    /**
+     * @class
+     *
+     * @memberof JARS~internals
+     *
+     * @param {JARS~internals.Module}
+     */
+    function Module(module) {
         this.module = module;
     }
 
-    ModuleProcessor.prototype = {
-        constructor: ModuleProcessor,
-
+    Module.prototype = {
+        constructor: Module,
+        /**
+         * @method
+         */
         load: function() {
             var module = this.module,
                 path = getFullPath(module);
@@ -23,7 +32,9 @@ JARS.internal('Processors/Module', function(getInternal) {
                 loadSource(path);
             }
         },
-
+        /**
+         * @param {JAR~internals.Handlers.Request#onModulesLoaded} registerCallback
+         */
         register: function(registerCallback) {
             var module = this.module;
 
@@ -35,5 +46,5 @@ JARS.internal('Processors/Module', function(getInternal) {
         }
     };
 
-    return ModuleProcessor;
+    return Module;
 });

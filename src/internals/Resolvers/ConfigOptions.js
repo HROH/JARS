@@ -6,7 +6,14 @@ JARS.internal('Resolvers/ConfigOptions', function(getInternal) {
         getVersion = getInternal('Resolvers/Version').getVersion,
         DEFAULT_EXTENSION = 'js';
 
-    function ConfigOptionsResolver(moduleName) {
+    /**
+     * @memberof JARS~internals.Resolvers
+     *
+     * @param {string} moduleName
+     *
+     * @return {JARS~internals.GlobalConfig~Options.Modules}
+     */
+    function ConfigOptions(moduleName) {
         return {
             extension: DEFAULT_EXTENSION,
 
@@ -18,5 +25,5 @@ JARS.internal('Resolvers/ConfigOptions', function(getInternal) {
         };
     }
 
-    return ConfigOptionsResolver;
+    return ConfigOptions;
 });

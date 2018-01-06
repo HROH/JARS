@@ -1,7 +1,15 @@
 JARS.internal('Bootstrappers/Modules', function(getInternal) {
     'use strict';
 
-    var ModulesBootstrapper = {
+    /**
+     * @namespace
+     *
+     * @memberof JARS~internals.Bootstrappers
+     */
+    var Modules = {
+        /**
+         * @method
+         */
         bootstrap: function() {
             var ModulesRegistry = getInternal('Registries/Modules');
 
@@ -10,5 +18,5 @@ JARS.internal('Bootstrappers/Modules', function(getInternal) {
         }
     };
 
-    return ModulesBootstrapper;
+    return Modules;
 });

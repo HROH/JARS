@@ -1,7 +1,15 @@
 JARS.internal('Bootstrappers/System', function(getInternal) {
     'use strict';
 
-    var SystemBootstrapper= {
+    /**
+     * @namespace
+     *
+     * @memberof JARS~internals.Bootstrappers
+     */
+    var System = {
+        /**
+         * @method
+         */
         bootstrap: function() {
             var systemModule;
 
@@ -22,26 +30,26 @@ JARS.internal('Bootstrappers/System', function(getInternal) {
 
             systemModule.setMeta({
                 /**
-                 * @param {JARS.internals.Interception} pluginRequest
+                 * @param {JARS~internals.Interception} pluginRequest
                  */
                 plugIn: function(pluginRequest) {
                     pluginRequest.success(pluginRequest.requestor.config.get('config'));
                 }
             });
 
-            systemModule.$export(function systemFactory() {
+            systemModule.$export(function() {
                 // TODO maybe calling the internal factory for System is the better option
                 // to isolate System on a per context basis but right now this is enough
 
                 /**
                  * @global
                  * @module System
-                 * @see JARS.internals.System
+                 * @see JARS~internals.System
                  */
                 return getInternal('System');
             });
         }
     };
 
-    return SystemBootstrapper;
+    return System;
 });

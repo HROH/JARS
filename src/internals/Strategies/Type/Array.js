@@ -5,17 +5,15 @@ JARS.internal('Strategies/Type/Array', function(getInternal) {
         AnyResolutionStrategy = getInternal('Strategies/Type/Any');
 
     /**
-     * @method Array
+     * @memberof JARS~internals.Strategies.Type
      *
-     * @memberof JARS.internals.TypeStrategies
-     *
-     * @param {JARS.internals.Module} baseModule
-     * @param {(JARS.internals.Dependencies.Declaration[]|JARS.internals.Bundle.Declaration)} modules
-     * @param {JARS.internals.ResolutionStrategy} resolutionStrategy
+     * @param {JARS~internals.Module} baseModule
+     * @param {Array<(JARS~internals.Dependencies~Declaration|JARS~internals.Bundle~Declaration)>} modules
+     * @param {JARS~internals.Strategies.Resolution~Strategy} resolutionStrategy
      *
      * @return {string[]}
      */
-    function ArrayResolutionStrategy(baseModule, modules, resolutionStrategy) {
+    function Array(baseModule, modules, resolutionStrategy) {
         var resolvedModules = [];
 
         arrayEach(modules, function concatResolvedModules(nestedModules) {
@@ -25,5 +23,5 @@ JARS.internal('Strategies/Type/Array', function(getInternal) {
         return resolvedModules;
     }
 
-    return ArrayResolutionStrategy;
+    return Array;
 });

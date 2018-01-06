@@ -1,19 +1,20 @@
-JARS.internal('Interceptors/Plugin', function pluginInterceptorSetup(getInternal) {
+JARS.internal('Interceptors/Plugin', function(getInternal) {
     'use strict';
 
     var getModule = getInternal('Registries/Modules').get,
         isFunction = getInternal('System').isFunction,
-        PluginInterceptor;
+        Plugin;
 
     /**
     * @namespace
-    * @implements JARS.internals.Interceptor
     *
-    * @memberof JARS.internals
+    * @memberof JARS~internals.Interceptors
+    *
+    * @implements  {JARS~internals.Interceptors~Interceptor}
     */
-    PluginInterceptor = {
+    Plugin = {
         /**
-         * @param {JARS.internals.Interception} interception
+         * @param {JARS~internals.Interception} interception
          */
         intercept: function(interception) {
             var plugIn = getModule(interception.info.moduleName).getMeta('plugIn');
@@ -26,5 +27,5 @@ JARS.internal('Interceptors/Plugin', function pluginInterceptorSetup(getInternal
         type: '!'
     };
 
-    return PluginInterceptor;
+    return Plugin;
 });

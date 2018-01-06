@@ -1,6 +1,10 @@
+/**
+ * @module System.Transports
+ * @see JARS~internals.System.Transports
+ */
 JARS.module('System.Transports', ['Console']).meta({
     /**
-     * @param {JARS.internals.Interception} pluginRequest
+     * @param {JARS~internals.Interception} pluginRequest
      */
     plugIn: function(pluginRequest) {
         var data = pluginRequest.info.data.split(':');
@@ -18,6 +22,11 @@ JARS.module('System.Transports', ['Console']).meta({
         transports = {},
         Transports;
 
+    /**
+     * @namespace
+     *
+     * @memberof JARS~internals.System
+     */
     Transports = {
         /**
          * @param {string} mode
@@ -28,7 +37,12 @@ JARS.module('System.Transports', ['Console']).meta({
                 transports[mode] = transport;
             }
         },
-
+        /**
+         * @param {string} mode
+         * @param {string} level
+         * @param {string} context
+         * @param {object} data
+         */
         write: function(mode, level, context, data) {
             var transport = transports[mode];
 

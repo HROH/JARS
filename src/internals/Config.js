@@ -1,4 +1,4 @@
-JARS.internal('Config', function configSetup(getInternal) {
+JARS.internal('Config', function(getInternal) {
     'use strict';
 
     var create = getInternal('Utils').create,
@@ -7,10 +7,10 @@ JARS.internal('Config', function configSetup(getInternal) {
     /**
      * @class
      *
-     * @memberof JARS.internals
+     * @memberof JARS~internals
      *
-     * @param {(JARS.internals.Module|JARS.internals.Bundle)} subject
-     * @param {JARS.internals.Config} [parentConfig]
+     * @param {(JARS~internals.Module|JARS~internals.Bundle)} subject
+     * @param {JARS~internals.Config} [parentConfig]
      */
     function Config(subject, parentConfig) {
         var config = this;
@@ -38,19 +38,29 @@ JARS.internal('Config', function configSetup(getInternal) {
             return (option in this._options) ? this._options[option] : this._defaultOptions[option];
         },
         /**
-         * @return {JARS.internals.ConfigOptions}
+         * @return {JARS~internals.Config.Options}
          */
         inheritOptions: function() {
             return create(ConfigOptions, this._options);
         }
     };
 
+    /**
+     * @param {JARS~internals.Module} module
+     *
+     * @return {JARS~internals.Config}
+     */
     Config.forModule = function(module) {
         var parentConfig = module.bundle.config;
 
         return module.isRoot ? parentConfig : new Config(module, parentConfig);
     };
 
+    /**
+     * @param {JARS~internals.Bundle} bundle
+     *
+     * @return {JARS~internals.Config}
+     */
     Config.forBundle = function(bundle) {
         var parent = bundle.module.deps.parent;
 

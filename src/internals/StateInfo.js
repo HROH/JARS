@@ -1,4 +1,4 @@
-JARS.internal('StateInfo', function stateInfoSetup(getInternal) {
+JARS.internal('StateInfo', function(getInternal) {
     'use strict';
 
     var arrayEach = getInternal('Utils').arrayEach,
@@ -26,7 +26,7 @@ JARS.internal('StateInfo', function stateInfoSetup(getInternal) {
     /**
      * @class
      *
-     * @memberof JARS.internals
+     * @memberof JARS~internals
      *
      * @param {string} stateText
      * @param {Object} logMethods
@@ -39,14 +39,14 @@ JARS.internal('StateInfo', function stateInfoSetup(getInternal) {
     }
 
     /**
-     * @return {JARS.internals.StateInfo}
+     * @return {JARS~internals.StateInfo}
      */
     StateInfo.initial = function() {
         return stateInfos[0];
     };
 
     /**
-     * @param {function(JARS.internals.StateInfo)} callback
+     * @param {function(JARS~internals.StateInfo)} callback
      */
     StateInfo.each = function(callback) {
         arrayEach(stateInfos, callback);
@@ -55,7 +55,7 @@ JARS.internal('StateInfo', function stateInfoSetup(getInternal) {
     StateInfo.prototype = {
         constructor: StateInfo,
         /**
-         * @param {JARS.internals.StateInfo} nextStateInfo
+         * @param {JARS~internals.StateInfo} nextStateInfo
          *
          * @return {boolean}
          */
@@ -63,7 +63,7 @@ JARS.internal('StateInfo', function stateInfoSetup(getInternal) {
             return this._next.indexOf(nextStateInfo) > -1;
         },
         /**
-         * @param {JARS.internals.StateInfo[]} nextStateInfos
+         * @param {JARS~internals.StateInfo[]} nextStateInfos
          */
         setNext: function(nextStateInfos) {
             this._next = nextStateInfos;

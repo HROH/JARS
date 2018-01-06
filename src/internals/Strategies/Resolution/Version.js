@@ -5,7 +5,15 @@ JARS.internal('Strategies/Resolution/Version', function(getInternal) {
         MSG_VERSION_RESOLUTION_ERROR = 'a version must only be added to the base module',
         DOT = '.';
 
-    function VersionResolutionStrategy(baseModule, moduleName) {
+    /**
+     * @memberof JARS~internals.Strategies.Resolution
+     *
+     * @param {JARS~internals.Module} baseModule
+     * @param {string} moduleName
+     *
+     * @return {string}
+     */
+    function Version(baseModule, moduleName) {
         return VersionResolver.getVersion(moduleName) ? {
             error: MSG_VERSION_RESOLUTION_ERROR
         } : {
@@ -15,5 +23,5 @@ JARS.internal('Strategies/Resolution/Version', function(getInternal) {
         };
     }
 
-    return VersionResolutionStrategy;
+    return Version;
 });

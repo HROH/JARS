@@ -1,4 +1,4 @@
-JARS.internal('GlobalConfigHooks/Modules', function modulesHookSetup(getInternal) {
+JARS.internal('GlobalConfigHooks/Modules', function(getInternal) {
     'use strict';
 
     var ModulesRegistry = getInternal('Registries/Modules'),
@@ -9,10 +9,10 @@ JARS.internal('GlobalConfigHooks/Modules', function modulesHookSetup(getInternal
     /**
      * @method
      *
-     * @memberof JARS.internals.GlobalConfigHooks
+     * @memberof JARS~internals.GlobalConfig.Hooks
      *
-     * @param {JARS.internals.GlobalConfig} globalConfig
-     * @param {Object} config
+     * @param {JARS~internals.GlobalConfig} globalConfig
+     * @param {JARS~internals.GlobalConfig~Options.Modules} config
      */
     function Modules(globalConfig, config) {
         var rootModule = ModulesRegistry.getRoot();
@@ -28,6 +28,26 @@ JARS.internal('GlobalConfigHooks/Modules', function modulesHookSetup(getInternal
             rootModule.config.update(config);
         }
     }
+
+    /**
+     * @typedef {object} Modules
+     *
+     * @memberof JARS~internals.GlobalConfig~Options
+     *
+     * @property {string} basePath
+     * @property {boolean} cache
+     * @property {boolean} checkCircularDeps
+     * @property {object} config
+     * @property {string} context
+     * @property {string} dirPath
+     * @property {string} extension
+     * @property {string} fileName
+     * @property {boolean} minify
+     * @property {JARS~internals.GlobalConfig~Options.Modules} recover
+     * @property {number} timeout
+     * @property {string} versionPath
+     * @property {JARS~internals.Dependencies~Declaration} restrict
+     */
 
     return Modules;
 });

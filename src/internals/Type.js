@@ -10,11 +10,25 @@ JARS.internal('Type', function(getInternal) {
         NUMBER = 'number',
         Type;
 
+    /**
+     * @namespace
+     *
+     * @memberof JARS~internals
+     */
     Type = {
+        /**
+         * @param {string} typeDef
+         *
+         * @return {Object}
+         */
         add: function(typeDef) {
             return createValidator(VALIDATOR_PREFIX + typeDef, TypeLookup.add(typeDef), envGlobal[typeDef]);
         },
-
+        /**
+         * @param {*} value
+         *
+         * @return {string}
+         */
         get: function(value) {
             var type;
 
@@ -31,18 +45,27 @@ JARS.internal('Type', function(getInternal) {
 
             return type || typeof value;
         },
-
+        /**
+         * @param {string} type
+         * @param {*} value
+         *
+         * @return {boolean}
+         */
         is: function(type, value) {
             return Type.get(value) === type.toLowerCase();
         },
-
+        /**
+         * @param {*} value
+         *
+         * @return {boolean}
+         */
         isNil: function(value) {
             return value == NOTHING;
         }
     };
 
     /**
-     * @memberof JARS.internals.Type
+     * @memberof JARS~internals.Type
      * @inner
      *
      * @param {*} value
@@ -53,6 +76,16 @@ JARS.internal('Type', function(getInternal) {
         return envGlobal.isNaN(value) ? NAN : envGlobal.isFinite(value) ? NUMBER : INFINITY;
     }
 
+    /**
+     * @memberof JARS~internals.Type
+     * @inner
+     *
+     * @param {string} validatorName
+     * @param {string} type
+     * @param {Object} globalType
+     *
+     * @return {Object}
+     */
     function createValidator(validatorName, type, globalType) {
         return {
             name: validatorName,

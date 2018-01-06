@@ -1,4 +1,4 @@
-JARS.internal('State', function stateSetup(getInternal) {
+JARS.internal('State', function(getInternal) {
     'use strict';
 
     var StateInfo = getInternal('StateInfo'),
@@ -11,9 +11,9 @@ JARS.internal('State', function stateSetup(getInternal) {
     /**
      * @class
      *
-     * @memberof JARS.internals
+     * @memberof JARS~internals
      *
-     * @param {(JARS.internals.Module|JARS.internals.Bundle)} subject
+     * @param {(JARS~internals.Module|JARS~internals.Bundle)} subject
      */
     function State(subject) {
         this._subject = subject;
@@ -22,7 +22,7 @@ JARS.internal('State', function stateSetup(getInternal) {
     }
 
     /**
-     * @param {(JARS.internals.StateChangeHandler|JARS.internals.InterceptionHandler)} changeHandler
+     * @param {(JARS~internals.Handlers.StateChange|JARS~internals.Handlers.Interception)} changeHandler
      */
     State.prototype.onChange = function(changeHandler) {
         this._queue.push(changeHandler);
@@ -67,6 +67,11 @@ JARS.internal('State', function stateSetup(getInternal) {
         }
     };
 
+    /**
+     * @param {Array<(JARS~internals.Handlers.StateChange|JARS~internals.Handlers.Interception)>} queue
+     * @param {string} method
+     * @param {(JARS~internals.Module|JARS~internals.Bundle)} subject
+     */
     function drainQueue(queue, method, subject) {
         while(queue.length) {
             queue.shift()[method](subject.name, {
@@ -76,64 +81,76 @@ JARS.internal('State', function stateSetup(getInternal) {
     }
 
     /**
-     * @method JARS.internals.State#isWaiting
+     * @method JARS~internals.State#isWaiting
      *
      * @return {boolean}
      */
 
     /**
-     * @method JARS.internals.State#isLoading
+     * @method JARS~internals.State#isLoading
      *
      * @return {boolean}
      */
 
     /**
-     * @method JARS.internals.State#isRegistered
+     * @method JARS~internals.State#isRegistered
      *
      * @return {boolean}
      */
 
     /**
-     * @method JARS.internals.State#isLoaded
+     * @method JARS~internals.State#isIntercepted
      *
      * @return {boolean}
      */
 
     /**
-     * @method JARS.internals.State#isAborted
+     * @method JARS~internals.State#isLoaded
      *
      * @return {boolean}
      */
 
     /**
-     * @method JARS.internals.State#setWaiting
+     * @method JARS~internals.State#isAborted
      *
      * @return {boolean}
      */
 
     /**
-     * @method JARS.internals.State#setLoading
+     * @method JARS~internals.State#setWaiting
      *
      * @return {boolean}
      */
 
     /**
-     * @method JARS.internals.State#setRegistered
+     * @method JARS~internals.State#setLoading
      *
      * @return {boolean}
      */
 
     /**
-     * @method JARS.internals.State#setLoaded
+     * @method JARS~internals.State#setRegistered
      *
      * @return {boolean}
      */
 
     /**
-     * @method JARS.internals.State#setAborted
+     * @method JARS~internals.State#setIntercepted
+     *
+     * @return {boolean}
+     */
+
+    /**
+     * @method JARS~internals.State#setLoaded
+     *
+     * @return {boolean}
+     */
+
+    /**
+     * @method JARS~internals.State#setAborted
      *
      * @param {string} message
-     * @param {Object} abortionInfo
+     * @param {Object} abortInfo
      *
      * @return {boolean}
      */

@@ -4,14 +4,38 @@ JARS.internal('Traverser/Modules', function(getInternal) {
     var getModule = getInternal('Registries/Modules').get,
         isBundle = getInternal('Resolvers/Bundle').isBundle,
         arrayEach = getInternal('Utils').arrayEach,
-        ModulesTraverser;
+        Modules;
 
-    ModulesTraverser = {
+    /**
+     * @namespace
+     *
+     * @memberof JARS~internals.Traverser
+     */
+    Modules = {
+        /**
+         * @param {JARS~internals.Module} entryModule
+         * @param {Object} traverseHandle
+         * @param {*} initialValue
+         *
+         * @return {*}
+         */
         traverse: function(entryModule, traverseHandle, initialValue) {
             return traverseModule(entryModule, entryModule, traverseHandle, 0, initialValue).value;
         }
     };
 
+    /**
+     * @memberof JARS~internals.Traverser.Modules
+     * @inner
+     *
+     * @param {JARS~internals.Module} module
+     * @param {JARS~internals.Module} entryModule
+     * @param {Object} traverseHandle
+     * @param {number} depth
+     * @param {*} value
+     *
+     * @return {JARS~internals.Traverser.Modules~Result}
+     */
     function traverseModule(module, entryModule, traverseHandle, depth, value) {
         if(traverseHandle.onModuleEnter(module, entryModule, depth, value)) {
             value = traverseDependencies(module, entryModule, traverseHandle, depth, value);
@@ -20,14 +44,50 @@ JARS.internal('Traverser/Modules', function(getInternal) {
         return traverseHandle.onModuleLeave(module, entryModule, depth, value);
     }
 
+    /**
+     * @memberof JARS~internals.Traverser.Modules
+     * @inner
+     *
+     * @param {JARS~internals.Module} module
+     * @param {JARS~internals.Module} entryModule
+     * @param {Object} traverseHandle
+     * @param {number} depth
+     * @param {*} value
+     *
+     * @return {*}
+     */
     function traverseDependencies(module, entryModule, traverseHandle, depth, value) {
         return traverseModules(module.deps.getAll().concat(module.interceptionDeps.getAll()), entryModule, traverseHandle, depth + 1, value).value;
     }
 
+    /**
+     * @memberof JARS~internals.Traverser.Modules
+     * @inner
+     *
+     * @param {JARS~internals.Module} module
+     * @param {JARS~internals.Module} entryModule
+     * @param {Object} traverseHandle
+     * @param {number} depth
+     * @param {*} value
+     *
+     * @return {JARS~internals.Traverser.Modules~Result}
+     */
     function traverseBundle(module, entryModule, traverseHandle, depth, value) {
         return traverseModules(module.bundle.modules, entryModule, traverseHandle, depth + 1, value);
     }
 
+    /**
+     * @memberof JARS~internals.Traverser.Modules
+     * @inner
+     *
+     * @param {string[]} modules
+     * @param {JARS~internals.Module} entryModule
+     * @param {Object} traverseHandle
+     * @param {number} depth
+     * @param {*} value
+     *
+     * @return {JARS~internals.Traverser.Modules~Result}
+     */
     function traverseModules(modules, entryModule, traverseHandle, depth, value) {
         var result;
 
@@ -47,5 +107,15 @@ JARS.internal('Traverser/Modules', function(getInternal) {
         };
     }
 
-    return ModulesTraverser;
+    /**
+     * @typedef {Object} Result
+     *
+     * @memberof JARS~internals.Traverser.Modules
+     * @inner
+     *
+     * @property {*} value
+     * @property {boolean} done
+     */
+
+    return Modules;
 });

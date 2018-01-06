@@ -3,14 +3,14 @@ JARS.internal('Resolvers/Version', function versionResolverSetup() {
 
     var EMPTY_STRING = '',
         VERSION_DELIMITER = '@',
-        VersionResolver;
+        Version;
 
     /**
      * @namespace
      *
-     * @memberof JARS.internals
+     * @memberof JARS~internals.Resolvers
      */
-    VersionResolver = {
+    Version = {
         /**
          * @param {function(string): string} transformModuleName
          *
@@ -18,7 +18,7 @@ JARS.internal('Resolvers/Version', function versionResolverSetup() {
          */
         unwrapVersion: function(transformModuleName) {
             return function unwrapVersion(moduleName) {
-                return appendVersion(transformModuleName(VersionResolver.removeVersion(moduleName)), VersionResolver.getVersion(moduleName));
+                return appendVersion(transformModuleName(Version.removeVersion(moduleName)), Version.getVersion(moduleName));
             };
         },
         /**
@@ -40,7 +40,7 @@ JARS.internal('Resolvers/Version', function versionResolverSetup() {
     };
 
     /**
-     * @memberof JARS.internals.VersionResolver
+     * @memberof JARS~internals.Resolvers.Version
      * @inner
      *
      * @param {string} moduleName
@@ -52,5 +52,5 @@ JARS.internal('Resolvers/Version', function versionResolverSetup() {
         return (moduleName && version) ? [moduleName, version].join(VERSION_DELIMITER) : moduleName;
     }
 
-    return VersionResolver;
+    return Version;
 });

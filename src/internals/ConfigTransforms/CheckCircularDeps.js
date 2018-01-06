@@ -2,7 +2,7 @@ JARS.internal('ConfigTransforms/CheckCircularDeps', function() {
     'use strict';
 
     /**
-     * @memberof JARS.internals.ConfigTransforms
+     * @memberof JARS~internals.Config.Transforms
      *
      * @param {boolean} value
      *

@@ -1,4 +1,4 @@
-JARS.internal('DependenciesChecker', function dependenciesCheckerSetup(getInternal) {
+JARS.internal('DependenciesChecker', function(getInternal) {
     'use strict';
 
     var CircularTraverser = getInternal('Traverser/Circular'),
@@ -10,11 +10,11 @@ JARS.internal('DependenciesChecker', function dependenciesCheckerSetup(getIntern
     /**
      * @namespace
      *
-     * @memberof JARS.internals
+     * @memberof JARS~internals
      */
     DependenciesChecker = {
         /**
-         * @param {JARS.internals.Module} module
+         * @param {JARS~internals.Module} module
          *
          * @return {boolean}
          */

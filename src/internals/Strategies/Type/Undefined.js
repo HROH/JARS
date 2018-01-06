@@ -2,15 +2,13 @@ JARS.internal('Strategies/Type/Undefined', function() {
     'use strict';
 
     /**
-     * @method Undefined
-     *
-     * @memberof JARS.internals.TypeStrategies
+     * @memberof JARS~internals.Strategies.Type
      *
      * @return {string[]}
      */
-    function UndefinedStrategy() {
+    function Undefined() {
         return [];
     }
 
-    return UndefinedStrategy;
+    return Undefined;
 });

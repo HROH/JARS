@@ -7,22 +7,22 @@ JARS.internal('Registries/Modules', function modulesRegistrySetup(getInternal) {
         objectEach = getInternal('Utils').objectEach,
         modules = {},
         ROOT_MODULE_NAME = '*',
-        ModulesRegistry, currentModule;
+        Modules, currentModule;
 
     /**
      * @namespace
      *
-     * @memberof JARS.internals
+     * @memberof JARS~internals.Registries
      */
-    ModulesRegistry = {
+    Modules = {
         /**
          * @param {string} moduleName
-         * @param {JARS.internals.Bundle.Declaration} bundleModules
+         * @param {JARS~internals.Bundle~Declaration} bundleModules
          *
-         * @return {JARS.internals.Module}
+         * @return {JARS~internals.Module}
          */
         register: function(moduleName, bundleModules) {
-            var module = ModulesRegistry.get(moduleName);
+            var module = Modules.get(moduleName);
 
             module ? module.bundle.add(bundleModules) : System.Logger.error('No modulename provided');
 
@@ -32,38 +32,38 @@ JARS.internal('Registries/Modules', function modulesRegistrySetup(getInternal) {
          * @param {string} moduleName
          * @param {boolean} [isRoot]
          *
-         * @return {JARS.internals.Module}
+         * @return {JARS~internals.Module}
          */
         get: function(moduleName, isRoot) {
             moduleName = BundleResolver.isBundle(moduleName) ? BundleResolver.removeBundleSuffix(moduleName) : removeInterceptionData(moduleName);
 
-            return moduleName ? modules[moduleName] || (modules[moduleName] = new ModulesRegistry.Module(moduleName, isRoot)) : null;
+            return moduleName ? modules[moduleName] || (modules[moduleName] = new Modules.Module(moduleName, isRoot)) : null;
         },
         /**
-         * @return {JARS.internals.Module}
+         * @return {JARS~internals.Module}
          */
         getRoot: function() {
-            return ModulesRegistry.get(ROOT_MODULE_NAME, true);
+            return Modules.get(ROOT_MODULE_NAME, true);
         },
         /**
-         * @param {JARS.internals.Module} module
+         * @param {JARS.internals~Module} module
          */
         setCurrent: function(module) {
-            currentModule = module || ModulesRegistry.getRoot();
+            currentModule = module || Modules.getRoot();
         },
         /**
-         * @return {JARS.internals.Module} module
+         * @return {JARS~internals.Module} module
          */
         getCurrent: function() {
             return currentModule;
         },
         /**
-         * @param {function(JARS.internals.Module, string)} callback
+         * @param {function(JARS~internals.Module, string)} callback
          */
         each: function(callback) {
             objectEach(modules, callback);
         }
     };
 
-    return ModulesRegistry;
+    return Modules;
 });

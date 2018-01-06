@@ -4,15 +4,15 @@ JARS.internal('Resolvers/Relative', function() {
     var RE_LEADING_DOT = /^\./;
 
     /**
-     * @memberof JARS.internals
+     * @memberof JARS~internals.Resolvers
      *
      * @param {string} moduleName
      *
      * @return {boolean}
      */
-    function RelativeResolver(moduleName) {
+    function Relative(moduleName) {
         return RE_LEADING_DOT.test(moduleName);
     }
 
-    return RelativeResolver;
+    return Relative;
 });

@@ -9,14 +9,14 @@ JARS.internal('Handlers/Request', function() {
     /**
      * @class
      *
-     * @memberof JARS.internals
+     * @memberof JARS~internals.Handlers
      *
-     * @param {(JARS.internals.Module|JARS.internals.Bundle)} requestor
+     * @param {(JARS~internals.Module|JARS~internals.Bundle)} requestor
      * @param {string[]} modules
      * @param {string[]} msgStrings
-     * @param {function()} onModulesLoaded
+     * @param {JARS~internals.Handlers.Request#onModulesLoaded} onModulesLoaded
      */
-    function RequestHandler(requestor, modules, msgStrings, onModulesLoaded) {
+    function Request(requestor, modules, msgStrings, onModulesLoaded) {
         var handler = this;
 
         handler.requestor = requestor;
@@ -27,8 +27,8 @@ JARS.internal('Handlers/Request', function() {
         modules.length && requestor.logger.debug(MSG_REQUESTED, [msgStrings[1] || msgStrings[0], modules.join(SEPARATOR)]);
     }
 
-    RequestHandler.prototype = {
-        constructor: RequestHandler,
+    Request.prototype = {
+        constructor: Request,
         /**
          * @param {string} loadedModuleName
          */
@@ -43,5 +43,11 @@ JARS.internal('Handlers/Request', function() {
         }
     };
 
-    return RequestHandler;
+    /**
+     * @method JARS~internals.Handlers.Request#onModulesLoaded
+     *
+     * @param {JARS~internals.Refs.Modules} ref
+     */
+
+    return Request;
 });

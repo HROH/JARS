@@ -6,13 +6,13 @@ JARS.internal('Handlers/BundleSubmodule', function(getInternal) {
         MSG_STRINGS = ['submodule', 'submodules'];
 
     /**
-     * @memberof JARS.internals
+     * @memberof JARS~internals.Handlers
      *
-     * @param {JARS.internals.Bundle} bundle
+     * @param {JARS~internals.Bundle} bundle
      *
-     * @return {JARS.internals.RequestHandler}
+     * @return {JARS~internals.Handlers.Request}
      */
-    function BundleSubmoduleHandler(bundle) {
+    function BundleSubmodule(bundle) {
         return new RequestHandler(bundle, bundle.modules, MSG_STRINGS, function(bundleRefs) {
             if(!bundle.state.isLoaded()) {
                 bundle.ref = new BundleRef(bundle, bundleRefs);
@@ -21,5 +21,5 @@ JARS.internal('Handlers/BundleSubmodule', function(getInternal) {
         });
     }
 
-    return BundleSubmoduleHandler;
+    return BundleSubmodule;
 });
