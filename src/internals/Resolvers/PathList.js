@@ -2,7 +2,7 @@ JARS.internal('Resolvers/PathList', function(getInternal) {
     'use strict';
 
     var PathListTraverser = getInternal('Traverser/PathList'),
-        traverse = getInternal('Traverser/Modules').traverse,
+        ModulesTraverser = getInternal('Traverser/Modules'),
         importModules = getInternal('Loader').$import,
         arrayEach = getInternal('Utils').arrayEach,
         getModule = getInternal('Registries/Modules').get,
@@ -29,7 +29,7 @@ JARS.internal('Resolvers/PathList', function(getInternal) {
             var entryModule = getModule(entryModuleName);
 
             importModules([entryModule.name], function computeSortedPathList() {
-                callback(traverse(entryModule, PathListTraverser, markModulesSorted(excluded, {
+                callback(ModulesTraverser(entryModule, PathListTraverser, markModulesSorted(excluded, {
                     sorted: {},
 
                     paths: []

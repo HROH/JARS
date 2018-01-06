@@ -3,26 +3,20 @@ JARS.internal('Traverser/Modules', function(getInternal) {
 
     var getModule = getInternal('Registries/Modules').get,
         isBundle = getInternal('Resolvers/Bundle').isBundle,
-        arrayEach = getInternal('Utils').arrayEach,
-        Modules;
+        arrayEach = getInternal('Utils').arrayEach;
 
     /**
-     * @namespace
-     *
      * @memberof JARS~internals.Traverser
+     *
+     * @param {JARS~internals.Module} entryModule
+     * @param {Object} traverseHandle
+     * @param {*} initialValue
+     *
+     * @return {*}
      */
-    Modules = {
-        /**
-         * @param {JARS~internals.Module} entryModule
-         * @param {Object} traverseHandle
-         * @param {*} initialValue
-         *
-         * @return {*}
-         */
-        traverse: function(entryModule, traverseHandle, initialValue) {
-            return traverseModule(entryModule, entryModule, traverseHandle, 0, initialValue).value;
-        }
-    };
+    function Modules(entryModule, traverseHandle, initialValue) {
+        return traverseModule(entryModule, entryModule, traverseHandle, 0, initialValue).value;
+    }
 
     /**
      * @memberof JARS~internals.Traverser.Modules

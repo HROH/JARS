@@ -5,7 +5,7 @@ JARS.internal('Dependencies', function(getInternal) {
         DependenciesHandler = getInternal('Handlers/Dependencies'),
         Modules = getInternal('Handlers/Modules'),
         CircularTraverser = getInternal('Traverser/Circular'),
-        traverse = getInternal('Traverser/Modules').traverse;
+        ModulesTraverser = getInternal('Traverser/Modules');
 
     /**
      * @class
@@ -39,7 +39,7 @@ JARS.internal('Dependencies', function(getInternal) {
          * @return {boolean}
          */
         abortIfCircular: function() {
-            return !this.module.isRoot && this.module.config.get('checkCircularDeps') && traverse(this.module, CircularTraverser);
+            return !this.module.isRoot && this.module.config.get('checkCircularDeps') && ModulesTraverser(this.module, CircularTraverser);
         },
         /**
          * @param {JAR~internals.Handlers.Request#onModulesLoaded} onModulesLoaded
