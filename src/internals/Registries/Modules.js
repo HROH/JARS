@@ -4,7 +4,7 @@ JARS.internal('Registries/Modules', function modulesRegistrySetup(getInternal) {
     var System = getInternal('System'),
         BundleResolver = getInternal('Resolvers/Bundle'),
         removeInterceptionData = getInternal('Resolvers/Interception').removeInterceptionData,
-        objectEach = getInternal('Utils').objectEach,
+        each = getInternal('Helpers/Object').each,
         modules = {},
         ROOT_MODULE_NAME = '*',
         Modules, currentModule;
@@ -61,7 +61,7 @@ JARS.internal('Registries/Modules', function modulesRegistrySetup(getInternal) {
          * @param {function(JARS~internals.Module, string)} callback
          */
         each: function(callback) {
-            objectEach(modules, callback);
+            each(modules, callback);
         }
     };
 

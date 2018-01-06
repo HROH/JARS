@@ -2,7 +2,7 @@ JARS.internal('Resolvers/Path', function pathResolverSetup(getInternal) {
     'use strict';
 
     var ExtensionTransform = getInternal('ConfigTransforms/Extension'),
-        arrayEach = getInternal('Utils').arrayEach,
+        each = getInternal('Helpers/Array').each,
         pathOptions = ['basePath', 'dirPath', 'versionPath', 'fileName', 'minify', 'extension', 'cache'],
         Path;
 
@@ -21,7 +21,7 @@ JARS.internal('Resolvers/Path', function pathResolverSetup(getInternal) {
         getFullPath: function(module, extension) {
             var path = '';
 
-            arrayEach(pathOptions, function(option) {
+            each(pathOptions, function(option) {
                 path += (option === 'extension' && extension) ? ExtensionTransform(extension) : module.config.get(option);
             });
 

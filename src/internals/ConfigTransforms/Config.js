@@ -1,7 +1,7 @@
 JARS.internal('ConfigTransforms/Config', function(getInternal) {
     'use strict';
 
-    var objectMerge = getInternal('Utils').objectMerge;
+    var merge = getInternal('Helpers/Object').merge;
 
     /**
      * @memberof JARS~internals.Config.Transforms
@@ -12,7 +12,7 @@ JARS.internal('ConfigTransforms/Config', function(getInternal) {
      * @return {Object}
      */
     function Config(config, moduleOrBundle) {
-        return objectMerge(moduleOrBundle.config.get('config'), config);
+        return merge(moduleOrBundle.config.get('config'), config);
     }
 
     return Config;

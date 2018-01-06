@@ -3,10 +3,10 @@ JARS.internal('ConfigOptions', function(getInternal) {
 
     var ConfigOptionsResolver = getInternal('Resolvers/ConfigOptions'),
         ConfigTransforms = getInternal('ConfigTransforms'),
-        Utils = getInternal('Utils'),
-        create = Utils.create,
-        hasOwnProp = Utils.hasOwnProp,
-        objectEach = Utils.objectEach,
+        ObjectHelper = getInternal('Helpers/Object'),
+        create = ObjectHelper.create,
+        hasOwnProp = ObjectHelper.hasOwnProp,
+        each = ObjectHelper.each,
         isBundle = getInternal('Resolvers/Bundle').isBundle,
         isNull = getInternal('System').isNull;
 
@@ -47,7 +47,7 @@ JARS.internal('ConfigOptions', function(getInternal) {
      * @param {(JARS~internals.Module|JARS~internals.Bundle)} subject
      */
     Options.transformAndUpdate = function(configOptions, options, subject) {
-        objectEach(options, function updateConfig(value, option) {
+        each(options, function updateConfig(value, option) {
             if (hasOwnProp(ConfigTransforms, option)) {
                 updateOption(configOptions, option, transformOption(option, value, subject));
             }

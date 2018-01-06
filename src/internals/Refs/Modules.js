@@ -1,7 +1,7 @@
 JARS.internal('Refs/Modules', function(getInternal) {
     'use strict';
 
-    var arrayEach = getInternal('Utils').arrayEach;
+    var each = getInternal('Helpers/Array').each;
 
     /**
      * @class
@@ -29,7 +29,7 @@ JARS.internal('Refs/Modules', function(getInternal) {
         get: function(context) {
             var refs = [];
 
-            arrayEach(this._refs, function(ref) {
+            each(this._refs, function(ref) {
                 refs.push(ref.get(context));
             });
 

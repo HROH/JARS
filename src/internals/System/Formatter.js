@@ -7,7 +7,7 @@ JARS.module('System.Formatter').$import([
 ]).$export(function(internals, isString, isArray, isObject) {
     'use strict';
 
-    var hasOwnProp = internals.get('Utils').hasOwnProp,
+    var hasOwnProp = internals.get('Helpers/Object').hasOwnProp,
         RE_TEMPLATE_KEY = /\$\{(.*?)\}/g,
         UNKNOWN_KEY = '<UNKNOWN KEY>',
         Formatter;

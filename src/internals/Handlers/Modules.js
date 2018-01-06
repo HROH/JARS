@@ -4,7 +4,7 @@ JARS.internal('Handlers/Modules', function modulesQueueSetup(getInternal) {
     var InterceptionHandler = getInternal('Handlers/Interception'),
         StateChangeHandler = getInternal('Handlers/StateChange'),
         ModulesRef = getInternal('Refs/Modules'),
-        arrayEach = getInternal('Utils').arrayEach,
+        each = getInternal('Helpers/Array').each,
         getModule = getInternal('Registries/Modules').get,
         isBundle = getInternal('Resolvers/Bundle').isBundle;
 
@@ -35,7 +35,7 @@ JARS.internal('Handlers/Modules', function modulesQueueSetup(getInternal) {
         request: function() {
             var handler = this;
 
-            arrayEach(handler._modules, function requestModule(requested, index) {
+            each(handler._modules, function requestModule(requested, index) {
                 handler.requestModule(requested, index);
             });
         },

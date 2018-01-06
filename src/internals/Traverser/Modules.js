@@ -3,7 +3,7 @@ JARS.internal('Traverser/Modules', function(getInternal) {
 
     var getModule = getInternal('Registries/Modules').get,
         isBundle = getInternal('Resolvers/Bundle').isBundle,
-        arrayEach = getInternal('Utils').arrayEach;
+        each = getInternal('Helpers/Array').each;
 
     /**
      * @memberof JARS~internals.Traverser
@@ -85,7 +85,7 @@ JARS.internal('Traverser/Modules', function(getInternal) {
     function traverseModules(modules, entryModule, traverseHandle, depth, value) {
         var result;
 
-        arrayEach(modules, function(moduleName) {
+        each(modules, function(moduleName) {
             var module = getModule(moduleName);
 
             result = traverseModule(module, entryModule, traverseHandle, depth, value);

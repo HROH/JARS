@@ -1,12 +1,12 @@
-JARS.internal('Recoverer', function(getInternal) {
+JARS.internal('Helpers/Recoverer', function(getInternal) {
     'use strict';
 
-    var objectMerge = getInternal('Utils').objectMerge,
+    var merge = getInternal('Helpers/Object').merge,
         nextRecoverConfigs = {},
         MSG_RECOVERING = 'failed to load and tries to recover...';
 
     /**
-     * @memberof JARS~internals
+     * @memberof JARS~internals.Helpers
      *
      * @param {JARS~internals.Module} module
      *
@@ -24,7 +24,7 @@ JARS.internal('Recoverer', function(getInternal) {
     }
 
     /**
-     * @memberof JARS~internals.Recoverer
+     * @memberof JARS~internals.Helpers.Recoverer
      * @inner
      *
      * @param {string} moduleName
@@ -40,7 +40,7 @@ JARS.internal('Recoverer', function(getInternal) {
             setNextRecoverConfig(moduleName, currentRecoverConfig);
             nextRecover = currentRecoverConfig.get('recover');
 
-            nextRecover && config.update(objectMerge({}, nextRecover, {
+            nextRecover && config.update(merge({}, nextRecover, {
                 restrict: moduleName
             }));
         }
@@ -49,7 +49,7 @@ JARS.internal('Recoverer', function(getInternal) {
     }
 
     /**
-     * @memberof JARS~internals.Recoverer
+     * @memberof JARS~internals.Helpers.Recoverer
      * @inner
      *
      * @param {string} moduleName
@@ -62,7 +62,7 @@ JARS.internal('Recoverer', function(getInternal) {
     }
 
     /**
-     * @memberof JARS~internals.Recoverer
+     * @memberof JARS~internals.Helpers.Recoverer
      * @inner
      *
      * @param {string} moduleName

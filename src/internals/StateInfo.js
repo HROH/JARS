@@ -1,7 +1,7 @@
 JARS.internal('StateInfo', function(getInternal) {
     'use strict';
 
-    var arrayEach = getInternal('Utils').arrayEach,
+    var each = getInternal('Helpers/Array').each,
         IS_PREFIX = 'is',
         SET_PREFIX = 'set',
         LOG_METHODS = {},
@@ -49,7 +49,7 @@ JARS.internal('StateInfo', function(getInternal) {
      * @param {function(JARS~internals.StateInfo)} callback
      */
     StateInfo.each = function(callback) {
-        arrayEach(stateInfos, callback);
+        each(stateInfos, callback);
     };
 
     StateInfo.prototype = {
@@ -70,7 +70,7 @@ JARS.internal('StateInfo', function(getInternal) {
         }
     };
 
-    arrayEach(['waiting', 'loading', 'registered', 'intercepted', 'loaded', 'aborted'], function(stateText) {
+    each(['waiting', 'loading', 'registered', 'intercepted', 'loaded', 'aborted'], function(stateText) {
         stateInfos.push(new StateInfo(stateText, stateText.charAt(0).toUpperCase() + stateText.substr(1), LOG_METHODS[stateText]));
     });
 

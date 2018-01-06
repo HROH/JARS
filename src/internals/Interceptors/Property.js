@@ -2,7 +2,7 @@ JARS.internal('Interceptors/Property', function(getInternal) {
     'use strict';
 
     // TODO allow search for nested properties
-    var hasOwnProp = getInternal('Utils').hasOwnProp,
+    var hasOwnProp = getInternal('Helpers/Object').hasOwnProp,
         Property;
 
     /**

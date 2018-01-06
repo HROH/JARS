@@ -1,7 +1,7 @@
 JARS.internal('GlobalConfigHooks/Environments', function(getInternal) {
     'use strict';
 
-    var objectMerge = getInternal('Utils').objectMerge;
+    var merge = getInternal('Helpers/Object').merge;
 
     /**
      * @memberof JARS~internals.GlobalConfig.Hooks
@@ -12,7 +12,7 @@ JARS.internal('GlobalConfigHooks/Environments', function(getInternal) {
      * @return {Object<string, JARS~internals.GlobalConfig~Options>}
      */
     function Environments(globalConfig, environments) {
-        return objectMerge(globalConfig.get('environments'), environments);
+        return merge(globalConfig.get('environments'), environments);
     }
 
     return Environments;

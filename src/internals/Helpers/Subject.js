@@ -1,18 +1,18 @@
-JARS.internal('Tools', function(getInternal) {
+JARS.internal('Helpers/Subject', function(getInternal) {
     'use strict';
 
-    var LogWrap = getInternal('LogWrap'),
+    var LogWrap = getInternal('Helpers/LogWrap'),
         State = getInternal('State'),
         Config = getInternal('Config'),
         Processors = getInternal('Processors'),
-        Tools;
+        Subject;
 
     /**
      * @namespace
      *
-     * @memberof JARS~internals
+     * @memberof JARS~internals.Helpers
      */
-    Tools = {
+    Subject = {
         /**
          * @param {JARS~internals.Bundle} bundle
          */
@@ -28,7 +28,7 @@ JARS.internal('Tools', function(getInternal) {
     };
 
     /**
-     * @memberof JARS~internals.Tools
+     * @memberof JARS~internals.Helpers.Subject
      * @inner
      *
      * @param {(JARS~internals.Module|JARS~internals.Bundle)} subject
@@ -44,5 +44,5 @@ JARS.internal('Tools', function(getInternal) {
         subject.processor = new Processor(subject);
     }
 
-    return Tools;
+    return Subject;
 });

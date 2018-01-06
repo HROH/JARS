@@ -6,11 +6,11 @@ JARS.module('System.Modules').$export(function systemModulesFactory() {
     'use strict';
 
     var getInternal = this.$$internals.get,
-        arrayEach = getInternal('Utils').arrayEach,
         Loader = getInternal('Loader'),
         ModulesRegistry = getInternal('Registries/Modules'),
         DependenciesResolver = getInternal('Resolvers/Dependencies'),
         getFullPath = getInternal('Resolvers/Path').getFullPath,
+        each = getInternal('Helpers/Array').each,
         Modules;
 
     /**
@@ -31,7 +31,7 @@ JARS.module('System.Modules').$export(function systemModulesFactory() {
 
             moduleNames = DependenciesResolver.resolveDeps(ModulesRegistry.getRoot(), moduleNames);
 
-            arrayEach(moduleNames, function use(moduleName) {
+            each(moduleNames, function use(moduleName) {
                 refs.push(Modules.use(moduleName));
             });
 

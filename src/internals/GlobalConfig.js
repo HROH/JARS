@@ -2,10 +2,9 @@ JARS.internal('GlobalConfig', function(getInternal) {
     'use strict';
 
     var System = getInternal('System'),
-        Utils = getInternal('Utils'),
         isArray = System.isArray,
-        arrayEach = Utils.arrayEach,
-        objectEach = Utils.objectEach,
+        arrayEach = getInternal('Helpers/Array').each,
+        objectEach = getInternal('Helpers/Object').each,
         GlobalConfigHooks = getInternal('GlobalConfigHooks'),
         globalConfig = {
             environments: {}

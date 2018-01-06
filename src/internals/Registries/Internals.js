@@ -84,7 +84,6 @@ JARS.init(function(commands) {
          */
         init: function() {
             Queue.addGroup([
-                'AutoAborter',
                 'Bootstrappers',
                 'Bundle',
                 'Config',
@@ -94,14 +93,13 @@ JARS.init(function(commands) {
                 'GlobalConfig',
                 'GlobalConfigHooks',
                 'Handlers',
+                'Helpers',
                 'Interception',
                 'InterceptionDependencies',
                 'Interceptors',
                 'Loader',
-                'LogWrap',
                 'Module',
                 'Processors',
-                'Recoverer',
                 'Refs',
                 'Registries',
                 'Resolvers',
@@ -109,11 +107,9 @@ JARS.init(function(commands) {
                 'StateInfo',
                 'Strategies',
                 'System',
-                'Tools',
                 'Traverser',
                 'Type',
                 'TypeLookup',
-                'Utils'
             ]);
         }
     };

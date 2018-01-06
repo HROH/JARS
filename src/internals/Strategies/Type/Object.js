@@ -1,7 +1,7 @@
 JARS.internal('Strategies/Type/Object', function(getInternal) {
     'use strict';
 
-    var objectEach = getInternal('Utils').objectEach,
+    var each = getInternal('Helpers/Object').each,
         AnyResolutionStrategy = getInternal('Strategies/Type/Any'),
         StringResolutionStrategy = getInternal('Strategies/Type/String'),
         NestedResolutionStrategy = getInternal('Strategies/Resolution/Nested'),
@@ -19,7 +19,7 @@ JARS.internal('Strategies/Type/Object', function(getInternal) {
     function Object(baseModule, modules, resolutionStrategy) {
         var resolvedModules = [];
 
-        objectEach(modules, function concatResolvedModules(nestedModules, moduleName) {
+        each(modules, function concatResolvedModules(nestedModules, moduleName) {
             var tmpBaseModuleName = StringResolutionStrategy(baseModule, moduleName, resolutionStrategy)[0];
 
             if(tmpBaseModuleName) {

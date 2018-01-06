@@ -1,7 +1,7 @@
 JARS.internal('Strategies/Type/Array', function(getInternal) {
     'use strict';
 
-    var arrayEach = getInternal('Utils').arrayEach,
+    var each = getInternal('Helpers/Array').each,
         AnyResolutionStrategy = getInternal('Strategies/Type/Any');
 
     /**
@@ -16,7 +16,7 @@ JARS.internal('Strategies/Type/Array', function(getInternal) {
     function Array(baseModule, modules, resolutionStrategy) {
         var resolvedModules = [];
 
-        arrayEach(modules, function concatResolvedModules(nestedModules) {
+        each(modules, function concatResolvedModules(nestedModules) {
             resolvedModules = resolvedModules.concat(AnyResolutionStrategy(baseModule, nestedModules, resolutionStrategy));
         });
 

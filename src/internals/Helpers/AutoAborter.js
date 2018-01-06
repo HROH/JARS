@@ -1,7 +1,7 @@
-JARS.internal('AutoAborter', function(getInternal) {
+JARS.internal('Helpers/AutoAborter', function(getInternal) {
     'use strict';
 
-    var Recoverer = getInternal('Recoverer'),
+    var Recoverer = getInternal('Helpers/Recoverer'),
         global = getInternal('Env').global,
         timeoutIDs = {},
         MILLISECONDS_PER_SECOND = 1000,
@@ -11,7 +11,7 @@ JARS.internal('AutoAborter', function(getInternal) {
     /**
      * @namespace
      *
-     * @memberof JARS~internals
+     * @memberof JARS~internals.Helpers
      */
     AutoAborter = {
         /**

@@ -1,7 +1,7 @@
 JARS.internal('ConfigTransforms/Recover', function(getInternal) {
     'use strict';
 
-    var objectMerge = getInternal('Utils').objectMerge;
+    var merge = getInternal('Helpers/Object').merge;
 
     /**
      * @memberof JARS~internals.Config.Transforms
@@ -14,7 +14,7 @@ JARS.internal('ConfigTransforms/Recover', function(getInternal) {
     function Recover(recoverConfig, subject) {
         // create a copy of the recover-config
         // because it should update for every module independently
-        var recover = objectMerge({}, recoverConfig);
+        var recover = merge({}, recoverConfig);
 
         recover.restrict = subject.name;
         // if no next recover-config is given set it explicitly

@@ -2,7 +2,7 @@ JARS.internal('InterceptionDependencies', function(getInternal) {
     'use strict';
 
     var Dependencies = getInternal('Dependencies'),
-        objectEach = getInternal('Utils').objectEach;
+        each = getInternal('Helpers/Object').each;
 
     /**
      * @class
@@ -32,7 +32,7 @@ JARS.internal('InterceptionDependencies', function(getInternal) {
         getAll: function() {
             var dependencies = [];
 
-            objectEach(this._deps, function(dependency) {
+            each(this._deps, function(dependency) {
                 dependencies = dependencies.concat(dependency.getAll());
             });
 

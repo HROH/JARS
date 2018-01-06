@@ -2,7 +2,7 @@ JARS.internal('State', function(getInternal) {
     'use strict';
 
     var StateInfo = getInternal('StateInfo'),
-        objectMerge = getInternal('Utils').objectMerge,
+        merge = getInternal('Helpers/Object').merge,
         ATTEMPT_MSG = 'attempted to mark as ${nextState} but is currently ${curState}',
         DONE_MSG = 'is ${nextState}',
         QUEUE_LOADED = 'onModuleLoaded',
@@ -38,7 +38,7 @@ JARS.internal('State', function(getInternal) {
             var state = this,
                 canTransition = state._current.hasNext(stateInfo);
 
-            logInfo = objectMerge(objectMerge({
+            logInfo = merge(merge({
                 curState: state._current.text,
 
                 nextState: stateInfo.text

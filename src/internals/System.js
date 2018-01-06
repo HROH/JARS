@@ -2,7 +2,6 @@ JARS.internal('System', function(getInternal) {
     'use strict';
 
     var Type = getInternal('Type'),
-        arrayEach = getInternal('Utils').arrayEach,
         envGlobal = getInternal('Env').global,
         types = 'Null Undefined String Number Boolean Array Arguments Object Function Date RegExp'.split(' '),
         isArgs, System;
@@ -137,7 +136,7 @@ JARS.internal('System', function(getInternal) {
      * @return {boolean}
      */
 
-    arrayEach(types, System.addTypeValidator);
+    getInternal('Helpers/Array').each(types, System.addTypeValidator);
 
     isArgs = System.isArguments;
 

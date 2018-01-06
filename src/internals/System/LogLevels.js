@@ -5,9 +5,8 @@
 JARS.module('System.LogLevels').$import(['.::$$internals', '.::isNumber', '.::isString']).$export(function(internals, isNumber, isString) {
     'use strict';
 
-    var Utils = internals.get('Utils'),
-        arrayEach = Utils.arrayEach,
-        hasOwnProp = Utils.hasOwnProp,
+    var each = internals.get('Helpers/Array').each,
+        hasOwnProp = internals.get('Helpers/Object').hasOwnProp,
         DEFAULT_LOGLEVELS = 'log debug info warn error'.split(' '),
         definedLevels = [],
         LogLevels;
@@ -37,7 +36,7 @@ JARS.module('System.LogLevels').$import(['.::$$internals', '.::isNumber', '.::is
          * @param {function()} callback
          */
         each: function(callback) {
-            arrayEach(definedLevels, callback);
+            each(definedLevels, callback);
         },
         /**
          * @param {string} level
@@ -58,7 +57,7 @@ JARS.module('System.LogLevels').$import(['.::$$internals', '.::isNumber', '.::is
         }
     };
 
-    arrayEach(DEFAULT_LOGLEVELS, function addLevel(stdLevel, levelIndex) {
+    each(DEFAULT_LOGLEVELS, function addLevel(stdLevel, levelIndex) {
         LogLevels.add(stdLevel, (levelIndex + 1) * 10);
     });
 

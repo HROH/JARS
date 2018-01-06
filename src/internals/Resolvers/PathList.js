@@ -4,7 +4,7 @@ JARS.internal('Resolvers/PathList', function(getInternal) {
     var PathListTraverser = getInternal('Traverser/PathList'),
         ModulesTraverser = getInternal('Traverser/Modules'),
         importModules = getInternal('Loader').$import,
-        arrayEach = getInternal('Utils').arrayEach,
+        each = getInternal('Helpers/Array').each,
         getModule = getInternal('Registries/Modules').get,
         isBundle = getInternal('Resolvers/Bundle').isBundle,
         excluded = ['*', 'System.*'],
@@ -46,7 +46,7 @@ JARS.internal('Resolvers/PathList', function(getInternal) {
      * @param {Object} trackList
      */
     function markModulesSorted(modules, trackList) {
-        arrayEach(modules, function markModuleSorted(excludedModule) {
+        each(modules, function markModuleSorted(excludedModule) {
             var module;
 
             trackList.sorted[excludedModule] = true;

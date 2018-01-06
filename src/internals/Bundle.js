@@ -2,7 +2,7 @@ JARS.internal('Bundle', function(getInternal) {
     'use strict';
 
     var BundleResolver = getInternal('Resolvers/Bundle'),
-        Tools = getInternal('Tools');
+        SubjectHelper = getInternal('Helpers/Subject');
 
     /**
      * @class
@@ -18,7 +18,7 @@ JARS.internal('Bundle', function(getInternal) {
         bundle.modules = [];
         bundle.module = module;
 
-        Tools.addToBundle(bundle);
+        SubjectHelper.addToBundle(bundle);
     }
 
     Bundle.prototype = {

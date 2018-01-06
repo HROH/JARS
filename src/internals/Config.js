@@ -1,7 +1,7 @@
 JARS.internal('Config', function(getInternal) {
     'use strict';
 
-    var create = getInternal('Utils').create,
+    var create = getInternal('Helpers/Object').create,
         ConfigOptions = getInternal('ConfigOptions');
 
     /**

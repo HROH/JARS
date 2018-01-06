@@ -4,7 +4,7 @@ JARS.internal('Module', function(getInternal) {
     var Dependencies = getInternal('Dependencies'),
         InterceptionDependencies = getInternal('InterceptionDependencies'),
         Bundle = getInternal('Bundle'),
-        Tools = getInternal('Tools'),
+        SubjectHelper = getInternal('Helpers/Subject'),
         ModuleRef = getInternal('Refs/Module');
 
     /**
@@ -36,7 +36,7 @@ JARS.internal('Module', function(getInternal) {
         module.interceptionDeps = new InterceptionDependencies(module);
         module.bundle = new Bundle(module);
 
-        Tools.addToModule(module);
+        SubjectHelper.addToModule(module);
     }
 
     Module.prototype = {

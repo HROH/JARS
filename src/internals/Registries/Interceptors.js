@@ -1,9 +1,9 @@
 JARS.internal('Registries/Interceptors', function(getInternal) {
     'use strict';
 
-    var Utils = getInternal('Utils'),
-        objectEach = Utils.objectEach,
-        hasOwnProp = Utils.hasOwnProp,
+    var ObjectHelper = getInternal('Helpers/Object'),
+        each = ObjectHelper.each,
+        hasOwnProp = ObjectHelper.hasOwnProp,
         interceptors = {},
         Interceptors;
 
@@ -25,7 +25,7 @@ JARS.internal('Registries/Interceptors', function(getInternal) {
          * @param {function(JARS~internals.Interceptors~Interceptor, string)} callback
          */
         each: function(callback) {
-            objectEach(interceptors, callback);
+            each(interceptors, callback);
         },
         /**
          * @param {string} type

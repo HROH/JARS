@@ -1,15 +1,15 @@
-JARS.internal('Utils', function() {
+JARS.internal('Helpers/Object', function() {
     'use strict';
 
     var hasOwn = ({}).hasOwnProperty,
-        Utils;
+        Object;
 
     /**
      * @namespace
      *
-     * @memberof JARS~internals
+     * @memberof JARS~internals.Helpers
      */
-    Utils = {
+    Object = {
         /**
          * @param {function()} Constructor
          * @param {Object} [newProto]
@@ -40,11 +40,11 @@ JARS.internal('Utils', function() {
          * @param {Object} object
          * @param {function(*, string): boolean} callback
          */
-        objectEach: function(object, callback) {
+        each: function(object, callback) {
             var property;
 
             for (property in object) {
-                if (Utils.hasOwnProp(object, property)) {
+                if (Object.hasOwnProp(object, property)) {
                     if (callback(object[property], property)) {
                         break;
                     }
@@ -57,28 +57,14 @@ JARS.internal('Utils', function() {
          *
          * @return {Object}
          */
-        objectMerge: function(dest, source) {
-            Utils.objectEach(source, function mergeValue(value, key) {
+        merge: function(dest, source) {
+            Object.each(source, function mergeValue(value, key) {
                 dest[key] = value;
             });
 
             return dest;
-        },
-        /**
-         * @param {(Array|NodeList)} array
-         * @param {function(*, number): boolean} callback
-         */
-        arrayEach: function(array, callback) {
-            var index = 0,
-                length = array.length;
-
-            for (; index < length; index++) {
-                if (callback(array[index], index)) {
-                    break;
-                }
-            }
         }
     };
 
-    return Utils;
+    return Object;
 });
