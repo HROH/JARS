@@ -1,8 +1,8 @@
-JARS.internal('ConfigTransforms/CheckCircularDeps', function() {
+JARS.internal('Configs/Transforms/CheckCircularDeps', function() {
     'use strict';
 
     /**
-     * @memberof JARS~internals.Config.Transforms
+     * @memberof JARS~internals.Configs.Transforms
      *
      * @param {boolean} value
      *

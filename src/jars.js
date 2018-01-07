@@ -4,7 +4,7 @@
     var previousJARS = envGlobal.JARS,
         commands = [
             ['Bootstrappers/Modules', 'bootstrap'],
-            ['Bootstrappers/GlobalConfig', 'bootstrap'],
+            ['Bootstrappers/Configs', 'bootstrap'],
             ['Bootstrappers/System', 'bootstrap']
         ],
         pushCommand = function(command) {
@@ -180,12 +180,12 @@
             JARS.module(moduleName, bundle).$export();
         },
         /**
-         * @param {(JARS~internals.GlobalConfig~Option|JARS~internals.GlobalConfig~Options)} optionOrConfigOrArray
+         * @param {(JARS~internals.Configs.Global~Option|JARS~internals.Configs.Global~Options)} optionOrConfigOrArray
          * @param {*} [valueOrArray]
          *
          * @return {JARS}
          */
-        configure: delegate('GlobalConfig', 'update', getJARS),
+        configure: delegate('Configs/Global', 'update', getJARS),
         /**
          * @param {string} entryModuleName
          * @param {function(string[])} callback

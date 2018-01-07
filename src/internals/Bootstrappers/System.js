@@ -13,7 +13,7 @@ JARS.internal('Bootstrappers/System', function(getInternal) {
         bootstrap: function() {
             var systemModule;
 
-            getInternal('GlobalConfig').update('modules', {
+            getInternal('Configs/Global').update('modules', {
                 restrict: 'System.*',
 
                 basePath: getInternal('Env').INTERNALS_PATH

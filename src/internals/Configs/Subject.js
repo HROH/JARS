@@ -1,8 +1,8 @@
-JARS.internal('Config', function(getInternal) {
+JARS.internal('Configs/Subject', function(getInternal) {
     'use strict';
 
     var create = getInternal('Helpers/Object').create,
-        ConfigOptions = getInternal('ConfigOptions');
+        Options = getInternal('Configs/Options');
 
     /**
      * @class
@@ -10,24 +10,24 @@ JARS.internal('Config', function(getInternal) {
      * @memberof JARS~internals
      *
      * @param {(JARS~internals.Module|JARS~internals.Bundle)} subject
-     * @param {JARS~internals.Config} [parentConfig]
+     * @param {JARS~internals.Configs.Subject} [parentConfig]
      */
-    function Config(subject, parentConfig) {
+    function Subject(subject, parentConfig) {
         var config = this;
 
         config.parentConfig = parentConfig;
         config._subject = subject;
-        config._options = parentConfig ? parentConfig.inheritOptions() : new ConfigOptions();
-        config._defaultOptions = ConfigOptions.getDefault(subject);
+        config._options = parentConfig ? parentConfig.inheritOptions() : new Options();
+        config._defaultOptions = Options.getDefault(subject);
     }
 
-    Config.prototype = {
-        constructor: Config,
+    Subject.prototype = {
+        constructor: Subject,
         /**
          * @param {Object} newOptions
          */
         update: function(newOptions) {
-            ConfigOptions.transformAndUpdate(this._options, newOptions, this._subject);
+            Options.transformAndUpdate(this._options, newOptions, this._subject);
         },
         /**
          * @param {string} option
@@ -38,34 +38,34 @@ JARS.internal('Config', function(getInternal) {
             return (option in this._options) ? this._options[option] : this._defaultOptions[option];
         },
         /**
-         * @return {JARS~internals.Config.Options}
+         * @return {JARS~internals.Configs.Options}
          */
         inheritOptions: function() {
-            return create(ConfigOptions, this._options);
+            return create(Options, this._options);
         }
     };
 
     /**
      * @param {JARS~internals.Module} module
      *
-     * @return {JARS~internals.Config}
+     * @return {JARS~internals.Configs.Subject}
      */
-    Config.forModule = function(module) {
+    Subject.forModule = function(module) {
         var parentConfig = module.bundle.config;
 
-        return module.isRoot ? parentConfig : new Config(module, parentConfig);
+        return module.isRoot ? parentConfig : new Subject(module, parentConfig);
     };
 
     /**
      * @param {JARS~internals.Bundle} bundle
      *
-     * @return {JARS~internals.Config}
+     * @return {JARS~internals.Configs.Subject}
      */
-    Config.forBundle = function(bundle) {
+    Subject.forBundle = function(bundle) {
         var parent = bundle.module.deps.parent;
 
-        return new Config(bundle, parent && parent.bundle.config);
+        return new Subject(bundle, parent && parent.bundle.config);
     };
 
-    return Config;
+    return Subject;
 });

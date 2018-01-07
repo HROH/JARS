@@ -3,7 +3,7 @@ JARS.internal('Helpers/Subject', function(getInternal) {
 
     var LogWrap = getInternal('Helpers/LogWrap'),
         State = getInternal('State'),
-        Config = getInternal('Config'),
+        Config = getInternal('Configs/Subject'),
         Processors = getInternal('Processors'),
         Subject;
 

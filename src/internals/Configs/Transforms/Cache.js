@@ -1,11 +1,11 @@
-JARS.internal('ConfigTransforms/Cache', function() {
+JARS.internal('Configs/Transforms/Cache', function() {
     'use strict';
 
     var EMPTY_STRING = '',
         CACHE_STRING = '?_=';
 
     /**
-     * @memberof JARS~internals.Config.Transforms
+     * @memberof JARS~internals.Configs.Transforms
      *
      * @param {boolean} cache
      *

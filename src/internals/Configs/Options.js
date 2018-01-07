@@ -1,8 +1,8 @@
-JARS.internal('ConfigOptions', function(getInternal) {
+JARS.internal('Configs/Options', function(getInternal) {
     'use strict';
 
-    var ConfigOptionsResolver = getInternal('Resolvers/ConfigOptions'),
-        ConfigTransforms = getInternal('ConfigTransforms'),
+    var OptionsResolver = getInternal('Resolvers/Options'),
+        Transforms = getInternal('Configs/Transforms'),
         ObjectHelper = getInternal('Helpers/Object'),
         create = ObjectHelper.create,
         hasOwnProp = ObjectHelper.hasOwnProp,
@@ -13,7 +13,7 @@ JARS.internal('ConfigOptions', function(getInternal) {
     /**
      * @class
      *
-     * @memberof JARS~internals.Config
+     * @memberof JARS~internals.Configs
      */
     function Options() {
         this.config = create(PublicConfig, this.config);
@@ -22,7 +22,7 @@ JARS.internal('ConfigOptions', function(getInternal) {
     /**
      * @class
      *
-     * @memberof JARS~internals.Config.Options
+     * @memberof JARS~internals.Configs.Options
      * @inner
      */
     function PublicConfig() {}
@@ -31,31 +31,31 @@ JARS.internal('ConfigOptions', function(getInternal) {
     /**
      * @param {(JARS~internals.Module|JARS~internals.Bundle)} subject
      *
-     * @return {JARS~internals.Config.Options}
+     * @return {JARS~internals.Configs.Options}
      */
     Options.getDefault = function(subject) {
         var defaultOptions = new Options();
 
-        isBundle(subject.name) || Options.transformAndUpdate(defaultOptions, ConfigOptionsResolver(subject.name), subject);
+        isBundle(subject.name) || Options.transformAndUpdate(defaultOptions, OptionsResolver(subject.name), subject);
 
         return defaultOptions;
     };
 
     /**
-     * @param {JARS~internals.Config.Options} configOptions
-     * @param {Object} options
+     * @param {JARS~internals.Configs.Options} options
+     * @param {Object} newOptions
      * @param {(JARS~internals.Module|JARS~internals.Bundle)} subject
      */
-    Options.transformAndUpdate = function(configOptions, options, subject) {
-        each(options, function updateConfig(value, option) {
-            if (hasOwnProp(ConfigTransforms, option)) {
-                updateOption(configOptions, option, transformOption(option, value, subject));
+    Options.transformAndUpdate = function(options, newOptions, subject) {
+        each(newOptions, function updateConfig(value, option) {
+            if (hasOwnProp(Transforms, option)) {
+                updateOption(options, option, transformOption(option, value, subject));
             }
         });
     };
 
     /**
-     * @memberof JARS~internals.Config.Options
+     * @memberof JARS~internals.Configs.Options
      * @inner
      *
      * @param {string} option
@@ -65,23 +65,23 @@ JARS.internal('ConfigOptions', function(getInternal) {
      * @return {*}
      */
     function transformOption(option, value, subject) {
-        return ConfigTransforms[option](value, subject);
+        return Transforms[option](value, subject);
     }
 
     /**
-     * @memberof JARS~internals.Config.Options
+     * @memberof JARS~internals.Configs.Options
      * @inner
      *
-     * @param {JARS~internals.Config.Options} configOptions
+     * @param {JARS~internals.Configs.Options} options
      * @param {string} option
      * @param {*} value
      */
-    function updateOption(configOptions, option, value) {
+    function updateOption(options, option, value) {
         if (isNull(value)) {
-            delete configOptions[option];
+            delete options[option];
         }
         else {
-            configOptions[option] = value;
+            options[option] = value;
         }
     }
 

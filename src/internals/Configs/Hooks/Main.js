@@ -1,4 +1,4 @@
-JARS.internal('GlobalConfigHooks/Main', function(getInternal) {
+JARS.internal('Configs/Hooks/Main', function(getInternal) {
     'use strict';
 
     var MAIN_CONTEXT = 'Main:',
@@ -8,9 +8,9 @@ JARS.internal('GlobalConfigHooks/Main', function(getInternal) {
     /**
      * @method
      *
-     * @memberof JARS~internals.GlobalConfig.Hooks
+     * @memberof JARS~internals.Configs.Hooks
      *
-     * @param {JARS~internals.GlobalConfig} globalConfig
+     * @param {JARS~internals.Configs.Global} globalConfig
      * @param {string} mainModule
      *
      * @return {string}

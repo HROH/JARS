@@ -1,7 +1,7 @@
-JARS.internal('GlobalConfig', function(getInternal) {
+JARS.internal('Configs/Global', function(getInternal) {
     'use strict';
 
-    var Hooks = getInternal('GlobalConfigHooks'),
+    var Hooks = getInternal('Configs/Hooks'),
         System = getInternal('System'),
         isArray = System.isArray,
         arrayEach = getInternal('Helpers/Array').each,
@@ -9,16 +9,16 @@ JARS.internal('GlobalConfig', function(getInternal) {
         globalConfig = {
             environments: {}
         },
-        GlobalConfig;
+        Global;
 
     /**
      * @namespace
      *
-     * @memberof JARS~internals
+     * @memberof JARS~internals.Configs
      */
-    GlobalConfig = {
+    Global = {
         /**
-         * @param {(JARS~internals.GlobalConfig~Option|JARS~internals.GlobalConfig~Options)} optionOrConfig
+         * @param {(JARS~internals.Configs.Global~Option|JARS~internals.Configs.Global~Options)} optionOrConfig
          * @param {*} [valueOrArray]
          */
         update: function(optionOrConfig, valueOrArray) {
@@ -30,7 +30,7 @@ JARS.internal('GlobalConfig', function(getInternal) {
             }
         },
         /**
-         * @param {JARS~internals.GlobalConfig~Option} option
+         * @param {JARS~internals.Configs.Global~Option} option
          *
          * @return {*}
          */
@@ -40,7 +40,7 @@ JARS.internal('GlobalConfig', function(getInternal) {
     };
 
     /**
-     * @memberof JARS~internals.GlobalConfig
+     * @memberof JARS~internals.Configs.Global
      * @inner
      *
      * @param {(*|Array<*>)} valueOrArray
@@ -53,32 +53,32 @@ JARS.internal('GlobalConfig', function(getInternal) {
             });
         }
         else {
-            globalConfig[option] = System.isFunction(Hooks[option]) ? Hooks[option](GlobalConfig, valueOrArray) : valueOrArray;
+            globalConfig[option] = System.isFunction(Hooks[option]) ? Hooks[option](Global, valueOrArray) : valueOrArray;
         }
     }
 
     /**
      * @typedef {('debugging'|'environment'|'environments'|'globalAccess'|'interceptors'|'loaderContext'|'main'|'modules')} Option
      *
-     * @memberof JARS~internals.GlobalConfig
+     * @memberof JARS~internals.Configs.Global
      * @inner
      */
 
      /**
       * @typedef {Object} Options
       *
-      * @memberof JARS~internals.GlobalConfig
+      * @memberof JARS~internals.Configs.Global
       * @inner
       *
-      * @property {(JARS~internals.GlobalConfig~Options.Debugging|boolean)} debugging
+      * @property {(JARS~internals.Configs.Hooks~Debugging|boolean)} debugging
       * @property {string} environment
-      * @property {Object<string, JARS~internals.GlobalConfig~Options>} environments
+      * @property {Object<string, JARS~internals.Configs.Global~Options>} environments
       * @property {boolean} globalAccess
       * @property {JARS~internals.Interceptors~Interceptor} interceptors
       * @property {string} loaderContext
       * @property {string} main
-      * @property {JARS~internals.GlobalConfig~Options.Modules} modules
+      * @property {JARS~internals.Configs.Hooks~Modules} modules
       */
 
-    return GlobalConfig;
+    return Global;
 });

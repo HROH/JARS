@@ -2,7 +2,7 @@ JARS.internal('Loader', function(getInternal) {
     'use strict';
 
     var System = getInternal('System'),
-        GlobalConfig = getInternal('GlobalConfig'),
+        GlobalConfig = getInternal('Configs/Global'),
         ModulesRegistry = getInternal('Registries/Modules'),
         Modules = getInternal('Handlers/Modules'),
         resolveDeps = getInternal('Resolvers/Dependencies').resolveDeps,

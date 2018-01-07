@@ -1,7 +1,7 @@
 /**
- * @namespace JARS~internals.Config.Transforms
+ * @namespace JARS~internals.Configs.Transforms
  */
-JARS.internalGroup('ConfigTransforms', [
+JARS.internalGroup('Configs/Transforms', [
     'BasePath',
     'Cache',
     'CheckCircularDeps',

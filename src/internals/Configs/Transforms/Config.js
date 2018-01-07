@@ -1,10 +1,10 @@
-JARS.internal('ConfigTransforms/Config', function(getInternal) {
+JARS.internal('Configs/Transforms/Config', function(getInternal) {
     'use strict';
 
     var merge = getInternal('Helpers/Object').merge;
 
     /**
-     * @memberof JARS~internals.Config.Transforms
+     * @memberof JARS~internals.Configs.Transforms
      *
      * @param {Object} config
      * @param {(JARS~internals.Module|JARS~internals.Bundle)} [moduleOrBundle]

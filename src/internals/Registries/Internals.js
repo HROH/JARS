@@ -86,12 +86,8 @@ JARS.init(function(commands) {
             Queue.addGroup([
                 'Bootstrappers',
                 'Bundle',
-                'Config',
-                'ConfigOptions',
-                'ConfigTransforms',
+                'Configs',
                 'Dependencies',
-                'GlobalConfig',
-                'GlobalConfigHooks',
                 'Handlers',
                 'Helpers',
                 'Interception',

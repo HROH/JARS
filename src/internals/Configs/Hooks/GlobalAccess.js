@@ -1,4 +1,4 @@
-JARS.internal('GlobalConfigHooks/GlobalAccess', function(getInternal) {
+JARS.internal('Configs/Hooks/GlobalAccess', function(getInternal) {
     'use strict';
 
     var getRootModule = getInternal('Registries/Modules').getRoot;
@@ -6,9 +6,9 @@ JARS.internal('GlobalConfigHooks/GlobalAccess', function(getInternal) {
     /**
      * @method
      *
-     * @memberof JARS~internals.GlobalConfig.Hooks
+     * @memberof JARS~internals.Configs.Hooks
      *
-     * @param {JARS~internals.GlobalConfig} globalConfig
+     * @param {JARS~internals.Configs.Global} globalConfig
      * @param {boolean} makeGlobal
      *
      * @return {boolean}

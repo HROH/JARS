@@ -1,15 +1,15 @@
-JARS.internal('ConfigTransforms/Recover', function(getInternal) {
+JARS.internal('Configs/Transforms/Recover', function(getInternal) {
     'use strict';
 
     var merge = getInternal('Helpers/Object').merge;
 
     /**
-     * @memberof JARS~internals.Config.Transforms
+     * @memberof JARS~internals.Configs.Transforms
      *
-     * @param {JARS~internals.GlobalConfig~Options.Modules} recoverConfig
+     * @param {JARS~internals.Configs.Hooks~Modules} recoverConfig
      * @param {(JARS~internals.Module|JARS~internals.Bundle)} subject
      *
-     * @return {JARS~internals.GlobalConfig~Options.Modules}
+     * @return {JARS~internals.Configs.Hooks~Modules}
      */
     function Recover(recoverConfig, subject) {
         // create a copy of the recover-config

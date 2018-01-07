@@ -1,4 +1,4 @@
-JARS.internal('Resolvers/ConfigOptions', function(getInternal) {
+JARS.internal('Resolvers/Options', function(getInternal) {
     'use strict';
 
     var FileNameResolver = getInternal('Resolvers/FileName'),
@@ -11,9 +11,9 @@ JARS.internal('Resolvers/ConfigOptions', function(getInternal) {
      *
      * @param {string} moduleName
      *
-     * @return {JARS~internals.GlobalConfig~Options.Modules}
+     * @return {JARS~internals.Configs.Hooks~Modules}
      */
-    function ConfigOptions(moduleName) {
+    function Options(moduleName) {
         return {
             extension: DEFAULT_EXTENSION,
 
@@ -25,5 +25,5 @@ JARS.internal('Resolvers/ConfigOptions', function(getInternal) {
         };
     }
 
-    return ConfigOptions;
+    return Options;
 });

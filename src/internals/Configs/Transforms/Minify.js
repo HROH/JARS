@@ -1,11 +1,11 @@
-JARS.internal('ConfigTransforms/Minify', function() {
+JARS.internal('Configs/Transforms/Minify', function() {
     'use strict';
 
     var MIN_SUFFIX = '.min',
         EMPTY_STRING = '';
 
     /**
-     * @memberof JARS~internals.Config.Transforms
+     * @memberof JARS~internals.Configs.Transforms
      *
      * @param {boolean} loadMin
      *

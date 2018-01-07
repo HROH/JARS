@@ -1,4 +1,4 @@
-JARS.internal('GlobalConfigHooks/Debugging', function(getInternal) {
+JARS.internal('Configs/Hooks/Debugging', function(getInternal) {
     'use strict';
 
     var isObject = getInternal('System').isObject;
@@ -6,10 +6,10 @@ JARS.internal('GlobalConfigHooks/Debugging', function(getInternal) {
     /**
      * @method
      *
-     * @memberof JARS~internals.GlobalConfig.Hooks
+     * @memberof JARS~internals.Configs.Hooks
      *
-     * @param {JARS~internals.GlobalConfig} globalConfig
-     * @param {(JARS~internals.GlobalConfig~Options.Debugging|boolean)} debugConfig
+     * @param {JARS~internals.Configs.Global} globalConfig
+     * @param {(JARS~internals.Configs.Hooks~Debugging|boolean)} debugConfig
      */
     function Debugging(globalConfig, debugConfig) {
         globalConfig.update('modules', {
@@ -22,7 +22,8 @@ JARS.internal('GlobalConfigHooks/Debugging', function(getInternal) {
     /**
      * @typedef {Object} Debugging
      *
-     * @memberof JARS~internals.GlobalConfig~Options
+     * @memberof JARS~internals.Configs.Hooks
+     * @inner
      *
      * @property {boolean} debug
      */

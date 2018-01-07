@@ -1,14 +1,14 @@
-JARS.internal('GlobalConfigHooks/LoaderContext', function(getInternal) {
+JARS.internal('Configs/Hooks/LoaderContext', function(getInternal) {
     'use strict';
 
-    var GlobalAccessHook = getInternal('GlobalConfigHooks/GlobalAccess');
+    var GlobalAccessHook = getInternal('Configs/Hooks/GlobalAccess');
 
     /**
      * @method
      *
-     * @memberof JARS~internals.GlobalConfig.Hooks
+     * @memberof JARS~internals.Configs.Hooks
      *
-     * @param {JARS~internals.GlobalConfig} globalConfig
+     * @param {JARS~internals.Configs.Global} globalConfig
      * @param {string} loaderContext
      *
      * @return {string}

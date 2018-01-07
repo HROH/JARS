@@ -1,7 +1,7 @@
 /**
- * @namespace JARS~internals.GlobalConfig.Hooks
+ * @namespace JARS~internals.Configs.Hooks
  */
-JARS.internalGroup('GlobalConfigHooks', [
+JARS.internalGroup('Configs/Hooks', [
     'Debugging',
     'Environment',
     'Environments',
