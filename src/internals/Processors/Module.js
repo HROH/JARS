@@ -33,7 +33,7 @@ JARS.internal('Processors/Module', function(getInternal) {
             }
         },
         /**
-         * @param {JAR~internals.Handlers.Request#onModulesLoaded} registerCallback
+         * @param {JARS~internals.Handlers.Request#onModulesLoaded} registerCallback
          */
         register: function(registerCallback) {
             var module = this.module;

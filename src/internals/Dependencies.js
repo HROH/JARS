@@ -42,7 +42,7 @@ JARS.internal('Dependencies', function(getInternal) {
             return !this.module.isRoot && this.module.config.get('checkCircularDeps') && ModulesTraverser(this.module, CircularTraverser);
         },
         /**
-         * @param {JAR~internals.Handlers.Request#onModulesLoaded} onModulesLoaded
+         * @param {JARS~internals.Handlers.Request#onModulesLoaded} onModulesLoaded
          */
         request: function(onModulesLoaded) {
             this.abortIfCircular() || Modules.request(DependenciesHandler(this, onModulesLoaded));

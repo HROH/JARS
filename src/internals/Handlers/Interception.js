@@ -10,7 +10,7 @@ JARS.internal('Handlers/Interception', function(getInternal) {
      *
      * @memberof JARS~internals.Handlers
      *
-     * @param {JARS~internals.Interception.Info} interceptionInfo
+     * @param {JARS~internals.Resolvers.Interception~Info} interceptionInfo
      * @param {JARS~internals.Handlers.StateChange} nextHandler
      */
     function Interception(interceptionInfo, nextHandler) {
