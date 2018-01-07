@@ -1,11 +1,11 @@
 JARS.internal('GlobalConfig', function(getInternal) {
     'use strict';
 
-    var System = getInternal('System'),
+    var Hooks = getInternal('GlobalConfigHooks'),
+        System = getInternal('System'),
         isArray = System.isArray,
         arrayEach = getInternal('Helpers/Array').each,
         objectEach = getInternal('Helpers/Object').each,
-        GlobalConfigHooks = getInternal('GlobalConfigHooks'),
         globalConfig = {
             environments: {}
         },
@@ -18,20 +18,15 @@ JARS.internal('GlobalConfig', function(getInternal) {
      */
     GlobalConfig = {
         /**
-         * @param {(JARS~internals.GlobalConfig~Option|JARS~internals.GlobalConfig~Options)} optionOrConfigOrArray
+         * @param {(JARS~internals.GlobalConfig~Option|JARS~internals.GlobalConfig~Options)} optionOrConfig
          * @param {*} [valueOrArray]
          */
-        update: function(optionOrConfigOrArray, valueOrArray) {
-            if (System.isString(optionOrConfigOrArray)) {
-                updateOption(optionOrConfigOrArray, valueOrArray);
+        update: function(optionOrConfig, valueOrArray) {
+            if (System.isString(optionOrConfig)) {
+                updateOption(valueOrArray, optionOrConfig);
             }
-            else if (System.isObject(optionOrConfigOrArray)) {
-                objectEach(optionOrConfigOrArray, function updateConfig(value, option) {
-                    GlobalConfig.update(option, value);
-                });
-            }
-            else if (isArray(optionOrConfigOrArray)) {
-                arrayEach(optionOrConfigOrArray, GlobalConfig.update);
+            else if (System.isObject(optionOrConfig)) {
+                objectEach(optionOrConfig, updateOption);
             }
         },
         /**
@@ -48,17 +43,17 @@ JARS.internal('GlobalConfig', function(getInternal) {
      * @memberof JARS~internals.GlobalConfig
      * @inner
      *
-     * @param {string} option
      * @param {(*|Array<*>)} valueOrArray
+     * @param {string} option
      */
-    function updateOption(option, valueOrArray) {
+    function updateOption(valueOrArray, option) {
         if(isArray(valueOrArray)) {
             arrayEach(valueOrArray, function(value) {
-                updateOption(option, value);
+                updateOption(value, option);
             });
         }
         else {
-            globalConfig[option] = System.isFunction(GlobalConfigHooks[option]) ? GlobalConfigHooks[option](GlobalConfig, valueOrArray) : valueOrArray;
+            globalConfig[option] = System.isFunction(Hooks[option]) ? Hooks[option](GlobalConfig, valueOrArray) : valueOrArray;
         }
     }
 
