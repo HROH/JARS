@@ -1,7 +1,8 @@
 JARS.internal('Configs/Options', function(getInternal) {
     'use strict';
 
-    var OptionsResolver = getInternal('Resolvers/Options'),
+    var PublicConfig = getInternal('Configs/Public'),
+        OptionsResolver = getInternal('Resolvers/Options'),
         Transforms = getInternal('Configs/Transforms'),
         ObjectHelper = getInternal('Helpers/Object'),
         create = ObjectHelper.create,
@@ -16,17 +17,21 @@ JARS.internal('Configs/Options', function(getInternal) {
      * @memberof JARS~internals.Configs
      */
     function Options() {
-        this.config = create(PublicConfig, this.config);
+        this.config = new PublicConfig();
     }
 
     /**
-     * @class
+     * @param {JARS~internals.Configs.Options} parentOptions
      *
-     * @memberof JARS~internals.Configs.Options
-     * @inner
+     * @return {JARS~internals.Configs.Options}
      */
-    function PublicConfig() {}
+    Options.childOf = function(parentOptions) {
+        var childOptions = create(Options, parentOptions);
 
+        childOptions.config = PublicConfig.childOf(parentOptions.config);
+
+        return childOptions;
+    };
 
     /**
      * @param {(JARS~internals.Module|JARS~internals.Bundle)} subject

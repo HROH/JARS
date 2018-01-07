@@ -1,13 +1,12 @@
 JARS.internal('Configs/Subject', function(getInternal) {
     'use strict';
 
-    var create = getInternal('Helpers/Object').create,
-        Options = getInternal('Configs/Options');
+    var Options = getInternal('Configs/Options');
 
     /**
      * @class
      *
-     * @memberof JARS~internals
+     * @memberof JARS~internals.Configs
      *
      * @param {(JARS~internals.Module|JARS~internals.Bundle)} subject
      * @param {JARS~internals.Configs.Subject} [parentConfig]
@@ -41,7 +40,7 @@ JARS.internal('Configs/Subject', function(getInternal) {
          * @return {JARS~internals.Configs.Options}
          */
         inheritOptions: function() {
-            return create(Options, this._options);
+            return Options.childOf(this._options);
         }
     };
 
