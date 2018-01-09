@@ -1,7 +1,7 @@
 JARS.internal('System', function(getInternal) {
     'use strict';
 
-    var Type = getInternal('Type'),
+    var Validators = getInternal('Types/Validators'),
         envGlobal = getInternal('Env').global,
         types = 'Null Undefined String Number Boolean Array Arguments Object Function Date RegExp'.split(' '),
         isArgs, System;
@@ -11,8 +11,8 @@ JARS.internal('System', function(getInternal) {
      *
      * @memberof JARS~internals
      *
-     * @borrows JARS~internals.Type.get as getType
-     * @borrows JARS~internals.Type.isNil as isNil
+     * @borrows JARS~internals.Types.Validators.getType as getType
+     * @borrows JARS~internals.Types.Validators.isNil as isNil
      */
     System = {
         /**
@@ -30,14 +30,14 @@ JARS.internal('System', function(getInternal) {
          * @param {string} typeDef
          */
         addTypeValidator: function(typeDef) {
-            var typeValidator = Type.add(typeDef);
+            var typeValidator = Validators.add(typeDef);
 
             System[typeValidator.name] = typeValidator.fn;
         },
 
-        getType: Type.get,
+        getType: Validators.getType,
 
-        isNil: Type.isNil,
+        isNil: Validators.isNil,
         /**
          * @param {*} value
          *

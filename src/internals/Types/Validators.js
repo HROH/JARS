@@ -1,21 +1,21 @@
-JARS.internal('Type', function(getInternal) {
+JARS.internal('Types/Validators', function(getInternal) {
     'use strict';
 
     var envGlobal = getInternal('Env').global,
-        TypeLookup = getInternal('TypeLookup'),
+        TypeLookup = getInternal('Types/Lookup'),
         NOTHING = null,
         VALIDATOR_PREFIX = 'is',
         INFINITY = 'infinity',
         NAN = 'nan',
         NUMBER = 'number',
-        Type;
+        Validators;
 
     /**
      * @namespace
      *
-     * @memberof JARS~internals
+     * @memberof JARS~internals.Types
      */
-    Type = {
+    Validators = {
         /**
          * @param {string} typeDef
          *
@@ -29,10 +29,10 @@ JARS.internal('Type', function(getInternal) {
          *
          * @return {string}
          */
-        get: function(value) {
+        getType: function(value) {
             var type;
 
-            if (!Type.isNil(value)) {
+            if (!Validators.isNil(value)) {
                 type = TypeLookup.get(value);
 
                 if (type === NUMBER) {
@@ -52,7 +52,7 @@ JARS.internal('Type', function(getInternal) {
          * @return {boolean}
          */
         is: function(type, value) {
-            return Type.get(value) === type.toLowerCase();
+            return Validators.getType(value) === type.toLowerCase();
         },
         /**
          * @param {*} value
@@ -65,7 +65,7 @@ JARS.internal('Type', function(getInternal) {
     };
 
     /**
-     * @memberof JARS~internals.Type
+     * @memberof JARS~internals.Types.Validators
      * @inner
      *
      * @param {*} value
@@ -77,7 +77,7 @@ JARS.internal('Type', function(getInternal) {
     }
 
     /**
-     * @memberof JARS~internals.Type
+     * @memberof JARS~internals.Types.Validators
      * @inner
      *
      * @param {string} validatorName
@@ -91,10 +91,10 @@ JARS.internal('Type', function(getInternal) {
             name: validatorName,
 
             fn: (globalType && globalType[validatorName]) || function typeValidator(value) {
-                return Type.is(type, value);
+                return Validators.is(type, value);
             }
         };
     }
 
-    return Type;
+    return Validators;
 });

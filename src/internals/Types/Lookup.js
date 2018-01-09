@@ -1,18 +1,18 @@
-JARS.internal('TypeLookup', function() {
+JARS.internal('Types/Lookup', function() {
     'use strict';
 
     var typeLookup = {},
         toString = ({}).toString,
         TYPE_LOOKUP_PREFIX = '[object ',
         TYPE_LOOKUP_SUFFIX = ']',
-        TypeLookup;
+        Lookup;
 
     /**
      * @namespace
      *
-     * @memberof JARS~internals
+     * @memberof JARS~internals.Types
      */
-    TypeLookup = {
+    Lookup = {
         /**
          * @param {string} typeDef
          *
@@ -31,5 +31,5 @@ JARS.internal('TypeLookup', function() {
         }
     };
 
-    return TypeLookup;
+    return Lookup;
 });

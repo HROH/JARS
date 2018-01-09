@@ -100,8 +100,7 @@ JARS.init(function(commands) {
                 'Subjects',
                 'System',
                 'Traverser',
-                'Type',
-                'TypeLookup',
+                'Types'
             ]);
         }
     };
