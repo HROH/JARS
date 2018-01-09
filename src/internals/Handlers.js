@@ -1,4 +1,11 @@
 /**
  * @namespace JARS~internals.Handlers
  */
-JARS.internalGroup('Handlers', ['BundleCoremodule', 'BundleSubmodule', 'Dependencies', 'Interception', 'Modules', 'Request', 'StateChange']);
+
+/**
+ * @typedef {(JARS~internals.Handlers.Module|JARS~internals.Handlers.Interception)} StateChange
+ *
+ * @memberof JARS~internals.Handlers
+ * @inner
+ */
+JARS.internalGroup('Handlers', ['BundleCoremodule', 'BundleSubmodule', 'Dependencies', 'Interception', 'Module', 'Modules', 'Request']);

@@ -22,7 +22,7 @@ JARS.internal('State', function(getInternal) {
     }
 
     /**
-     * @param {(JARS~internals.Handlers.StateChange|JARS~internals.Handlers.Interception)} changeHandler
+     * @param {JARS~internals.Handlers~StateChange} changeHandler
      */
     State.prototype.onChange = function(changeHandler) {
         this._queue.push(changeHandler);
@@ -68,7 +68,7 @@ JARS.internal('State', function(getInternal) {
     };
 
     /**
-     * @param {Array<(JARS~internals.Handlers.StateChange|JARS~internals.Handlers.Interception)>} queue
+     * @param {JARS~internals.Handlers~StateChange[]} queue
      * @param {string} method
      * @param {JARS~internals.Subjects~Subject} subject
      */

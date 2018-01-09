@@ -2,7 +2,7 @@ JARS.internal('Handlers/Modules', function modulesQueueSetup(getInternal) {
     'use strict';
 
     var InterceptionHandler = getInternal('Handlers/Interception'),
-        StateChangeHandler = getInternal('Handlers/StateChange'),
+        ModuleHandler = getInternal('Handlers/Module'),
         ModulesRef = getInternal('Refs/Modules'),
         each = getInternal('Helpers/Array').each,
         getModule = getInternal('Registries/Modules').get,
@@ -46,7 +46,7 @@ JARS.internal('Handlers/Modules', function modulesQueueSetup(getInternal) {
         requestModule: function(requested, index) {
             var module = getModule(requested),
                 moduleOrBundle = isBundle(requested) ? module.bundle : module,
-                changeHandler = new StateChangeHandler(index, this);
+                changeHandler = new ModuleHandler(index, this);
 
             moduleOrBundle.processor.load();
             moduleOrBundle.state.onChange(isBundle(requested) ? changeHandler : InterceptionHandler.intercept(requested, changeHandler));

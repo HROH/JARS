@@ -1,4 +1,4 @@
-JARS.internal('Handlers/StateChange', function() {
+JARS.internal('Handlers/Module', function() {
     'use strict';
 
     /**
@@ -9,14 +9,14 @@ JARS.internal('Handlers/StateChange', function() {
      * @param {number} index
      * @param {JARS~internals.Handlers.Request}
      */
-    function StateChange(index, nextHandler) {
+    function Module(index, nextHandler) {
         this.requestor = nextHandler.requestor;
         this._index = index;
         this._nextHandler = nextHandler;
     }
 
-    StateChange.prototype = {
-        constructor: StateChange,
+    Module.prototype = {
+        constructor: Module,
         /**
          * @param {string} publisherName
          * @param {object} data
@@ -33,5 +33,5 @@ JARS.internal('Handlers/StateChange', function() {
         }
     };
 
-    return StateChange;
+    return Module;
 });
