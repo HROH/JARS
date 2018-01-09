@@ -1,7 +1,7 @@
-JARS.internal('State', function(getInternal) {
+JARS.internal('States/Subject', function(getInternal) {
     'use strict';
 
-    var StateInfo = getInternal('StateInfo'),
+    var StateInfo = getInternal('States/Info'),
         merge = getInternal('Helpers/Object').merge,
         ATTEMPT_MSG = 'attempted to mark as ${nextState} but is currently ${curState}',
         DONE_MSG = 'is ${nextState}',
@@ -11,11 +11,11 @@ JARS.internal('State', function(getInternal) {
     /**
      * @class
      *
-     * @memberof JARS~internals
+     * @memberof JARS~internals.States
      *
      * @param {JARS~internals.Subjects~Subject} subject
      */
-    function State(subject) {
+    function Subject(subject) {
         this._subject = subject;
         this._current = StateInfo.initial();
         this._queue = [];
@@ -24,17 +24,17 @@ JARS.internal('State', function(getInternal) {
     /**
      * @param {JARS~internals.Handlers~StateChange} changeHandler
      */
-    State.prototype.onChange = function(changeHandler) {
+    Subject.prototype.onChange = function(changeHandler) {
         this._queue.push(changeHandler);
         this._syncQueue();
     };
 
     StateInfo.each(function(stateInfo) {
-        State.prototype[stateInfo.is] = function() {
+        Subject.prototype[stateInfo.is] = function() {
             return this._current === stateInfo;
         };
 
-        State.prototype[stateInfo.set] = function(customMessage, logInfo) {
+        Subject.prototype[stateInfo.set] = function(customMessage, logInfo) {
             var state = this,
                 canTransition = state._current.hasNext(stateInfo);
 
@@ -58,7 +58,7 @@ JARS.internal('State', function(getInternal) {
     /**
      * @private
      */
-    State.prototype._syncQueue = function() {
+    Subject.prototype._syncQueue = function() {
         var state = this,
             isLoaded = state.isLoaded();
 
@@ -81,79 +81,96 @@ JARS.internal('State', function(getInternal) {
     }
 
     /**
-     * @method JARS~internals.State#isWaiting
+     * @method JARS~internals.States.Subject#isWaiting
      *
      * @return {boolean}
      */
 
     /**
-     * @method JARS~internals.State#isLoading
+     * @method JARS~internals.States.Subject#isLoading
      *
      * @return {boolean}
      */
 
     /**
-     * @method JARS~internals.State#isRegistered
+     * @method JARS~internals.States.Subject#isRegistered
      *
      * @return {boolean}
      */
 
     /**
-     * @method JARS~internals.State#isIntercepted
+     * @method JARS~internals.States.Subject#isIntercepted
      *
      * @return {boolean}
      */
 
     /**
-     * @method JARS~internals.State#isLoaded
+     * @method JARS~internals.States.Subject#isLoaded
      *
      * @return {boolean}
      */
 
     /**
-     * @method JARS~internals.State#isAborted
+     * @method JARS~internals.States.Subject#isAborted
      *
      * @return {boolean}
      */
 
     /**
-     * @method JARS~internals.State#setWaiting
+     * @method JARS~internals.States.Subject#setWaiting
+     *
+     * @param {string} [message]
+     * @param {Object} [logInfo]
+     *
      *
      * @return {boolean}
      */
 
     /**
-     * @method JARS~internals.State#setLoading
+     * @method JARS~internals.States.Subject#setLoading
+     *
+     * @param {string} [message]
+     * @param {Object} [logInfo]
+     *
      *
      * @return {boolean}
      */
 
     /**
-     * @method JARS~internals.State#setRegistered
+     * @method JARS~internals.States.Subject#setRegistered
+     *
+     * @param {string} [message]
+     * @param {Object} [logInfo]
      *
      * @return {boolean}
      */
 
     /**
-     * @method JARS~internals.State#setIntercepted
+     * @method JARS~internals.States.Subject#setIntercepted
+     *
+     * @param {string} [message]
+     * @param {Object} [logInfo]
      *
      * @return {boolean}
      */
 
     /**
-     * @method JARS~internals.State#setLoaded
+     * @method JARS~internals.States.Subject#setLoaded
+     *
+     * @param {string} [message]
+     * @param {Object} [logInfo]
      *
      * @return {boolean}
      */
 
     /**
-     * @method JARS~internals.State#setAborted
+     * @method JARS~internals.States.Subject#setAborted
      *
-     * @param {string} message
-     * @param {Object} abortInfo
+     * @param {string} [message]
+     * @param {Object} [logInfo]
      *
      * @return {boolean}
      */
 
-    return State;
+    return Subject;
 });

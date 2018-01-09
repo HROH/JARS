@@ -1,4 +1,4 @@
-JARS.internal('StateInfo', function(getInternal) {
+JARS.internal('States/Info', function(getInternal) {
     'use strict';
 
     var each = getInternal('Helpers/Array').each,
@@ -26,12 +26,12 @@ JARS.internal('StateInfo', function(getInternal) {
     /**
      * @class
      *
-     * @memberof JARS~internals
+     * @memberof JARS~internals.States
      *
      * @param {string} stateText
      * @param {Object} logMethods
      */
-    function StateInfo(stateText, stateMethodText, logMethods) {
+    function Info(stateText, stateMethodText, logMethods) {
         this.text = stateText;
         this.methods = logMethods;
         this.is = IS_PREFIX + stateMethodText;
@@ -39,23 +39,23 @@ JARS.internal('StateInfo', function(getInternal) {
     }
 
     /**
-     * @return {JARS~internals.StateInfo}
+     * @return {JARS~internals.States.Info}
      */
-    StateInfo.initial = function() {
+    Info.initial = function() {
         return stateInfos[0];
     };
 
     /**
-     * @param {function(JARS~internals.StateInfo)} callback
+     * @param {function(JARS~internals.States.Info)} callback
      */
-    StateInfo.each = function(callback) {
+    Info.each = function(callback) {
         each(stateInfos, callback);
     };
 
-    StateInfo.prototype = {
-        constructor: StateInfo,
+    Info.prototype = {
+        constructor: Info,
         /**
-         * @param {JARS~internals.StateInfo} nextStateInfo
+         * @param {JARS~internals.States.Info} nextStateInfo
          *
          * @return {boolean}
          */
@@ -63,7 +63,7 @@ JARS.internal('StateInfo', function(getInternal) {
             return this._next.indexOf(nextStateInfo) > -1;
         },
         /**
-         * @param {JARS~internals.StateInfo[]} nextStateInfos
+         * @param {JARS~internals.States.Info[]} nextStateInfos
          */
         setNext: function(nextStateInfos) {
             this._next = nextStateInfos;
@@ -71,7 +71,7 @@ JARS.internal('StateInfo', function(getInternal) {
     };
 
     each(['waiting', 'loading', 'registered', 'intercepted', 'loaded', 'aborted'], function(stateText) {
-        stateInfos.push(new StateInfo(stateText, stateText.charAt(0).toUpperCase() + stateText.substr(1), LOG_METHODS[stateText]));
+        stateInfos.push(new Info(stateText, stateText.charAt(0).toUpperCase() + stateText.substr(1), LOG_METHODS[stateText]));
     });
 
     stateInfos[0].setNext([stateInfos[1], stateInfos[2], stateInfos[5]]);
@@ -81,5 +81,5 @@ JARS.internal('StateInfo', function(getInternal) {
     stateInfos[4].setNext([stateInfos[0]]);
     stateInfos[5].setNext([stateInfos[0]]);
 
-    return StateInfo;
+    return Info;
 });
