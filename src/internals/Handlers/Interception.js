@@ -1,7 +1,7 @@
 JARS.internal('Handlers/Interception', function(getInternal) {
     'use strict';
 
-    var InterceptionObject = getInternal('Subjects/Interception'),
+    var InterceptionSubject = getInternal('Subjects/Interception'),
         extractInterceptionInfo = getInternal('Resolvers/Interception').extractInterceptionInfo,
         getInterceptor = getInternal('Registries/Interceptors').get;
 
@@ -10,7 +10,7 @@ JARS.internal('Handlers/Interception', function(getInternal) {
      *
      * @memberof JARS~internals.Handlers
      *
-     * @param {JARS~internals.Resolvers.Interception~Info} interceptionInfo
+     * @param {JARS~internals.Subjects.Interception~Info} interceptionInfo
      * @param {JARS~internals.Handlers.StateChange} nextHandler
      */
     function Interception(interceptionInfo, nextHandler) {
@@ -26,7 +26,7 @@ JARS.internal('Handlers/Interception', function(getInternal) {
          * @param {object} data
          */
         onModuleLoaded: function(publisherName, data) {
-            getInterceptor(this._info.type).intercept(new InterceptionObject(this.requestor, this._info, this._nextHandler, data.ref));
+            getInterceptor(this._info.type).intercept(new InterceptionSubject(this.requestor, this._info, this._nextHandler, data.ref));
         },
         /**
          * @method

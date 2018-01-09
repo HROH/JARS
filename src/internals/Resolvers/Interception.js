@@ -22,7 +22,7 @@ JARS.internal('Resolvers/Interception', function interceptionResolverSetup(getIn
         /**
          * @param {string} moduleName
          *
-         * @return {JARS~internals.Resolvers.Interception~Info}
+         * @return {JARS~internals.Subjects.Interception~Info}
          */
         extractInterceptionInfo: function(moduleName) {
             var interceptionInfo = interceptionInfoCache[moduleName],
@@ -57,18 +57,6 @@ JARS.internal('Resolvers/Interception', function interceptionResolverSetup(getIn
             return interceptionInfo;
         }
     };
-
-    /**
-     * @typedef {Object} Info
-     *
-     * @memberof JARS~internals.Resolvers.Interception
-     * @inner
-     *
-     * @property {string} fullModuleName
-     * @property {string} moduleName
-     * @property {string} type
-     * @property {string} data
-     */
 
     return Interception;
 });

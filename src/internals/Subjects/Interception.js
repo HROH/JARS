@@ -9,10 +9,10 @@ JARS.internal('Subjects/Interception', function(getInternal) {
     /**
      * @class
      *
-     * @memberof JARS~internals
+     * @memberof JARS~internals.Subjects
      *
      * @param {JARS~internals.Subjects.Module} requestor
-     * @param {JARS~internals.Resolvers.Interception~Info} interceptionInfo
+     * @param {JARS~internals.Subjects.Interception~Info} interceptionInfo
      * @param {JARS~internals.Handlers.StateChange} handler
      */
     function Interception(requestor, interceptionInfo, handler, ref) {
@@ -82,6 +82,18 @@ JARS.internal('Subjects/Interception', function(getInternal) {
             this._handler.onModuleAborted(this.info.fullModuleName);
         }
     };
+
+    /**
+     * @typedef {Object} Info
+     *
+     * @memberof JARS~internals.Subjects.Interception
+     * @inner
+     *
+     * @property {string} fullModuleName
+     * @property {string} moduleName
+     * @property {string} type
+     * @property {string} data
+     */
 
     return Interception;
 });
