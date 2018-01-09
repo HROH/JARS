@@ -18,7 +18,7 @@ JARS.internal('Subjects/Bundle', function(getInternal) {
         bundle.modules = [];
         bundle.module = module;
 
-        SubjectHelper.addToBundle(bundle);
+        SubjectHelper.initBundle(bundle);
     }
 
     Bundle.prototype = {

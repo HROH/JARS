@@ -90,6 +90,7 @@ JARS.init(function(commands) {
                 'Helpers',
                 'Interceptors',
                 'Loader',
+                'Logger',
                 'Processors',
                 'Refs',
                 'Registries',

@@ -36,7 +36,7 @@ JARS.internal('Subjects/Module', function(getInternal) {
         module.interceptionDeps = new InterceptionDependencies(module);
         module.bundle = new Bundle(module);
 
-        SubjectHelper.addToModule(module);
+        SubjectHelper.initModule(module);
     }
 
     Module.prototype = {

@@ -1,9 +1,9 @@
 JARS.internal('Helpers/Subject', function(getInternal) {
     'use strict';
 
-    var LogWrap = getInternal('Helpers/LogWrap'),
+    var Logger = getInternal('Logger'),
         State = getInternal('States/Subject'),
-        Config = getInternal('Configs/Subject'),
+        Configs = getInternal('Configs'),
         Processors = getInternal('Processors'),
         Subject;
 
@@ -16,14 +16,14 @@ JARS.internal('Helpers/Subject', function(getInternal) {
         /**
          * @param {JARS~internals.Subjects.Bundle} bundle
          */
-        addToBundle: function (bundle) {
-            addToSubject(bundle, true);
+        initBundle: function (bundle) {
+            initSubject(bundle, true);
         },
         /**
          * @param {JARS~internals.Subjects.Module} module
          */
-        addToModule: function(module) {
-            addToSubject(module);
+        initModule: function(module) {
+            initSubject(module);
         }
     };
 
@@ -34,13 +34,13 @@ JARS.internal('Helpers/Subject', function(getInternal) {
      * @param {JARS~internals.Subjects~Subject} subject
      * @param {boolean} isBundle
      */
-    function addToSubject(subject, isBundle) {
-        var factoryName = isBundle ? 'forBundle': 'forModule',
-            Processor = Processors[isBundle ? 'bundle' : 'module'];
+    function initSubject(subject, isBundle) {
+        var subjectType = isBundle ? 'bundle' : 'module',
+            Processor = Processors[subjectType];
 
-        subject.logger = LogWrap[factoryName](subject);
+        subject.logger = Logger[subjectType](subject);
         subject.state = new State(subject);
-        subject.config = Config[factoryName](subject);
+        subject.config = Configs[subjectType](subject);
         subject.processor = new Processor(subject);
     }
 

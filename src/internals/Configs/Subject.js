@@ -44,27 +44,5 @@ JARS.internal('Configs/Subject', function(getInternal) {
         }
     };
 
-    /**
-     * @param {JARS~internals.Subjects.Module} module
-     *
-     * @return {JARS~internals.Configs.Subject}
-     */
-    Subject.forModule = function(module) {
-        var parentConfig = module.bundle.config;
-
-        return module.isRoot ? parentConfig : new Subject(module, parentConfig);
-    };
-
-    /**
-     * @param {JARS~internals.Subjects.Bundle} bundle
-     *
-     * @return {JARS~internals.Configs.Subject}
-     */
-    Subject.forBundle = function(bundle) {
-        var parent = bundle.module.deps.parent;
-
-        return new Subject(bundle, parent && parent.bundle.config);
-    };
-
     return Subject;
 });
