@@ -92,7 +92,7 @@
      * @borrows JARS~internals.Registries.Internals.register as internal
      * @borrows JARS~internals.Registries.Internals.registerGroup as internalGroup
      */
-    envGlobal.JARS = JARS = {
+    JARS = {
         /**
          * @param {function()} bootstrapInternalsRegistry
          */
@@ -124,7 +124,7 @@
          * @method
          *
          * @param {string} moduleName
-         * @param {JARS~internals.Bundle~Declaration} bundle
+         * @param {JARS~internals.Subjects.Bundle~Declaration} bundle
          *
          * @return {JARS~ModuleWrapper}
          */
@@ -147,7 +147,7 @@
                 /**
                  * @method
                  *
-                 * @param {JARS~internals.Dependencies~Declaration}
+                 * @param {JARS~internals.Subjects.Dependencies.Module~Declaration}
                  *
                  * @return {JARS~ModuleWrapper}
                  */
@@ -155,7 +155,7 @@
                 /**
                  * @method
                  *
-                 * @param {JARS~internals.Module~Factory} factory
+                 * @param {JARS~internals.Subjects.Module~Factory} factory
                  */
                 $export: delegate(dynamicInternalName, '$export')
             };
@@ -174,12 +174,14 @@
         }),
         /**
          * @param {string} moduleName
-         * @param {JARS~internals.Bundle~Declaration} bundle
+         * @param {JARS~internals.Subjects.Bundle~Declaration} bundle
          */
         moduleAuto: function(moduleName, bundle) {
             JARS.module(moduleName, bundle).$export();
         },
         /**
+         * @method
+         *
          * @param {(JARS~internals.Configs.Global~Option|JARS~internals.Configs.Global~Options)} optionOrConfigOrArray
          * @param {*} [valueOrArray]
          *
@@ -187,6 +189,8 @@
          */
         configure: delegate('Configs/Global', 'update', getJARS),
         /**
+         * @method
+         *
          * @param {string} entryModuleName
          * @param {function(string[])} callback
          *
@@ -194,6 +198,8 @@
          */
         computeSortedPathList: delegate('Resolvers/PathList', 'computeSortedPathList', getJARS),
         /**
+         * @method
+         *
          * @param {string} context
          * @param {string} switchToContext
          *
@@ -214,6 +220,8 @@
          */
         version: '0.3.0'
     };
+
+    envGlobal.JARS = JARS;
 
     JARS.main(Env.MAIN_MODULE);
     SourceManager.load(Env.INTERNALS_PATH + 'Registries/Internals.js');

@@ -28,6 +28,23 @@ JARS.internal('Bootstrappers/System', function(getInternal) {
                 'Transports.*'
             ]);
 
+            /**
+             * @module System
+             *
+             * @borrows JARS~internals.Registries.Internals as $$internals
+             * @borrows JARS~internals.Types.Validators.getType as getType
+             * @borrows JARS~internals.Types.Validators.isNil as isNil
+             * @borrows JARS~internals.Types.Validators.isNull as isNull
+             * @borrows JARS~internals.Types.Validators.isUndefined as isUndefined
+             * @borrows JARS~internals.Types.Validators.isString as isString
+             * @borrows JARS~internals.Types.Validators.isNumber as isNumber
+             * @borrows JARS~internals.Types.Validators.isBoolean as isBoolean
+             * @borrows JARS~internals.Types.Validators.isArray as isArray
+             * @borrows JARS~internals.Types.Validators.isObject as isObject
+             * @borrows JARS~internals.Types.Validators.isFunction as isFunction
+             * @borrows JARS~internals.Types.Validators.isDate as isDate
+             * @borrows JARS~internals.Types.Validators.isRegExp as isRegExp
+             */
             systemModule.setMeta({
                 /**
                  * @param {JARS~internals.Subjects.Interception} pluginRequest
@@ -42,23 +59,6 @@ JARS.internal('Bootstrappers/System', function(getInternal) {
                     envGlobal = getInternal('Env').global,
                     System;
 
-                /**
-                 * @module System
-                 *
-                 * @borrows JARS~internals.Registries.Internals as $$internals
-                 * @borrows JARS~internals.Types.Validators.getType as getType
-                 * @borrows JARS~internals.Types.Validators.isNil as isNil
-                 * @borrows JARS~internals.Types.Validators.isNull as isNull
-                 * @borrows JARS~internals.Types.Validators.isUndefined as isUndefined
-                 * @borrows JARS~internals.Types.Validators.isString as isString
-                 * @borrows JARS~internals.Types.Validators.isNumber as isNumber
-                 * @borrows JARS~internals.Types.Validators.isBoolean as isBoolean
-                 * @borrows JARS~internals.Types.Validators.isArray as isArray
-                 * @borrows JARS~internals.Types.Validators.isObject as isObject
-                 * @borrows JARS~internals.Types.Validators.isFunction as isFunction
-                 * @borrows JARS~internals.Types.Validators.isDate as isDate
-                 * @borrows JARS~internals.Types.Validators.isRegExp as isRegExp
-                 */
                 System = {
                     /**
                      * @namespace
