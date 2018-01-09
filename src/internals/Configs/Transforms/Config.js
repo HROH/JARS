@@ -7,12 +7,12 @@ JARS.internal('Configs/Transforms/Config', function(getInternal) {
      * @memberof JARS~internals.Configs.Transforms
      *
      * @param {Object} config
-     * @param {(JARS~internals.Module|JARS~internals.Bundle)} [moduleOrBundle]
+     * @param {JARS~internals.Subjects~Subject} subject
      *
      * @return {Object}
      */
-    function Config(config, moduleOrBundle) {
-        return merge(moduleOrBundle.config.get('config'), config);
+    function Config(config, subject) {
+        return merge(subject.config.get('config'), config);
     }
 
     return Config;

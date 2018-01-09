@@ -11,7 +11,7 @@ JARS.internal('Handlers/Request', function() {
      *
      * @memberof JARS~internals.Handlers
      *
-     * @param {(JARS~internals.Module|JARS~internals.Bundle)} requestor
+     * @param {JARS~internals.Subjects~Subject} requestor
      * @param {string[]} modules
      * @param {string[]} msgStrings
      * @param {JARS~internals.Handlers.Request#onModulesLoaded} onModulesLoaded

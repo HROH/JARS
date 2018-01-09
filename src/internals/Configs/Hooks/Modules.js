@@ -47,7 +47,7 @@ JARS.internal('Configs/Hooks/Modules', function(getInternal) {
      * @property {JARS~internals.Configs.Hooks~Modules} recover
      * @property {number} timeout
      * @property {string} versionPath
-     * @property {JARS~internals.Dependencies~Declaration} restrict
+     * @property {JARS~internals.Subjects.Dependencies.Module~Declaration} restrict
      */
 
     return Modules;

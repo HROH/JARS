@@ -10,7 +10,7 @@ JARS.internal('Processors/Module', function(getInternal) {
      *
      * @memberof JARS~internals.Processors
      *
-     * @param {JARS~internals.Module}
+     * @param {JARS~internals.Subjects.Module}
      */
     function Module(module) {
         this.module = module;

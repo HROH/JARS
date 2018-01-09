@@ -1,7 +1,7 @@
 JARS.internal('Handlers/Interception', function(getInternal) {
     'use strict';
 
-    var InterceptionObject = getInternal('Interception'),
+    var InterceptionObject = getInternal('Subjects/Interception'),
         extractInterceptionInfo = getInternal('Resolvers/Interception').extractInterceptionInfo,
         getInterceptor = getInternal('Registries/Interceptors').get;
 

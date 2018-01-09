@@ -1,4 +1,4 @@
-JARS.internal('Dependencies', function(getInternal) {
+JARS.internal('Subjects/Dependencies/Module', function(getInternal) {
     'use strict';
 
     var DependenciesResolver = getInternal('Resolvers/Dependencies'),
@@ -10,19 +10,19 @@ JARS.internal('Dependencies', function(getInternal) {
     /**
      * @class
      *
-     * @memberof JARS~internals
+     * @memberof JARS~internals.Subjects.Dependencies
      *
-     * @param {JARS~internals.Module} module
+     * @param {JARS~internals.Subjects.Module} module
      * @param {boolean} ignoreParent
      */
-    function Dependencies(module, ignoreParent) {
+    function Module(module, ignoreParent) {
         this.parent = ignoreParent ? null : DependenciesResolver.getParent(module);
         this.module = module;
         this._modules = [];
     }
 
-    Dependencies.prototype = {
-        constructor: Dependencies,
+    Module.prototype = {
+        constructor: Module,
         /**
          * @return {string[]}
          */
@@ -30,7 +30,7 @@ JARS.internal('Dependencies', function(getInternal) {
             return this.parent ? [this.parent.name].concat(this._modules) : this._modules;
         },
         /**
-         * @param {JARS~internals.Dependencies~Declaration} dependencyModules
+         * @param {JARS~internals.Subjects.Dependencies.Module~Declaration} dependencyModules
          */
         add: function(dependencyModules) {
             this._modules = this._modules.concat(DependenciesResolver.resolveDeps(this.module, dependencyModules));
@@ -50,11 +50,11 @@ JARS.internal('Dependencies', function(getInternal) {
     };
 
    /**
-    * @typedef {(string|JARS~internals.Dependencies~Declaration[]|Object<string, JARS~internals.Dependencies~Declaration>)} Declaration
+    * @typedef {(string|JARS~internals.Subjects.Dependencies.Module~Declaration[]|Object<string, JARS~internals.Subjects.Dependencies.Module~Declaration>)} Declaration
     *
-    * @memberof JARS~internals.Dependencies
+    * @memberof JARS~internals.Subjects.Dependencies.Module
     * @inner
     */
 
-    return Dependencies;
+    return Module;
 });

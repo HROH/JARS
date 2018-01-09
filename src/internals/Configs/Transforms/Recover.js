@@ -7,7 +7,7 @@ JARS.internal('Configs/Transforms/Recover', function(getInternal) {
      * @memberof JARS~internals.Configs.Transforms
      *
      * @param {JARS~internals.Configs.Hooks~Modules} recoverConfig
-     * @param {(JARS~internals.Module|JARS~internals.Bundle)} subject
+     * @param {JARS~internals.Subjects~Subject} subject
      *
      * @return {JARS~internals.Configs.Hooks~Modules}
      */

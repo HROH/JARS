@@ -7,7 +7,7 @@ JARS.internal('Handlers/BundleCoremodule', function(getInternal) {
     /**
      * @memberof JARS~internals.Handlers
      *
-     * @param {JARS~internals.Bundle} bundle
+     * @param {JARS~internals.Subjects.Bundle} bundle
      *
      * @return {JARS~internals.Handlers.Request}
      */

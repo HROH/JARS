@@ -13,7 +13,7 @@ JARS.internal('Bootstrappers/Modules', function(getInternal) {
         bootstrap: function() {
             var ModulesRegistry = getInternal('Registries/Modules');
 
-            ModulesRegistry.Module = getInternal('Module');
+            ModulesRegistry.Module = getInternal('Subjects/Module');
             ModulesRegistry.getRoot().$export();
         }
     };

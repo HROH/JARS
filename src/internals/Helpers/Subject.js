@@ -14,13 +14,13 @@ JARS.internal('Helpers/Subject', function(getInternal) {
      */
     Subject = {
         /**
-         * @param {JARS~internals.Bundle} bundle
+         * @param {JARS~internals.Subjects.Bundle} bundle
          */
         addToBundle: function (bundle) {
             addToSubject(bundle, true);
         },
         /**
-         * @param {JARS~internals.Module} module
+         * @param {JARS~internals.Subjects.Module} module
          */
         addToModule: function(module) {
             addToSubject(module);
@@ -31,7 +31,7 @@ JARS.internal('Helpers/Subject', function(getInternal) {
      * @memberof JARS~internals.Helpers.Subject
      * @inner
      *
-     * @param {(JARS~internals.Module|JARS~internals.Bundle)} subject
+     * @param {JARS~internals.Subjects~Subject} subject
      * @param {boolean} isBundle
      */
     function addToSubject(subject, isBundle) {

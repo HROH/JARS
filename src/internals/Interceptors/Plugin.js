@@ -14,7 +14,7 @@ JARS.internal('Interceptors/Plugin', function(getInternal) {
     */
     Plugin = {
         /**
-         * @param {JARS~internals.Interception} interception
+         * @param {JARS~internals.Subjects.Interception} interception
          */
         intercept: function(interception) {
             var plugIn = getModule(interception.info.moduleName).getMeta('plugIn');

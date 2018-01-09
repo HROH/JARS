@@ -13,7 +13,7 @@ JARS.internal('State', function(getInternal) {
      *
      * @memberof JARS~internals
      *
-     * @param {(JARS~internals.Module|JARS~internals.Bundle)} subject
+     * @param {JARS~internals.Subjects~Subject} subject
      */
     function State(subject) {
         this._subject = subject;
@@ -70,7 +70,7 @@ JARS.internal('State', function(getInternal) {
     /**
      * @param {Array<(JARS~internals.Handlers.StateChange|JARS~internals.Handlers.Interception)>} queue
      * @param {string} method
-     * @param {(JARS~internals.Module|JARS~internals.Bundle)} subject
+     * @param {JARS~internals.Subjects~Subject} subject
      */
     function drainQueue(queue, method, subject) {
         while(queue.length) {

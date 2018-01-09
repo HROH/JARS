@@ -13,7 +13,7 @@ JARS.internal('Resolvers/Path', function pathResolverSetup(getInternal) {
      */
     Path = {
         /**
-         * @param {JARS~internals.Module} module
+         * @param {JARS~internals.Subjects.Module} module
          * @param {string} [extension]
          *
          * @return {string}

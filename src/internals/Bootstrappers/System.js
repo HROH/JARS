@@ -30,7 +30,7 @@ JARS.internal('Bootstrappers/System', function(getInternal) {
 
             systemModule.setMeta({
                 /**
-                 * @param {JARS~internals.Interception} pluginRequest
+                 * @param {JARS~internals.Subjects.Interception} pluginRequest
                  */
                 plugIn: function(pluginRequest) {
                     pluginRequest.success(pluginRequest.requestor.config.get('config'));

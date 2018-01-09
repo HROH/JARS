@@ -17,7 +17,7 @@ JARS.internal('Processors/Bundle', function(getInternal) {
      *
      * @memberof JARS~internals.Processors
      *
-     * @param {JARS~internals.Bundle}
+     * @param {JARS~internals.Subjects.Bundle}
      */
     function Bundle(bundle) {
         this.bundle = bundle;

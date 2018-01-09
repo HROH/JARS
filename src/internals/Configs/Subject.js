@@ -8,7 +8,7 @@ JARS.internal('Configs/Subject', function(getInternal) {
      *
      * @memberof JARS~internals.Configs
      *
-     * @param {(JARS~internals.Module|JARS~internals.Bundle)} subject
+     * @param {JARS~internals.Subjects~Subject} subject
      * @param {JARS~internals.Configs.Subject} [parentConfig]
      */
     function Subject(subject, parentConfig) {
@@ -45,7 +45,7 @@ JARS.internal('Configs/Subject', function(getInternal) {
     };
 
     /**
-     * @param {JARS~internals.Module} module
+     * @param {JARS~internals.Subjects.Module} module
      *
      * @return {JARS~internals.Configs.Subject}
      */
@@ -56,7 +56,7 @@ JARS.internal('Configs/Subject', function(getInternal) {
     };
 
     /**
-     * @param {JARS~internals.Bundle} bundle
+     * @param {JARS~internals.Subjects.Bundle} bundle
      *
      * @return {JARS~internals.Configs.Subject}
      */

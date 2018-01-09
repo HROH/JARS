@@ -1,4 +1,4 @@
-JARS.internal('Bundle', function(getInternal) {
+JARS.internal('Subjects/Bundle', function(getInternal) {
     'use strict';
 
     var BundleResolver = getInternal('Resolvers/Bundle'),
@@ -7,9 +7,9 @@ JARS.internal('Bundle', function(getInternal) {
     /**
      * @class
      *
-     * @memberof JARS~internals
+     * @memberof JARS~internals.Subjects
      *
-     * @param {JARS~internals.Module} module
+     * @param {JARS~internals.Subjects.Module} module
      */
     function Bundle(module) {
         var bundle = this;
@@ -24,7 +24,7 @@ JARS.internal('Bundle', function(getInternal) {
     Bundle.prototype = {
         constructor: Bundle,
         /**
-         * @param {JARS~internals.Bundle~Declaration} bundleModules
+         * @param {JARS~internals.Subjects.Bundle~Declaration} bundleModules
          */
         add: function(bundleModules) {
             this.modules = BundleResolver.resolveBundle(this.module, bundleModules);
@@ -44,7 +44,7 @@ JARS.internal('Bundle', function(getInternal) {
    /**
     * @typedef {string[]} Declaration
     *
-    * @memberof JARS~internals.Bundle
+    * @memberof JARS~internals.Subjects.Bundle
     * @inner
     */
 

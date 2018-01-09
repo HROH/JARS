@@ -25,9 +25,9 @@ JARS.internal('Resolvers/Dependencies', function dependenciesResolverSetup(getIn
             return moduleName.substr(0, moduleName.lastIndexOf(DOT));
         }),
         /**
-         * @param {JARS~internals.Module} module
+         * @param {JARS~internals.Subjects.Module} module
          *
-         * @return {(JARS~internals.Module|null)}
+         * @return {(JARS~internals.Subjects.Module|null)}
          */
         getParent: function(module) {
             var parentName = Dependencies.getParentName(module.name);
@@ -35,8 +35,8 @@ JARS.internal('Resolvers/Dependencies', function dependenciesResolverSetup(getIn
             return module.isRoot ? null : (parentName ? ModulesRegistry.get(parentName) : ModulesRegistry.getRoot());
         },
         /**
-         * @param {JARS~internals.Module} baseModule
-         * @param {JARS~internals.Dependencies~Declaration} modules
+         * @param {JARS~internals.Subjects.Module} baseModule
+         * @param {JARS~internals.Subjects.Dependencies.Module~Declaration} modules
          *
          * @return {string[]}
          */

@@ -7,7 +7,7 @@ JARS.internal('Handlers/Dependencies', function(getInternal) {
     /**
      * @memberof JARS~internals.Handlers
      *
-     * @param {JARS~internals.Dependencies} dependencies
+     * @param {JARS~internals.Subjects.Dependencies} dependencies
      * @param {JARS~internals.Handlers.Request#onModulesLoaded} onModulesLoaded
      *
      * @return {JARS~internals.Handlers.Request}

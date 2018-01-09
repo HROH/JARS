@@ -12,8 +12,8 @@ JARS.internal('Traverser/Circular', function() {
      */
     Circular = {
         /**
-         * @param {JARS~internals.Module} module
-         * @param {JARS~internals.Module} entryModule
+         * @param {JARS~internals.Subjects.Module} module
+         * @param {JARS~internals.Subjects.Module} entryModule
          * @param {number} depth
          *
          * @return {boolean}
@@ -22,8 +22,8 @@ JARS.internal('Traverser/Circular', function() {
             return !equalsEntryModule(module, entryModule, depth) && (module.state.isRegistered() || module.state.isIntercepted());
         },
         /**
-         * @param {JARS~internals.Module} module
-         * @param {JARS~internals.Module} entryModule
+         * @param {JARS~internals.Subjects.Module} module
+         * @param {JARS~internals.Subjects.Module} entryModule
          * @param {number} depth
          * @param {*} circularList
          *
@@ -48,8 +48,8 @@ JARS.internal('Traverser/Circular', function() {
      * @memberof JARS~internals.Traverser.Circular
      * @inner
      *
-     * @param {JARS~internals.Module} module
-     * @param {JARS~internals.Module} entryModule
+     * @param {JARS~internals.Subjects.Module} module
+     * @param {JARS~internals.Subjects.Module} entryModule
      * @param {number} depth
      *
      * @return {boolean}

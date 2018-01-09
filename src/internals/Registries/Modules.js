@@ -17,9 +17,9 @@ JARS.internal('Registries/Modules', function modulesRegistrySetup(getInternal) {
     Modules = {
         /**
          * @param {string} moduleName
-         * @param {JARS~internals.Bundle~Declaration} bundleModules
+         * @param {JARS~internals.Subjects.Bundle~Declaration} bundleModules
          *
-         * @return {JARS~internals.Module}
+         * @return {JARS~internals.Subjects.Module}
          */
         register: function(moduleName, bundleModules) {
             var module = Modules.get(moduleName);
@@ -32,7 +32,7 @@ JARS.internal('Registries/Modules', function modulesRegistrySetup(getInternal) {
          * @param {string} moduleName
          * @param {boolean} [isRoot]
          *
-         * @return {JARS~internals.Module}
+         * @return {JARS~internals.Subjects.Module}
          */
         get: function(moduleName, isRoot) {
             moduleName = BundleResolver.isBundle(moduleName) ? BundleResolver.removeBundleSuffix(moduleName) : removeInterceptionData(moduleName);
@@ -40,25 +40,25 @@ JARS.internal('Registries/Modules', function modulesRegistrySetup(getInternal) {
             return moduleName ? modules[moduleName] || (modules[moduleName] = new Modules.Module(moduleName, isRoot)) : null;
         },
         /**
-         * @return {JARS~internals.Module}
+         * @return {JARS~internals.Subjects.Module}
          */
         getRoot: function() {
             return Modules.get(ROOT_MODULE_NAME, true);
         },
         /**
-         * @param {JARS~internals.Module} module
+         * @param {JARS~internals.Subjects.Module} module
          */
         setCurrent: function(module) {
             currentModule = module || Modules.getRoot();
         },
         /**
-         * @return {JARS~internals.Module} module
+         * @return {JARS~internals.Subjects.Module} module
          */
         getCurrent: function() {
             return currentModule;
         },
         /**
-         * @param {function(JARS~internals.Module, string)} callback
+         * @param {function(JARS~internals.Subjects.Module, string)} callback
          */
         each: function(callback) {
             each(modules, callback);

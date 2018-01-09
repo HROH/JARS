@@ -45,8 +45,8 @@ JARS.internal('Resolvers/Bundle', function bundleResolverSetup(getInternal) {
             return RE_BUNDLE_SUFFIX.test(VersionResolver.removeVersion(moduleName));
         },
         /**
-         * @param {JARS~internals.Module} baseModule
-         * @param {JARS~internals.Bundle~Declaration} bundleModules
+         * @param {JARS~internals.Subjects.Module} baseModule
+         * @param {JARS~internals.Subjects.Bundle~Declaration} bundleModules
          *
          * @return {string[]}
          */

@@ -22,7 +22,7 @@ JARS.module('System.Modules').$export(function systemModulesFactory() {
      */
     Modules = {
         /**
-         * @param {JARS~internals.Dependencies~Declaration} moduleNames
+         * @param {JARS~internals.Subjects.Dependencies.Module~Declaration} moduleNames
          *
          * @return {Array<*>}
          */

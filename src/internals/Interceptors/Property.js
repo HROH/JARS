@@ -14,7 +14,7 @@ JARS.internal('Interceptors/Property', function(getInternal) {
     */
     Property = {
         /**
-         * @param {JARS~internals.Interception} interception
+         * @param {JARS~internals.Subjects.Interception} interception
          */
         intercept: function(interception) {
             interception.$export(function() {

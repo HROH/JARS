@@ -4,7 +4,7 @@
  */
 JARS.module('System.Transports', ['Console']).meta({
     /**
-     * @param {JARS~internals.Interception} pluginRequest
+     * @param {JARS~internals.Subjects.Interception} pluginRequest
      */
     plugIn: function(pluginRequest) {
         var data = pluginRequest.info.data.split(':');

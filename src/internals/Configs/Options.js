@@ -34,7 +34,7 @@ JARS.internal('Configs/Options', function(getInternal) {
     };
 
     /**
-     * @param {(JARS~internals.Module|JARS~internals.Bundle)} subject
+     * @param {JARS~internals.Subjects~Subject} subject
      *
      * @return {JARS~internals.Configs.Options}
      */
@@ -49,7 +49,7 @@ JARS.internal('Configs/Options', function(getInternal) {
     /**
      * @param {JARS~internals.Configs.Options} options
      * @param {Object} newOptions
-     * @param {(JARS~internals.Module|JARS~internals.Bundle)} subject
+     * @param {JARS~internals.Subjects~Subject} subject
      */
     Options.transformAndUpdate = function(options, newOptions, subject) {
         each(newOptions, function updateConfig(value, option) {
@@ -65,7 +65,7 @@ JARS.internal('Configs/Options', function(getInternal) {
      *
      * @param {string} option
      * @param {*} value
-     * @param {(JARS~internals.Module|JARS~internals.Bundle)} subject
+     * @param {JARS~internals.Subjects~Subject} subject
      *
      * @return {*}
      */

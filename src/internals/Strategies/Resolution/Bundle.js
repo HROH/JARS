@@ -8,7 +8,7 @@ JARS.internal('Strategies/Resolution/Bundle', function bundleResolutionStrategyS
     /**
      * @memberof JARS~internals.Strategies.Resolution
      *
-     * @param {JARS~internals.Module} baseModule
+     * @param {JARS~internals.Subjects.Module} baseModule
      * @param {string} moduleName
      *
      * @return {string}

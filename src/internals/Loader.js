@@ -28,7 +28,7 @@ JARS.internal('Loader', function(getInternal) {
             switchToContext && GlobalConfig.update('loaderContext', switchToContext);
         },
         /**
-         * @param {JARS~internals.Dependencies~Declaration} moduleNames
+         * @param {JARS~internals.Subjects.Dependencies.Module~Declaration} moduleNames
          * @param {function(...*)} onModulesImported
          * @param {function()} onModuleAborted
          * @param {function()} onModuleImported

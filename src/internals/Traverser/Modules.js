@@ -8,7 +8,7 @@ JARS.internal('Traverser/Modules', function(getInternal) {
     /**
      * @memberof JARS~internals.Traverser
      *
-     * @param {JARS~internals.Module} entryModule
+     * @param {JARS~internals.Subjects.Module} entryModule
      * @param {Object} traverseHandle
      * @param {*} initialValue
      *
@@ -22,8 +22,8 @@ JARS.internal('Traverser/Modules', function(getInternal) {
      * @memberof JARS~internals.Traverser.Modules
      * @inner
      *
-     * @param {JARS~internals.Module} module
-     * @param {JARS~internals.Module} entryModule
+     * @param {JARS~internals.Subjects.Module} module
+     * @param {JARS~internals.Subjects.Module} entryModule
      * @param {Object} traverseHandle
      * @param {number} depth
      * @param {*} value
@@ -42,8 +42,8 @@ JARS.internal('Traverser/Modules', function(getInternal) {
      * @memberof JARS~internals.Traverser.Modules
      * @inner
      *
-     * @param {JARS~internals.Module} module
-     * @param {JARS~internals.Module} entryModule
+     * @param {JARS~internals.Subjects.Module} module
+     * @param {JARS~internals.Subjects.Module} entryModule
      * @param {Object} traverseHandle
      * @param {number} depth
      * @param {*} value
@@ -58,8 +58,8 @@ JARS.internal('Traverser/Modules', function(getInternal) {
      * @memberof JARS~internals.Traverser.Modules
      * @inner
      *
-     * @param {JARS~internals.Module} module
-     * @param {JARS~internals.Module} entryModule
+     * @param {JARS~internals.Subjects.Module} module
+     * @param {JARS~internals.Subjects.Module} entryModule
      * @param {Object} traverseHandle
      * @param {number} depth
      * @param {*} value
@@ -75,7 +75,7 @@ JARS.internal('Traverser/Modules', function(getInternal) {
      * @inner
      *
      * @param {string[]} modules
-     * @param {JARS~internals.Module} entryModule
+     * @param {JARS~internals.Subjects.Module} entryModule
      * @param {Object} traverseHandle
      * @param {number} depth
      * @param {*} value

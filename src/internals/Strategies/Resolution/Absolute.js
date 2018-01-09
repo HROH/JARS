@@ -8,7 +8,7 @@ JARS.internal('Strategies/Resolution/Absolute', function absoluteResolutionStrat
     /**
      * @memberof JARS~internals.Strategies.Resolution
      *
-     * @param {JARS~internals.Module} baseModule
+     * @param {JARS~internals.Subjects.Module} baseModule
      * @param {string} moduleName
      *
      * @return {string}

@@ -6,7 +6,7 @@ JARS.internal('Refs/Bundle', function() {
      *
      * @memberof JARS~internals.Refs
      *
-     * @param {JARS~internals.Bundle} bundle
+     * @param {JARS~internals.Subjects.Bundle} bundle
      * @param {JARS~internals.Refs.Modules} bundleRefs
      */
     function Bundle(bundle, bundleRefs) {

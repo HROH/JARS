@@ -1,4 +1,4 @@
-JARS.internal('Interception', function(getInternal) {
+JARS.internal('Subjects/Interception', function(getInternal) {
     'use strict';
 
     var InterceptionRef = getInternal('Refs/Interception'),
@@ -11,7 +11,7 @@ JARS.internal('Interception', function(getInternal) {
      *
      * @memberof JARS~internals
      *
-     * @param {JARS~internals.Module} requestor
+     * @param {JARS~internals.Subjects.Module} requestor
      * @param {JARS~internals.Resolvers.Interception~Info} interceptionInfo
      * @param {JARS~internals.Handlers.StateChange} handler
      */
@@ -30,7 +30,7 @@ JARS.internal('Interception', function(getInternal) {
     Interception.prototype = {
         constructor: Interception,
         /**
-         * @param {JARS~internals.Dependencies~Declaration} dependencies
+         * @param {JARS~internals.Subjects.Dependencies.Module~Declaration} dependencies
          */
         $import: function(dependencies) {
             this._exported || this.deps.add(dependencies);
@@ -59,7 +59,7 @@ JARS.internal('Interception', function(getInternal) {
             return getFullPath(this.requestor, fileType);
         },
         /**
-         * @param {JARS~internals.Dependencies~Declaration} moduleNames
+         * @param {JARS~internals.Subjects.Dependencies.Module~Declaration} moduleNames
          * @param {function()} provide
          */
         $importAndLink: function(moduleNames, provide) {

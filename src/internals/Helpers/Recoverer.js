@@ -8,7 +8,7 @@ JARS.internal('Helpers/Recoverer', function(getInternal) {
     /**
      * @memberof JARS~internals.Helpers
      *
-     * @param {JARS~internals.Module} module
+     * @param {JARS~internals.Subjects.Module} module
      *
      * @return {boolean}
      */

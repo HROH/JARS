@@ -17,7 +17,7 @@ JARS.internal('Helpers/LogWrap', function(getInternal) {
     }
 
     /**
-     * @param {JARS~internals.Bundle} bundle
+     * @param {JARS~internals.Subjects.Bundle} bundle
      *
      * @return {JARS~internals.Helpers.LogWrap}
      */
@@ -26,7 +26,7 @@ JARS.internal('Helpers/LogWrap', function(getInternal) {
     };
 
     /**
-     * @param {JARS~internals.Module} module
+     * @param {JARS~internals.Subjects.Module} module
      *
      * @return {JARS~internals.Helpers.LogWrap}
      */

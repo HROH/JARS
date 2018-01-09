@@ -9,7 +9,7 @@ JARS.internal('Refs/Module', function(getInternal) {
      *
      * @memberof JARS~internals.Refs
      *
-     * @param {JARS~internals.Module} module
+     * @param {JARS~internals.Subjects.Module} module
      * @param {JARS~internals.Refs.Modules} refs
      * @param {function()} factory
      */

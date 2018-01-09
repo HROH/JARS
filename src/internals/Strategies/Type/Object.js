@@ -10,8 +10,8 @@ JARS.internal('Strategies/Type/Object', function(getInternal) {
     /**
      * @memberof JARS~internals.Strategies.Type
      *
-     * @param {JARS~internals.Module} baseModule
-     * @param {Object<string, JARS~internals.Dependencies~Declaration>} modules
+     * @param {JARS~internals.Subjects.Module} baseModule
+     * @param {Object<string, JARS~internals.Subjects.Dependencies.Module~Declaration>} modules
      * @param {JARS~internals.Strategies.Resolution~Strategy} resolutionStrategy
      *
      * @return {string[]}
