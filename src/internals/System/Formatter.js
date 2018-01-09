@@ -1,6 +1,5 @@
 /**
- * @module System.Formatter
- * @see JARS~internals.System.Formatter
+ * @module Formatter
  */
 JARS.module('System.Formatter').$import([
     '.::$$internals', '.::isString', '.::isArray', '.::isObject'
@@ -15,7 +14,9 @@ JARS.module('System.Formatter').$import([
     /**
      * @namespace
      *
-     * @memberof JARS~internals.System
+     * @memberof module:System
+     *
+     * @alias module:Formatter
      */
     Formatter = {
         /**
@@ -38,7 +39,7 @@ JARS.module('System.Formatter').$import([
     };
 
     /**
-     * @memberof JARS~internals.System.Formatter
+     * @memberof module:Formatter
      * @inner
      *
      * @param {array} match

@@ -1,6 +1,5 @@
 /**
- * @module System.LogLevels
- * @see JARS~internals.System.LogLevels
+ * @module LogLevels
  */
 JARS.module('System.LogLevels').$import(['.::$$internals', '.::isNumber', '.::isString']).$export(function(internals, isNumber, isString) {
     'use strict';
@@ -14,7 +13,9 @@ JARS.module('System.LogLevels').$import(['.::$$internals', '.::isNumber', '.::is
     /**
      * @namespace
      *
-     * @memberof JARS~internals.System
+     * @memberof module:System
+     *
+     * @alias module:LogLevels
      */
     LogLevels = {
         /**
@@ -62,7 +63,7 @@ JARS.module('System.LogLevels').$import(['.::$$internals', '.::isNumber', '.::is
     });
 
     /**
-     * @memberof JARS~internals.LogLevels
+     * @memberof module:LogLevels
      * @inner
      *
      * @param {string} level
@@ -74,7 +75,7 @@ JARS.module('System.LogLevels').$import(['.::$$internals', '.::isNumber', '.::is
     }
 
     /**
-     * @memberof JARS~internals.LogLevels
+     * @memberof module:LogLevels
      * @inner
      *
      * @param {string} level
@@ -85,7 +86,7 @@ JARS.module('System.LogLevels').$import(['.::$$internals', '.::isNumber', '.::is
         return LogLevels[level.toUpperCase()];
     }
     /**
-     * @memberof JARS~internals.LogLevels
+     * @memberof module:LogLevels
      * @inner
      *
      * @param {string} level

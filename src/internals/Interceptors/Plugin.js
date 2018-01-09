@@ -2,7 +2,7 @@ JARS.internal('Interceptors/Plugin', function(getInternal) {
     'use strict';
 
     var getModule = getInternal('Registries/Modules').get,
-        isFunction = getInternal('System').isFunction,
+        isFunction = getInternal('Types/Validators').isFunction,
         Plugin;
 
     /**

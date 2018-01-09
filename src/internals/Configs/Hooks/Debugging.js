@@ -1,7 +1,7 @@
 JARS.internal('Configs/Hooks/Debugging', function(getInternal) {
     'use strict';
 
-    var isObject = getInternal('System').isObject;
+    var isObject = getInternal('Types/Validators').isObject;
 
     /**
      * @method

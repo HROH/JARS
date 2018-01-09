@@ -1,6 +1,5 @@
 /**
- * @module System.Transports.Console
- * @see JARS~internals.System.Transports.Console
+ * @module Console
  */
 JARS.module('System.Transports.Console').$import(['..!', '..::env', '..LogLevels']).$export(function(config, env, LogLevels) {
     'use strict';
@@ -11,11 +10,11 @@ JARS.module('System.Transports.Console').$import(['..!', '..::env', '..LogLevels
     /**
      * @class
      *
-     * @memberof JARS~internals.System.Transports
+     * @memberof module:Transports
+     *
+     * @alias module:Console
      */
-    function Console() {
-
-    }
+    function Console() {}
 
     /**
      * @param {string} level
@@ -41,7 +40,7 @@ JARS.module('System.Transports.Console').$import(['..!', '..::env', '..LogLevels
     });
 
     /**
-     * @memberof JARS~internals.System.Transports.Console
+     * @memberof module:Console
      * @inner
      *
      * @param {string} nextGroup
@@ -55,7 +54,7 @@ JARS.module('System.Transports.Console').$import(['..!', '..::env', '..LogLevels
     }
 
     /**
-     * @memberof JARS~internals.System.Transports.Console
+     * @memberof module:Console
      * @inner
      *
      * @param {string} level
@@ -67,7 +66,7 @@ JARS.module('System.Transports.Console').$import(['..!', '..::env', '..LogLevels
     }
 
     /**
-     * @memberof JARS~internals.System.Transports.Console
+     * @memberof module:Console
      * @inner
      *
      * @return {boolean}
@@ -77,7 +76,7 @@ JARS.module('System.Transports.Console').$import(['..!', '..::env', '..LogLevels
     }
 
     /**
-     * @memberof JARS~internals.System.Transports.Console
+     * @memberof module:Console
      * @inner
      *
      * @param {string} level
@@ -91,7 +90,7 @@ JARS.module('System.Transports.Console').$import(['..!', '..::env', '..LogLevels
     }
 
     /**
-     * @memberof JARS~internals.System.Transports.Console
+     * @memberof module:Console
      * @inner
      *
      * @param {string} level
@@ -104,7 +103,7 @@ JARS.module('System.Transports.Console').$import(['..!', '..::env', '..LogLevels
     }
 
     /**
-     * @memberof JARS~internals.System.Transports.Console
+     * @memberof module:Console
      * @inner
      *
      * @param {object} data
@@ -117,7 +116,7 @@ JARS.module('System.Transports.Console').$import(['..!', '..::env', '..LogLevels
     }
 
     /**
-     * @memberof JARS~internals.System.Transports.Console
+     * @memberof module:Console
      * @inner
      *
      * @param {string} string

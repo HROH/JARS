@@ -98,7 +98,6 @@ JARS.init(function(commands) {
                 'States',
                 'Strategies',
                 'Subjects',
-                'System',
                 'Traverser',
                 'Types'
             ]);

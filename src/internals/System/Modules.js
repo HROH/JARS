@@ -1,6 +1,5 @@
 /**
- * @module System.Modules
- * @see JARS~internals.System.Modules
+ * @module Modules
  */
 JARS.module('System.Modules').$export(function systemModulesFactory() {
     'use strict';
@@ -16,7 +15,9 @@ JARS.module('System.Modules').$export(function systemModulesFactory() {
     /**
      * @namespace
      *
-     * @memberof JARS~internals.System
+     * @memberof module:System
+     *
+     * @alias module:Modules
      *
      * @borrows JARS~internals.Loader.$import as $import
      */

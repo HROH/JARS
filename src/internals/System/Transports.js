@@ -1,6 +1,5 @@
 /**
- * @module System.Transports
- * @see JARS~internals.System.Transports
+ * @module Transports
  */
 JARS.module('System.Transports', ['Console']).meta({
     /**
@@ -25,7 +24,9 @@ JARS.module('System.Transports', ['Console']).meta({
     /**
      * @namespace
      *
-     * @memberof JARS~internals.System
+     * @memberof module:System
+     *
+     * @alias module:Transports
      */
     Transports = {
         /**

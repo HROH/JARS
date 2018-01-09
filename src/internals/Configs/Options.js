@@ -9,7 +9,7 @@ JARS.internal('Configs/Options', function(getInternal) {
         hasOwnProp = ObjectHelper.hasOwnProp,
         each = ObjectHelper.each,
         isBundle = getInternal('Resolvers/Bundle').isBundle,
-        isNull = getInternal('System').isNull;
+        isNull = getInternal('Types/Validators').isNull;
 
     /**
      * @class

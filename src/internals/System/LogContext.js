@@ -1,6 +1,5 @@
 /**
- * @module System.LogContext
- * @see JARS~internals.System.LogContext
+ * @module LogContext
  */
 JARS.module('System.LogContext').$import(['.!', '.']).$export(function(config, System) {
     'use strict';
@@ -11,7 +10,9 @@ JARS.module('System.LogContext').$import(['.!', '.']).$export(function(config, S
     /**
      * @namespace
      *
-     * @memberof JARS~internals.System
+     * @memberof module:System
+     *
+     * @alias module:LogContext
      */
     LogContext = {
         /**
@@ -27,7 +28,7 @@ JARS.module('System.LogContext').$import(['.!', '.']).$export(function(config, S
     };
 
     /**
-     * @memberof JARS~internals.System.LogContext
+     * @memberof module:LogContext
      * @inner
      *
      * @return {string}
@@ -51,7 +52,7 @@ JARS.module('System.LogContext').$import(['.!', '.']).$export(function(config, S
     }
 
     /**
-     * @memberof JARS~internals.System.LogContext
+     * @memberof module:LogContext
      * @inner
      *
      * @param {(string|string[])} contextList
@@ -63,7 +64,7 @@ JARS.module('System.LogContext').$import(['.!', '.']).$export(function(config, S
     }
 
     /**
-     * @memberof JARS~internals.System.LogContext
+     * @memberof module:LogContext
      * @inner
      *
      * @param {string} context
@@ -76,7 +77,7 @@ JARS.module('System.LogContext').$import(['.!', '.']).$export(function(config, S
     }
 
     /**
-     * @memberof JARS~internals.System.LogContext
+     * @memberof module:LogContext
      * @inner
      *
      * @param {string} context
@@ -89,7 +90,7 @@ JARS.module('System.LogContext').$import(['.!', '.']).$export(function(config, S
     }
 
     /**
-     * @memberof JARS~internals.System.LogContext
+     * @memberof module:LogContext
      * @inner
      *
      * @param {string} context

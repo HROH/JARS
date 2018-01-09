@@ -2,8 +2,8 @@ JARS.internal('Configs/Global', function(getInternal) {
     'use strict';
 
     var Hooks = getInternal('Configs/Hooks'),
-        System = getInternal('System'),
-        isArray = System.isArray,
+        Validators = getInternal('Types/Validators'),
+        isArray = Validators.isArray,
         arrayEach = getInternal('Helpers/Array').each,
         objectEach = getInternal('Helpers/Object').each,
         globalConfig = {
@@ -22,10 +22,10 @@ JARS.internal('Configs/Global', function(getInternal) {
          * @param {*} [valueOrArray]
          */
         update: function(optionOrConfig, valueOrArray) {
-            if (System.isString(optionOrConfig)) {
+            if (Validators.isString(optionOrConfig)) {
                 updateOption(valueOrArray, optionOrConfig);
             }
-            else if (System.isObject(optionOrConfig)) {
+            else if (Validators.isObject(optionOrConfig)) {
                 objectEach(optionOrConfig, updateOption);
             }
         },
@@ -53,7 +53,7 @@ JARS.internal('Configs/Global', function(getInternal) {
             });
         }
         else {
-            globalConfig[option] = System.isFunction(Hooks[option]) ? Hooks[option](Global, valueOrArray) : valueOrArray;
+            globalConfig[option] = Validators.isFunction(Hooks[option]) ? Hooks[option](Global, valueOrArray) : valueOrArray;
         }
     }
 

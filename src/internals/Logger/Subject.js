@@ -1,7 +1,7 @@
 JARS.internal('Logger/Subject', function(getInternal) {
     'use strict';
 
-    var System = getInternal('System');
+    var getModule = getInternal('Registries/Modules').get;
 
     /**
      * @class
@@ -16,7 +16,9 @@ JARS.internal('Logger/Subject', function(getInternal) {
 
     getInternal('Helpers/Array').each(['debug', 'error', 'info', 'warn'], function addForward(methodName) {
         Subject.prototype[methodName] = function(message, values) {
-            System.Logger && System.Logger[methodName + 'WithContext'](this._context, message, values);
+            var loggerRef = getModule('System.Logger').ref;
+
+            loggerRef && loggerRef.get()[methodName + 'WithContext'](this._context, message, values);
         };
     });
 

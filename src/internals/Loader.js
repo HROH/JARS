@@ -1,8 +1,7 @@
 JARS.internal('Loader', function(getInternal) {
     'use strict';
 
-    var System = getInternal('System'),
-        GlobalConfig = getInternal('Configs/Global'),
+    var GlobalConfig = getInternal('Configs/Global'),
         ModulesRegistry = getInternal('Registries/Modules'),
         Modules = getInternal('Handlers/Modules'),
         resolveDeps = getInternal('Resolvers/Dependencies').resolveDeps,
@@ -23,7 +22,7 @@ JARS.internal('Loader', function(getInternal) {
                 module.ref.flush(context);
             });
 
-            System.Logger.info('Successfully flushed modules with context "${0}"', [context]);
+            ModulesRegistry.get('System.Logger').ref.get().info('Successfully flushed modules with context "${0}"', [context]);
 
             switchToContext && GlobalConfig.update('loaderContext', switchToContext);
         },

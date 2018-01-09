@@ -3,6 +3,7 @@ JARS.internal('Types/Validators', function(getInternal) {
 
     var envGlobal = getInternal('Env').global,
         TypeLookup = getInternal('Types/Lookup'),
+        types = 'Null Undefined String Number Boolean Array Arguments Object Function Date RegExp'.split(' '),
         NOTHING = null,
         VALIDATOR_PREFIX = 'is',
         INFINITY = 'infinity',
@@ -19,10 +20,14 @@ JARS.internal('Types/Validators', function(getInternal) {
         /**
          * @param {string} typeDef
          *
-         * @return {Object}
+         * @return {string}
          */
         add: function(typeDef) {
-            return createValidator(VALIDATOR_PREFIX + typeDef, TypeLookup.add(typeDef), envGlobal[typeDef]);
+            var validatorName = VALIDATOR_PREFIX + typeDef;
+
+            Validators[validatorName] || createValidator(validatorName, TypeLookup.add(typeDef), envGlobal[typeDef]);
+
+            return validatorName;
         },
         /**
          * @param {*} value
@@ -83,18 +88,104 @@ JARS.internal('Types/Validators', function(getInternal) {
      * @param {string} validatorName
      * @param {string} type
      * @param {Object} globalType
-     *
-     * @return {Object}
      */
     function createValidator(validatorName, type, globalType) {
-        return {
-            name: validatorName,
-
-            fn: (globalType && globalType[validatorName]) || function typeValidator(value) {
-                return Validators.is(type, value);
-            }
+        Validators[validatorName] = (globalType && globalType[validatorName]) || function typeValidator(value) {
+            return Validators.is(type, value);
         };
     }
+
+    /**
+     * @method JARS~internals.Types.Validators.isNull
+     *
+     * @param {*} value
+     *
+     * @return {boolean}
+     */
+
+    /**
+     * @method JARS~internals.Types.Validators.isUndefined
+     *
+     * @param {*} value
+     *
+     * @return {boolean}
+     */
+
+    /**
+     * @method JARS~internals.Types.Validators.isString
+     *
+     * @param {*} value
+     *
+     * @return {boolean}
+     */
+
+    /**
+     * @method JARS~internals.Types.Validators.isNumber
+     *
+     * @param {*} value
+     *
+     * @return {boolean}
+     */
+
+    /**
+     * @method JARS~internals.Types.Validators.isBoolean
+     *
+     * @param {*} value
+     *
+     * @return {boolean}
+     */
+
+    /**
+     * @method JARS~internals.Types.Validators.isArray
+     *
+     * @param {*} value
+     *
+     * @return {boolean}
+     */
+
+    /**
+     * @method JARS~internals.Types.Validators.isArguments
+     *
+     * @param {*} value
+     *
+     * @return {boolean}
+     */
+
+    /**
+     * @method JARS~internals.Types.Validators.isObject
+     *
+     * @param {*} value
+     *
+     * @return {boolean}
+     */
+
+    /**
+     * @method JARS~internals.Types.Validators.isFunction
+     *
+     * @param {*} value
+     *
+     * @return {boolean}
+     */
+
+    /**
+     * @method JARS~internals.Types.Validators.isDate
+     *
+     * @param {*} value
+     *
+     * @return {boolean}
+     */
+
+    /**
+     * @method JARS~internals.Types.Validators.isRegExp
+     *
+     * @param {*} value
+     *
+     * @return {boolean}
+     */
+
+    getInternal('Helpers/Array').each(types, function(typeDef) {
+        Validators.add(typeDef);
+    });
 
     return Validators;
 });

@@ -1,8 +1,7 @@
 JARS.internal('Registries/Modules', function modulesRegistrySetup(getInternal) {
     'use strict';
 
-    var System = getInternal('System'),
-        BundleResolver = getInternal('Resolvers/Bundle'),
+    var BundleResolver = getInternal('Resolvers/Bundle'),
         removeInterceptionData = getInternal('Resolvers/Interception').removeInterceptionData,
         each = getInternal('Helpers/Object').each,
         modules = {},
@@ -24,7 +23,7 @@ JARS.internal('Registries/Modules', function modulesRegistrySetup(getInternal) {
         register: function(moduleName, bundleModules) {
             var module = Modules.get(moduleName);
 
-            module ? module.bundle.add(bundleModules) : System.Logger.error('No modulename provided');
+            module ? module.bundle.add(bundleModules) : Modules.get('System.Logger').ref.get().error('No modulename provided');
 
             return module;
         },
@@ -32,10 +31,10 @@ JARS.internal('Registries/Modules', function modulesRegistrySetup(getInternal) {
          * @param {string} moduleName
          * @param {boolean} [isRoot]
          *
-         * @return {JARS~internals.Subjects.Module}
+         * @return {(JARS~internals.Subjects.Module|null)}
          */
         get: function(moduleName, isRoot) {
-            moduleName = BundleResolver.isBundle(moduleName) ? BundleResolver.removeBundleSuffix(moduleName) : removeInterceptionData(moduleName);
+            moduleName && (moduleName = BundleResolver.isBundle(moduleName) ? BundleResolver.removeBundleSuffix(moduleName) : removeInterceptionData(moduleName));
 
             return moduleName ? modules[moduleName] || (modules[moduleName] = new Modules.Module(moduleName, isRoot)) : null;
         },

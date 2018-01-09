@@ -1,6 +1,5 @@
 /**
- * @module System.Logger
- * @see JARS~internals.System.Logger
+ * @module Logger
  */
 JARS.module('System.Logger').$import([
     '.!',
@@ -16,10 +15,10 @@ JARS.module('System.Logger').$import([
         ROOT_LOGCONTEXT = getCurrentModuleData().moduleName;
 
     /**
-     * @memberof JARS~internals.System.Logger
+     * @memberof module:Logger
      * @inner
      *
-     * @param {object} options
+     * @param {Object} options
      * @param {string} level
      * @param {string} context
      *
@@ -30,10 +29,10 @@ JARS.module('System.Logger').$import([
     }
 
     /**
-     * @memberof JARS~internals.System.Logger
+     * @memberof module:Logger
      * @inner
      *
-     * @param {object} options
+     * @param {Object} options
      * @param {string} option
      *
      * @return {*}
@@ -45,10 +44,12 @@ JARS.module('System.Logger').$import([
     /**
      * @class
      *
-     * @memberof JARS~internals.System
+     * @memberof module:System
+     *
+     * @alias module:Logger
      *
      * @param {string} logContext
-     * @param {object} options
+     * @param {Object} options
      */
     function Logger(logContext, options) {
         var logger = this;
@@ -59,18 +60,18 @@ JARS.module('System.Logger').$import([
 
     /**
      * @param {string} logContext
-     * @param {object} options
+     * @param {Object} options
      *
-     * @return {JARS~internals.System.Logger}
+     * @return {module:Logger}
      */
     Logger.get = function(logContext, options) {
         return loggerCache[logContext] || (loggerCache[logContext] = new Logger(logContext, options));
     };
 
     /**
-     * @param {object} options
+     * @param {Object} options
      *
-     * @return {JARS~internals.System.Logger}
+     * @return {module:Logger}
      */
     Logger.forCurrentModule = function(options) {
         return Logger.get(getCurrentModuleData().moduleName, options);
@@ -79,7 +80,7 @@ JARS.module('System.Logger').$import([
     /**
      * @param {string} level
      * @param {*} message
-     * @param {(object|array)} values
+     * @param {(Object|Array)} values
      */
     Logger.prototype.write = function(level, message, values) {
         var options = this.options,
