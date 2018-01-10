@@ -58,7 +58,7 @@ JARS.internal('Configs/Global', function(getInternal) {
     }
 
     /**
-     * @typedef {('debugging'|'environment'|'environments'|'globalAccess'|'interceptors'|'loaderContext'|'main'|'modules')} Option
+     * @typedef {('debugging'|'environment'|'environments'|'globalAccess'|'interceptors'|'main'|'modules')} Option
      *
      * @memberof JARS~internals.Configs.Global
      * @inner
@@ -75,7 +75,6 @@ JARS.internal('Configs/Global', function(getInternal) {
       * @property {Object<string, JARS~internals.Configs.Global~Options>} environments
       * @property {boolean} globalAccess
       * @property {JARS~internals.Interceptors~Interceptor} interceptors
-      * @property {string} loaderContext
       * @property {string} main
       * @property {JARS~internals.Configs.Hooks~Modules} modules
       */

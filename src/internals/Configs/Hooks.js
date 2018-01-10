@@ -7,7 +7,6 @@ JARS.internalGroup('Configs/Hooks', [
     'Environments',
     'GlobalAccess',
     'Interceptors',
-    'LoaderContext',
     'Main',
     'Modules'
 ]);
