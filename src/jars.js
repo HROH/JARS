@@ -205,7 +205,7 @@
          *
          * @return {JARS}
          */
-        flush: delegate('Loader', 'flush', getJARS),
+        flush: delegate('Registries/Modules', 'flush', getJARS),
         /**
          * @return {JARS}
          */

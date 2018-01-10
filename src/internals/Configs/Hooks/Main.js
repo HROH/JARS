@@ -16,9 +16,9 @@ JARS.internal('Configs/Hooks/Main', function(getInternal) {
      * @return {string}
      */
     function Main(globalConfig, mainModule) {
-        var Loader = getInternal('Loader');
+        var $import = getInternal('Handlers/Modules').$import;
 
-        Loader.$import('System.*', function(System) {
+        $import('System.*', function(System) {
             var mainLogger = new System.Logger(MAIN_CONTEXT + mainModule, {
                 debug: true
             });
@@ -31,7 +31,7 @@ JARS.internal('Configs/Hooks/Main', function(getInternal) {
                 dirPath: ''
             });
 
-            Loader.$import(mainModule, function mainModuleLoaded() {
+            $import(mainModule, function mainModuleLoaded() {
                 mainLogger.info(SUCCESS_MESSAGE);
             }, function mainModuleAborted() {
                 mainLogger.error(ERROR_MESSAGE);

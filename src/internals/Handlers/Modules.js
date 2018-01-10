@@ -1,7 +1,8 @@
 JARS.internal('Handlers/Modules', function modulesQueueSetup(getInternal) {
     'use strict';
 
-    var InterceptionHandler = getInternal('Handlers/Interception'),
+    var ImportHandler = getInternal('Handlers/Import'),
+        InterceptionHandler = getInternal('Handlers/Interception'),
         ModuleHandler = getInternal('Handlers/Module'),
         ModulesRef = getInternal('Refs/Modules'),
         each = getInternal('Helpers/Array').each,
@@ -82,6 +83,16 @@ JARS.internal('Handlers/Modules', function modulesQueueSetup(getInternal) {
      */
     Modules.request = function(requestHandler) {
         new Modules(requestHandler).request();
+    };
+
+    /**
+     * @param {JARS~internals.Subjects.Dependencies.Module~Declaration} moduleNames
+     * @param {function(...*)} onModulesImported
+     * @param {function()} onModuleAborted
+     * @param {function()} onModuleImported
+     */
+    Modules.$import = function(moduleNames, onModulesImported, onModuleAborted, onModuleImported) {
+        Modules.request(ImportHandler(moduleNames, onModulesImported, onModuleAborted, onModuleImported));
     };
 
     /**

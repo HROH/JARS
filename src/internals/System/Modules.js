@@ -5,9 +5,9 @@ JARS.module('System.Modules').$export(function systemModulesFactory() {
     'use strict';
 
     var getInternal = this.$$internals.get,
-        Loader = getInternal('Loader'),
         ModulesRegistry = getInternal('Registries/Modules'),
-        DependenciesResolver = getInternal('Resolvers/Dependencies'),
+        $import = getInternal('Handlers/Modules').$import,
+        resolveDeps = getInternal('Resolvers/Dependencies').resolveDeps,
         getFullPath = getInternal('Resolvers/Path').getFullPath,
         each = getInternal('Helpers/Array').each,
         Modules;
@@ -19,7 +19,7 @@ JARS.module('System.Modules').$export(function systemModulesFactory() {
      *
      * @alias module:Modules
      *
-     * @borrows JARS~internals.Loader.$import as $import
+     * @borrows JARS~internals.Handlers.Modules.$import as $import
      */
     Modules = {
         /**
@@ -30,7 +30,7 @@ JARS.module('System.Modules').$export(function systemModulesFactory() {
         useAll: function(moduleNames) {
             var refs = [];
 
-            moduleNames = DependenciesResolver.resolveDeps(ModulesRegistry.getRoot(), moduleNames);
+            moduleNames = resolveDeps(ModulesRegistry.getRoot(), moduleNames);
 
             each(moduleNames, function use(moduleName) {
                 refs.push(Modules.use(moduleName));
@@ -44,10 +44,10 @@ JARS.module('System.Modules').$export(function systemModulesFactory() {
          * @return {*}
          */
         use: function(moduleName) {
-            return ModulesRegistry.get(moduleName).ref;
+            return ModulesRegistry.get(moduleName).ref.get();
         },
 
-        $import: Loader.$import,
+        $import: $import,
         /**
          * @return {{moduleName: string, path: string}}
          */

@@ -8,4 +8,4 @@
  * @memberof JARS~internals.Handlers
  * @inner
  */
-JARS.internalGroup('Handlers', ['BundleCoremodule', 'BundleSubmodule', 'Dependencies', 'Interception', 'Module', 'Modules', 'Request']);
+JARS.internalGroup('Handlers', ['BundleCoremodule', 'BundleSubmodule', 'Dependencies', 'Import', 'Interception', 'Module', 'Modules', 'Request']);
