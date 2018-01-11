@@ -1,7 +1,7 @@
 JARS.internal('Strategies/Type/Any', function(getInternal) {
     'use strict';
 
-    var getType = getInternal('Types/Validators').getType;
+    var getType = getInternal('Types/Lookup').get;
 
     /**
      * @memberof JARS~internals.Strategies.Type

@@ -1,4 +1,4 @@
 /**
  * @namespace JARS~internals.Types
  */
-JARS.internalGroup('Types', ['Lookup', 'Validators']);
+JARS.internalGroup('Types', ['Lookup', 'Validator', 'Validators']);

@@ -2,13 +2,9 @@ JARS.internal('Types/Validators', function(getInternal) {
     'use strict';
 
     var envGlobal = getInternal('Env').global,
-        TypeLookup = getInternal('Types/Lookup'),
+        Validator = getInternal('Types/Validator'),
         types = 'Null Undefined String Number Boolean Array Arguments Object Function Date RegExp'.split(' '),
         NOTHING = null,
-        VALIDATOR_PREFIX = 'is',
-        INFINITY = 'infinity',
-        NAN = 'nan',
-        NUMBER = 'number',
         Validators;
 
     /**
@@ -23,41 +19,7 @@ JARS.internal('Types/Validators', function(getInternal) {
          * @return {string}
          */
         add: function(typeDef) {
-            var validatorName = VALIDATOR_PREFIX + typeDef;
-
-            Validators[validatorName] || createValidator(validatorName, TypeLookup.add(typeDef), envGlobal[typeDef]);
-
-            return validatorName;
-        },
-        /**
-         * @param {*} value
-         *
-         * @return {string}
-         */
-        getType: function(value) {
-            var type;
-
-            if (!Validators.isNil(value)) {
-                type = TypeLookup.get(value);
-
-                if (type === NUMBER) {
-                    type = getTypeOfNumber(value);
-                }
-            }
-            else {
-                type = String(value);
-            }
-
-            return type || typeof value;
-        },
-        /**
-         * @param {string} type
-         * @param {*} value
-         *
-         * @return {boolean}
-         */
-        is: function(type, value) {
-            return Validators.getType(value) === type.toLowerCase();
+            return Validator(Validators, typeDef);
         },
         /**
          * @param {*} value
@@ -66,34 +28,59 @@ JARS.internal('Types/Validators', function(getInternal) {
          */
         isNil: function(value) {
             return value == NOTHING;
+        },
+        /**
+         * @param {*} value
+         *
+         * @return {boolean}
+         */
+        isDefined: function(value) {
+            return !Validators.isUndefined(value);
+        },
+        /**
+         * @method
+         *
+         * @param {*} value
+         *
+         * @return {boolean}
+         */
+        isInteger: Number.isInteger || function(value) {
+            return Validators.isNumber(value) && envGlobal.parseInt(value, 10) === value;
+        },
+        /**
+         * @method
+         *
+         * @param {*} value
+         *
+         * @return {boolean}
+         */
+        isFinite: envGlobal.isFinite,
+        /**
+         * @param {*} value
+         *
+         * @return {boolean}
+         */
+        isNaN: function(value) {
+            return envGlobal.isNaN(value) && value !== value;
+        },
+        /**
+         * @param {*} value
+         *
+         * @return {boolean}
+         */
+        isArrayLike: function(value) {
+            return Validators.isArray(value) || (!Validators.isNil(value) && isIterable(value));
+        },
+        /**
+         * @param {*} instance
+         * @param {Function} Class
+         *
+         * @return {boolean}
+         */
+        isA: function(instance, Class) {
+            return instance instanceof Class;
         }
     };
-
-    /**
-     * @memberof JARS~internals.Types.Validators
-     * @inner
-     *
-     * @param {*} value
-     *
-     * @return {string}
-     */
-    function getTypeOfNumber(value) {
-        return envGlobal.isNaN(value) ? NAN : envGlobal.isFinite(value) ? NUMBER : INFINITY;
-    }
-
-    /**
-     * @memberof JARS~internals.Types.Validators
-     * @inner
-     *
-     * @param {string} validatorName
-     * @param {string} type
-     * @param {Object} globalType
-     */
-    function createValidator(validatorName, type, globalType) {
-        Validators[validatorName] = (globalType && globalType[validatorName]) || function typeValidator(value) {
-            return Validators.is(type, value);
-        };
-    }
 
     /**
      * @method JARS~internals.Types.Validators.isNull
@@ -186,6 +173,20 @@ JARS.internal('Types/Validators', function(getInternal) {
     getInternal('Helpers/Array').each(types, function(typeDef) {
         Validators.add(typeDef);
     });
+
+    /**
+     * @memberof JARS~internals.Types.Validators
+     * @inner
+     *
+     * @param {*} value
+     *
+     * @return {boolean}
+     */
+    function isIterable(value) {
+        var length = value.length;
+
+        return length === 0 || (length > 0 && ((length - 1) in value));
+    }
 
     return Validators;
 });
