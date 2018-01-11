@@ -71,7 +71,7 @@ JARS.internal('Registries/Modules', function modulesRegistrySetup(getInternal) {
                 module.ref.flush(context);
             });
 
-            Modules.get('System.Logger').ref.get(switchToContext).info('Successfully flushed modules with context "${0}"', [context]);
+            Modules.get('System').bundle.ref.get(switchToContext).Logger.info('Successfully flushed modules with context "${0}"', [context]);
 
             switchToContext && Modules.getRoot().config.update({
                 context: switchToContext
