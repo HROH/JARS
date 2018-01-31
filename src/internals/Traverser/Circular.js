@@ -30,7 +30,7 @@ JARS.internal('Traverser/Circular', function() {
          * @return {JARS~internals.Traverser.Modules~Result}
          */
         onModuleLeave: function(module, entryModule, depth, circularList) {
-            (circularList || (equalsEntryModule(module, entryModule, depth) && (circularList = []))) && circularList.push(module.name);
+            (circularList || (equalsEntryModule(module, entryModule, depth) && (circularList = []))) && circularList.unshift(module.name);
 
             if(circularList && !depth) {
                 entryModule.state.setAborted(MSG_ABORTED_CIRCULAR_DEPENDENCIES, [circularList.join(CIRCULAR_SEPARATOR)]);
