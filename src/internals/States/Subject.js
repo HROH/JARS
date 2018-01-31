@@ -44,7 +44,7 @@ JARS.internal('States/Subject', function(getInternal) {
                 nextState: stateInfo.text
             }, stateInfo.methods), logInfo);
 
-            state._subject.logger[logInfo[canTransition ? 'done' : 'attempt']](canTransition ? DONE_MSG + (customMessage || '') : ATTEMPT_MSG, logInfo);
+            state._subject.logger[logInfo[canTransition ? 'done' : 'attempt']]((canTransition ? DONE_MSG : ATTEMPT_MSG) + (customMessage || ''), logInfo);
 
             if(canTransition) {
                 state._current = stateInfo;
