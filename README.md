@@ -1,200 +1,172 @@
-#JAR
+# JARS
 
-What is JAR ? It is a self - contained JavaScript library that consists of its own Loader and a few basic modules (so far) that will ease the creation of <code>Classes</code>, <code>Interfaces</code> and <code>Mixins</code> by providing a simple abstraction layer.
-Classes support inheritance, implementation of Interfaces as well as differentiation between public and protected (<code>_$</code>) properties and methods.
-There are also extensions of the native types <code>Object</code>, <code>Array</code>, <code>Function</code> and <code>String</code>.
-Everything in JAR is only accessible through a handful of methods which will hopefully make the library easy to understand and to use.
-
-(To those who looked into the jar.js-file and wondered where the modules <code>jar.async.\*</code>, <code>jar.html.\*</code> and <code>jar.util.\*</code> are: They are not completed yet and will follow as soon as possible.)
+What is JARS ? It is an opinionated but still highly configurable module loader similar to requirejs, that also introduces some new concepts for how modules should be handled to make them more flexible.
+Everything in JARS is only accessible through a handful of methods which will hopefully make the library easy to understand and to use.
 
 Though this library should work in all modern browsers (and even ie6+), it is not recommended for production use.
 It is merely thought of as a learning practice.
-Some of the used features may go against common best practices.
-This mainly applies to the fact that some of the native prototypes (even <code>Object.prototype</code>) are extended (though sandboxed).
+Some of the used features may go against common best practices or just be outdated considering the latest development in es6+.
 
-##Usage
+## Usage
 
-To use JAR, you only have to write the following line in the head of your HTML - document.
+To use JARS, you only have to write the following line in the head of your HTML - document.
 ```html
- <script type="text/javascript" src="path/to/jar.js"></script>
+<script data-main="entryModuleName" type="text/javascript" src="path/to/jars.js"></script>
 ```
 That's it! You are done!  
-You can now play with JAR in an inline-script or a custom js-file.
+You can now play with JARS in an inline-script or a custom javascript file.
 
-##The Loader
+## Modules and bundles
 
-What is so different about the Loader? Why not use an existing loader like requirejs?  
-Because there are some cases that are not covered by such loaders:
+To be able to properly talk about how JARS works, there are a few concepts that have to be explained first.
 
-* Module hierarchy tree:  
-The Loader automatically creates a module hierarchy tree so that a module like <code>jar.lang</code> can be later accessed as <code>jar.lang</code> in javascript.
-This also gives your project more structure, because it maps one to one to your file system and namespaces your code by default encouraging you to write "themed bundles".
-Although there exists a default file mapping, modules don't depend on it, so you can completely reconfigure their location in the file system without ever touching the module.
+### Modules
 
-* Bundles:  
-It is possible to define and import bundles like <code>jar.lang.\*</code> .
-This will import the module <code>jar.lang</code> and all its submodules.
-A bundle is defined in the module's properties.
-
- Example for bundle:
+Like in any other module loader you can compose your application from **modules**. In JARS these **modules** have to be named, e.g. <code>'async'</code> or <code>'async.Promise'</code>. You can define a **module** like this:
 ```js
-JAR.module('anotherBundle', ['Module', 'Module2'] /* pointing to 'anotherBundle.Module' and 'anotherBundle.Module2' */).$export(function() {
-    ...
+JARS.module('module').$import(dependencies).$export(function(dep1, dep2, ...) {
+    // module code goes here
+    return moduleExports;
 });
 ```
 
-* Automatic dependency-detection and complex dependency-definition:  
-There are two kinds of dependencies - implicit dependencies like <code>jar</code> for <code>jar.lang</code> and explizit dependencies.
-Explicit dependencies are declared in the module itself.
-To see how it works, just look into the existing modules.
+### Coremodules and Submodules
 
- Some examples for explicit dependencies:
+You might have noticed some similarities between the example **modules** above. That is because they have a specific relationship. <code>'async.Promise'</code> is a **submodule** to <code>'async'</code> which in turn is a **coremodule** to the former. The relationship is pretty straightforward - the **coremodule** is always an implicit dependency to the **submodule**, while the **submodule** can never be a dependency to a **coremodule**. A **coremodule** can have as many **submodules** as you want and those **submodules** can even have their own **submodules**. They also translate one-to-one to namespaces in your code.
 
- * String:
- ```js
-    JAR.module('someBundle.Module').$import('anotherBundle.Module').$export(function(anotherBundleModule) { // has one dependency in another bundle
-        var someBundle = this; // implicit
-        ...
-    });
+### Bundles
 
-    JAR.module('someBundle.Module').$import('anotherBundle.*').$export(function(anotherBundle) { // has a bundle as dependency
-        ...
-    });
-
-    JAR.module('someBundle.Module').$import('.Module2').$export(function(Module2) { // has one dependency in the same bundle
-        var someBundle = this;
-        someBundle.Module2 === Module2 // true
-        ...
-    });
- ```
-
- * Array:
- ```js
-	JAR.module('someBundle.Module').$import(['anotherBundle.Module', 'anotherBundle.Module2']).$export(function(anotherBundleModule, anotherBundleModule2) { // has more dependencies in another bundle
-        ...
-    });
-
-    JAR.module('someBundle.Module').$import(['.Module2', '.Module3']).$export(function(Module2, Module3) { // has more dependencies in the same bundle
-        ...
-    });
- ```
-
- * Object:
- ```js
-    JAR.module('someBundle.Module').$import({
-        anotherBundle: ['.' /* '.' is a special symbol that refers to the module on the lefthand side */, 'Module', 'Module2']
-    }).$export(function(anotherBundle, anotherBundleModule, anotherBundleModule2) { // has more dependencies in another bundle
-        ...
-    });
- ```
-
-The different dependency-declarations can be combined like in the last example (Object, Array)
-
-##Configuration
-
-You can configure JAR through this line,
+A **bundle** is a collection of a **coremodule** and all its ** submodules**. You can define a bundle like this:
 ```js
-JAR.configure(options);
+JARS.module('async', ['Promise']).$import(...).$export(...);
 ```
-or
+If you are not importing or exporting anything you can als just write:
 ```js
-JAR.configure(option, value);
+JARS.moduleAuto('async', ['Promise']);
+```
+Now you can import this **bundle** in other **modules** using <code>.*</code> at the end like this:
+```js
+JARS.module('module').$import('async.*').$export(function(async) {
+    // async gives you access to all the modules in a bundle
+    // as long as the coremodule doesn't export a primitive
+    var Promise = async.Promise;
+});
+```
+A **bundle** can also have **subbundles**. You can just refer to them in the bundle notation like this:
+```js
+JARS.moduleAuto('bundle', ['subbundle.*']);
+
+// and in 'bundle.subbundle'
+JARS.moduleAuto('bundle.subbundle', ['Module1', 'Module2']);
+
+// loads 'bundle', 'bundle.subbundle', 'bundle.subbundle.Module1', 'bundle.subbundle.Module2'
+JARS.module('module').$import('bundle.*').$export(...);
+```
+
+## Configuration
+
+You can configure JARS like this:,
+```js
+JARS.configure(option, value);
+// or
+JARS.configure(options);
+// or
+JARS.configure([options, ...]);
 ```
 where <code>options</code> includes one of the following:
 
-* **debugging {Object|Boolean}** (Shortcut for defining <code>modules.config</code> for <code>System.Logger</code>)
-If you just pass a boolean value, it has the same effect as the debug option.
+* **debugging {Object|Boolean}** (Shortcut for defining <code>modules.config</code> on all modules)  
+If you just pass a boolean value, it has the same effect as the <code>debugging.debug</code> option.
 Or you can provide an object with the following options:
  * **context {Object|Array|String}** (define a comma-separated list of loggers that are allowed to log messages)  
  You can also define an Object with include- and exclude-properties.
 
  * **debug {Boolean}** (turn debugging on or off - default: <code>false</code>)
 
- * **level {String|Number}** (The level that still should be logged - default: <code>System.Logger.logLevels.ALL</code>)  
- E.g. a level of **warn** will log all messages with equal or higher priorities (warn, error).
+ * **level {String|Number}** (The level that still should be logged - default: <code>System.LogLevels.ALL</code>)  
+ E.g. a level of <code>'warn'</code> will log all messages with equal or higher priorities (warn, error).
 
- * **mode {String}** (stdout if debugging is turned on <code>console, ...</code> - default: <code>console</code>)  
- You can provide your own debugger via the <code>System.Logger.addDebugger(debuggerSetup)</code> function in the <code>System.Logger</code>-module
+ * **mode {String}** (stdout if debugging is turned on - default: <code>'console'</code>)  
+ You can provide your own transport via <code>System.Transports.add(mode, Transport)</code>
 * **environment {String}** (switch between environments)
 
 * **environments {Object}** (define environments, that you can switch between)
 
     ```js
-	JAR.configure('environments', {
+	JARS.configure('environments', {
 		myEnvironment: {
-		    /*...environment options...*/
+		    // environment configuration
 		}
 	});
 
-	//later in your code
-	JAR.configure('environment', 'myEnvironment');
+	// later in your code
+	JARS.configure('environment', 'myEnvironment');
     ```
 
-* **globalAccess {Boolean}** (root-modules can be accessed over the namespace <code>JAR.mods</code>. This may be useful in developement - default: <code>false</code>)
+* **globalAccess {Boolean}** (root-modules can be accessed over the namespace <code>JARS.mods</code>. This may be useful in developement - default: <code>false</code>)
 
-* **loaderContext {String}** (spin up or switch to another Loader instance with a complete new set of modules)
+* **main {String}** (define the entry module of your application)  
+It will be automatically loaded.
 
-* **main {String}** (define the main-file of your application)
-
-* **modules {Object|Array}** (configure modulespecific options like <code>baseUrl</code> or <code>recover</code>)  
+* **modules {Object|Array}** (configure modulespecific options like <code>basePath</code> or <code>recover</code>)  
 You can customize the following options for your modules:
- * **baseUrl {String}** (url to the rootdirectory of your modules - default: current directory)
+ * **basePath {String}** (path to the rootdirectory of your modules - default: current directory)
 
  * **cache {Boolean}** (<code>false</code> prevents caching of the files - default: <code>true</code>)
- 
- * **checkCircularDeps {Boolean}** (<code>true</code> causes the module to check for circular dependencies - default: <code>false</code>)  
- Can be very slow, so only use this feature if your app is not loading properly and you don't get any error messages.
+
+ * **checkCircularDeps {Boolean}** (<code>true</code> causes the loader to check for circular dependencies - default: <code>false</code>)  
+ Can be slow in larger projects, so only use this feature with caution or if your app is not loading properly and you don't get any error messages.
 
  * **config {Object}** (options for configuring a module)  
- You can read the config using the <code>"System!"</code>-plugin-interceptor in your dependencies.
- It will give you a config-object that you can access for the option you need.
+ You can read the config using the <code>'System!'</code> plugin interceptor in your dependencies.
+ It will give you a <code>config</code> object that you can access for the option you need. All <code>config</code>s inherit from their parent <code>config</code>s.
 
  * **dirPath {String}** (path to the module)  
  By default the dirPath will be created by using the name of the module.
- E.g. the module <code>jar.lang</code> is located at [baseUrl]/jar/lang/lang.js (if the module starts in lowercase it gets its own directory)
- and the module <code>jar.lang.Class</code> is located at [baseUrl]/jar/lang/Class.js.
- If you define a new dirPath you can flatten the structure of your directories
+ E.g. the module <code>lang</code> is located at <code>'[basePath]/lang/lang.js'</code> (if the module starts in lowercase it gets its own directory)
+ and the module <code>lang.Class</code> is located at <code>'[basePath]/lang/Class.js'</code>.
+ If you define a new dirPath you can adjust the structure of your directories to <code>'[basePath]/([dirPath]/)[fileName].[extension]'</code>.
+
+ * **extension {string}** (change the file type of your module - default: <code>'js'</code>)
 
  * **fileName {String}** (change the filename of your module)
 
- * **minified {Boolean}** (should the Loader load a minified version - automatically appends **.min** to every filename)
+ * **minify {Boolean}** (should the Loader load a minified version - automatically appends **.min** to every filename)
 
  * **recover {Object}** (define a recover-configuration with the same options)  
- If the Loader fails to load a module and finds a recover it will attempt to load the module with the new options.
- Recovers can be nested as deep as you want. Options that are not redefined in a recover still remain active.
+ If the loader fails to load a module and finds a recover it will attempt to load the module with the new options.  
+ Recovers can be nested as deep as you want. Options that are not redefined in a recover still remain active. Pass <code>null</code> to delete them.  
  If you use the <code>recover</code>-option you should set the <code>timeout</code> as low as possible (0.5 seconds).
 
  * **timeout {Number}** (seconds to wait until the Loader aborts the loading of a module - default: <code>5</code>)
 
- * **versionSuffix {String}** (this will be appended to the filename)  
- This may be useful if you switch from an older to a newer version.
- It is not recommended or possible to load two different versions of one module.
+ * **versionPath {String}** (this will be appended to the directory path)
 
-   You can also pass the additional options:
-   * **restrict {Object|Array|String}** (defines the modules that are affected by this configuration similar to the dependency-declaration in <code>JAR.module(moduleName, [bundle]).$import(dependencies)</code>).
-   
-   * **loaderContext {String}** (the loaderContext of the modules that you want to configure)
-   By default this is the active loader.
+ You can also pass the additional options:
+ * **restrict {Object|Array|String}** (defines the modules that are affected by this configuration similar to the dependency-declaration in <code>JARS.module(moduleName, [bundle]).$import(dependencies)</code>).
 
-    ```js
-    JAR.configure('modules', {
-    	loaderContext: 'default' // default active loader
-        restrict: 'jar.lang.*', // restrict configuration to all the modules under 'jar.lang'
-        baseUrl: 'http://localhost/libs/',
-        minified: true
-    });
+ * **context {String}** (the context of the modules that you want to configure - default: <code>'default'</code>)
 
-    // This will load the module from 'http://localhost/libs/jar/lang/Object.min.js'
-    JAR.$import('jar.lang.Object');
-    ```
+ ```js
+ JARS.configure('modules', {
+     restrict: 'lang.*', // restrict configuration to all the modules under 'lang'
+     basePath: 'http://localhost/libs',
+     minify: true,
+     recover: {
+         basePath: 'http://localhost/backup'
+     }
+ });
 
-   Note that these configurations inherit options from their parent (e.g. jar.lang -> jar.lang.* -> jar.* -> global config).
-   So if there exists no configuration for a specific module the Loader will look for a configuration on a higher or - if you omit the restriction - on the global level.
-* **supressErrors {Boolean}** (whether thrown errors in a <code>JAR.main</code>-block should be caught - default: <code>false</code>)
+ // This will load the module from 'http://localhost/libs/lang/Object.min.js'
+ // or from 'http://localhost/backup/lang/Object.min.js' on failure
+ JARS.$import('lang.Object');
+ ```
 
-##Interceptors
+ Note that these configurations inherit options from their parent (e.g. lang -> lang.* -> global config). So if there exists no configuration for a specific module the loader will look for a configuration on a higher or - if you omit the restriction - on the global level.
 
-JAR includes the concept of interceptors.
+## Interceptors
+
+JARS includes the concept of interceptors.
 They basically intercept and interact with required modules before they are passed to the requiring module.
 You could say, it is an abstraction of what is known as "[plugins](http://requirejs.org/docs/plugins.html)" in requirejs.
 The syntax for using an interceptor is <code>moduleName + interceptorType + data</code>.
@@ -204,136 +176,72 @@ JAR comes with two default interceptors for now:
 Like already said, this interceptor is used  similar to  the implementation in requirejs,
 but it has a slightly different purpose and is not restricted to resources only.
 It just gives control to the required module, which can resume or abort loading and pass custom data to the requiring module.
-The only requirement to use the interceptor on a module is, that the required module has method called <code>$plugIn(pluginRequest)</code>.
+The only requirement to use the interceptor on a module is, that the required module has method called <code>plugIn(pluginRequest)</code> defined as meta data.
+```js
+JARS.module('test').meta({
+    plugIn: function(pluginRequest) {
+        // ...
+    }
+});
+```
 The <code>pluginRequest</code> has the following information:
- * **listener {String}** the name of the requiring module
+ * **requestor {JARS.internals.Module}** the requiring module
 
- * **data {String}** the passed in data
+ * **info {Object}** the passed in interception info
 
  * **success([value]) {Function}** call this method to resume loading.  
- If you pass in a value, the requiring module will receive it instead of the required module.
+ If you pass in a value, the requiring module will receive it instead of the required module. Calls <code>pluginRequest.$export(function() {return value;})</code>
 
- * **fail([error]) {Function}** calling this method will abort loading and show the error or a default message in the debugger (default: console)
+ * **fail([error]) {Function}** calling this method will abort loading and show the error or a default message
 
- * **$import(modules, callback, errback, progressback) {Function}** import additional modules (equal to <code>jar.$importLazy()</code> from the <code>jar</code>-module)
+ * **$import(modules) {Function}** import additional modules as dependencies of the requestor
+ * **$export(provide) {Function}** export the return value of <code>provide(...modulesExports)</code> that the requestor will receive. The content of the requested module can be accessed through <code>this</code>.
 
- * **$importAndLink(modules, callback, errback, progressback) {Function}** this is the same as calling the <code>pluginRequest.$import()</code> method.
- But it will link the modules as dependencies of the requiring module.
- It is useful if you check for dynamic circular dependencies or if you use <code>JAR.getDependencyURLList()</code>, which gives you an ordered list of all loaded modules and their dependencies.
+ * **$importAndLink(modules, provide) {Function}** this is a shorthand for calling <code>pluginRequest.$import(modules).$export(provide)</code>.
 
-    ```js
-    JAR.module('c').$import('b').$export(function() {
-        ...
-    });
-
-    JAR.module('b').$import('a!c').$export(function() {
-       ...
-    });
-
-    JAR.module('a').$export(function() {
-        return {
-            $plugIn: function(pluginRequest) {
-                pluginRequest.$import(pluginRequest.data /* 'c' */, pluginRequest.success, pluginRequest.fail);
-            }
-        };
-    })
-    ```
-   The example won't resume nor abort and not even show a message when checking for circular dependencies,
-   because the loader only knows about the declared dependencies **(c->b->a)** but not the indirect dependency **(b->c)**.
-   Using <code>pluginRequest.$importAndLink()</code> instead solves this problem (showing the correct error message, that it found a circular dependency).
-
-* **PartialModuleInterceptor** (interceptorType: **"::"**)  
+* **PropertyInterceptor** (interceptorType: **"::"**)  
 It tries to find a property that equals the passed data on the required module.
 If it finds such a property, the requiring module will receive its value instead of the required module.
-If the property doesn't exist, loading is aborted and you can see an error message in the debugger (default: console).
+If the property doesn't exist, loading is aborted and an error is logged.
 
  Without interceptor:
- ```js
- JAR.module('someBundle.Module').$import('System').$export(function(System) {
-     var isString = System.isString,
-         isFunction = System.isFunction;
-         ...
- });
- ```
-
- With interceptor:
- ```js
- JAR.module('someBundle.Module').$import({
-     System: ['::isString', '::isFunction']
- }).$export(function(isString, isFunction) {
-         ...
- });
- ```
-
-##Main entry
-
-The entry point for your program is a file, that can be loaded manual or configured as an option (see [Configuration](#configuration)).
-It includes several <code>JAR.$import()</code> statements and a <code>JAR.main()</code> block, that will be executed after every imported module is loaded.
-
 ```js
-JAR.$import('jar.lang.Class'); // import the module (also accepts an Array or Object)
-
-JAR.main(function(Class) { // waits for all the modules to be loaded
-    Class === this.jar.lang.Class; // this !== window
-
-    var RO = Class('ReadOnly', { // create a Class
-        $: { // privileged methods have access to protected methods/properties
-            constructor: function(value) {
-                value && (this._$value = value); // protected methods/properties get prefixed with _$
-            },
-
-            getValue: function() { // can get value
-                return this._$value;
-            }
-        },
-
-        _$: { // not accessible from the outside
-            value: 'default'
-        }
-    });
-
-    var RW = Class('ReadWrite', {
-        // doesn't need protected access
-        constructor: function(value) {
-            this.$super(value); // calls the constructor of the SuperClass - this.$super is only available if the method is overridden
-        },
-
-        $: {
-            setValue: function(value) { // can set value
-                this._$value = value;
-            }
-        }
-    }).extendz(RO); // inherit from RO (you can use RO.createSubClass(name, {...}) alternatively
-
-    var ro = new RO();
-    ro.getValue() // 'default'
-    ro.setValue('custom') // error
-    ro._$value // undefined
-
-    var rw = new RW('notDefault');
-    rw.getValue() // 'notDefault'
-    rw.setValue('custom')
-    rw.getValue() // 'custom'
-    rw._$value // undefined
-
-    ro.constructor === RO // true
-    ro.Class === RO // true
-    ro.getHash() // unique hash like 'Object #<*:ReadOnly#...>'
-    RO.getClassName() // 'ReadOnly'
-    RO.getHash() // unique hash like 'Class #<*:ReadOnly>'
-    RO.getSubClasses()[0] === RW // true
-    RW.getSuperClass() === RO // true
-    RO.getInstances()[0] === ro // true
-    RO.getInstances(true /*get instances of subclasses too*/)[1] === rw // true - inheritance
-    RW.getInstances()[0] === rw // true
-    ro instanceof RO // true
-    ro instanceof RW // false
-    rw instanceof RO // true - inheritance
-    rw instanceof RW // true
+JARS.module('someBundle.Module').$import('System').$export(function(System) {
+    var isString = System.isString,
+        isFunction = System.isFunction;
+        // ...
 });
 ```
 
-##Versioning
+ With interceptor:
+```js
+JARS.module('someBundle.Module').$import({
+    System: ['::isString', '::isFunction']
+}).$export(function(isString, isFunction) {
+        // ...
+});
+```
+
+## Main entry
+
+The entry point for your program is a module, that can be configured as an option (see [Configuration](#configuration)).
+
+```js
+//In entryModule.js
+JARS.module('entryModule').$import('some.Module').export(function(someModule) {
+    //Code to setup project goes here
+});
+//In index.html
+<script data-main="entryModule" type="text/javascript" src="path/to/jars.js"></script>
+//or
+<script type="text/javascript" src="path/to/jars.js">
+    JARS.main('entryModule');
+    //or
+    JARS.configure('main', 'entryModule');
+</script>
+```
+
+## Versioning
 
 This project follows SemVer guidelines.
 There are no fixed milestones set for now, so I will update the minor version when I feel that I completed some bigger changes in the codebase.
@@ -341,9 +249,9 @@ I will also not make any patches before version 1.0.0 because everything is stil
 
 The latest version is 0.3.0.
 
-##Copyright and licensing
+## Copyright and licensing
 
-Copyright(c) 2013-2015 Holger Haas
+Copyright(c) 2013-2017 Holger Haas
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"),
 to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
