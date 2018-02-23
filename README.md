@@ -36,7 +36,7 @@ You might have noticed some similarities between the example **modules** above. 
 
 ### Bundles
 
-A **bundle** is a collection of a **coremodule** and all its ** submodules**. You can define a bundle like this:
+A **bundle** is a collection of a **coremodule** and all its **submodules**. You can define a bundle like this:
 ```js
 JARS.module('async', ['Promise']).$import(...).$export(...);
 ```
@@ -67,11 +67,9 @@ JARS.module('module').$import('bundle.*').$export(...);
 
 You can configure JARS like this:,
 ```js
-JARS.configure(option, value);
+JARS.configure(option, value|values[]);
 // or
 JARS.configure(options);
-// or
-JARS.configure([options, ...]);
 ```
 where <code>options</code> includes one of the following:
 
@@ -103,7 +101,7 @@ Or you can provide an object with the following options:
   JARS.configure('environment', 'myEnvironment');
   ```
 
-* **globalAccess {Boolean}** (root-modules can be accessed over the namespace <code>JARS.mods</code>. This may be useful in developement - default: <code>false</code>)
+* **globalAccess {Boolean}** (internals can be accessed over the namespace <code>JARS.internals</code>. This may be useful in developement - default: <code>false</code>)
 
 * **main {String}** (define the entry module of your application)  
 It will be automatically loaded.
@@ -125,13 +123,13 @@ You can customize the following options for your modules:
   By default the dirPath will be created by using the name of the module.
   E.g. the module <code>lang</code> is located at <code>'[basePath]/lang/lang.js'</code> (if the module starts in lowercase it gets its own directory)
   and the module <code>lang.Class</code> is located at <code>'[basePath]/lang/Class.js'</code>.
-  If you define a new dirPath you can adjust the structure of your directories to <code>'[basePath]/([dirPath]/)[fileName].[extension]'</code>.
+  If you define a new dirPath you can adjust the structure of your directories to <code>'[basePath]/([versionPath]/)([dirPath]/)[fileName].[extension]'</code>.
 
   * **extension {string}** (change the file type of your module - default: <code>'js'</code>)
 
   * **fileName {String}** (change the filename of your module)
 
-  * **minify {Boolean}** (should the Loader load a minified version - automatically appends **.min** to every filename)
+  * **minify {Boolean}** (should the Loader load a minified version - automatically appends <code>.min</code> to every filename)
 
   * **recover {Object}** (define a recover-configuration with the same options)  
   If the loader fails to load a module and finds a recover it will attempt to load the module with the new options.  
@@ -140,12 +138,10 @@ You can customize the following options for your modules:
 
   * **timeout {Number}** (seconds to wait until the Loader aborts the loading of a module - default: <code>5</code>)
 
-  * **versionPath {String}** (this will be appended to the directory path)
+  * **versionPath {String}** (this will be prepended to the directory path)
 
   You can also pass the additional options:
   * **restrict {Object|Array|String}** (defines the modules that are affected by this configuration similar to the dependency-declaration in <code>JARS.module(moduleName, [bundle]).$import(dependencies)</code>).
-
-  * **context {String}** (the context of the modules that you want to configure - default: <code>'default'</code>)
 
   ```js
   JARS.configure('modules', {
@@ -162,7 +158,9 @@ You can customize the following options for your modules:
   JARS.$import('lang.Object');
   ```
 
- Note that these configurations inherit options from their parent (e.g. lang -> lang.* -> global config). So if there exists no configuration for a specific module the loader will look for a configuration on a higher or - if you omit the restriction - on the global level.
+  * **context {String}** (the context of the modules that you want to configure - default: <code>'default'</code>)
+
+ Note that these configurations inherit options from their parent (e.g. <code>lang</code> -> <code>lang.*</code> -> <code>global</code> config). So if there exists no configuration for a specific module the loader will look for a configuration on a higher or - if you omit the restriction - on the global level.
 
 ## Interceptors
 
@@ -170,7 +168,7 @@ JARS includes the concept of interceptors.
 They basically intercept and interact with required modules before they are passed to the requiring module.
 You could say, it is an abstraction of what is known as "[plugins](http://requirejs.org/docs/plugins.html)" in requirejs.
 The syntax for using an interceptor is <code>moduleName + interceptorType + data</code>.
-JAR comes with two default interceptors for now:
+JARS comes with two default interceptors for now:
 
 ### PluginInterceptor (interceptorType: **"!"**)  
 Like already said, this interceptor is used  similar to  the implementation in requirejs,
@@ -185,7 +183,7 @@ JARS.module('test').meta({
 });
 ```
 The <code>pluginRequest</code> has the following information:
-  * **requestor {JARS.internals.Module}** the requiring module
+  * **requestor {JARS~internals.Module}** the requiring module
 
   * **info {Object}** the passed in interception info
 
