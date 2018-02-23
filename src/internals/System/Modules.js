@@ -8,7 +8,7 @@ JARS.module('System.Modules').$export(function() {
         ModulesRegistry = getInternal('Registries/Modules'),
         $import = getInternal('Handlers/Modules').$import,
         resolveDeps = getInternal('Resolvers/Dependencies').resolveDeps,
-        getFullPath = getInternal('Resolvers/Path').getFullPath,
+        PathResolver = getInternal('Resolvers/Path'),
         each = getInternal('Helpers/Array').each,
         Modules;
 
@@ -57,7 +57,7 @@ JARS.module('System.Modules').$export(function() {
             return {
                 moduleName: module.name,
 
-                path: getFullPath(module)
+                path: PathResolver(module)
             };
         }
     };

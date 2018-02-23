@@ -1,7 +1,7 @@
 JARS.internal('Traverser/PathList', function(getInternal) {
     'use strict';
 
-    var getFullPath = getInternal('Resolvers/Path').getFullPath,
+    var PathResolver = getInternal('Resolvers/Path'),
         PathList;
 
     /**
@@ -32,7 +32,7 @@ JARS.internal('Traverser/PathList', function(getInternal) {
         onModuleLeave: function(module, entryModule, depth, trackList) {
             if(!isModuleSorted(module, trackList)) {
                 trackList.sorted[module.name] = true;
-                trackList.paths.push(getFullPath(module));
+                trackList.paths.push(PathResolver(module));
             }
 
             return {

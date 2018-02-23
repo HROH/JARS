@@ -2,7 +2,7 @@ JARS.internal('Subjects/Interception', function(getInternal) {
     'use strict';
 
     var InterceptionRef = getInternal('Refs/Interception'),
-        getFullPath = getInternal('Resolvers/Path').getFullPath,
+        PathResolver = getInternal('Resolvers/Path'),
         MSG_MODULE_INTERCEPTED = ' - handling request of "${fullModuleName}"',
         MSG_INTERCEPTION_ERROR = ' - error in interception of module "${moduleName}" by interceptor "${type}" with data "${data}"';
 
@@ -56,7 +56,7 @@ JARS.internal('Subjects/Interception', function(getInternal) {
          * @return {string}
          */
         getFilePath: function(fileType) {
-            return getFullPath(this.requestor, fileType);
+            return PathResolver(this.requestor, fileType);
         },
         /**
          * @param {JARS~internals.Subjects.Dependencies.Module~Declaration} moduleNames

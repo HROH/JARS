@@ -2,7 +2,7 @@ JARS.internal('Processors/Module', function(getInternal) {
     'use strict';
 
     var AutoAborter = getInternal('Helpers/AutoAborter'),
-        getFullPath = getInternal('Resolvers/Path').getFullPath,
+        PathResolver = getInternal('Resolvers/Path'),
         loadSource = getInternal('SourceManager').load;
 
     /**
@@ -23,7 +23,7 @@ JARS.internal('Processors/Module', function(getInternal) {
          */
         load: function() {
             var module = this.module,
-                path = getFullPath(module);
+                path = PathResolver(module);
 
             if (module.state.setLoading()) {
 

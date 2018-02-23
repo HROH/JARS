@@ -4,30 +4,25 @@ JARS.internal('Resolvers/Path', function(getInternal) {
     var ExtensionTransform = getInternal('Configs/Transforms/Extension'),
         each = getInternal('Helpers/Array').each,
         pathOptions = ['basePath', 'versionPath', 'dirPath', 'fileName', 'minify', 'extension', 'cache'],
-        Path;
+        OPTION_EXTENSION = 'extension';
 
     /**
-     * @namespace
-     *
      * @memberof JARS~internals.Resolvers
+     *
+     * @param {JARS~internals.Subjects.Module} module
+     * @param {string} [extension]
+     *
+     * @return {string}
      */
-    Path = {
-        /**
-         * @param {JARS~internals.Subjects.Module} module
-         * @param {string} [extension]
-         *
-         * @return {string}
-         */
-        getFullPath: function(module, extension) {
-            var path = '';
+    function Path(module, extension) {
+        var path = '';
 
-            each(pathOptions, function(option) {
-                path += (option === 'extension' && extension) ? ExtensionTransform(extension) : module.config.get(option);
-            });
+        each(pathOptions, function(option) {
+            path += (option === OPTION_EXTENSION && extension) ? ExtensionTransform(extension) : module.config.get(option);
+        });
 
-            return path;
-        }
-    };
+        return path;
+    }
 
     return Path;
 });
