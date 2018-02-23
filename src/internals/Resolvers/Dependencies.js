@@ -1,4 +1,4 @@
-JARS.internal('Resolvers/Dependencies', function dependenciesResolverSetup(getInternal) {
+JARS.internal('Resolvers/Dependencies', function(getInternal) {
     'use strict';
 
     var ModulesRegistry = getInternal('Registries/Modules'),

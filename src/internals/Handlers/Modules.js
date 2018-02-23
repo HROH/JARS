@@ -1,4 +1,4 @@
-JARS.internal('Handlers/Modules', function modulesQueueSetup(getInternal) {
+JARS.internal('Handlers/Modules', function(getInternal) {
     'use strict';
 
     var ImportHandler = getInternal('Handlers/Import'),

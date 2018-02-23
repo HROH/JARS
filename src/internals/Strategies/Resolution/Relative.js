@@ -1,4 +1,4 @@
-JARS.internal('Strategies/Resolution/Relative', function relativeResolutionStrategySetup(getInternal) {
+JARS.internal('Strategies/Resolution/Relative', function(getInternal) {
     'use strict';
 
     var RelativeResolver = getInternal('Resolvers/Relative'),

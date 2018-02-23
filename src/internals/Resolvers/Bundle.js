@@ -1,4 +1,4 @@
-JARS.internal('Resolvers/Bundle', function bundleResolverSetup(getInternal) {
+JARS.internal('Resolvers/Bundle', function(getInternal) {
     'use strict';
 
     var ArrayResolutionStrategy = getInternal('Strategies/Type/Array'),

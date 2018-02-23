@@ -1,4 +1,4 @@
-JARS.internal('Registries/Modules', function modulesRegistrySetup(getInternal) {
+JARS.internal('Registries/Modules', function(getInternal) {
     'use strict';
 
     var BundleResolver = getInternal('Resolvers/Bundle'),

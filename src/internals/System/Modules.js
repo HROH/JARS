@@ -1,7 +1,7 @@
 /**
  * @module Modules
  */
-JARS.module('System.Modules').$export(function systemModulesFactory() {
+JARS.module('System.Modules').$export(function() {
     'use strict';
 
     var getInternal = this.$$internals.get,

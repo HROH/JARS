@@ -1,4 +1,4 @@
-JARS.internal('Resolvers/Path', function pathResolverSetup(getInternal) {
+JARS.internal('Resolvers/Path', function(getInternal) {
     'use strict';
 
     var ExtensionTransform = getInternal('Configs/Transforms/Extension'),

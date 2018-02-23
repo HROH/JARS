@@ -1,4 +1,4 @@
-JARS.internal('Strategies/Resolution/Absolute', function absoluteResolutionStrategySetup(getInternal) {
+JARS.internal('Strategies/Resolution/Absolute', function(getInternal) {
     'use strict';
 
     var VersionResolutionStrategy = getInternal('Strategies/Resolution/Version'),

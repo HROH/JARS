@@ -1,4 +1,4 @@
-JARS.internal('Resolvers/Version', function versionResolverSetup() {
+JARS.internal('Resolvers/Version', function() {
     'use strict';
 
     var EMPTY_STRING = '',

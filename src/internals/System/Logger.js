@@ -8,7 +8,7 @@ JARS.module('System.Logger').$import([
     '.LogContext',
     '.LogLevels',
     '.Modules::getCurrentModuleData'
-]).$export(function systemLoggerSetup(config, Transports, format, LogContext, LogLevels, getCurrentModuleData) {
+]).$export(function(config, Transports, format, LogContext, LogLevels, getCurrentModuleData) {
     'use strict';
 
     var loggerCache = {},
