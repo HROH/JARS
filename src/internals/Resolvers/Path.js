@@ -3,7 +3,7 @@ JARS.internal('Resolvers/Path', function pathResolverSetup(getInternal) {
 
     var ExtensionTransform = getInternal('Configs/Transforms/Extension'),
         each = getInternal('Helpers/Array').each,
-        pathOptions = ['basePath', 'dirPath', 'versionPath', 'fileName', 'minify', 'extension', 'cache'],
+        pathOptions = ['basePath', 'versionPath', 'dirPath', 'fileName', 'minify', 'extension', 'cache'],
         Path;
 
     /**
