@@ -1,0 +1,16 @@
+===============
+# directories
+===============
+.vscode/
+build/
+examples/
+min/
+node_modules/
+reports/
+#temp
+tests/
+docs/
+
+===============
+# files
+===============

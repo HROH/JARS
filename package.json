@@ -1,0 +1,19 @@
+{
+  "name": "jars",
+  "version": "0.4.0",
+  "description": "",
+  "author": "Holger Haas",
+  "private": true,
+  "license": "MIT",
+  "devDependencies": {
+    "gulp": "3.9.1",
+    "jars-gulp": "file:../jars-gulp",
+    "jars-karma": "file:../jars-karma"
+  },
+  "scripts": {
+    "dev": "gulp -- dev",
+    "test": "gulp -- test",
+    "watch": "gulp -- watch",
+    "version": "git add README.md src/jars.js"
+  }
+}
