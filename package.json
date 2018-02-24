@@ -1,6 +1,6 @@
 {
   "name": "jars",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "",
   "author": "Holger Haas",
   "private": true,
@@ -13,6 +13,7 @@
   "scripts": {
     "dev": "gulp -- dev",
     "test": "gulp -- test",
-    "watch": "gulp -- watch"
+    "watch": "gulp -- watch",
+    "version": "git add README.md src/jars.js"
   }
 }

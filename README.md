@@ -247,7 +247,7 @@ This project follows SemVer guidelines.
 There are no fixed milestones set for now, so I will update the minor version when I feel that I completed some bigger changes in the codebase.
 I will also not make any patches before version 1.0.0 because everything is still unstable.
 
-The latest version is 0.3.0.
+The latest version is 0.4.0.
 
 ## Copyright and licensing
 
