@@ -11,10 +11,10 @@ JARS.internal('Bootstrappers/Modules', function(getInternal) {
          * @method
          */
         bootstrap: function() {
-            var ModulesRegistry = getInternal('Registries/Modules');
-
-            ModulesRegistry.Module = getInternal('Subjects/Module');
-            ModulesRegistry.getRoot().$export();
+            var rootModule = getInternal('Registries/Subjects').getRootModule();
+            
+            getInternal('Helpers/Tracker').setRoot(rootModule);
+            rootModule.$export();
         }
     };
 

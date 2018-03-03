@@ -8,7 +8,7 @@ JARS.internal('Configs/Subject', function(getInternal) {
      *
      * @memberof JARS~internals.Configs
      *
-     * @param {JARS~internals.Subjects~Subject} subject
+     * @param {JARS~internals.Subjects.Subject} subject
      * @param {JARS~internals.Configs.Subject} [parentConfig]
      */
     function Subject(subject, parentConfig) {

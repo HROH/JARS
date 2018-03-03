@@ -9,16 +9,16 @@ JARS.internal('Resolvers/Path', function(getInternal) {
     /**
      * @memberof JARS~internals.Resolvers
      *
-     * @param {JARS~internals.Subjects.Module} module
+     * @param {JARS~internals.Subjects.Subject} subject
      * @param {string} [extension]
      *
      * @return {string}
      */
-    function Path(module, extension) {
+    function Path(subject, extension) {
         var path = '';
 
         each(pathOptions, function(option) {
-            path += (option === OPTION_EXTENSION && extension) ? ExtensionTransform(extension) : module.config.get(option);
+            path += (option === OPTION_EXTENSION && extension) ? ExtensionTransform(extension) : subject.config.get(option);
         });
 
         return path;

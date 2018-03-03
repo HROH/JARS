@@ -3,11 +3,11 @@
  */
 JARS.internalGroup('Resolvers', [
     'Bundle',
-    'Dependencies',
     'DirPath',
     'FileName',
     'Interception',
     'Options',
+    'Parent',
     'Path',
     'PathList',
     'Relative',

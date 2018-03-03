@@ -16,7 +16,7 @@ JARS.internal('Configs/Hooks/Main', function(getInternal) {
      * @return {string}
      */
     function Main(globalConfig, mainModule) {
-        var $import = getInternal('Handlers/Modules').$import;
+        var $import = getInternal('Handlers/Import').$import;
 
         $import('System.*', function(System) {
             var mainLogger = new System.Logger(MAIN_CONTEXT + mainModule, {

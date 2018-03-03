@@ -5,9 +5,9 @@ JARS.module('System.Modules').$export(function() {
     'use strict';
 
     var getInternal = this.$$internals.get,
-        ModulesRegistry = getInternal('Registries/Modules'),
-        $import = getInternal('Handlers/Modules').$import,
-        resolveDeps = getInternal('Resolvers/Dependencies').resolveDeps,
+        getRootModule = getInternal('Registries/Subjects').getRootModule,
+        getCurrent = getInternal('Helpers/Tracker').getCurrent,
+        $import = getInternal('Handlers/Import').$import,
         PathResolver = getInternal('Resolvers/Path'),
         each = getInternal('Helpers/Array').each,
         Modules;
@@ -19,21 +19,19 @@ JARS.module('System.Modules').$export(function() {
      *
      * @alias module:Modules
      *
-     * @borrows JARS~internals.Handlers.Modules.$import as $import
+     * @borrows JARS~internals.Handlers.Import.$import as $import
      */
     Modules = {
         /**
-         * @param {JARS~internals.Subjects.Dependencies.Module~Declaration} moduleNames
+         * @param {JARS~internals.Subjects~Declaration} moduleNames
          *
          * @return {Array<*>}
          */
         useAll: function(moduleNames) {
             var refs = [];
 
-            moduleNames = resolveDeps(ModulesRegistry.getRoot(), moduleNames);
-
-            each(moduleNames, function use(moduleName) {
-                refs.push(Modules.use(moduleName));
+            each(getRootModule().dependencies.resolve(moduleNames), function(subject) {
+                refs.push(subject.ref.get());
             });
 
             return refs;
@@ -44,7 +42,7 @@ JARS.module('System.Modules').$export(function() {
          * @return {*}
          */
         use: function(moduleName) {
-            return ModulesRegistry.get(moduleName).ref.get();
+            return Modules.useAll(moduleName)[0];
         },
 
         $import: $import,
@@ -52,7 +50,8 @@ JARS.module('System.Modules').$export(function() {
          * @return {{moduleName: string, path: string}}
          */
         getCurrentModuleData: function() {
-            var module = ModulesRegistry.getCurrent();
+            //TODO
+            var module = getCurrent();
 
             return {
                 moduleName: module.name,

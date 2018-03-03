@@ -1,32 +1,27 @@
 JARS.internal('Handlers/Modules', function(getInternal) {
     'use strict';
 
-    var ImportHandler = getInternal('Handlers/Import'),
-        InterceptionHandler = getInternal('Handlers/Interception'),
-        ModuleHandler = getInternal('Handlers/Module'),
-        ModulesRef = getInternal('Refs/Modules'),
-        each = getInternal('Helpers/Array').each,
-        getModule = getInternal('Registries/Modules').get,
-        isBundle = getInternal('Resolvers/Bundle').isBundle;
+    var ModulesRef = getInternal('Refs/Modules'),
+        each = getInternal('Helpers/Array').each;
 
     /**
      * @class
      *
      * @memberof JARS~internals.Handlers
      *
-     * @param {JARS~internals.Handlers.Request} requestHandler
+     * @param {JARS~internals.Handlers.Subjects.Subject} requestHandler
      */
     function Modules(requestHandler) {
         var handler = this;
 
         handler.requestor = requestHandler.requestor;
         handler._nextHandler = requestHandler;
-        handler._modules = requestHandler.modules;
-        handler._total = handler._modules.length;
+        handler._subjects = requestHandler.subjects;
+        handler._total = handler._subjects.length;
         handler._ref = new ModulesRef();
         handler._loaded = 0;
 
-        handler.onModulesLoaded();
+        handler.onCompleted();
     }
 
     Modules.prototype = {
@@ -36,63 +31,47 @@ JARS.internal('Handlers/Modules', function(getInternal) {
         request: function() {
             var handler = this;
 
-            each(handler._modules, function requestModule(requested, index) {
-                handler.requestModule(requested, index);
+            each(handler._subjects, function(subject, index) {
+                handler.requestSubject(subject, index);
             });
         },
         /**
-         * @param {string} requested
+         * @param {JARS~internals.Subjects.Subject} subject
          * @param {number} index
          */
-        requestModule: function(requested, index) {
-            var module = getModule(requested),
-                moduleOrBundle = isBundle(requested) ? module.bundle : module,
-                changeHandler = new ModuleHandler(index, this);
+        requestSubject: function(subject, index) {
+            this._ref.add(index, subject.ref);
 
-            moduleOrBundle.processor.load();
-            moduleOrBundle.state.onChange(isBundle(requested) ? changeHandler : InterceptionHandler.intercept(requested, changeHandler));
+            subject.load(this);
         },
         /**
-         * @param {string} publisherName
-         * @param {object} data
+         * @param {JARS~internals.Subjects.Subject} subject
          */
-        onModuleLoaded: function(publisherName, data) {
+        onLoaded: function(subject) {
             var handler = this;
 
-            handler._ref.add(data.index, data.ref);
-
-            handler._nextHandler.onModuleLoaded(publisherName, data.ref, getPercentage(handler._loaded++, handler._total));
-            handler.onModulesLoaded();
+            handler._nextHandler.onLoaded(subject, getPercentage(handler._loaded++, handler._total));
+            handler.onCompleted();
         },
         /**
-         * @param {string} abortedModuleName
+         * @param {JARS~internals.Subjects.Subject} subject
          */
-        onModuleAborted: function(abortedModuleName) {
-            this._nextHandler.onModuleAborted(abortedModuleName);
+        onAborted: function(subject) {
+            this._nextHandler.onAborted(subject);
         },
         /**
          * @method
          */
-        onModulesLoaded: function() {
-            this._loaded === this._total && this._nextHandler.onModulesLoaded(this._ref);
+        onCompleted: function() {
+            this._loaded === this._total && this._nextHandler.onCompleted(this._ref);
         }
     };
 
     /**
-     * @param {JARS~internals.Handlers.Request} requestHandler
+     * @param {JARS~internals.Handlers.Subjects.Subject} requestHandler
      */
     Modules.request = function(requestHandler) {
         new Modules(requestHandler).request();
-    };
-
-    /**
-     * @param {JARS~internals.Subjects.Dependencies.Module~Declaration} moduleNames
-     * @param {function(...*)} onModulesImported
-     * @param {function()} onModuleAborted
-     * @param {function()} onModuleImported
-     */
-    Modules.$import = function(moduleNames, onModulesImported, onModuleAborted, onModuleImported) {
-        Modules.request(ImportHandler(moduleNames, onModulesImported, onModuleAborted, onModuleImported));
     };
 
     /**

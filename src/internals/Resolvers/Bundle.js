@@ -1,8 +1,7 @@
 JARS.internal('Resolvers/Bundle', function(getInternal) {
     'use strict';
 
-    var ArrayResolutionStrategy = getInternal('Strategies/Type/Array'),
-        BundleResolutionStrategy = getInternal('Strategies/Resolution/Bundle'),
+    var ParentResolver = getInternal('Resolvers/Parent'),
         VersionResolver = getInternal('Resolvers/Version'),
         unwrapVersion = VersionResolver.unwrapVersion,
         BUNDLE_SUFFIX = '.*',
@@ -43,17 +42,10 @@ JARS.internal('Resolvers/Bundle', function(getInternal) {
          */
         isBundle: function(moduleName) {
             return RE_BUNDLE_SUFFIX.test(VersionResolver.removeVersion(moduleName));
-        },
-        /**
-         * @param {JARS~internals.Subjects.Module} baseModule
-         * @param {JARS~internals.Subjects.Bundle~Declaration} bundleModules
-         *
-         * @return {string[]}
-         */
-        resolveBundle: function(baseModule, bundleModules) {
-            return ArrayResolutionStrategy(baseModule, bundleModules || [], BundleResolutionStrategy);
         }
     };
+
+    Bundle.ROOT = Bundle.getBundleName(ParentResolver.ROOT);
 
     return Bundle;
 });

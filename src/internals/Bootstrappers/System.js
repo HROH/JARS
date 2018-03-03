@@ -19,7 +19,7 @@ JARS.internal('Bootstrappers/System', function(getInternal) {
                 basePath: getInternal('Env').INTERNALS_PATH
             });
 
-            systemModule = getInternal('Registries/Modules').register('System', [
+            systemModule = getInternal('Registries/Subjects').registerModule('System', [
                 'Formatter',
                 'Logger',
                 'LogContext',
@@ -57,7 +57,9 @@ JARS.internal('Bootstrappers/System', function(getInternal) {
                  * @param {JARS~internals.Subjects.Interception} pluginRequest
                  */
                 plugIn: function(pluginRequest) {
-                    pluginRequest.success(pluginRequest.requestor.config.get('config'));
+                    pluginRequest.$export(function() {
+                        return pluginRequest.requestor.config.get('config');
+                    });
                 }
             });
 

@@ -3,17 +3,17 @@ JARS.internal('States/Subject', function(getInternal) {
 
     var StateInfo = getInternal('States/Info'),
         merge = getInternal('Helpers/Object').merge,
-        ATTEMPT_MSG = 'attempted to mark as ${nextState} but is currently ${curState}',
-        DONE_MSG = 'is ${nextState}',
-        QUEUE_LOADED = 'onModuleLoaded',
-        QUEUE_ABORTED = 'onModuleAborted';
+        MSG_ATTEMPT = 'attempted to mark as ${nextState} but is currently ${curState}',
+        MSG_DONE = 'is ${nextState}',
+        LOG_ATTEMPT = 'attempt',
+        LOG_DONE = 'done';
 
     /**
      * @class
      *
      * @memberof JARS~internals.States
      *
-     * @param {JARS~internals.Subjects~Subject} subject
+     * @param {JARS~internals.Subjects.Subject} subject
      */
     function Subject(subject) {
         this._subject = subject;
@@ -21,20 +21,48 @@ JARS.internal('States/Subject', function(getInternal) {
         this._queue = [];
     }
 
-    /**
-     * @param {JARS~internals.Handlers~StateChange} changeHandler
-     */
-    Subject.prototype.onChange = function(changeHandler) {
-        this._queue.push(changeHandler);
-        this._syncQueue();
-    };
+    Subject.prototype = {
+        constructor: Subject,
+        /**
+         * @param {JARS~internals.Handlers.Modules} changeHandler
+         */
+        onChange: function(changeHandler) {
+            this._queue.push(changeHandler);
+            this._syncQueue();
+        },
+        /**
+         * @private
+         */
+        _syncQueue: function() {
+            var state = this,
+                isLoaded = state.isLoaded();
 
-    StateInfo.each(function(stateInfo) {
-        Subject.prototype[stateInfo.is] = function() {
+            if(isLoaded || state.isAborted()) {
+                while(state._queue.length) {
+                    state._queue.shift()[isLoaded ? 'onLoaded' : 'onAborted'](state._subject);
+                }
+            }
+        },
+        /**
+         * @private
+         *
+         * @param {JARS~internals.State.Info} stateInfo
+         *
+         * @return {boolean}
+         */
+        _is: function(stateInfo) {
             return this._current === stateInfo;
-        };
-
-        Subject.prototype[stateInfo.set] = function(customMessage, logInfo) {
+        },
+        /**
+         * @private
+         *
+         * @param {JARS~internals.State.Info} stateInfo
+         * @param {string} [message]
+         * @param {Object} [logInfo]
+         *
+         * @return {boolean}
+         */
+        _set: function(stateInfo, message, logInfo) {
             var state = this,
                 canTransition = state._current.hasNext(stateInfo);
 
@@ -44,7 +72,7 @@ JARS.internal('States/Subject', function(getInternal) {
                 nextState: stateInfo.text
             }, stateInfo.methods), logInfo);
 
-            state._subject.logger[logInfo[canTransition ? 'done' : 'attempt']]((canTransition ? DONE_MSG : ATTEMPT_MSG) + (customMessage || ''), logInfo);
+            state._subject.logger[logInfo[canTransition ? LOG_DONE : LOG_ATTEMPT]]((canTransition ? MSG_DONE : MSG_ATTEMPT) + (message ? ' - ' + message : ''), logInfo);
 
             if(canTransition) {
                 state._current = stateInfo;
@@ -52,33 +80,18 @@ JARS.internal('States/Subject', function(getInternal) {
             }
 
             return canTransition;
-        };
-    });
-
-    /**
-     * @private
-     */
-    Subject.prototype._syncQueue = function() {
-        var state = this,
-            isLoaded = state.isLoaded();
-
-        if(isLoaded || state.isAborted()) {
-            drainQueue(state._queue, isLoaded ? QUEUE_LOADED : QUEUE_ABORTED, state._subject);
         }
     };
 
-    /**
-     * @param {JARS~internals.Handlers~StateChange[]} queue
-     * @param {string} method
-     * @param {JARS~internals.Subjects~Subject} subject
-     */
-    function drainQueue(queue, method, subject) {
-        while(queue.length) {
-            queue.shift()[method](subject.name, {
-                ref: subject.ref
-            });
-        }
-    }
+    StateInfo.each(function(stateInfo) {
+        Subject.prototype[stateInfo.is] = function() {
+            return this._is(stateInfo);
+        };
+
+        Subject.prototype[stateInfo.set] = function(customMessage, logInfo) {
+            return this._set(stateInfo, customMessage, logInfo);
+        };
+    });
 
     /**
      * @method JARS~internals.States.Subject#isWaiting

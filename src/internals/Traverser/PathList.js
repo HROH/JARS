@@ -2,6 +2,8 @@ JARS.internal('Traverser/PathList', function(getInternal) {
     'use strict';
 
     var PathResolver = getInternal('Resolvers/Path'),
+        BundleResolver = getInternal('Resolvers/Bundle'),
+        InterceptionResolver = getInternal('Resolvers/Interception'),
         PathList;
 
     /**
@@ -11,28 +13,28 @@ JARS.internal('Traverser/PathList', function(getInternal) {
      */
     PathList = {
         /**
-         * @param {JARS~internals.Subjects.Module} module
-         * @param {JARS~internals.Subjects.Module} entryModule
+         * @param {JARS~internals.Subjects.Subject} subject
+         * @param {JARS~internals.Subjects.Subject} entryModule
          * @param {number} depth
          * @param {*} trackList
          *
          * @return {boolean}
          */
-        onModuleEnter: function(module, entryModule, depth, trackList) {
-            return !isModuleSorted(module, trackList) && module.state.isLoaded();
+        onEnter: function(subject, entryModule, depth, trackList) {
+            return !isSorted(subject, trackList) && subject.state.isLoaded();
         },
         /**
-         * @param {JARS~internals.Subjects.Module} module
-         * @param {JARS~internals.Subjects.Module} entryModule
+         * @param {JARS~internals.Subjects.Subject} subject
+         * @param {JARS~internals.Subjects.Subject} entryModule
          * @param {number} depth
-         * @param {*} trackList
+         * @param {Object} trackList
          *
          * @return {JARS~internals.Traverser.Modules~Result}
          */
-        onModuleLeave: function(module, entryModule, depth, trackList) {
-            if(!isModuleSorted(module, trackList)) {
-                trackList.sorted[module.name] = true;
-                trackList.paths.push(PathResolver(module));
+        onLeave: function(subject, entryModule, depth, trackList) {
+            if(!isSorted(subject, trackList)) {
+                trackList.sorted[subject.name] = true;
+                !InterceptionResolver.isInterception(subject.name) && !BundleResolver.isBundle(subject.name) && trackList.paths.push(PathResolver(subject));
             }
 
             return {
@@ -44,13 +46,13 @@ JARS.internal('Traverser/PathList', function(getInternal) {
     };
 
     /**
-     * @param {JARS~internals.Subjects.Module} module
-     * @param {*} trackList
+     * @param {JARS~internals.Subjects.Subject} subject
+     * @param {Object} trackList
      *
      * @return {boolean}
      */
-    function isModuleSorted(module, trackList) {
-        return trackList.sorted[module.name];
+    function isSorted(subject, trackList) {
+        return trackList.sorted[subject.name];
     }
 
     return PathList;

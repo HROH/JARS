@@ -3,11 +3,10 @@ JARS.internal('Resolvers/PathList', function(getInternal) {
 
     var PathListTraverser = getInternal('Traverser/PathList'),
         ModulesTraverser = getInternal('Traverser/Modules'),
-        importModules = getInternal('Handlers/Modules').$import,
+        importModules = getInternal('Handlers/Import').$import,
         each = getInternal('Helpers/Array').each,
-        getModule = getInternal('Registries/Modules').get,
-        isBundle = getInternal('Resolvers/Bundle').isBundle,
-        excluded = ['*', 'System.*'],
+        rootModule = getInternal('Registries/Subjects').getRootModule(),
+        excluded = rootModule.dependencies.resolve('System.*'),
         PathList;
 
     /**
@@ -26,10 +25,10 @@ JARS.internal('Resolvers/PathList', function(getInternal) {
          * @param {function(string[])} callback
          */
         computeSortedPathList: function(entryModuleName, callback) {
-            var entryModule = getModule(entryModuleName);
+            var entryModule = rootModule.dependencies.resolve(entryModuleName)[0];
 
             importModules([entryModule.name], function computeSortedPathList() {
-                callback(ModulesTraverser(entryModule, PathListTraverser, markModulesSorted(excluded, {
+                callback(ModulesTraverser(entryModule, PathListTraverser, markSubjectsSorted(excluded, {
                     sorted: {},
 
                     paths: []
@@ -42,19 +41,16 @@ JARS.internal('Resolvers/PathList', function(getInternal) {
      * @memberof JARS~internals.Resolvers.PathList
      * @inner
      *
-     * @param {string[]} modules
+     * @param {JARS~internals.Subjects.Subject[]} subjects
      * @param {Object} trackList
      */
-    function markModulesSorted(modules, trackList) {
-        each(modules, function markModuleSorted(excludedModule) {
-            var module;
+    function markSubjectsSorted(subjects, trackList) {
+        each(subjects, function markSubjectSorted(excludedSubject) {
+            trackList.sorted[excludedSubject.name] = true;
 
-            trackList.sorted[excludedModule] = true;
-
-            if(isBundle(excludedModule)) {
-                module = getModule(excludedModule);
-                trackList.sorted[module.name] = true;
-                trackList = markModulesSorted(module.bundle.modules, trackList);
+            if(!excludedSubject.isRoot) {
+                trackList.sorted[excludedSubject.parent.name] = true;
+                trackList = markSubjectsSorted(excludedSubject.dependencies.getAll(), trackList);
             }
         });
 

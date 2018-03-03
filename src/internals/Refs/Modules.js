@@ -16,7 +16,7 @@ JARS.internal('Refs/Modules', function(getInternal) {
         constructor: Modules,
         /**
          * @param {number} index
-         * @param {(JARS~internals.Refs.Module|JARS~internals.Refs.Interception)} ref
+         * @param {JARS~internals.Refs.Subject} ref
          */
         add: function(index, ref) {
             this._refs[index] = ref;
@@ -34,6 +34,14 @@ JARS.internal('Refs/Modules', function(getInternal) {
             });
 
             return refs;
+        },
+        /**
+         * @param {string} context
+         */
+        flush: function(context) {
+            each(this._refs, function(ref) {
+                ref.flush(context);
+            });
         }
     };
 

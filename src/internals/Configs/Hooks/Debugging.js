@@ -12,10 +12,14 @@ JARS.internal('Configs/Hooks/Debugging', function(getInternal) {
      * @param {(JARS~internals.Configs.Hooks~Debugging|boolean)} debugConfig
      */
     function Debugging(globalConfig, debugConfig) {
+        debugConfig = isObject(debugConfig) ? debugConfig : {
+            debug: debugConfig
+        };
+
         globalConfig.update('modules', {
-            config: isObject(debugConfig) ? debugConfig : {
-                debug: debugConfig
-            }
+            config: debugConfig,
+
+            debug: debugConfig.debug
         });
     }
 

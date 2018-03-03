@@ -8,18 +8,18 @@ JARS.internal('Strategies/Resolution/Version', function(getInternal) {
     /**
      * @memberof JARS~internals.Strategies.Resolution
      *
-     * @param {JARS~internals.Subjects.Module} baseModule
-     * @param {string} moduleName
+     * @param {JARS~internals.Subjects.Subject} subject
+     * @param {string} subjectName
      *
-     * @return {string}
+     * @return {{error: string, name: string}}
      */
-    function Version(baseModule, moduleName) {
-        return VersionResolver.getVersion(moduleName) ? {
+    function Version(subject, subjectName) {
+        return VersionResolver.getVersion(subjectName) ? {
             error: MSG_VERSION_RESOLUTION_ERROR
         } : {
-            moduleName: VersionResolver.unwrapVersion(function resolveAbsolute(baseModuleName) {
-                return baseModuleName + (moduleName ? DOT + moduleName : moduleName);
-            })(baseModule.name)
+            name: VersionResolver.unwrapVersion(function(subjectBaseName) {
+                return subjectBaseName + (subjectName ? DOT + subjectName : subjectName);
+            })(subject.name)
         };
     }
 

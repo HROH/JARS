@@ -1,8 +1,9 @@
 JARS.internal('Interceptors/Plugin', function(getInternal) {
     'use strict';
 
-    var getModule = getInternal('Registries/Modules').get,
-        isFunction = getInternal('Types/Validators').isFunction,
+    var isFunction = getInternal('Types/Validators').isFunction,
+        META_PLUGIN = 'plugIn',
+        MSG_MISSING_PLUGIN_METHOD = 'could not call method "plugIn" on this module',
         Plugin;
 
     /**
@@ -14,12 +15,12 @@ JARS.internal('Interceptors/Plugin', function(getInternal) {
     */
     Plugin = {
         /**
-         * @param {JARS~internals.Subjects.Interception} interception
+         * @param {JARS~internals.Subjects.Subject} interception
          */
         intercept: function(interception) {
-            var plugIn = getModule(interception.info.moduleName).getMeta('plugIn');
+            var plugIn = interception.parent.getMeta(META_PLUGIN);
 
-            isFunction(plugIn) ? plugIn(interception) : interception.fail('Could not call method "plugIn" on this module');
+            isFunction(plugIn) ? plugIn(interception, getInternal) : interception.state.setAborted(MSG_MISSING_PLUGIN_METHOD);
         },
         /**
          * @type {string}

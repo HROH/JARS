@@ -8,15 +8,15 @@ JARS.internal('Strategies/Resolution/Absolute', function(getInternal) {
     /**
      * @memberof JARS~internals.Strategies.Resolution
      *
-     * @param {JARS~internals.Subjects.Module} baseModule
-     * @param {string} moduleName
+     * @param {JARS~internals.Subjects.Subject} subject
+     * @param {string} subjectName
      *
-     * @return {string}
+     * @return {{error: string, name: string}}
      */
-    function Absolute(baseModule, moduleName) {
-        return (baseModule.isRoot || RelativeResolver(moduleName)) ? {
+    function Absolute(subject, subjectName) {
+        return (subject.isRoot || RelativeResolver(subjectName)) ? {
             error: MSG_ABSOLUTE_RESOLUTION_ERROR
-        } : VersionResolutionStrategy(baseModule, moduleName);
+        } : VersionResolutionStrategy(subject, subjectName);
     }
 
     return Absolute;

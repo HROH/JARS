@@ -1,43 +1,35 @@
 JARS.internal('Traverser/Circular', function() {
     'use strict';
 
-    var CIRCULAR_SEPARATOR = '" -> "',
-        MSG_ABORTED_CIRCULAR_DEPENDENCIES = ' - found circular dependencies "${0}"',
-        Circular;
-
     /**
      * @namespace
      *
      * @memberof JARS~internals.Traverser
      */
-    Circular = {
+    var Circular = {
         /**
-         * @param {JARS~internals.Subjects.Module} module
-         * @param {JARS~internals.Subjects.Module} entryModule
+         * @param {JARS~internals.Subjects.Subject} subject
+         * @param {JARS~internals.Subjects.Subject} entryModule
          * @param {number} depth
          *
          * @return {boolean}
          */
-        onModuleEnter: function(module, entryModule, depth) {
-            return !equalsEntryModule(module, entryModule, depth) && (module.state.isRegistered() || module.state.isIntercepted());
+        onEnter: function(subject, entryModule, depth) {
+            return !equalsEntryModule(subject, entryModule, depth) && !(subject.state.isLoading() || subject.state.isLoaded());
         },
         /**
-         * @param {JARS~internals.Subjects.Module} module
-         * @param {JARS~internals.Subjects.Module} entryModule
+         * @param {JARS~internals.Subjects.Subject} subject
+         * @param {JARS~internals.Subjects.Subject} entryModule
          * @param {number} depth
          * @param {*} circularList
          *
          * @return {JARS~internals.Traverser.Modules~Result}
          */
-        onModuleLeave: function(module, entryModule, depth, circularList) {
-            (circularList || (equalsEntryModule(module, entryModule, depth) && (circularList = []))) && circularList.unshift(module.name);
-
-            if(circularList && !depth) {
-                entryModule.state.setAborted(MSG_ABORTED_CIRCULAR_DEPENDENCIES, [circularList.join(CIRCULAR_SEPARATOR)]);
-            }
+        onLeave: function(subject, entryModule, depth, circularList) {
+            (circularList || (equalsEntryModule(subject, entryModule, depth) && (circularList = []))) && circularList.unshift(subject.name);
 
             return {
-                value: depth ? circularList : !!circularList,
+                value: circularList,
 
                 done: !!circularList
             };
@@ -48,14 +40,14 @@ JARS.internal('Traverser/Circular', function() {
      * @memberof JARS~internals.Traverser.Circular
      * @inner
      *
-     * @param {JARS~internals.Subjects.Module} module
-     * @param {JARS~internals.Subjects.Module} entryModule
+     * @param {JARS~internals.Subjects.Subject} subject
+     * @param {JARS~internals.Subjects.Subject} entryModule
      * @param {number} depth
      *
      * @return {boolean}
      */
-    function equalsEntryModule(module, entryModule, depth) {
-        return depth && module === entryModule;
+    function equalsEntryModule(subject, entryModule, depth) {
+        return depth && subject === entryModule;
     }
 
     return Circular;

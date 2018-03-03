@@ -1,34 +1,44 @@
 JARS.internal('Handlers/Import', function(getInternal) {
     'use strict';
 
-    var resolveDeps = getInternal('Resolvers/Dependencies').resolveDeps,
-        getRootModule = getInternal('Registries/Modules').getRoot;
+    var request = getInternal('Handlers/Modules').request,
+        rootModule = getInternal('Registries/Subjects').getRootModule();
 
     /**
      * @memberof JARS~internals.Handlers
      *
-     * @param {JARS~internals.Subjects.Dependencies.Module~Declaration} moduleNames
-     * @param {function(...*)} onModulesLoaded
-     * @param {function()} onModuleAborted
-     * @param {function()} onModuleLoaded
+     * @param {JARS~internals.Subjects~Declaration} moduleNames
+     * @param {function(...*)} onCompleted
+     * @param {function()} onAborted
+     * @param {function()} onLoaded
+     *
+     * @return {JARS~internals.Handlers.Subjects.Subject}
      */
-    function Import(moduleNames, onModulesLoaded, onModuleAborted, onModuleLoaded) {
-        var rootModule = getRootModule();
-        
+    function Import(moduleNames, onCompleted, onAborted, onLoaded) {
         return {
             requestor: rootModule,
 
-            modules: resolveDeps(rootModule, moduleNames),
+            subjects: rootModule.dependencies.resolve(moduleNames),
 
-            onModuleLoaded: onModuleLoaded || noop,
+            onLoaded: onLoaded || noop,
 
-            onModuleAborted: onModuleAborted || noop,
+            onAborted: onAborted || noop,
 
-            onModulesLoaded: function(refs) {
-                (onModulesLoaded || noop).apply(null, refs.get());
-            }
+            onCompleted: onCompleted ? function(refs) {
+                onCompleted.apply(null, refs.get());
+            } : noop
         };
     }
+
+    /**
+     * @param {JARS~internals.Subjects~Declaration} moduleNames
+     * @param {function(...*)} onCompleted
+     * @param {function()} onAborted
+     * @param {function()} onLoaded
+     */
+    Import.$import = function(moduleNames, onCompleted, onAborted, onLoaded) {
+        request(Import(moduleNames, onCompleted, onAborted, onLoaded));
+    };
 
     /**
      * @memberof JARS~internals.Handlers.Import

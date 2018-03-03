@@ -4,30 +4,30 @@ JARS.internal('Strategies/Type/Object', function(getInternal) {
     var each = getInternal('Helpers/Object').each,
         AnyResolutionStrategy = getInternal('Strategies/Type/Any'),
         StringResolutionStrategy = getInternal('Strategies/Type/String'),
-        NestedResolutionStrategy = getInternal('Strategies/Resolution/Nested'),
-        ModulesRegistry = getInternal('Registries/Modules');
+        NestedResolutionStrategy = getInternal('Strategies/Resolution/Nested');
 
     /**
      * @memberof JARS~internals.Strategies.Type
      *
-     * @param {JARS~internals.Subjects.Module} baseModule
-     * @param {Object<string, JARS~internals.Subjects.Dependencies.Module~Declaration>} modules
+     * @param {JARS~internals.Subjects.Subject} subject
+     * @param {JARS~internals.Subjects.Subject} requestor
+     * @param {Object<string, JARS~internals.Subjects~Declaration>} subjects
      * @param {JARS~internals.Strategies.Resolution~Strategy} resolutionStrategy
      *
-     * @return {string[]}
+     * @return {JARS~internals.Subjects.Subject[]}
      */
-    function Object(baseModule, modules, resolutionStrategy) {
-        var resolvedModules = [];
+    function Object(subject, requestor, subjects, resolutionStrategy) {
+        var resolvedSubjects = [];
 
-        each(modules, function concatResolvedModules(nestedModules, moduleName) {
-            var tmpBaseModuleName = StringResolutionStrategy(baseModule, moduleName, resolutionStrategy)[0];
+        each(subjects, function(nestedSubjects, moduleName) {
+            var nestedSubject = StringResolutionStrategy(subject, requestor, moduleName, resolutionStrategy)[0];
 
-            if(tmpBaseModuleName) {
-                resolvedModules = resolvedModules.concat(AnyResolutionStrategy(ModulesRegistry.get(tmpBaseModuleName), nestedModules, NestedResolutionStrategy));
+            if(nestedSubject) {
+                resolvedSubjects = resolvedSubjects.concat(AnyResolutionStrategy(nestedSubject, requestor, nestedSubjects, NestedResolutionStrategy));
             }
         });
 
-        return resolvedModules;
+        return resolvedSubjects;
     }
 
     return Object;

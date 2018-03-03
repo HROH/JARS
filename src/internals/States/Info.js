@@ -28,7 +28,7 @@ JARS.internal('States/Info', function(getInternal) {
      *
      * @memberof JARS~internals.States
      *
-     * @param {string} stateText
+     * @param {string} stateMethodText
      * @param {Object} logMethods
      */
     function Info(stateText, stateMethodText, logMethods) {

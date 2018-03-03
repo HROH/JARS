@@ -5,7 +5,7 @@ JARS.internal('Helpers/AutoAborter', function(getInternal) {
         global = getInternal('Env').global,
         timeoutIDs = {},
         MILLISECONDS_PER_SECOND = 1000,
-        MSG_MODULE_ABORTED = ' - timeout after ${sec} second(s) with given path "${path}"',
+        MSG_MODULE_ABORTED = 'timeout after ${sec} second(s) with given path "${path}"',
         AutoAborter;
 
     /**
@@ -15,7 +15,7 @@ JARS.internal('Helpers/AutoAborter', function(getInternal) {
      */
     AutoAborter = {
         /**
-         * @param {JARS~internals.Subjects.Module} module
+         * @param {JARS~internals.Subjects.Subject} module
          * @param {string} path
          */
         setup: function(module, path) {
@@ -30,7 +30,7 @@ JARS.internal('Helpers/AutoAborter', function(getInternal) {
             }, timeout * MILLISECONDS_PER_SECOND);
         },
         /**
-         * @param {JARS~internals.Subjects.Module} module
+         * @param {JARS~internals.Subjects.Subject} module
          */
         clear: function(module) {
             global.clearTimeout(timeoutIDs[module.name]);

@@ -8,9 +8,9 @@
  * @memberof JARS~internals.Strategies.Resolution
  * @inner
  *
- * @param {JARS~internals.Module} baseModule
- * @param {string} moduleName
+ * @param {JARS~internals.Subject} subject
+ * @param {string} subjectName
  *
- * @return {string}
+ * @return {{error: string, name: string}}
  */
-JARS.internalGroup('Strategies/Resolution', ['Absolute', 'Bundle', 'Dependencies', 'Nested', 'Relative', 'Version']);
+JARS.internalGroup('Strategies/Resolution', ['Absolute', 'Bundle', 'Nested', 'Relative', 'Subject', 'Version']);

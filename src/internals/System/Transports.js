@@ -3,7 +3,7 @@
  */
 JARS.module('System.Transports', ['Console']).meta({
     /**
-     * @param {JARS~internals.Subjects.Interception} pluginRequest
+     * @param {JARS~internals.Subjects.Subject} pluginRequest
      */
     plugIn: function(pluginRequest) {
         var data = pluginRequest.info.data.split(':');
@@ -11,7 +11,7 @@ JARS.module('System.Transports', ['Console']).meta({
         pluginRequest.$importAndLink(data[1], function addTransport(Transport) {
             this.add(data[0], new Transport());
 
-            pluginRequest.success(this);
+            return this;
         });
     }
 }).$import(['.!', '.::$$internals']).$export(function(config, internals) {

@@ -1,4 +1,4 @@
-JARS.internal('Strategies/Resolution/Dependencies', function(getInternal) {
+JARS.internal('Strategies/Resolution/Subject', function(getInternal) {
     'use strict';
 
     var RelativeResolver = getInternal('Resolvers/Relative'),
@@ -8,18 +8,18 @@ JARS.internal('Strategies/Resolution/Dependencies', function(getInternal) {
     /**
      * @memberof JARS~internals.Strategies.Resolution
      *
-     * @param {JARS~internals.Subjects.Module} baseModule
-     * @param {string} moduleName
+     * @param {JARS~internals.Subjects.Subject} subject
+     * @param {string} subjectName
      *
-     * @return {string}
+     * @return {{error: string, name: string}}
      */
-    function Dependencies(baseModule, moduleName) {
-        return RelativeResolver(moduleName) ? RelativeResolutionStrategy(baseModule, moduleName) : moduleName ? {
-            moduleName: moduleName
+    function Subject(subject, subjectName) {
+        return RelativeResolver(subjectName) ? RelativeResolutionStrategy(subject, subjectName) : subjectName ? {
+            name: subjectName
         } : {
             error: MSG_DEPENDENCY_RESOLUTION_ERROR
         };
     }
 
-    return Dependencies;
+    return Subject;
 });

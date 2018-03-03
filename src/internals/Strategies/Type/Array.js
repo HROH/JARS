@@ -7,20 +7,21 @@ JARS.internal('Strategies/Type/Array', function(getInternal) {
     /**
      * @memberof JARS~internals.Strategies.Type
      *
-     * @param {JARS~internals.Module} baseModule
-     * @param {JARS~internals.Subjects~Declaration[]} modules
+     * @param {JARS~internals.Subjects.Subject} subject
+     * @param {JARS~internals.Subjects.Subject} requestor
+     * @param {JARS~internals.Subjects~Declaration[]} subjects
      * @param {JARS~internals.Strategies.Resolution~Strategy} resolutionStrategy
      *
-     * @return {string[]}
+     * @return {JARS~internals.Subjects.Subject[]}
      */
-    function Array(baseModule, modules, resolutionStrategy) {
-        var resolvedModules = [];
+    function Array(subject, requestor, subjects, resolutionStrategy) {
+        var resolvedSubjects = [];
 
-        each(modules, function concatResolvedModules(nestedModules) {
-            resolvedModules = resolvedModules.concat(AnyResolutionStrategy(baseModule, nestedModules, resolutionStrategy));
+        each(subjects, function concatResolvedModules(nestedSubjects) {
+            resolvedSubjects = resolvedSubjects.concat(AnyResolutionStrategy(subject, requestor, nestedSubjects, resolutionStrategy));
         });
 
-        return resolvedModules;
+        return resolvedSubjects;
     }
 
     return Array;

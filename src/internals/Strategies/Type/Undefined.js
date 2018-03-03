@@ -4,7 +4,7 @@ JARS.internal('Strategies/Type/Undefined', function() {
     /**
      * @memberof JARS~internals.Strategies.Type
      *
-     * @return {string[]}
+     * @return {JARS~internals.Subjects.Subject[]}
      */
     function Undefined() {
         return [];

@@ -124,16 +124,16 @@
          * @method
          *
          * @param {string} moduleName
-         * @param {JARS~internals.Subjects.Bundle~Declaration} bundle
+         * @param {JARS~internals.Subjects~Declaration} bundle
          *
          * @return {JARS~ModuleWrapper}
          */
-        module: delegate('Registries/Modules', 'register', function returnModuleWrapper(moduleName) {
-            var dynamicInternalName = 'ModulesRegistry:' + moduleName,
+        module: delegate('Registries/Subjects', 'registerModule', function returnModuleWrapper(moduleName) {
+            var dynamicInternalName = 'Registries/Subjects:' + moduleName,
                 ModuleWrapper;
 
             delegate('Registries/Internals', 'register')(dynamicInternalName, function(getInternal) {
-                return getInternal('Registries/Modules').get(moduleName);
+                return getInternal('Registries/Subjects').get(moduleName);
             });
 
             /**
@@ -143,11 +143,18 @@
              * @inner
              */
             ModuleWrapper = {
+                /**
+                 * @method
+                 *
+                 * @param {Object}
+                 *
+                 * @return {JARS~ModuleWrapper}
+                 */
                 meta: delegate(dynamicInternalName, 'setMeta', returnSelf),
                 /**
                  * @method
                  *
-                 * @param {JARS~internals.Subjects.Dependencies.Module~Declaration}
+                 * @param {JARS~internals.Subjects~Declaration}
                  *
                  * @return {JARS~ModuleWrapper}
                  */
@@ -155,7 +162,7 @@
                 /**
                  * @method
                  *
-                 * @param {JARS~internals.Subjects.Module~Factory} factory
+                 * @param {JARS~internals.Subjects.Subject~Provide} provide
                  */
                 $export: delegate(dynamicInternalName, '$export')
             };
@@ -174,7 +181,7 @@
         }),
         /**
          * @param {string} moduleName
-         * @param {JARS~internals.Subjects.Bundle~Declaration} bundle
+         * @param {JARS~internals.Subjects~Declaration} bundle
          */
         moduleAuto: function(moduleName, bundle) {
             JARS.module(moduleName, bundle).$export();
@@ -205,7 +212,7 @@
          *
          * @return {JARS}
          */
-        flush: delegate('Registries/Modules', 'flush', getJARS),
+        flush: delegate('Registries/Subjects', 'flush', getJARS),
         /**
          * @return {JARS}
          */

@@ -8,7 +8,7 @@ JARS.internal('Helpers/Array', function() {
      */
     var Array = {
         /**
-         * @param {(Array|NodeList)} array
+         * @param {Array<*>} array
          * @param {function(*, number): boolean} callback
          */
         each: function(array, callback) {

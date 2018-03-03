@@ -1,31 +1,23 @@
 JARS.internal('Configs/Hooks/Modules', function(getInternal) {
     'use strict';
 
-    var ModulesRegistry = getInternal('Registries/Modules'),
-        resolveDeps = getInternal('Resolvers/Dependencies').resolveDeps,
-        isBundle = getInternal('Resolvers/Bundle').isBundle,
+    var SubjectsRegistry = getInternal('Registries/Subjects'),
         each = getInternal('Helpers/Array').each;
 
     /**
-     * @method
-     *
      * @memberof JARS~internals.Configs.Hooks
      *
      * @param {JARS~internals.Configs.Global} globalConfig
      * @param {JARS~internals.Configs.Hooks~Modules} config
      */
     function Modules(globalConfig, config) {
-        var rootModule = ModulesRegistry.getRoot();
-
         if(config.restrict) {
-            each(resolveDeps(rootModule, config.restrict), function updateConfig(moduleName) {
-                var module = ModulesRegistry.get(moduleName);
-
-                (isBundle(moduleName) ? module.bundle : module).config.update(config);
+            each(SubjectsRegistry.getRootModule().dependencies.resolve(config.restrict), function updateConfig(subject) {
+                subject.config.update(config);
             });
         }
         else {
-            rootModule.config.update(config);
+            SubjectsRegistry.getRootBundle().config.update(config);
         }
     }
 
@@ -40,6 +32,7 @@ JARS.internal('Configs/Hooks/Modules', function(getInternal) {
      * @property {boolean} checkCircularDeps
      * @property {JARS~internals.Configs.Public} config
      * @property {string} context
+     * @property {boolean} debug
      * @property {string} dirPath
      * @property {string} extension
      * @property {string} fileName
@@ -47,7 +40,7 @@ JARS.internal('Configs/Hooks/Modules', function(getInternal) {
      * @property {JARS~internals.Configs.Hooks~Modules} recover
      * @property {number} timeout
      * @property {string} versionPath
-     * @property {JARS~internals.Subjects.Dependencies.Module~Declaration} restrict
+     * @property {JARS~internals.Subjects~Declaration} restrict
      */
 
     return Modules;

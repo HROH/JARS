@@ -8,16 +8,16 @@ JARS.internal('Strategies/Resolution/Nested', function(getInternal) {
     /**
      * @memberof JARS~internals.Strategies.Resolution
      *
-     * @param {JARS~internals.Subjects.Module} baseModule
-     * @param {string} moduleName
+     * @param {JARS~internals.Subjects.Subject} subject
+     * @param {string} subjectName
      *
-     * @return {string}
+     * @return {{error: string, name: string}}
      */
-    function Nested(baseModule, moduleName) {
-        return moduleName !== DOT ? AbsoluteResolutionStrategy(baseModule, moduleName) : baseModule.isRoot ? {
+    function Nested(subject, subjectName) {
+        return subjectName !== DOT ? AbsoluteResolutionStrategy(subject, subjectName) : subject.isRoot ? {
             error: MSG_NESTED_RESOLUTION_ERROR
         } : {
-            moduleName: baseModule.name
+            name: subject.name
         };
     }
 

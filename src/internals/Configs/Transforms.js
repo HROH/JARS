@@ -7,6 +7,7 @@ JARS.internalGroup('Configs/Transforms', [
     'CheckCircularDeps',
     'Config',
     'Context',
+    'Debug',
     'DirPath',
     'Extension',
     'FileName',

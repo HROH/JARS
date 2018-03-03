@@ -86,11 +86,10 @@ JARS.init(function(commands) {
             Queue.addGroup([
                 'Bootstrappers',
                 'Configs',
+                'Factories',
                 'Handlers',
                 'Helpers',
                 'Interceptors',
-                'Logger',
-                'Processors',
                 'Refs',
                 'Registries',
                 'Resolvers',
