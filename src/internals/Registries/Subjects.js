@@ -54,7 +54,7 @@ JARS.internal('Registries/Subjects', function(getInternal) {
          * @param {string} switchToContext
          */
         flush: function(context, switchToContext) {
-            Cache.each(function flushModule(subject) {
+            Cache.each(function(subject) {
                 subject.ref.flush(context);
             });
 
@@ -106,7 +106,7 @@ JARS.internal('Registries/Subjects', function(getInternal) {
      * @param {string} subjectType
      * @param {string} key
      *
-     * @return {[function(){}, string[]]}
+     * @return {Array}
      */
     function getFactory(subjectType, key) {
         return factories[key][subjectType] || factories[key].subject;

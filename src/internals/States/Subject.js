@@ -46,7 +46,7 @@ JARS.internal('States/Subject', function(getInternal) {
         /**
          * @private
          *
-         * @param {JARS~internals.State.Info} stateInfo
+         * @param {JARS~internals.States.Info} stateInfo
          *
          * @return {boolean}
          */
@@ -56,7 +56,7 @@ JARS.internal('States/Subject', function(getInternal) {
         /**
          * @private
          *
-         * @param {JARS~internals.State.Info} stateInfo
+         * @param {JARS~internals.States.Info} stateInfo
          * @param {string} [message]
          * @param {Object} [logInfo]
          *

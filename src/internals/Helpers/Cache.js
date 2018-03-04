@@ -48,7 +48,7 @@ JARS.internal('Helpers/Cache', function(getInternal) {
             return value;
         },
         /**
-         * @param {function(JARS~internals.Subjects.Subject|null)} callback
+         * @param {function((JARS~internals.Subjects.Subject|null))} callback
          */
         each: function(callback) {
             each(cache, function(entry, subjectName) {
