@@ -11,9 +11,13 @@ JARS.internal('Factories/Logger', function(getInternal) {
      */
     Logger = {
         subject: [function(subjectName, injected) {
-            return new SubjectLogger(injected.description + ':' + subjectName, injected.config);
+            return new SubjectLogger(injected.description + ':' + subjectName, injected.config, injectLogger(injected, 'state'), injectLogger(injected, 'ref'));
         }, ['config', 'description']]
     };
+
+    function injectLogger(injected, key) {
+        return injected.$inject('System.Logger', key);
+    }
 
     return Logger;
 });

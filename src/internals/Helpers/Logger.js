@@ -1,8 +1,6 @@
 JARS.internal('Helpers/Logger', function(getInternal) {
     'use strict';
 
-    var loggerRef;
-
     /**
      * @class
      *
@@ -10,29 +8,30 @@ JARS.internal('Helpers/Logger', function(getInternal) {
      *
      * @param {string} description
      * @param {JARS~internals.Configs.Subject} config
+     * @param {JARS~internals.States.Subject} loggerState
+     * @param {JARS~internals.Refs.Subject} loggerRef
      */
-    function Subject(description, config) {
-        this._config = config;
+    function Subject(description, config, loggerState, loggerRef) {
         this._context = description;
+        this._config = config;
+        this._loggerState = loggerState;
+        this._loggerRef = loggerRef;
     }
-
-    getInternal('Helpers/Array').each(['debug', 'error', 'info', 'warn'], function addForward(methodName) {
-        Subject.prototype[methodName] = function(message, values) {
-            var loggerRef = getLoggerRef();
-
-            this._config.get('debug') && loggerRef && loggerRef.get()[methodName + 'WithContext'](this._context, message, values);
-        };
-    });
 
     /**
-     * @memberof JARS~internals.Helpers.Logger
-     * @inner
-     *
-     * @return {JARS~internals.Refs.Module}
+     * @param {string} level
+     * @param {string} message
+     * @param {Object} [values]
      */
-    function getLoggerRef() {
-        return loggerRef || (loggerRef = getInternal('Registries/Subjects').get('System.Logger').ref);
-    }
+    Subject.prototype.write = function(level, message, values) {
+        this._config.get('debug') && this._loggerState.isLoaded() && this._loggerRef.get()[level + 'WithContext'](this._context, message, values);
+    };
+
+    getInternal('Helpers/Array').each(['debug', 'error', 'info', 'warn'], function(level) {
+        Subject.prototype[level] = function(message, values) {
+            this.write(level, message, values);
+        };
+    });
 
     /**
      * @method JARS~internals.Helpers.Logger#debug
