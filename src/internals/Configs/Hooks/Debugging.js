@@ -1,7 +1,8 @@
 JARS.internal('Configs/Hooks/Debugging', function(getInternal) {
     'use strict';
 
-    var isObject = getInternal('Types/Validators').isObject;
+    var isObject = getInternal('Types/Validators').isObject,
+        merge = getInternal('Helpers/Object').merge;
 
     /**
      * @method
@@ -12,9 +13,11 @@ JARS.internal('Configs/Hooks/Debugging', function(getInternal) {
      * @param {(JARS~internals.Configs.Hooks~Debugging|boolean)} debugConfig
      */
     function Debugging(globalConfig, debugConfig) {
-        debugConfig = isObject(debugConfig) ? debugConfig : {
+        debugConfig = merge({
+            mode: 'console'
+        }, isObject(debugConfig) ? debugConfig : {
             debug: debugConfig
-        };
+        });
 
         globalConfig.update('modules', {
             config: debugConfig,
