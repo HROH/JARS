@@ -22,15 +22,16 @@ JARS.module('System.Transports.Console').$import(['..!', '..::env', '..LogLevels
      * @param {object} data
      */
     Console.prototype.write = function(level, context, data) {
-        var info = getInfo(level, context, data);
+        var message = getMessage(level, context, data),
+            meta = getIfConfigured(data, 'meta');
 
         updateGroup(context);
 
         if (shouldThrowError(level)) {
-            throw new Error(info + ' -> ' + data.message);
+            throw new Error(message);
         }
 
-        globalConsole[level](info, data.message, getData(data, 'meta'));
+        meta ? globalConsole[level](message, meta) : globalConsole[level](message);
     };
 
     LogLevels.each(function createConsoleForward(level) {
@@ -85,8 +86,8 @@ JARS.module('System.Transports.Console').$import(['..!', '..::env', '..LogLevels
      *
      * @return {string}
      */
-    function getInfo(level, context, data) {
-        return brackets(getData(data, 'timestamp')) + brackets(getContext(level, context));
+    function getMessage(level, context, data) {
+        return brackets(getIfConfigured(data, 'timestamp')) + brackets(getContext(level, context)) + ' ' + data.message;
     }
 
     /**
@@ -111,7 +112,7 @@ JARS.module('System.Transports.Console').$import(['..!', '..::env', '..LogLevels
      *
      * @return {string}
      */
-    function getData(data, key) {
+    function getIfConfigured(data, key) {
         return config[key] ? data[key] : '';
     }
 
