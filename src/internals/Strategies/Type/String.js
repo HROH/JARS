@@ -17,7 +17,7 @@ JARS.internal('Strategies/Type/String', function(getInternal) {
      */
     function String(subject, requestor, subjectName, resolutionStrategy) {
         var info = extractInterceptionInfo(subjectName),
-            result = resolutionStrategy(subject, info.moduleName);
+            result = resolutionStrategy(subject, info.name);
 
         abortOnResolutionError(subject.state, result.error, subjectName);
 

@@ -15,31 +15,29 @@ JARS.internal('Resolvers/Interception', function(getInternal) {
             return Interception.removeInterceptionData(interceptionName) !== interceptionName;
         },
         /**
-         * @param {string} moduleName
+         * @param {string} subjectName
          *
          * @return {string}
          */
-        removeInterceptionData: function(moduleName) {
-            return Interception.extractInterceptionInfo(moduleName).moduleName;
+        removeInterceptionData: function(subjectName) {
+            return Interception.extractInterceptionInfo(subjectName).name;
         },
         /**
-         * @param {string} moduleName
+         * @param {string} subjectName
          *
          * @return {JARS~internals.Resolvers.Interception~Info}
          */
-        extractInterceptionInfo: function(moduleName) {
-            var interceptionInfo = interceptionInfoCache[moduleName],
+        extractInterceptionInfo: function(subjectName) {
+            var interceptionInfo = interceptionInfoCache[subjectName],
                 moduleParts;
 
             if (!interceptionInfo) {
                 eachInterceptor(function findInterceptor(interceptor, interceptorType) {
-                    if (moduleName.indexOf(interceptorType) > -1) {
-                        moduleParts = moduleName.split(interceptorType);
+                    if (subjectName.indexOf(interceptorType) > -1) {
+                        moduleParts = subjectName.split(interceptorType);
 
                         interceptionInfo = {
-                            fullModuleName: moduleName,
-
-                            moduleName: moduleParts.shift(),
+                            name: moduleParts.shift(),
 
                             type: interceptorType,
 
@@ -50,10 +48,8 @@ JARS.internal('Resolvers/Interception', function(getInternal) {
                     }
                 });
 
-                interceptionInfo = interceptionInfoCache[moduleName] = interceptionInfo || {
-                    fullModuleName: moduleName,
-
-                    moduleName: moduleName
+                interceptionInfo = interceptionInfoCache[subjectName] = interceptionInfo || {
+                    name: subjectName
                 };
             }
 
@@ -67,8 +63,7 @@ JARS.internal('Resolvers/Interception', function(getInternal) {
      * @memberof JARS~internals.Resolvers.Interception
      * @inner
      *
-     * @property {string} fullModuleName
-     * @property {string} moduleName
+     * @property {string} name
      * @property {string} type
      * @property {string} data
      */
