@@ -12,30 +12,32 @@ JARS.internal('Factories/Parent', function(getInternal) {
      * @memberof JARS~internals.Factories
      */
     Parent = {
-        module: [function(subjectName, injected) {
-            return subjectName === ParentResolver.ROOT ? null : getSubject(ParentResolver(subjectName), injected);
-        }],
+        module: function(injectLocal, inject) {
+            var moduleName = injectLocal('$name');
 
-        bundle: [function(subjectName, injected) {
-            return getSubject(BundleResolver.removeBundleSuffix(subjectName), injected);
-        }],
+            return moduleName === ParentResolver.ROOT ? null : injectSubject(inject, ParentResolver(moduleName));
+        },
 
-        interception: [function(subjectName, injected) {
-            return getSubject(InterceptionResolver.removeInterceptionData(subjectName), injected, injected.requestor);
-        }, ['requestor']],
+        bundle: function(injectLocal, inject) {
+            return injectSubject(inject, BundleResolver.removeBundleSuffix(injectLocal('$name')));
+        },
+
+        interception: function(injectLocal, inject) {
+            return injectSubject(inject, InterceptionResolver.removeInterceptionData(injectLocal('$name')), injectLocal('requestor'));
+        },
     };
 
     /**
      * @memberof JARS~internals.Factories.Parent
      *
+     * @param {function} inject
      * @param {string} subjectName
-     * @param {Object} injected
      * @param {JARS~internals.Subjects.Subject} [requestor]
      *
      * @return {JARS~internals.Subjects.Subject}
      */
-    function getSubject(subjectName, injected, requestor) {
-        return injected.$inject(subjectName, 'subject', requestor);
+    function injectSubject(inject, subjectName, requestor) {
+        return inject(subjectName, 'subject', requestor);
     }
 
     return Parent;

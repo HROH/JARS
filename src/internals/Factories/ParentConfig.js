@@ -11,28 +11,32 @@ JARS.internal('Factories/ParentConfig', function(getInternal) {
      * @memberof JARS~internals.Factories
      */
     ParentConfig = {
-        module: [getBundleConfig],
+        module: function(injectLocal, inject) {
+            return injectBundleConfig(inject, injectLocal('$name'));
+        },
 
-        bundle: [function(subjectName, injected) {
-            return subjectName === BundleResolver.ROOT ? null : getBundleConfig(ParentResolver(BundleResolver.removeBundleSuffix(subjectName)), injected);
-        }],
+        bundle: function(injectLocal, inject) {
+            var bundleName = injectLocal('$name');
+            
+            return bundleName === BundleResolver.ROOT ? null : injectBundleConfig(inject, ParentResolver(BundleResolver.removeBundleSuffix(bundleName)));
+        },
 
-        interception: [function(subject, injected) {
-            return injected.requestor.config;
-        }, ['requestor']]
+        interception: function(injectLocal) {
+            return injectLocal('requestor').config;
+        }
     };
 
     /**
      * @memberof JARS~internals.Factories.ParentConfig
      * @inner
      *
+     * @param {function} inject
      * @param {string} subjectName
-     * @param {Object} injected
      *
      * @return {JARS~internals.Configs.Subject}
      */
-    function getBundleConfig(subjectName, injected) {
-        return injected.$inject(BundleResolver.getBundleName(subjectName), 'config');
+    function injectBundleConfig(inject, subjectName) {
+        return inject(BundleResolver.getBundleName(subjectName), 'config');
     }
 
     return ParentConfig;

@@ -10,9 +10,9 @@ JARS.internal('Factories/Ref', function(getInternal) {
      * @memberof JARS~internals.Factories
      */
     Ref = {
-        subject: [function(subjectName, injected) {
-            return new SubjectRef(injected.baseSubject);
-        }, ['baseSubject']]
+        subject: function(injectLocal) {
+            return new SubjectRef(injectLocal('baseSubject'));
+        }
     };
 
     return Ref;

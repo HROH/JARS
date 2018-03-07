@@ -10,9 +10,9 @@ JARS.internal('Factories/Config', function(getInternal) {
      * @memberof JARS~internals.Factories
      */
     Config = {
-        subject: [function(subjectName, injected) {
-            return new SubjectConfig(injected.baseSubject, injected.parentConfig);
-        }, ['baseSubject', 'parentConfig']]
+        subject: function(injectLocal) {
+            return new SubjectConfig(injectLocal('baseSubject'), injectLocal('parentConfig'));
+        }
     };
 
     return Config;

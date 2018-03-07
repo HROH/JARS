@@ -1,24 +1,24 @@
-JARS.internal('Factories/ResolutionStrategy', function(getInternal) {
+JARS.internal('Factories/Strategy', function(getInternal) {
     'use strict';
 
     var SubjectStrategy = getInternal('Strategies/Resolution/Subject'),
         BundleStrategy = getInternal('Strategies/Resolution/Bundle'),
-        ResolutionStrategy;
+        Strategy;
 
     /**
      * @namespace
      *
      * @memberof JARS~internals.Factories
      */
-    ResolutionStrategy = {
-        subject: [function() {
+    Strategy = {
+        subject: function() {
             return SubjectStrategy;
-        }],
+        },
 
-        bundle: [function() {
+        bundle: function() {
             return BundleStrategy;
-        }]
+        }
     };
 
-    return ResolutionStrategy;
+    return Strategy;
 });

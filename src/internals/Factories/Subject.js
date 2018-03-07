@@ -1,7 +1,8 @@
 JARS.internal('Factories/Subject', function(getInternal) {
     'use strict';
 
-    var merge = getInternal('Helpers/Object').merge,
+    var each = getInternal('Helpers/Array').each,
+        subjectProperties = ['logger', 'state', 'dependencies', 'config', 'ref', 'parent', 'requestor', 'handler', 'info'],
         Subject;
 
     /**
@@ -10,14 +11,15 @@ JARS.internal('Factories/Subject', function(getInternal) {
      * @memberof JARS~internals.Factories
      */
     Subject = {
-        subject: [function(subjectName, injected) {
-            var subject = injected.baseSubject;
+        subject: function(injectLocal) {
+            var subject = injectLocal('baseSubject');
 
-            merge(subject, injected);
-            delete subject.baseSubject;
+            each(subjectProperties, function(prop) {
+                subject[prop] = injectLocal(prop);
+            });
 
             return subject;
-        }, ['baseSubject', 'logger', 'state', 'dependencies', 'config', 'ref', 'parent', 'requestor', 'handler', 'info']]
+        }
     };
 
     return Subject;

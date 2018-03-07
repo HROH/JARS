@@ -17,7 +17,7 @@ JARS.internal('Handlers/Subjects/Dependencies', function(getInternal) {
      * @param {JARS~internals.Subjects.Subject~Provide} provide
      */
     function Dependencies(subject, provide) {
-        var circularDependencies = getCircularDependencies(subject);
+        var circularDependencies = getCircularDependencies(subject.requestor);
 
         return new SubjectHandler(subject, circularDependencies ? [] : subject.dependencies.getAll(), MSG_STRINGS, circularDependencies ? function() {
             subject.state.setAborted(MSG_ABORTED_CIRCULAR_DEPENDENCIES, [circularDependencies.join(CIRCULAR_SEPARATOR)]);
@@ -33,13 +33,11 @@ JARS.internal('Handlers/Subjects/Dependencies', function(getInternal) {
      * @memberof JARS~internals.Handlers.Subjects
      * @inner
      *
-     * @param {JARS~internals.Subjects.Subject}
+     * @param {JARS~internals.Subjects.Subject} entryModule
      *
      * @return {(string[]|boolean)}
      */
-    function getCircularDependencies(subject) {
-        var entryModule = subject.requestor;
-
+    function getCircularDependencies(entryModule) {
         return !entryModule.isRoot && entryModule.config.get('checkCircularDeps') && ModulesTraverser(entryModule, CircularTraverser);
     }
 

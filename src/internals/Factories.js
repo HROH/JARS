@@ -13,7 +13,7 @@ JARS.internalGroup('Factories', [
     'ParentConfig',
     'Ref',
     'Requestor',
-    'ResolutionStrategy',
+    'Strategy',
     'State',
     'Subject'
 ]);

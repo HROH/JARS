@@ -10,9 +10,9 @@ JARS.internal('Factories/Dependencies', function(getInternal) {
      * @memberof JARS~internals.Factories
      */
     Dependencies = {
-        subject: [function(subjectName, injected) {
-            return new SubjectDependencies(injected.requestor, injected.state, injected.resolutionStrategy);
-        }, ['requestor', 'state', 'resolutionStrategy']]
+        subject: function(injectLocal) {
+            return new SubjectDependencies(injectLocal('requestor'), injectLocal('state'), injectLocal('strategy'));
+        }
     };
 
     return Dependencies;

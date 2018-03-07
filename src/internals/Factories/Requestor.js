@@ -7,13 +7,13 @@ JARS.internal('Factories/Requestor', function() {
      * @memberof JARS~internals.Factories
      */
     var Requestor = {
-        subject: [function(subjectName, injected) {
-            return injected.baseSubject;
-        }, ['baseSubject']],
+        subject: function(injectLocal) {
+            return injectLocal('baseSubject');
+        },
 
-        interception: [function(subjectName, injected) {
-            return injected.$arg;
-        }],
+        interception: function(injectLocal) {
+            return injectLocal('$arg');
+        },
     };
 
     return Requestor;

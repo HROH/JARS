@@ -12,17 +12,17 @@ JARS.internal('Factories/Handler', function(getInternal) {
      * @memberof JARS~internals.Factories
      */
     Handler = {
-        module: [function() {
+        module: function() {
             return ModuleHandler;
-        }],
+        },
 
-        bundle: [function() {
+        bundle: function() {
             return BundleHandler;
-        }],
+        },
 
-        interception: [function() {
+        interception: function() {
             return InterceptionHandler;
-        }]
+        }
     };
 
     return Handler;

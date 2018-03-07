@@ -1,9 +1,9 @@
 JARS.internal('Factories/Description', function() {
     'use strict';
 
-    var DESC_MODULE = 'Module',
-        DESC_BUNDLE = 'Bundle',
-        DESC_INTERCEPTION = 'Interception',
+    var DESC_MODULE = 'Module:',
+        DESC_BUNDLE = 'Bundle:',
+        DESC_INTERCEPTION = 'Interception:',
         Description;
 
     /**
@@ -12,17 +12,17 @@ JARS.internal('Factories/Description', function() {
      * @memberof JARS~internals.Factories
      */
     Description = {
-        module: [function() {
-            return DESC_MODULE;
-        }],
+        module: function(injectLocal) {
+            return DESC_MODULE + injectLocal('$name');
+        },
 
-        bundle: [function() {
-            return DESC_BUNDLE;
-        }],
+        bundle: function(injectLocal) {
+            return DESC_BUNDLE + injectLocal('$name');
+        },
 
-        interception: [function() {
-            return DESC_INTERCEPTION;
-        }],
+        interception: function(injectLocal) {
+            return DESC_INTERCEPTION + injectLocal('$name');
+        },
     };
 
     return Description;
