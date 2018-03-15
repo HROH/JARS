@@ -6,7 +6,7 @@ JARS.internal('Factories/ParentName', function(getInternal) {
 
         bundle: getInternal('Resolvers/Bundle').removeBundleSuffix,
 
-        interception: getInternal('Resolvers/Interception').removeInterceptionData
+        interception: getInternal('Resolvers/Interception').getSubjectName
     };
 
     /**

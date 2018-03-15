@@ -16,12 +16,12 @@ JARS.internal('Strategies/Type/String', function(getInternal) {
      * @return {JARS~internals.Subjects.Subject[]}
      */
     function String(subject, requestor, subjectName, resolutionStrategy) {
-        var info = InterceptionResolver.extractInterceptionInfo(subjectName),
+        var info = InterceptionResolver.getInfo(subjectName),
             result = resolutionStrategy(subject, info.name);
 
         abortOnResolutionError(subject.stateUpdater, result.error, subjectName);
 
-        return result.name ? [SubjectsRegistry.get(InterceptionResolver.addInterceptionData(result.name, info), requestor)] : [];
+        return result.name ? [SubjectsRegistry.get(InterceptionResolver.makeInterception(result.name, info), requestor)] : [];
     }
 
     /**

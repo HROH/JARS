@@ -17,15 +17,15 @@ JARS.internal('Resolvers/Interception', function(getInternal) {
          * @return {boolean}
          */
         isInterception: function(subjectName) {
-            return Interception.removeInterceptionData(subjectName) !== subjectName;
+            return Interception.getSubjectName(subjectName) !== subjectName;
         },
         /**
          * @param {string} subjectName
          *
          * @return {string}
          */
-        removeInterceptionData: function(subjectName) {
-            return Interception.extractInterceptionInfo(subjectName).name;
+        getSubjectName: function(subjectName) {
+            return Interception.getInfo(subjectName).name;
         },
         /**
          * @param {string} subjectName
@@ -33,7 +33,7 @@ JARS.internal('Resolvers/Interception', function(getInternal) {
          *
          * @return {string}
          */
-        addInterceptionData: function(subjectName, info) {
+        makeInterception: function(subjectName, info) {
             return info.type ? subjectName + info.type + info.data : subjectName;
         },
         /**
@@ -41,7 +41,7 @@ JARS.internal('Resolvers/Interception', function(getInternal) {
          *
          * @return {JARS~internals.Resolvers.Interception~Info}
          */
-        extractInterceptionInfo: function(subjectName) {
+        getInfo: function(subjectName) {
             var interceptionInfo = interceptionInfoCache[subjectName],
                 moduleParts;
 
