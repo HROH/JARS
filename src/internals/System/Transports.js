@@ -8,7 +8,8 @@ JARS.module('System.Transports', ['Console']).meta({
     plugIn: function(pluginRequest) {
         var data = pluginRequest.info.data.split(':');
 
-        pluginRequest.$importAndLink(data[1], function addTransport(Transport) {
+        pluginRequest.$import(data[1]);
+        pluginRequest.$export(function(Transport) {
             this.add(data[0], new Transport());
 
             return this;
