@@ -26,7 +26,7 @@ JARS.internal('Configs/Hooks/Main', function(getInternal) {
             globalConfig.update('modules', {
                 restrict: mainModule,
 
-                basePath: './',
+                basePath: getInternal('Env').BASE_PATH,
 
                 dirPath: ''
             });

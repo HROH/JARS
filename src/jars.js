@@ -15,7 +15,6 @@
     Env = (function envConfigSetup() {
         var scripts = envGlobal.document.getElementsByTagName('script'),
             script = scripts[scripts.length - 1],
-            BASE_PATH = getData('base') || script.src.substring(0, script.src.lastIndexOf('/') + 1),
             Env;
 
         /**
@@ -35,11 +34,11 @@
             /**
              * @type {string}
              */
-            BASE_PATH: BASE_PATH,
+            BASE_PATH: getData('base') ||  './',
             /**
              * @type {string}
              */
-            INTERNALS_PATH: getData('internals') || (BASE_PATH + 'internals/'),
+            INTERNALS_PATH: getData('internals') || (script.src.substring(0, script.src.lastIndexOf('/')) + '/internals/'),
         };
 
         /**
