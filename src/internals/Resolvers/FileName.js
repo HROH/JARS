@@ -7,14 +7,14 @@ JARS.internal('Resolvers/FileName', function(getInternal) {
     /**
      * @memberof JARS~internals.Resolvers
      *
-     * @param {string} moduleName
+     * @param {string} subjectName
      *
      * @return {string}
      */
-    function FileName(moduleName) {
-        moduleName = removeVersion(moduleName);
+    function FileName(subjectName) {
+        subjectName = removeVersion(subjectName);
 
-        return moduleName.substr(moduleName.lastIndexOf(DOT) + 1);
+        return subjectName.substr(subjectName.lastIndexOf(DOT) + 1);
     }
 
     return FileName;

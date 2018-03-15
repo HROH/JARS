@@ -12,30 +12,30 @@ JARS.internal('Resolvers/Version', function() {
      */
     Version = {
         /**
-         * @param {function(string): string} transformModuleName
+         * @param {function(string): string} transformSubjectName
          *
          * @return {function(string): string}
          */
-        unwrapVersion: function(transformModuleName) {
-            return function unwrapVersion(moduleName) {
-                return appendVersion(transformModuleName(Version.removeVersion(moduleName)), Version.getVersion(moduleName));
+        unwrapVersion: function(transformSubjectName) {
+            return function unwrapVersion(subjectName) {
+                return appendVersion(transformSubjectName(Version.removeVersion(subjectName)), Version.getVersion(subjectName));
             };
         },
         /**
-         * @param {string} moduleName
+         * @param {string} subjectName
          *
          * @return {string}
          */
-        removeVersion: function(moduleName) {
-            return moduleName.split(VERSION_DELIMITER)[0];
+        removeVersion: function(subjectName) {
+            return subjectName.split(VERSION_DELIMITER)[0];
         },
         /**
-         * @param {string} moduleName
+         * @param {string} subjectName
          *
          * @return {string}
          */
-        getVersion: function(moduleName) {
-            return moduleName.split(VERSION_DELIMITER)[1] || EMPTY_STRING;
+        getVersion: function(subjectName) {
+            return subjectName.split(VERSION_DELIMITER)[1] || EMPTY_STRING;
         }
     };
 
@@ -43,13 +43,13 @@ JARS.internal('Resolvers/Version', function() {
      * @memberof JARS~internals.Resolvers.Version
      * @inner
      *
-     * @param {string} moduleName
+     * @param {string} subjectName
      * @param {string} version
      *
      * @return {string}
      */
-    function appendVersion(moduleName, version) {
-        return (moduleName && version) ? [moduleName, version].join(VERSION_DELIMITER) : moduleName;
+    function appendVersion(subjectName, version) {
+        return (subjectName && version) ? [subjectName, version].join(VERSION_DELIMITER) : subjectName;
     }
 
     return Version;

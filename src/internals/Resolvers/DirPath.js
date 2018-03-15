@@ -11,12 +11,12 @@ JARS.internal('Resolvers/DirPath', function(getInternal) {
     /**
      * @memberof JARS~internals.Resolvers
      *
-     * @param {string} moduleName
+     * @param {string} subjectName
      *
      * @return {string}
      */
-    function DirPath(moduleName) {
-        return removeVersion(RE_STARTS_WITH_UPPERCASE.test(FileNameResolver(moduleName)) ? ParentResolver(moduleName) : moduleName).replace(RE_DOT, SLASH);
+    function DirPath(subjectName) {
+        return removeVersion(RE_STARTS_WITH_UPPERCASE.test(FileNameResolver(subjectName)) ? ParentResolver(subjectName) : subjectName).replace(RE_DOT, SLASH);
     }
 
     return DirPath;

@@ -6,12 +6,12 @@ JARS.internal('Resolvers/Relative', function() {
     /**
      * @memberof JARS~internals.Resolvers
      *
-     * @param {string} moduleName
+     * @param {string} subjectName
      *
      * @return {boolean}
      */
-    function Relative(moduleName) {
-        return RE_LEADING_DOT.test(moduleName);
+    function Relative(subjectName) {
+        return RE_LEADING_DOT.test(subjectName);
     }
 
     return Relative;

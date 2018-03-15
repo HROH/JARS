@@ -9,16 +9,16 @@ JARS.internal('Resolvers/Parent', function(getInternal) {
     /**
      * @method
      *
-     * @param {string} moduleName
+     * @param {string} subjectName
      *
      * @return {string}
      */
-    function Parent(moduleName) {
-        return getParentName(moduleName) || ROOT;
+    function Parent(subjectName) {
+        return subjectName !== ROOT ? getParentName(subjectName) || ROOT : '';
     }
     
-    getParentName = unwrapVersion(function(moduleName) {
-        return moduleName.lastIndexOf(DOT) > -1 && moduleName.substr(0, moduleName.lastIndexOf(DOT));
+    getParentName = unwrapVersion(function(subjectName) {
+        return subjectName.lastIndexOf(DOT) > -1 && subjectName.substr(0, subjectName.lastIndexOf(DOT));
     });
 
     Parent.ROOT = ROOT;

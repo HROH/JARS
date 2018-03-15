@@ -18,30 +18,30 @@ JARS.internal('Resolvers/Bundle', function(getInternal) {
         /**
          * @method
          *
-         * @param {string} moduleName
+         * @param {string} subjectName
          *
          * @return {string}
          */
-        getBundleName: unwrapVersion(function getBundleName(moduleName) {
-            return moduleName + BUNDLE_SUFFIX;
+        getBundleName: unwrapVersion(function getBundleName(subjectName) {
+            return subjectName + BUNDLE_SUFFIX;
         }),
         /**
          * @method
          *
-         * @param {string} moduleName
+         * @param {string} subjectName
          *
          * @return {string}
          */
-        removeBundleSuffix: unwrapVersion(function(moduleName) {
-            return moduleName.replace(RE_BUNDLE_SUFFIX, EMPTY_STRING);
+        removeBundleSuffix: unwrapVersion(function(subjectName) {
+            return subjectName.replace(RE_BUNDLE_SUFFIX, EMPTY_STRING);
         }),
         /**
-         * @param {string} moduleName
+         * @param {string} subjectName
          *
          * @return {boolean}
          */
-        isBundle: function(moduleName) {
-            return RE_BUNDLE_SUFFIX.test(VersionResolver.removeVersion(moduleName));
+        isBundle: function(subjectName) {
+            return RE_BUNDLE_SUFFIX.test(VersionResolver.removeVersion(subjectName));
         }
     };
 

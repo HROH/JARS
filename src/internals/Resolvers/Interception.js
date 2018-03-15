@@ -11,8 +11,13 @@ JARS.internal('Resolvers/Interception', function(getInternal) {
      * @memberof JARS~internals.Resolvers
      */
     Interception = {
-        isInterception: function(interceptionName) {
-            return Interception.removeInterceptionData(interceptionName) !== interceptionName;
+        /**
+         * @param {string} subjectName
+         *
+         * @return {boolean}
+         */
+        isInterception: function(subjectName) {
+            return Interception.removeInterceptionData(subjectName) !== subjectName;
         },
         /**
          * @param {string} subjectName

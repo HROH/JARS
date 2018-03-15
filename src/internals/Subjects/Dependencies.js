@@ -22,7 +22,7 @@ JARS.internal('Subjects/Dependencies', function(getInternal) {
     Dependencies.prototype = {
         constructor: Dependencies,
         /**
-         * @return {string[]}
+         * @return {JARS~internals.Subjects.Subject[]}
          */
         getAll: function() {
             return this._modules;
@@ -36,12 +36,12 @@ JARS.internal('Subjects/Dependencies', function(getInternal) {
             }
         },
         /**
-         * @param {string} moduleName
+         * @param {string} subjectName
          *
          * @return {(JARS~internals.Subjects.Subject|null)}
          */
-        find: function(moduleName) {
-            var index = this._modules.indexOf(this.resolve([moduleName])[0]);
+        find: function(subjectName) {
+            var index = this._modules.indexOf(this.resolve([subjectName])[0]);
 
             return index > -1 ? this._modules[index] : null;
         },

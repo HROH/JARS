@@ -9,19 +9,19 @@ JARS.internal('Resolvers/Options', function(getInternal) {
     /**
      * @memberof JARS~internals.Resolvers
      *
-     * @param {string} moduleName
+     * @param {string} subjectname
      *
      * @return {JARS~internals.Configs.Hooks~Modules}
      */
-    function Options(moduleName) {
+    function Options(subjectname) {
         return {
             extension: DEFAULT_EXTENSION,
 
-            fileName: FileNameResolver(moduleName),
+            fileName: FileNameResolver(subjectname),
 
-            dirPath: DirPathResolver(moduleName),
+            dirPath: DirPathResolver(subjectname),
 
-            versionPath: getVersion(moduleName)
+            versionPath: getVersion(subjectname)
         };
     }
 
