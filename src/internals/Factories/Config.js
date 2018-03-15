@@ -1,19 +1,18 @@
 JARS.internal('Factories/Config', function(getInternal) {
     'use strict';
 
-    var SubjectConfig = getInternal('Configs/Subject'),
-        Config;
+    var SubjectConfig = getInternal('Configs/Subject');
 
     /**
-     * @namespace
-     *
      * @memberof JARS~internals.Factories
+     *
+     * @param {JARS~internals.Helpers.Injector} injector
+     *
+     * @return {JARS~internals.Configs.Subject}
      */
-    Config = {
-        subject: function(injectLocal) {
-            return new SubjectConfig(injectLocal('baseSubject'), injectLocal('parentConfig'));
-        }
-    };
+    function Config(injector) {
+        return new SubjectConfig(injector.subjectName, injector.injectLocal('options'));
+    }
 
     return Config;
 });

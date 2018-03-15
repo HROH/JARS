@@ -15,15 +15,15 @@ JARS.internal('Handlers/Subjects/Subject', function(getInternal) {
      * @param {JARS~internals.Subjects.Subject} requestor
      * @param {JARS~internals.Subjects.Subject[]} subjects
      * @param {string[]} msgStrings
-     * @param {JARS~internals.Handlers.Subjects.Subject#onCompleted} onCompleted
+     * @param {JARS~internals.Handlers~Completion} completionHandler
      */
-    function Subject(requestor, subjects, msgStrings, onCompleted) {
+    function Subject(requestor, subjects, msgStrings, completionHandler) {
         var handler = this;
 
         handler.requestor = requestor;
         handler.subjects = subjects;
         handler._msgStrings = msgStrings;
-        handler.onCompleted = onCompleted;
+        handler._completionHandler = completionHandler;
 
         subjects.length && requestor.logger.debug(MSG_REQUESTED, [msgStrings[1] || msgStrings[0], join(subjects)]);
     }
@@ -31,19 +31,33 @@ JARS.internal('Handlers/Subjects/Subject', function(getInternal) {
     Subject.prototype = {
         constructor: Subject,
         /**
-         * @param {JARS~internals.Subjects.Subject} subject
+         * @param {string} subjectName
          */
-        onLoaded: function(subject) {
-            this.requestor.logger.debug(MSG_LOADED, [this._msgStrings[0], subject.name]);
+        onLoaded: function(subjectName) {
+            this.requestor.logger.debug(MSG_LOADED, [this._msgStrings[0], subjectName]);
         },
         /**
-         * @param {JARS~internals.Subjects.Subject} subject
+         * @param {string} subjectName
          */
-        onAborted: function(subject) {
-            this.requestor.state.setAborted(MSG_ABORTED, [this._msgStrings[0], subject.name]);
+        onAborted: function(subjectName) {
+            this.requestor.stateUpdater.setAborted(MSG_ABORTED, [this._msgStrings[0], subjectName]);
+        },
+        /**
+         * @param {JARS~internals.Refs.Modules} refs
+         */
+        onCompleted: function(refs) {
+            this._completionHandler.onCompleted(refs);
         }
     };
 
+    /**
+     * @memberof JARS~internals.Handlers.Subjects.Subject
+     * @inner
+     *
+     * @param {JARS~internals.Subjects.Subject[]} subjects
+     *
+     * @return {string[]}
+     */
     function join(subjects) {
         var subjectNames = [];
 
@@ -53,12 +67,6 @@ JARS.internal('Handlers/Subjects/Subject', function(getInternal) {
 
         return subjectNames.join(SEPARATOR);
     }
-
-    /**
-     * @method JARS~internals.Handlers.Subjects.Subject#onCompleted
-     *
-     * @param {JARS~internals.Refs.Modules} ref
-     */
 
     return Subject;
 });

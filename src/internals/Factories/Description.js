@@ -1,29 +1,24 @@
 JARS.internal('Factories/Description', function() {
     'use strict';
 
-    var DESC_MODULE = 'Module:',
-        DESC_BUNDLE = 'Bundle:',
-        DESC_INTERCEPTION = 'Interception:',
-        Description;
+    var DESCRIPTIONS = {
+        module: 'Module:',
+
+        bundle: 'Bundle:',
+
+        interception: 'Interception:'
+    };
 
     /**
-     * @namespace
-     *
      * @memberof JARS~internals.Factories
+     *
+     * @param {JARS~internals.Helpers.Injector} injector
+     *
+     * @return {string}
      */
-    Description = {
-        module: function(injectLocal) {
-            return DESC_MODULE + injectLocal('$name');
-        },
-
-        bundle: function(injectLocal) {
-            return DESC_BUNDLE + injectLocal('$name');
-        },
-
-        interception: function(injectLocal) {
-            return DESC_INTERCEPTION + injectLocal('$name');
-        },
-    };
+    function Description(injector) {
+        return DESCRIPTIONS[injector.type];
+    }
 
     return Description;
 });

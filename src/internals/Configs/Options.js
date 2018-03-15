@@ -34,14 +34,14 @@ JARS.internal('Configs/Options', function(getInternal) {
     };
 
     /**
-     * @param {JARS~internals.Subjects.Subject} subject
+     * @param {string} subjectName
      *
      * @return {JARS~internals.Configs.Options}
      */
-    Options.getDefault = function(subject) {
+    Options.getDefault = function(subjectName) {
         var defaultOptions = new Options();
 
-        isBundle(subject.name) || Options.transformAndUpdate(defaultOptions, OptionsResolver(subject.name), subject);
+        isBundle(subjectName) || Options.transformAndUpdate(defaultOptions, OptionsResolver(subjectName), subjectName);
 
         return defaultOptions;
     };
@@ -49,12 +49,12 @@ JARS.internal('Configs/Options', function(getInternal) {
     /**
      * @param {JARS~internals.Configs.Options} options
      * @param {Object} newOptions
-     * @param {JARS~internals.Subjects.Subject} subject
+     * @param {string} subjectName
      */
-    Options.transformAndUpdate = function(options, newOptions, subject) {
+    Options.transformAndUpdate = function(options, newOptions, subjectName) {
         each(newOptions, function updateConfig(value, option) {
             if (hasOwnProp(Transforms, option)) {
-                updateOption(options, option, transformOption(option, value, subject));
+                updateOption(options, option, transformOption(option, value, options[option], subjectName));
             }
         });
     };
@@ -65,12 +65,13 @@ JARS.internal('Configs/Options', function(getInternal) {
      *
      * @param {string} option
      * @param {*} value
-     * @param {JARS~internals.Subjects.Subject} subject
+     * @param {*} oldValue
+     * @param {string} subjectName
      *
      * @return {*}
      */
-    function transformOption(option, value, subject) {
-        return Transforms[option](value, subject);
+    function transformOption(option, value, oldValue, subjectName) {
+        return Transforms[option](value, oldValue, subjectName);
     }
 
     /**

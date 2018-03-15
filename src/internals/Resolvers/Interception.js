@@ -29,6 +29,15 @@ JARS.internal('Resolvers/Interception', function(getInternal) {
         },
         /**
          * @param {string} subjectName
+         * @param {JARS~internals.Resolvers.Interception~Info} info
+         *
+         * @return {string}
+         */
+        addInterceptionData: function(subjectName, info) {
+            return info.type ? subjectName + info.type + info.data : subjectName;
+        },
+        /**
+         * @param {string} subjectName
          *
          * @return {JARS~internals.Resolvers.Interception~Info}
          */

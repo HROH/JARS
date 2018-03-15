@@ -22,7 +22,7 @@ JARS.internal('Helpers/AutoAborter', function(getInternal) {
             var timeout = module.config.get('timeout');
 
             timeoutIDs[module.name] = global.setTimeout(function abortModule() {
-                Recoverer(module) || module.state.setAborted(MSG_MODULE_ABORTED, {
+                Recoverer(module) || module.stateUpdater.setAborted(MSG_MODULE_ABORTED, {
                     path: path,
 
                     sec: timeout

@@ -13,16 +13,16 @@ JARS.internal('Helpers/Tracker', function() {
          * @param {JARS~internals.Subjects.Subject} subject
          */
         setRoot: function(subject) {
-            root = subject;
+            root = subject.name;
         },
         /**
-         * @param {JARS~internals.Subjects.Subject} [subject]
+         * @param {string} [subject]
          */
-        setCurrent: function(subject) {
-            current = subject || root;
+        setCurrent: function(subjectName) {
+            current = subjectName || root;
         },
         /**
-         * @return {JARS~internals.Subjects.Subject}
+         * @return {string}
          */
         getCurrent: function() {
             return current;

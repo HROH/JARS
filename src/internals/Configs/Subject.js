@@ -8,16 +8,15 @@ JARS.internal('Configs/Subject', function(getInternal) {
      *
      * @memberof JARS~internals.Configs
      *
-     * @param {JARS~internals.Subjects.Subject} subject
-     * @param {JARS~internals.Configs.Subject} [parentConfig]
+     * @param {string} subjectName
+     * @param {JARS~internals.Configs.Options} options
      */
-    function Subject(subject, parentConfig) {
+    function Subject(subjectName, options) {
         var config = this;
 
-        config.parentConfig = parentConfig;
-        config._subject = subject;
-        config._options = parentConfig ? parentConfig.inheritOptions() : new Options();
-        config._defaultOptions = Options.getDefault(subject);
+        config._subjectName = subjectName;
+        config._options = options;
+        config._defaultOptions = Options.getDefault(subjectName);
     }
 
     Subject.prototype = {
@@ -26,7 +25,7 @@ JARS.internal('Configs/Subject', function(getInternal) {
          * @param {Object} newOptions
          */
         update: function(newOptions) {
-            Options.transformAndUpdate(this._options, newOptions, this._subject);
+            Options.transformAndUpdate(this._options, newOptions, this._subjectName);
         },
         /**
          * @param {string} option
@@ -35,12 +34,6 @@ JARS.internal('Configs/Subject', function(getInternal) {
          */
         get: function(option) {
             return (option in this._options) ? this._options[option] : this._defaultOptions[option];
-        },
-        /**
-         * @return {JARS~internals.Configs.Options}
-         */
-        inheritOptions: function() {
-            return Options.childOf(this._options);
         }
     };
 

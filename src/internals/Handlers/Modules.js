@@ -45,19 +45,19 @@ JARS.internal('Handlers/Modules', function(getInternal) {
             subject.load(this);
         },
         /**
-         * @param {JARS~internals.Subjects.Subject} subject
+         * @param {string} subjectName
          */
-        onLoaded: function(subject) {
+        onLoaded: function(subjectName) {
             var handler = this;
 
-            handler._nextHandler.onLoaded(subject, getPercentage(handler._loaded++, handler._total));
+            handler._nextHandler.onLoaded(subjectName, getPercentage(handler._loaded++, handler._total));
             handler.onCompleted();
         },
         /**
-         * @param {JARS~internals.Subjects.Subject} subject
+         * @param {string} subjectName
          */
-        onAborted: function(subject) {
-            this._nextHandler.onAborted(subject);
+        onAborted: function(subjectName) {
+            this._nextHandler.onAborted(subjectName);
         },
         /**
          * @method

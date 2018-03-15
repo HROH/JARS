@@ -1,26 +1,44 @@
 JARS.internal('Factories/Subject', function(getInternal) {
     'use strict';
 
-    var each = getInternal('Helpers/Array').each,
-        subjectProperties = ['logger', 'state', 'dependencies', 'config', 'ref', 'parent', 'requestor', 'handler', 'info'],
-        Subject;
+    var BaseSubject = getInternal('Subjects/Subject');
 
     /**
-     * @namespace
-     *
      * @memberof JARS~internals.Factories
+     *
+     * @param {JARS~internals.Helpers.Injector} injector
+     *
+     * @return {JARS~internals.Subjects.Subject}
      */
-    Subject = {
-        subject: function(injectLocal) {
-            var subject = injectLocal('baseSubject');
+    function Subject(injector) {
+        var subjectName = injector.subjectName;
 
-            each(subjectProperties, function(prop) {
-                subject[prop] = injectLocal(prop);
-            });
+        return new BaseSubject(subjectName, injectParent(injector), injectRequestor(injector), injector);
+    }
 
-            return subject;
-        }
-    };
+    /**
+     * @memberof JARS~internals.Factories.Subject
+     * @inner
+     *
+     * @param {JARS~internals.Helpers.Injector} injector
+     *
+     * @return {JARS~internals.Subjects.Subject}
+     */
+    function injectParent(injector) {
+        return injector.inject(injector.injectLocal('parentName'), 'subject');
+    }
+
+    /**
+     * @memberof JARS~internals.Factories.Subject
+     * @inner
+     *
+     * @param {JARS~internals.Helpers.Injector} injector
+     *
+     * @return {(JARS~internals.Subjects.Subject|null)}
+     */
+    function injectRequestor(injector) {
+        return injector.subjectName !== injector.requestorName ? injector.inject(injector.requestorName, 'subject'): null;
+    }
 
     return Subject;
 });

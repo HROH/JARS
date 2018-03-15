@@ -5,7 +5,6 @@ JARS.internal('Registries/Subjects', function(getInternal) {
         BundleResolver = getInternal('Resolvers/Bundle'),
         ParentResolver = getInternal('Resolvers/Parent'),
         AutoAborter = getInternal('Helpers/AutoAborter'),
-        Cache = getInternal('Helpers/Cache'),
         Subjects;
     
     /**
@@ -35,7 +34,7 @@ JARS.internal('Registries/Subjects', function(getInternal) {
          * @return {JARS~internals.Subjects.Subject}
          */
         get: function(subjectName, requestor) {
-            return Injector.inject(subjectName, 'subject', requestor);
+            return Injector.inject(subjectName, requestor && requestor.name, 'subject');
         },
         /**
          * @return {JARS~internals.Subjects.Subject}
@@ -54,9 +53,7 @@ JARS.internal('Registries/Subjects', function(getInternal) {
          * @param {string} switchToContext
          */
         flush: function(context, switchToContext) {
-            Cache.each(function(subject) {
-                subject.ref.flush(context);
-            });
+            Injector.flush(context);
 
             switchToContext && Subjects.getRootModule().config.update({
                 context: switchToContext

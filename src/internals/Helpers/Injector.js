@@ -1,60 +1,95 @@
 JARS.internal('Helpers/Injector', function(getInternal) {
     'use strict';
 
-    var Cache = getInternal('Helpers/Cache'),
-        isBundle = getInternal('Resolvers/Bundle').isBundle,
+    var isBundle = getInternal('Resolvers/Bundle').isBundle,
         isInterception = getInternal('Resolvers/Interception').isInterception,
+        each = getInternal('Helpers/Object').each,
         Factories = getInternal('Factories'),
         SUBJECT_TYPE_MODULE = 'module',
         SUBJECT_TYPE_BUNDLE = 'bundle',
         SUBJECT_TYPE_INTERCEPTION = 'interception',
-        Injector, Getter;
+        injectors = {};
 
     /**
-     * @namespace
+     * @class
      *
      * @memberof JARS~internals.Helpers
+     *
+     * @param {string} subjectName
+     * @param {string} requestorName
      */
-    Injector = {
+    function Injector(subjectName, requestorName, subjectType) {
+        this.subjectName = subjectName;
+        this.requestorName = requestorName;
+        this.type = subjectType;
+        this._cache = {};
+    }
+
+    Injector.prototype = {
+        constructor: Injector,
         /**
-         * @param {string} subjectName
-         * @param {string} key
-         * @param {JARS~internals.Subjects.Subject} [requestor]
+         * @param {string} localKey
+         * @param {*} localArgs
          *
          * @return {*}
          */
-        inject: function(subjectName, key, requestor) {
-            var subjectType = getSubjectType(subjectName);
-
-            return getInjected(subjectName, key, subjectType === SUBJECT_TYPE_INTERCEPTION && requestor, subjectType);
-        }
-    };
-
-    Getter = {
-        $name: function(subjectName) {
-            return subjectName;
-        },
-
-        $arg: function(subjectName, key, requestor) {
-            return requestor;
+        injectLocal: function(localKey, localArgs) {
+            return this._cache[localKey] || (this._cache[localKey] = Factories[localKey](this, localArgs));
         },
         /**
-         * @memberof JARS~internals.Helpers.Injector
-         * @inner
-         *
-         * @param {string} subjectName
-         * @param {string} subjectType
-         * @param {string} key
-         * @param {JARS~internals.Subjects.Subject} [requestor]
+         * @param {string} localSubjectName
+         * @param {string} localKey
+         * @param {*} localArgs
          *
          * @return {*}
          */
-        factory: function(subjectName, key, requestor, subjectType) {
-            return (Factories[key][subjectType] || Factories[key].subject)(function injectLocal(localKey) {
-                return getInjected(subjectName, localKey, requestor, subjectType);
-            }, Injector.inject);
+        inject: function(localSubjectName, localKey, localArgs) {
+            return Injector.inject(localSubjectName, this.requestorName, localKey, localArgs);
+        },
+        /**
+         * @param {string} context
+         */
+        flush: function(context) {
+            this._cache.ref && this._cache.ref.flush(context);
         }
     };
+
+    /**
+     * @param {string} subjectName
+     * @param {string} requestorName
+     * @param {string} key
+     * @param {*} args
+     *
+     * @return {*}
+     */
+    Injector.inject = function(subjectName, requestorName, key, args) {
+        return subjectName ? getInjector(subjectName, requestorName).injectLocal(key, args) : null;
+    };
+
+    /**
+     * @param {string} context 
+     */
+    Injector.flush = function(context) {
+        each(injectors, function(injector) {
+            injector.flush(context);
+        });
+    };
+
+    /**
+     * @param {string} subjectName
+     * @param {string} requestorName
+     *
+     * @return {JARS~internals.Helpers.Injector}
+     */
+    function getInjector(subjectName, requestorName) {
+        var subjectType = getSubjectType(subjectName),
+            injectorKey;
+
+        requestorName = subjectType === SUBJECT_TYPE_INTERCEPTION ? requestorName : subjectName;
+        injectorKey = subjectName + ':' + requestorName;
+
+        return injectors[injectorKey] || (injectors[injectorKey] = new Injector(subjectName, requestorName, subjectType));
+    }
     
     /**
      * @param {string} subjectName
@@ -63,21 +98,6 @@ JARS.internal('Helpers/Injector', function(getInternal) {
      */
     function getSubjectType(subjectName) {
         return isInterception(subjectName) ? SUBJECT_TYPE_INTERCEPTION : isBundle(subjectName) ? SUBJECT_TYPE_BUNDLE : SUBJECT_TYPE_MODULE;
-    }
-
-    /**
-     * @memberof JARS~internals.Helpers.Injector
-     * @inner
-     *
-     * @param {string} subjectName
-     * @param {string} subjectType
-     * @param {string} key
-     * @param {JARS~internals.Subjects.Subject} [requestor]
-     *
-     * @return {*}
-     */
-    function getInjected(subjectName, key, requestor, subjectType) {
-        return Cache.get(subjectName, key, requestor) || Cache.set(subjectName, key, (Getter[key] || Getter.factory)(subjectName, key, requestor, subjectType), requestor);
     }
 
     return Injector;

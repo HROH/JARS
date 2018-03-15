@@ -1,22 +1,17 @@
 JARS.internal('States/Subject', function(getInternal) {
     'use strict';
 
-    var StateInfo = getInternal('States/Info'),
-        merge = getInternal('Helpers/Object').merge,
-        MSG_ATTEMPT = 'attempted to mark as ${nextState} but is currently ${curState}',
-        MSG_DONE = 'is ${nextState}',
-        LOG_ATTEMPT = 'attempt',
-        LOG_DONE = 'done';
+    var StateInfo = getInternal('States/Info');
 
     /**
      * @class
      *
      * @memberof JARS~internals.States
      *
-     * @param {JARS~internals.Subjects.Subject} subject
+     * @param {string} subjectName
      */
-    function Subject(subject) {
-        this._subject = subject;
+    function Subject(subjectName) {
+        this._subjectName = subjectName;
         this._current = StateInfo.initial();
         this._queue = [];
     }
@@ -39,7 +34,7 @@ JARS.internal('States/Subject', function(getInternal) {
 
             if(isLoaded || state.isAborted()) {
                 while(state._queue.length) {
-                    state._queue.shift()[isLoaded ? 'onLoaded' : 'onAborted'](state._subject);
+                    state._queue.shift()[isLoaded ? 'onLoaded' : 'onAborted'](state._subjectName);
                 }
             }
         },
@@ -54,25 +49,16 @@ JARS.internal('States/Subject', function(getInternal) {
             return this._current === stateInfo;
         },
         /**
-         * @private
-         *
          * @param {JARS~internals.States.Info} stateInfo
-         * @param {string} [message]
-         * @param {Object} [logInfo]
+         * @param {function(canTransition: boolean, currentStateInfo: JARS~internals.States.Info, nextStateInfo: JARS~internals.States.Info)} callback
          *
          * @return {boolean}
          */
-        _set: function(stateInfo, message, logInfo) {
+        set: function(stateInfo, callback) {
             var state = this,
                 canTransition = state._current.hasNext(stateInfo);
 
-            logInfo = merge(merge({
-                curState: state._current.text,
-
-                nextState: stateInfo.text
-            }, stateInfo.methods), logInfo);
-
-            state._subject.logger[logInfo[canTransition ? LOG_DONE : LOG_ATTEMPT]]((canTransition ? MSG_DONE : MSG_ATTEMPT) + (message ? ' - ' + message : ''), logInfo);
+            callback(canTransition, state._current, stateInfo);
 
             if(canTransition) {
                 state._current = stateInfo;
@@ -86,10 +72,6 @@ JARS.internal('States/Subject', function(getInternal) {
     StateInfo.each(function(stateInfo) {
         Subject.prototype[stateInfo.is] = function() {
             return this._is(stateInfo);
-        };
-
-        Subject.prototype[stateInfo.set] = function(customMessage, logInfo) {
-            return this._set(stateInfo, customMessage, logInfo);
         };
     });
 
@@ -125,62 +107,6 @@ JARS.internal('States/Subject', function(getInternal) {
 
     /**
      * @method JARS~internals.States.Subject#isAborted
-     *
-     * @return {boolean}
-     */
-
-    /**
-     * @method JARS~internals.States.Subject#setWaiting
-     *
-     * @param {string} [message]
-     * @param {Object} [logInfo]
-     *
-     *
-     * @return {boolean}
-     */
-
-    /**
-     * @method JARS~internals.States.Subject#setLoading
-     *
-     * @param {string} [message]
-     * @param {Object} [logInfo]
-     *
-     *
-     * @return {boolean}
-     */
-
-    /**
-     * @method JARS~internals.States.Subject#setRegistered
-     *
-     * @param {string} [message]
-     * @param {Object} [logInfo]
-     *
-     * @return {boolean}
-     */
-
-    /**
-     * @method JARS~internals.States.Subject#setIntercepted
-     *
-     * @param {string} [message]
-     * @param {Object} [logInfo]
-     *
-     * @return {boolean}
-     */
-
-    /**
-     * @method JARS~internals.States.Subject#setLoaded
-     *
-     * @param {string} [message]
-     * @param {Object} [logInfo]
-     *
-     * @return {boolean}
-     */
-
-    /**
-     * @method JARS~internals.States.Subject#setAborted
-     *
-     * @param {string} [message]
-     * @param {Object} [logInfo]
      *
      * @return {boolean}
      */

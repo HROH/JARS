@@ -5,7 +5,7 @@ JARS.module('System.Modules').$export(function() {
     'use strict';
 
     var getInternal = this.$$internals.get,
-        getRootModule = getInternal('Registries/Subjects').getRootModule,
+        SubjectsRegistry = getInternal('Registries/Subjects'),
         getCurrent = getInternal('Helpers/Tracker').getCurrent,
         $import = getInternal('Handlers/Import').$import,
         PathResolver = getInternal('Resolvers/Path'),
@@ -30,7 +30,7 @@ JARS.module('System.Modules').$export(function() {
         useAll: function(moduleNames) {
             var refs = [];
 
-            each(getRootModule().dependencies.resolve(moduleNames), function(subject) {
+            each(SubjectsRegistry.getRootModule().dependencies.resolve(moduleNames), function(subject) {
                 refs.push(subject.ref.get());
             });
 
@@ -51,7 +51,7 @@ JARS.module('System.Modules').$export(function() {
          */
         getCurrentModuleData: function() {
             //TODO
-            var module = getCurrent();
+            var module = SubjectsRegistry.get(getCurrent());
 
             return {
                 moduleName: module.name,

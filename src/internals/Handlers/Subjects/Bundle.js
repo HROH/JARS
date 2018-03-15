@@ -11,9 +11,14 @@ JARS.internal('Handlers/Subjects/Bundle', function(getInternal) {
      * @param {JARS~internals.Subjects.Subject} subject 
      */
     function Bundle(subject) {
-        subject.$export(function() {
-            var dependencies = subject.dependencies.getAll(),
-                bundleExport = {
+        this._subject = subject;
+    }
+
+    Bundle.prototype.onCompleted = function() {
+        var dependencies = this._subject.dependencies.getAll();
+
+        this._subject.$export(function() {
+            var bundleExport = {
                     default: this
                 };
 
@@ -25,7 +30,7 @@ JARS.internal('Handlers/Subjects/Bundle', function(getInternal) {
 
             return bundleExport;
         });
-    }
+    };
 
     return Bundle;
 });

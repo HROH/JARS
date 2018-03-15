@@ -1,19 +1,18 @@
 JARS.internal('Factories/State', function(getInternal) {
     'use strict';
 
-    var SubjectState = getInternal('States/Subject'),
-        State;
+    var SubjectState = getInternal('States/Subject');
 
     /**
-     * @namespace
-     *
      * @memberof JARS~internals.Factories
+     *
+     * @param {JARS~internals.Helpers.Injector} injector
+     *
+     * @return {JARS~internals.States.Subject}
      */
-    State = {
-        subject: function(injectLocal) {
-            return new SubjectState(injectLocal('baseSubject'));
-        }
-    };
+    function State(injector) {
+        return new SubjectState(injector.subjectName);
+    }
 
     return State;
 });

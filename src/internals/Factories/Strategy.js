@@ -1,24 +1,24 @@
 JARS.internal('Factories/Strategy', function(getInternal) {
     'use strict';
 
-    var SubjectStrategy = getInternal('Strategies/Resolution/Subject'),
-        BundleStrategy = getInternal('Strategies/Resolution/Bundle'),
-        Strategy;
+    var strategies = {
+        module: getInternal('Strategies/Resolution/Subject'),
+
+        bundle: getInternal('Strategies/Resolution/Bundle')
+    };
+
+    strategies.interception = strategies.module;
 
     /**
-     * @namespace
-     *
      * @memberof JARS~internals.Factories
+     *
+     * @param {JARS~internals.Helpers.Injector} injector
+     *
+     * @return {JARS~internals.Strategies.Resolution~Strategy}
      */
-    Strategy = {
-        subject: function() {
-            return SubjectStrategy;
-        },
-
-        bundle: function() {
-            return BundleStrategy;
-        }
-    };
+    function Strategy(injector) {
+        return strategies[injector.type];
+    }
 
     return Strategy;
 });

@@ -2,18 +2,17 @@
  * @namespace JARS~internals.Factories
  */
 JARS.internalGroup('Factories', [
-    'BaseSubject',
     'Config',
     'Dependencies',
     'Description',
     'Handler',
     'Info',
     'Logger',
-    'Parent',
-    'ParentConfig',
+    'Options',
+    'ParentName',
     'Ref',
-    'Requestor',
     'Strategy',
     'State',
+    'StateUpdater',
     'Subject'
 ]);

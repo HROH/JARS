@@ -23,11 +23,26 @@ JARS.internal('Subjects/Subject', function(getInternal) {
      * @memberof JARS~internals.Subjects
      *
      * @param {string} subjectName
+     * @param {JARS~internals.Subjects.Subject} parent
+     * @param {(JARS~internals.Subjects.Subject|null)} requestor
+     * @param {JARS~internals.Helpers.Injector} injector
      */
-    function Subject(subjectName) {
-        this.name = subjectName;
-        this.isRoot = subjectName === ParentResolver.ROOT;
-        this._meta = {};
+    function Subject(subjectName, parent, requestor, injector) {
+        var subject = this;
+
+        subject.name = subjectName;
+        subject.isRoot = subjectName === ParentResolver.ROOT;
+        subject.parent = parent;
+        subject.requestor = requestor || subject;
+        subject.config = injector.injectLocal('config');
+        subject.ref = injector.injectLocal('ref');
+        subject.logger = injector.injectLocal('logger');
+        subject.state = injector.injectLocal('state');
+        subject.stateUpdater = injector.injectLocal('stateUpdater');
+        subject.dependencies = injector.injectLocal('dependencies', subject.requestor);
+        subject.handler = injector.injectLocal('handler', subject);
+        subject.info = injector.injectLocal('info');
+        subject._meta = {};
     }
 
     Subject.prototype = {
@@ -56,7 +71,7 @@ JARS.internal('Subjects/Subject', function(getInternal) {
          * @param {JARS~internals.Subjects.Subject~Provide} provide
          */
         $export: function(provide) {
-            if (this.state.setRegistered()) {
+            if (this.stateUpdater.setRegistered()) {
                 Modules.request(DependenciesLoadHandler(this, provide));
             }
         },
@@ -64,7 +79,7 @@ JARS.internal('Subjects/Subject', function(getInternal) {
          * @param {JARS~internals.Handlers.Modules} handler
          */
         load: function(handler) {
-            if (this.state.setLoading()) {
+            if (this.stateUpdater.setLoading()) {
                 Modules.request(ParentLoadHandler(this, this.handler));
             }
 

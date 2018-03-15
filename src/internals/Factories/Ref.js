@@ -1,19 +1,18 @@
 JARS.internal('Factories/Ref', function(getInternal) {
     'use strict';
 
-    var SubjectRef = getInternal('Refs/Subject'),
-        Ref;
+    var SubjectRef = getInternal('Refs/Subject');
 
     /**
-     * @namespace
-     *
      * @memberof JARS~internals.Factories
+     *
+     * @param {JARS~internals.Helpers.Injector} injector
+     *
+     * @return {JARS~internals.Refs.Subject}
      */
-    Ref = {
-        subject: function(injectLocal) {
-            return new SubjectRef(injectLocal('baseSubject'));
-        }
-    };
+    function Ref(injector) {
+        return new SubjectRef(injector.subjectName, injector.inject(injector.injectLocal('parentName'), 'ref'), injector.injectLocal('config'));
+    }
 
     return Ref;
 });

@@ -6,13 +6,13 @@ JARS.internal('Configs/Transforms/Config', function(getInternal) {
     /**
      * @memberof JARS~internals.Configs.Transforms
      *
-     * @param {Object} config
-     * @param {JARS~internals.Subjects.Subject} subject
+     * @param {Object} publicConfig
+     * @param {string} subject
      *
      * @return {JARS~internals.Configs.Public}
      */
-    function Config(config, subject) {
-        return merge(subject.config.get('config'), config);
+    function Config(publicConfig, oldPublicConfig) {
+        return merge(oldPublicConfig, publicConfig);
     }
 
     return Config;

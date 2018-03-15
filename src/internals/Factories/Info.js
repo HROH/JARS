@@ -4,17 +4,15 @@ JARS.internal('Factories/Info', function(getInternal) {
     var extractInterceptionInfo = getInternal('Resolvers/Interception').extractInterceptionInfo;
 
     /**
-     * @namespace
-     *
      * @memberof JARS~internals.Factories
+     *
+     * @param {JARS~internals.Helpers.Injector} injector
+     *
+     * @return {JARS~internals.Resolvers.Interception~Info}
      */
-    var Info = {
-        subject: function() {},
-
-        interception: function(injectLocal) {
-            return extractInterceptionInfo(injectLocal('$name'));
-        }
-    };
+    function Info(injector) {
+        return extractInterceptionInfo(injector.subjectName);
+    }
 
     return Info;
 });

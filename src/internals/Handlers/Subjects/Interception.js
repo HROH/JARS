@@ -10,9 +10,15 @@ JARS.internal('Handlers/Subjects/Interception', function(getInternal) {
      * @param {JARS~internals.Subjects.Subject} subject 
      */
     function Interception(subject) {
-        subject.requestor.state.setIntercepted(MSG_MODULE_INTERCEPTED, [subject.name]);
-        getInterceptor(subject.info.type).intercept(subject);
+        this._subject = subject;
     }
+
+    Interception.prototype.onCompleted = function() {
+        var subject = this._subject;
+        
+        subject.requestor.stateUpdater.setIntercepted(MSG_MODULE_INTERCEPTED, [subject.name]);
+        getInterceptor(subject.info.type).intercept(subject);
+    };
 
     return Interception;
 });

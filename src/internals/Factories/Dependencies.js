@@ -1,19 +1,19 @@
 JARS.internal('Factories/Dependencies', function(getInternal) {
     'use strict';
 
-    var SubjectDependencies = getInternal('Subjects/Dependencies'),
-        Dependencies;
+    var SubjectDependencies = getInternal('Subjects/Dependencies');
 
     /**
-     * @namespace
-     *
      * @memberof JARS~internals.Factories
+     *
+     * @param {JARS~internals.Helpers.Injector} injector
+     * @param {JARS~internals.Subjects.Subject} requestor
+     *
+     * @return {JARS~internals.Subjects.Dependencies}
      */
-    Dependencies = {
-        subject: function(injectLocal) {
-            return new SubjectDependencies(injectLocal('requestor'), injectLocal('state'), injectLocal('strategy'));
-        }
-    };
+    function Dependencies(injector, requestor) {
+        return new SubjectDependencies(requestor, injector.injectLocal('state'), injector.injectLocal('strategy'));
+    }
 
     return Dependencies;
 });

@@ -1,29 +1,19 @@
 JARS.internal('Factories/Handler', function(getInternal) {
     'use strict';
 
-    var ModuleHandler = getInternal('Handlers/Subjects/Module'),
-        BundleHandler = getInternal('Handlers/Subjects/Bundle'),
-        InterceptionHandler = getInternal('Handlers/Subjects/Interception'),
-        Handler;
+    var Handlers = getInternal('Handlers/Subjects');
 
     /**
-     * @namespace
-     *
      * @memberof JARS~internals.Factories
+     *
+     * @param {JARS~internals.Helpers.Injector} injector
+     * @param {JARS~internals.Subjects.Subject} subject
+     *
+     * @return {JARS~internals.Handlers~Completion}
      */
-    Handler = {
-        module: function() {
-            return ModuleHandler;
-        },
-
-        bundle: function() {
-            return BundleHandler;
-        },
-
-        interception: function() {
-            return InterceptionHandler;
-        }
-    };
+    function Handler(injector, subject) {
+        return new Handlers[injector.type](subject);
+    }
 
     return Handler;
 });

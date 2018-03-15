@@ -1,18 +1,22 @@
 JARS.internal('Refs/Subject', function(getInternal) {
     'use strict';
 
-    var setCurrent = getInternal('Helpers/Tracker').setCurrent;
+    var Tracker = getInternal('Helpers/Tracker');
 
     /**
      * @class
      *
      * @memberof JARS~internals.Refs
      *
-     * @param {JARS~internals.Subjects.Subject} subject
+     * @param {string} subjectName
+     * @param {JARS~internals.Refs.Subject} parentRef
+     * @param {JARS~internals.Configs.Subject} config
      */
-    function Subject(subject) {
-        this._subject = subject;
+    function Subject(subjectName, parentRef, config) {
+        this._subjectName = subjectName;
+        this._parent = parentRef;
         this._contexts = {};
+        this._config = config;
     }
 
     Subject.prototype = {
@@ -31,7 +35,7 @@ JARS.internal('Refs/Subject', function(getInternal) {
          * @return {*}
          */
         get: function(context) {
-            context = context || this._subject.config.get('context');
+            context = context || this._config.get('context');
 
             return this._contexts[context] || this._create(context);
         },
@@ -48,19 +52,27 @@ JARS.internal('Refs/Subject', function(getInternal) {
          * @return {*}
          */
         _create: function(context) {
-            var subject = this._subject,
-                contexts = this._contexts,
-                parentRef, refs;
+            var ref = this,
+                contexts = ref._contexts,
+                parentContent, contents;
 
-            if(!subject.isRoot) {
-                parentRef = subject.parent.ref.get(context);
-                refs = this._refs.get(context);
+            if(ref._parent) {
+                parentContent = ref._parent.get(context);
+                contents = ref._refs.get(context);
 
-                setCurrent(subject);
+                Tracker.setCurrent(ref._subjectName);
 
-                contexts[context] = this._provide.apply(parentRef, refs) || {};
+                try {
+                    contexts[context] = ref._provide.apply(parentContent, contents) || {};
+                } catch (error) {
+                    contexts[context] = {};
+                    //TODO handle error
 
-                setCurrent();
+                    throw error;
+                }
+                finally {
+                    Tracker.setCurrent();
+                }
             }
             else {
                 contexts[context] = {};

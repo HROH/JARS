@@ -11,11 +11,15 @@ JARS.internal('Handlers/Subjects/Module', function(getInternal) {
      * @param {JARS~internals.Subjects.Subject} subject 
      */
     function Module(subject) {
-        var path = PathResolver(subject);
-
-        AutoAborter.setup(subject, path);
-        loadSource(path);
+        this._subject = subject;
     }
+
+    Module.prototype.onCompleted = function() {
+        var path = PathResolver(this._subject);
+
+        AutoAborter.setup(this._subject, path);
+        loadSource(path);
+    };
 
     return Module;
 });
