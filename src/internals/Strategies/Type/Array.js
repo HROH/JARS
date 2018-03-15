@@ -17,7 +17,7 @@ JARS.internal('Strategies/Type/Array', function(getInternal) {
     function Array(subject, requestor, subjects, resolutionStrategy) {
         var resolvedSubjects = [];
 
-        each(subjects, function concatResolvedModules(nestedSubjects) {
+        each(subjects, function(nestedSubjects) {
             resolvedSubjects = resolvedSubjects.concat(AnyResolutionStrategy(subject, requestor, nestedSubjects, resolutionStrategy));
         });
 
