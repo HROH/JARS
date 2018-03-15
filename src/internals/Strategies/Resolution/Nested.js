@@ -11,7 +11,7 @@ JARS.internal('Strategies/Resolution/Nested', function(getInternal) {
      * @param {JARS~internals.Subjects.Subject} subject
      * @param {string} subjectName
      *
-     * @return {{error: string, name: string}}
+     * @return {JARS~internals.Strategies.Resolution~Data}
      */
     function Nested(subject, subjectName) {
         return subjectName !== DOT ? AbsoluteResolutionStrategy(subject, subjectName) : subject.isRoot ? {

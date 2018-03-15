@@ -11,7 +11,7 @@ JARS.internal('Strategies/Resolution/Subject', function(getInternal) {
      * @param {JARS~internals.Subjects.Subject} subject
      * @param {string} subjectName
      *
-     * @return {{error: string, name: string}}
+     * @return {JARS~internals.Strategies.Resolution~Data}
      */
     function Subject(subject, subjectName) {
         return RelativeResolver(subjectName) ? RelativeResolutionStrategy(subject, subjectName) : subjectName ? {

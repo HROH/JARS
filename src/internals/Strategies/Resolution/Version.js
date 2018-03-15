@@ -11,7 +11,7 @@ JARS.internal('Strategies/Resolution/Version', function(getInternal) {
      * @param {JARS~internals.Subjects.Subject} subject
      * @param {string} subjectName
      *
-     * @return {{error: string, name: string}}
+     * @return {JARS~internals.Strategies.Resolution~Data}
      */
     function Version(subject, subjectName) {
         return VersionResolver.getVersion(subjectName) ? {
