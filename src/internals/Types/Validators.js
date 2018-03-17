@@ -2,10 +2,10 @@ JARS.internal('Types/Validators', function(getInternal) {
     'use strict';
 
     var envGlobal = getInternal('Env').global,
-        Validator = getInternal('Types/Validator'),
-        types = 'Null Undefined String Number Boolean Array Arguments Object Function Date RegExp'.split(' '),
-        NOTHING = null,
-        Validators;
+        TypeLookup = getInternal('Types/Lookup'),
+        Validators,
+        VALIDATOR_PREFIX = 'is',
+        ARGUMENTS = 'arguments';
 
     /**
      * @namespace
@@ -14,20 +14,12 @@ JARS.internal('Types/Validators', function(getInternal) {
      */
     Validators = {
         /**
-         * @param {string} typeDef
-         *
-         * @return {string}
-         */
-        add: function(typeDef) {
-            return Validator(Validators, typeDef);
-        },
-        /**
          * @param {*} value
          *
          * @return {boolean}
          */
         isNil: function(value) {
-            return value == NOTHING;
+            return Validators.isUndefined(value) || Validators.isNull(value);
         },
         /**
          * @param {*} value
@@ -170,10 +162,6 @@ JARS.internal('Types/Validators', function(getInternal) {
      * @return {boolean}
      */
 
-    getInternal('Helpers/Array').each(types, function(typeDef) {
-        Validators.add(typeDef);
-    });
-
     /**
      * @memberof JARS~internals.Types.Validators
      * @inner
@@ -186,6 +174,20 @@ JARS.internal('Types/Validators', function(getInternal) {
         var length = value.length;
 
         return length === 0 || (length > 0 && ((length - 1) in value));
+    }
+
+    TypeLookup.each(function(type, typeDef) {
+        var validatorName = VALIDATOR_PREFIX + typeDef;
+
+        Validators[validatorName] = getGlobalValidator(typeDef, validatorName) || (type === ARGUMENTS ? function(value) {
+            return value && (TypeLookup.get(value) === type || Validators.isArrayLike(value));
+        } : function(value) {
+            return TypeLookup.get(value) === type;
+        });
+    });
+
+    function getGlobalValidator(typeDef, validatorName) {
+        return (envGlobal[typeDef] && envGlobal[typeDef][validatorName]) ? envGlobal[typeDef][validatorName] : null;
     }
 
     return Validators;

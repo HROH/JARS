@@ -1,7 +1,10 @@
 JARS.internal('Types/Lookup', function(getInternal) {
     'use strict';
 
-    var envGlobal = getInternal('Env').global,
+    var each = getInternal('Helpers/Object').each,
+        envGlobal = getInternal('Env').global,
+        types = 'Null Undefined String Number NaN Boolean Array Arguments Object Function Date RegExp'.split(' '),
+        typeDefs = {},
         typeLookup = {},
         toString = ({}).toString,
         TYPE_LOOKUP_PREFIX = '[object ',
@@ -19,24 +22,24 @@ JARS.internal('Types/Lookup', function(getInternal) {
      */
     Lookup = {
         /**
-         * @param {string} typeDef
-         *
-         * @return {string}
-         */
-        add: function(typeDef) {
-            return (typeLookup[TYPE_LOOKUP_PREFIX + typeDef + TYPE_LOOKUP_SUFFIX] = typeDef.toLowerCase());
-        },
-        /**
          * @param {*} value
          *
          * @return {string}
          */
         get: function(value) {
-            var type = (value === NOTHING ? String(value) : typeLookup[toString.call(value)]) || typeof value;
+            var type = (value == NOTHING ? String(value) : typeLookup[toString.call(value)]) || typeof value;
 
             return type === NUMBER ? getNumberType(value) : type;
+        },
+
+        each: function(callback) {
+            each(typeDefs, callback);
         }
     };
+
+    getInternal('Helpers/Array').each(types, function(typeDef) {
+        typeDefs[typeDef] = typeLookup[TYPE_LOOKUP_PREFIX + typeDef + TYPE_LOOKUP_SUFFIX] = typeDef.toLowerCase();
+    });
 
     /**
      * @memberof JARS~internals.Types.Lookup

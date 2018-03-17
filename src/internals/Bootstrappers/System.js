@@ -83,16 +83,6 @@ JARS.internal('Bootstrappers/System', function(getInternal) {
                     },
 
                     $$internals: getInternal('Registries/Internals'),
-                    /**
-                     * @memberof module:System
-                     *
-                     * @param {string} typeDef
-                     */
-                    addTypeValidator: function(typeDef) {
-                        var validatorName = Validators.add(typeDef);
-
-                        System[validatorName] || (System[validatorName] = Validators[validatorName]);
-                    },
 
                     getType: Lookup.getType,
 
