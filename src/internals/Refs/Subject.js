@@ -44,7 +44,7 @@ JARS.internal('Refs/Subject', function(getInternal) {
          */
         flush: function(context) {
             this._contexts[context] = null;
-            this._refs.flush(context);
+            this._refs && this._refs.flush(context);
         },
         /**
          * @param {string} context
