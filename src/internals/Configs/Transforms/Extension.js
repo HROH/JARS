@@ -1,7 +1,8 @@
 JARS.internal('Configs/Transforms/Extension', function() {
     'use strict';
 
-    var DOT = '.';
+    var RE_LEADING_DOT = /^\./,
+        DOT = '.';
 
     /**
      * @memberof JARS~internals.Configs.Transforms
@@ -11,7 +12,7 @@ JARS.internal('Configs/Transforms/Extension', function() {
      * @return {string}
      */
     function Extension(extension) {
-        return DOT + extension;
+        return RE_LEADING_DOT.test(extension) ? extension : DOT + extension;
     }
 
     return Extension;
