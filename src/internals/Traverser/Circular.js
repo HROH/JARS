@@ -26,7 +26,9 @@ JARS.internal('Traverser/Circular', function() {
          * @return {JARS~internals.Traverser.Modules~Result}
          */
         onLeave: function(subject, entryModule, depth, circularList) {
-            (circularList || (equalsEntryModule(subject, entryModule, depth) && (circularList = []))) && circularList.unshift(subject.name);
+            if(circularList || equalsEntryModule(subject, entryModule, depth)) {
+                circularList = circularList ? [subject.name].concat(circularList) : [subject.name];
+            }
 
             return {
                 value: circularList,
