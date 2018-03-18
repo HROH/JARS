@@ -3,7 +3,7 @@ JARS.internal('Types/Lookup', function(getInternal) {
 
     var each = getInternal('Helpers/Object').each,
         envGlobal = getInternal('Env').global,
-        types = 'Null Undefined String Number NaN Boolean Array Arguments Object Function Date RegExp'.split(' '),
+        types = 'Null Undefined String Number Boolean Array Arguments Object Function Date RegExp'.split(' '),
         typeDefs = {},
         typeLookup = {},
         toString = ({}).toString,
