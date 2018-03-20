@@ -1,10 +1,16 @@
 /**
  * @module Modules
  */
-JARS.module('System.Modules').$export(function() {
+JARS.module('System.Modules').meta({
+    plugIn: function(pluginRequest) {
+        pluginRequest.$export(function() {
+            return pluginRequest.requestor.config.get('config');
+        });
+    }
+}).$import('*!Registries/Internals').$export(function(InternalsRegistry) {
     'use strict';
 
-    var getInternal = this.$$internals.get,
+    var getInternal = InternalsRegistry.get,
         SubjectsRegistry = getInternal('Registries/Subjects'),
         getCurrent = getInternal('Helpers/Tracker').getCurrent,
         $import = getInternal('Handlers/Import').$import,

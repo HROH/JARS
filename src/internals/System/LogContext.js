@@ -1,7 +1,7 @@
 /**
  * @module LogContext
  */
-JARS.module('System.LogContext').$import(['.!', '.']).$export(function(config, System) {
+JARS.module('System.LogContext').$import(['.Modules!', '.']).$export(function(config, System) {
     'use strict';
 
     var CONTEXT_DELIMITER = ',',

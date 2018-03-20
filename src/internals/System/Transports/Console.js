@@ -1,7 +1,7 @@
 /**
  * @module Console
  */
-JARS.module('System.Transports.Console').$import(['..!', '..::env', '..LogLevels']).$export(function(config, env, LogLevels) {
+JARS.module('System.Transports.Console').$import(['..Modules!', '..::env', '..LogLevels']).$export(function(config, env, LogLevels) {
     'use strict';
 
     var globalConsole = env.global.console || {},

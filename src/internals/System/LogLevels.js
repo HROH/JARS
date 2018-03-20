@@ -1,11 +1,11 @@
 /**
  * @module LogLevels
  */
-JARS.module('System.LogLevels').$import(['.::$$internals', '.::isNumber', '.::isString']).$export(function(internals, isNumber, isString) {
+JARS.module('System.LogLevels').$import(['*!Registries/Internals', '.::isNumber', '.::isString']).$export(function(InternalsRegistry, isNumber, isString) {
     'use strict';
 
-    var each = internals.get('Helpers/Array').each,
-        hasOwnProp = internals.get('Helpers/Object').hasOwnProp,
+    var each = InternalsRegistry.get('Helpers/Array').each,
+        hasOwnProp = InternalsRegistry.get('Helpers/Object').hasOwnProp,
         DEFAULT_LOGLEVELS = 'log debug info warn error'.split(' '),
         definedLevels = [],
         LogLevels;

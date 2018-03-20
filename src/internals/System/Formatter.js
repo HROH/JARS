@@ -2,11 +2,11 @@
  * @module Formatter
  */
 JARS.module('System.Formatter').$import([
-    '.::$$internals', '.::isString', '.::isArray', '.::isObject'
-]).$export(function(internals, isString, isArray, isObject) {
+    '*!Helpers/Object', '.::isString', '.::isArray', '.::isObject'
+]).$export(function(ObjectHelper, isString, isArray, isObject) {
     'use strict';
 
-    var hasOwnProp = internals.get('Helpers/Object').hasOwnProp,
+    var hasOwnProp = ObjectHelper.hasOwnProp,
         RE_TEMPLATE_KEY = /\$\{(.*?)\}/g,
         UNKNOWN_KEY = '<UNKNOWN KEY>',
         Formatter;

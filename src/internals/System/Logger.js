@@ -2,7 +2,7 @@
  * @module Logger
  */
 JARS.module('System.Logger').$import([
-    '.!',
+    '.Modules!',
     '.Transports',
     '.Formatter::format',
     '.LogContext',

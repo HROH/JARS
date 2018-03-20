@@ -15,10 +15,10 @@ JARS.module('System.Transports', ['Console']).meta({
             return this;
         });
     }
-}).$import(['.!', '.::$$internals']).$export(function(config, internals) {
+}).$import(['.Modules!', '*!Helpers/Object']).$export(function(config, ObjectHelper) {
     'use strict';
 
-    var hasOwnProp = internals.get('Helpers/Object').hasOwnProp,
+    var hasOwnProp = ObjectHelper.hasOwnProp,
         transports = {},
         Transports;
 
