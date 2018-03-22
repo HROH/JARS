@@ -12,13 +12,13 @@ JARS.internal('Bootstrappers/Modules', function(getInternal) {
          */
         bootstrap: function() {
             var rootModule = getInternal('Registries/Subjects').getRootModule();
-            
+
             getInternal('Helpers/Tracker').setRoot(rootModule);
             rootModule.setMeta({
                 /**
                  * @param {JARS~internals.Subjects.Interception} pluginRequest
                  */
-                plugIn: function(pluginRequest, getInternal) {
+                plugIn: function(pluginRequest) {
                     var internalName = pluginRequest.info.data,
                         internal = getInternal(internalName);
 

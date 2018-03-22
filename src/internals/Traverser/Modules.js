@@ -49,7 +49,7 @@ JARS.internal('Traverser/Modules', function(getInternal) {
      * @return {*}
      */
     function traverseRelated(subject, entryModule, traverseHandle, depth, value) {
-        var result = (subject.isRoot || subject.parent.isRoot) ? defaultResult(value) : traverseSubject(subject.parent, entryModule, traverseHandle, depth, value);
+        var result = subject.isRoot || subject.parent.isRoot ? defaultResult(value) : traverseSubject(subject.parent, entryModule, traverseHandle, depth, value);
 
         if(!result.done) {
             result = traverseDependencies(subject, entryModule, traverseHandle, depth, result.value);
@@ -83,7 +83,9 @@ JARS.internal('Traverser/Modules', function(getInternal) {
     }
 
     /**
-     * 
+     * @memberof JARS~internals.Traverser.Modules
+     * @inner
+     *
      * @param {*} value
      *
      * @return {JARS~internals.Traverser.Modules~Result}

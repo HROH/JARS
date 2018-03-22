@@ -34,11 +34,11 @@
             /**
              * @type {string}
              */
-            BASE_PATH: getData('base') ||  './',
+            BASE_PATH: getData('base') || './',
             /**
              * @type {string}
              */
-            INTERNALS_PATH: getData('internals') || (script.src.substring(0, script.src.lastIndexOf('/')) + '/internals/'),
+            INTERNALS_PATH: getData('internals') || script.src.substring(0, script.src.lastIndexOf('/')) + '/internals/'
         };
 
         /**
@@ -66,7 +66,7 @@
          *
          * @memberof JARS~internals
          */
-        SourceManager =  {
+        SourceManager = {
             /**
              * @param {string} path
              */

@@ -6,10 +6,9 @@ JARS.internal('Types/Lookup', function(getInternal) {
         types = 'Null Undefined String Number Boolean Array Arguments Object Function Date RegExp'.split(' '),
         typeDefs = {},
         typeLookup = {},
-        toString = ({}).toString,
+        toString = {}.toString,
         TYPE_LOOKUP_PREFIX = '[object ',
         TYPE_LOOKUP_SUFFIX = ']',
-        NOTHING = null,
         INFINITY = 'infinity',
         NAN = 'nan',
         NUMBER = 'number',
@@ -27,7 +26,7 @@ JARS.internal('Types/Lookup', function(getInternal) {
          * @return {string}
          */
         get: function(value) {
-            var type = (value == NOTHING ? String(value) : typeLookup[toString.call(value)]) || typeof value;
+            var type = (value === null ? String(value) : typeLookup[toString.call(value)]) || typeof value;
 
             return type === NUMBER ? getNumberType(value) : type;
         },

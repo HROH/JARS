@@ -2,7 +2,7 @@ JARS.internal('Helpers/Tracker', function() {
     'use strict';
 
     var current, root, Tracker;
-    
+
     /**
      * @namespace
      *

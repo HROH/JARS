@@ -57,9 +57,9 @@ JARS.internal('Resolvers/Interception', function(getInternal) {
 
                             data: moduleParts.join(interceptorType)
                         };
-
-                        return true;
                     }
+
+                    return !!interceptionInfo;
                 });
 
                 interceptionInfo = interceptionInfoCache[subjectName] = interceptionInfo || {

@@ -64,20 +64,20 @@ JARS.internal('Configs/Global', function(getInternal) {
      * @inner
      */
 
-     /**
-      * @typedef {Object} Options
-      *
-      * @memberof JARS~internals.Configs.Global
-      * @inner
-      *
-      * @property {(JARS~internals.Configs.Hooks~Debugging|boolean)} debugging
-      * @property {string} environment
-      * @property {Object<string, JARS~internals.Configs.Global~Options>} environments
-      * @property {boolean} globalAccess
-      * @property {JARS~internals.Interceptors~Interceptor} interceptors
-      * @property {string} main
-      * @property {JARS~internals.Configs.Hooks~Modules} modules
-      */
+    /**
+     * @typedef {Object} Options
+     *
+     * @memberof JARS~internals.Configs.Global
+     * @inner
+     *
+     * @property {(JARS~internals.Configs.Hooks~Debugging|boolean)} debugging
+     * @property {string} environment
+     * @property {Object<string, JARS~internals.Configs.Global~Options>} environments
+     * @property {boolean} globalAccess
+     * @property {JARS~internals.Interceptors~Interceptor} interceptors
+     * @property {string} main
+     * @property {JARS~internals.Configs.Hooks~Modules} modules
+     */
 
     return Global;
 });

@@ -18,7 +18,7 @@ JARS.internal('Resolvers/Path', function(getInternal) {
         var path = '';
 
         each(pathOptions, function(option) {
-            path += (option === OPTION_EXTENSION && extension) ? ExtensionTransform(extension) : subject.config.get(option);
+            path += option === OPTION_EXTENSION && extension ? ExtensionTransform(extension) : subject.config.get(option);
         });
 
         return path;

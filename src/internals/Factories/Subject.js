@@ -37,7 +37,7 @@ JARS.internal('Factories/Subject', function(getInternal) {
      * @return {(JARS~internals.Subjects.Subject|null)}
      */
     function injectRequestor(injector) {
-        return injector.subjectName !== injector.requestorName ? injector.inject(injector.requestorName, 'subject'): null;
+        return injector.subjectName !== injector.requestorName ? injector.inject(injector.requestorName, 'subject') : null;
     }
 
     return Subject;

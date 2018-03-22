@@ -8,7 +8,7 @@ JARS.internal('Handlers/Subjects/Bundle', function(getInternal) {
     /**
      * @memberof JARS~internals.Handlers.Subjects
      *
-     * @param {JARS~internals.Subjects.Subject} subject 
+     * @param {JARS~internals.Subjects.Subject} subject
      */
     function Bundle(subject) {
         this._subject = subject;
@@ -19,8 +19,8 @@ JARS.internal('Handlers/Subjects/Bundle', function(getInternal) {
 
         this._subject.$export(function() {
             var bundleExport = {
-                    default: this
-                };
+                default: this
+            };
 
             each(arguments, function(dep, index) {
                 var dependencyName = dependencies[index].name;

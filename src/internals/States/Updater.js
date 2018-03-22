@@ -38,10 +38,10 @@ JARS.internal('States/Updater', function(getInternal) {
             return updater._state.set(stateInfo, function(canTransition, currentStateInfo, nextStateInfo) {
                 logInfo = merge(merge({
                     curState: currentStateInfo.text,
-    
+
                     nextState: nextStateInfo.text
                 }, nextStateInfo.methods), logInfo);
-    
+
                 updater._logger[logInfo[canTransition ? LOG_DONE : LOG_ATTEMPT]](getMessage(canTransition, message), logInfo);
             });
         }

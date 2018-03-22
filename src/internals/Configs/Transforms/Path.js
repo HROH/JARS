@@ -12,7 +12,7 @@ JARS.internal('Configs/Transforms/Path', function() {
      * @return {string}
      */
     function Path(path) {
-       return (!path || RE_END_SLASH.test(path)) ? path : path + SLASH;
+        return !path || RE_END_SLASH.test(path) ? path : path + SLASH;
     }
 
     return Path;

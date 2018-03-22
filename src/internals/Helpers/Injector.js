@@ -67,7 +67,7 @@ JARS.internal('Helpers/Injector', function(getInternal) {
     };
 
     /**
-     * @param {string} context 
+     * @param {string} context
      */
     Injector.flush = function(context) {
         each(injectors, function(injector) {
@@ -90,7 +90,7 @@ JARS.internal('Helpers/Injector', function(getInternal) {
 
         return injectors[injectorKey] || (injectors[injectorKey] = new Injector(subjectName, requestorName, subjectType));
     }
-    
+
     /**
      * @param {string} subjectName
      *

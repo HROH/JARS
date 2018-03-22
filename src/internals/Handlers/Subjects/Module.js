@@ -8,7 +8,7 @@ JARS.internal('Handlers/Subjects/Module', function(getInternal) {
     /**
      * @memberof JARS~internals.Handlers.Subjects
      *
-     * @param {JARS~internals.Subjects.Subject} subject 
+     * @param {JARS~internals.Subjects.Subject} subject
      */
     function Module(subject) {
         this._subject = subject;

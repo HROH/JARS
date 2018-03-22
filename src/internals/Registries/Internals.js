@@ -29,7 +29,7 @@ JARS.init(function(commands) {
          * @param {string} groupName
          * @param {string[]} groupList
          */
-        registerGroup: function (groupName, groupList) {
+        registerGroup: function(groupName, groupList) {
             Queue.addGroup(groupList, groupName);
 
             Internals.register(groupName, function(getInternal) {
@@ -47,7 +47,7 @@ JARS.init(function(commands) {
          *
          * @return {*}
          */
-        get: function (internalName) {
+        get: function(internalName) {
             var factory = internals[internalName];
 
             return factory && (factory.ref || (factory.ref = factory(Internals.get)));
@@ -129,7 +129,9 @@ JARS.init(function(commands) {
          * @param {function()} callback
          */
         each: function(groupList, callback) {
-            for(var index = 0; index < groupList.length; index++) {
+            var index = 0;
+
+            for(index; index < groupList.length; index++) {
                 callback(groupList[index]);
             }
         }

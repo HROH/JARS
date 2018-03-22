@@ -13,9 +13,9 @@ JARS.internal('Strategies/Resolution/Relative', function(getInternal) {
      * @return {JARS~internals.Strategies.Resolution~Data}
      */
     function Relative(subject, subjectName) {
-        return ((!subject.isRoot && RelativeResolver(subjectName)) ?
+        return !subject.isRoot && RelativeResolver(subjectName) ?
             Relative(subject.parent, subjectName.substr(1)) :
-            AbsoluteResolutionStrategy(subject, subjectName));
+            AbsoluteResolutionStrategy(subject, subjectName);
     }
 
     return Relative;

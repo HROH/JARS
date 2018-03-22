@@ -6,6 +6,8 @@ JARS.module('System.Transports', ['Console']).meta({
      * @param {JARS~internals.Subjects.Subject} pluginRequest
      */
     plugIn: function(pluginRequest) {
+        'use strict';
+
         var data = pluginRequest.info.data.split(':');
 
         pluginRequest.$import(data[1]);

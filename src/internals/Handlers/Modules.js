@@ -84,7 +84,7 @@ JARS.internal('Handlers/Modules', function(getInternal) {
      * @return {number}
      */
     function getPercentage(count, total) {
-        return Number((count/total).toFixed(2));
+        return Number((count / total).toFixed(2));
     }
 
     return Modules;

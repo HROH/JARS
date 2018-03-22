@@ -24,7 +24,7 @@ JARS.internal('Factories/Options', function(getInternal) {
 
         bundle: function(injector) {
             var grandParentName = ParentResolver(injector.injectLocal('parentName'));
-            
+
             return grandParentName ? inheritOptions(injector, getBundleName(grandParentName)) : new ConfigOptions();
         },
 

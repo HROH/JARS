@@ -1,7 +1,7 @@
 JARS.internal('Helpers/Object', function() {
     'use strict';
 
-    var hasOwn = ({}).hasOwnProperty,
+    var hasOwn = {}.hasOwnProperty,
         Object;
 
     /**
@@ -17,7 +17,8 @@ JARS.internal('Helpers/Object', function() {
          * @return {Object}
          */
         create: function(Constructor, newProto) {
-            var oldProto = Constructor.prototype, object;
+            var oldProto = Constructor.prototype,
+                object;
 
             newProto && (Constructor.prototype = newProto);
 

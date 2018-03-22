@@ -33,7 +33,7 @@ JARS.internal('Configs/Subject', function(getInternal) {
          * @return {*}
          */
         get: function(option) {
-            return (option in this._options) ? this._options[option] : this._defaultOptions[option];
+            return option in this._options ? this._options[option] : this._defaultOptions[option];
         }
     };
 

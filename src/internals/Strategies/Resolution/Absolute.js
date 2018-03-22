@@ -14,7 +14,7 @@ JARS.internal('Strategies/Resolution/Absolute', function(getInternal) {
      * @return {JARS~internals.Strategies.Resolution~Data}
      */
     function Absolute(subject, subjectName) {
-        return (subject.isRoot || RelativeResolver(subjectName)) ? {
+        return subject.isRoot || RelativeResolver(subjectName) ? {
             error: MSG_ABSOLUTE_RESOLUTION_ERROR
         } : VersionResolutionStrategy(subject, subjectName);
     }

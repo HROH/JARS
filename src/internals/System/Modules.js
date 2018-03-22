@@ -3,6 +3,8 @@
  */
 JARS.module('System.Modules').meta({
     plugIn: function(pluginRequest) {
+        'use strict';
+
         pluginRequest.$export(function() {
             return pluginRequest.requestor.config.get('config');
         });

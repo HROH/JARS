@@ -16,7 +16,7 @@ JARS.internal('Resolvers/Parent', function(getInternal) {
     function Parent(subjectName) {
         return subjectName !== ROOT ? getParentName(subjectName) || ROOT : '';
     }
-    
+
     getParentName = unwrapVersion(function(subjectName) {
         return subjectName.lastIndexOf(DOT) > -1 && subjectName.substr(0, subjectName.lastIndexOf(DOT));
     });

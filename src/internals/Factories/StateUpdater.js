@@ -2,7 +2,7 @@ JARS.internal('Factories/StateUpdater', function(getInternal) {
     'use strict';
 
     var Updater = getInternal('States/Updater');
-    
+
     /**
      * @memberof JARS~internals.Factories
      *

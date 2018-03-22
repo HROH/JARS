@@ -29,7 +29,7 @@ JARS.internal('Bootstrappers/Configs', function(getInternal) {
                     getInternal('Interceptors/Property')
                 ],
 
-                globalAccess: false,
+                globalAccess: false
             });
         }
     };

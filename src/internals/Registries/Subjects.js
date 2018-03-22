@@ -6,7 +6,7 @@ JARS.internal('Registries/Subjects', function(getInternal) {
         ParentResolver = getInternal('Resolvers/Parent'),
         AutoAborter = getInternal('Helpers/AutoAborter'),
         Subjects;
-    
+
     /**
      * @namespace
      *

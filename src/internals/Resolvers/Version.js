@@ -49,7 +49,7 @@ JARS.internal('Resolvers/Version', function() {
      * @return {string}
      */
     function appendVersion(subjectName, version) {
-        return (subjectName && version) ? [subjectName, version].join(VERSION_DELIMITER) : subjectName;
+        return subjectName && version ? [subjectName, version].join(VERSION_DELIMITER) : subjectName;
     }
 
     return Version;
