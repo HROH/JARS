@@ -6,6 +6,8 @@
   "private": true,
   "license": "MIT",
   "devDependencies": {
+    "eslint": "4.19.0",
+    "eslint-config-jars": "file:../eslint-config-jars",
     "gulp": "3.9.1",
     "jars-gulp": "file:../jars-gulp",
     "jars-karma": "file:../jars-karma"
