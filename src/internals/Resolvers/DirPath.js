@@ -16,7 +16,11 @@ JARS.internal('Resolvers/DirPath', function(getInternal) {
      * @return {string}
      */
     function DirPath(subjectName) {
-        return removeVersion(RE_STARTS_WITH_UPPERCASE.test(FileNameResolver(subjectName)) ? ParentResolver(subjectName) : subjectName).replace(RE_DOT, SLASH);
+        return removeVersion(RE_STARTS_WITH_UPPERCASE.test(FileNameResolver(subjectName)) ? getParentDir(subjectName) : subjectName).replace(RE_DOT, SLASH);
+    }
+
+    function getParentDir(subjectName) {
+        return ParentResolver(subjectName) === ParentResolver.ROOT ? '' : ParentResolver(subjectName);
     }
 
     return DirPath;
