@@ -2,8 +2,7 @@ JARS.internal('Traverser/PathList', function(getInternal) {
     'use strict';
 
     var PathResolver = getInternal('Resolvers/Path'),
-        BundleResolver = getInternal('Resolvers/Bundle'),
-        InterceptionResolver = getInternal('Resolvers/Interception'),
+        SubjectTypes = getInternal('Types/Subject'),
         PathList;
 
     /**
@@ -34,7 +33,7 @@ JARS.internal('Traverser/PathList', function(getInternal) {
         onLeave: function(subject, entryModule, depth, trackList) {
             if(!isSorted(subject, trackList)) {
                 trackList.sorted[subject.name] = true;
-                !InterceptionResolver.isInterception(subject.name) && !BundleResolver.isBundle(subject.name) && trackList.paths.push(PathResolver(subject));
+                !SubjectTypes.isInterception(subject.name) && !SubjectTypes.isBundle(subject.name) && trackList.paths.push(PathResolver(subject));
             }
 
             return {

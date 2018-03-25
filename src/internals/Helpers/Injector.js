@@ -1,13 +1,9 @@
 JARS.internal('Helpers/Injector', function(getInternal) {
     'use strict';
 
-    var isBundle = getInternal('Resolvers/Bundle').isBundle,
-        isInterception = getInternal('Resolvers/Interception').isInterception,
+    var SubjectTypes = getInternal('Types/Subject'),
         each = getInternal('Helpers/Object').each,
         Factories = getInternal('Factories'),
-        SUBJECT_TYPE_MODULE = 'module',
-        SUBJECT_TYPE_BUNDLE = 'bundle',
-        SUBJECT_TYPE_INTERCEPTION = 'interception',
         injectors = {};
 
     /**
@@ -18,10 +14,10 @@ JARS.internal('Helpers/Injector', function(getInternal) {
      * @param {string} subjectName
      * @param {string} requestorName
      */
-    function Injector(subjectName, requestorName, subjectType) {
+    function Injector(subjectName, requestorName) {
         this.subjectName = subjectName;
-        this.requestorName = requestorName;
-        this.type = subjectType;
+        this.type = SubjectTypes.get(subjectName);
+        this.requestorName = getRequestorName(subjectName, requestorName);
         this._cache = {};
     }
 
@@ -82,22 +78,13 @@ JARS.internal('Helpers/Injector', function(getInternal) {
      * @return {JARS~internals.Helpers.Injector}
      */
     function getInjector(subjectName, requestorName) {
-        var subjectType = getSubjectType(subjectName),
-            injectorKey;
+        var injectorKey = subjectName + ':' + getRequestorName(subjectName, requestorName);
 
-        requestorName = subjectType === SUBJECT_TYPE_INTERCEPTION ? requestorName : subjectName;
-        injectorKey = subjectName + ':' + requestorName;
-
-        return injectors[injectorKey] || (injectors[injectorKey] = new Injector(subjectName, requestorName, subjectType));
+        return injectors[injectorKey] || (injectors[injectorKey] = new Injector(subjectName, requestorName));
     }
 
-    /**
-     * @param {string} subjectName
-     *
-     * @return {string}
-     */
-    function getSubjectType(subjectName) {
-        return isInterception(subjectName) ? SUBJECT_TYPE_INTERCEPTION : isBundle(subjectName) ? SUBJECT_TYPE_BUNDLE : SUBJECT_TYPE_MODULE;
+    function getRequestorName(subjectName, requestorName) {
+        return SubjectTypes.isInterception(subjectName) ? requestorName : subjectName;
     }
 
     return Injector;

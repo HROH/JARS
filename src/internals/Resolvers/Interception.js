@@ -14,14 +14,6 @@ JARS.internal('Resolvers/Interception', function(getInternal) {
         /**
          * @param {string} subjectName
          *
-         * @return {boolean}
-         */
-        isInterception: function(subjectName) {
-            return Interception.getSubjectName(subjectName) !== subjectName;
-        },
-        /**
-         * @param {string} subjectName
-         *
          * @return {string}
          */
         getSubjectName: function(subjectName) {

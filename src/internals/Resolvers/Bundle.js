@@ -34,15 +34,7 @@ JARS.internal('Resolvers/Bundle', function(getInternal) {
          */
         removeBundleSuffix: unwrapVersion(function(subjectName) {
             return subjectName.replace(RE_BUNDLE_SUFFIX, EMPTY_STRING);
-        }),
-        /**
-         * @param {string} subjectName
-         *
-         * @return {boolean}
-         */
-        isBundle: function(subjectName) {
-            return RE_BUNDLE_SUFFIX.test(VersionResolver.removeVersion(subjectName));
-        }
+        })
     };
 
     Bundle.ROOT = Bundle.getBundleName(ParentResolver.ROOT);
