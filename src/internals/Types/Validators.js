@@ -3,9 +3,10 @@ JARS.internal('Types/Validators', function(getInternal) {
 
     var envGlobal = getInternal('Env').global,
         TypeLookup = getInternal('Types/Lookup'),
-        Validators,
         VALIDATOR_PREFIX = 'is',
-        ARGUMENTS = 'arguments';
+        ARGUMENTS = 'arguments',
+        BASE_TEN = 10,
+        Validators;
 
     /**
      * @namespace
@@ -37,7 +38,7 @@ JARS.internal('Types/Validators', function(getInternal) {
          * @return {boolean}
          */
         isInteger: Number.isInteger || function(value) {
-            return Validators.isNumber(value) && envGlobal.parseInt(value, 10) === value;
+            return Validators.isNumber(value) && envGlobal.parseInt(value, BASE_TEN) === value;
         },
         /**
          * @method
@@ -52,9 +53,7 @@ JARS.internal('Types/Validators', function(getInternal) {
          *
          * @return {boolean}
          */
-        isNaN: function(value) {
-            return envGlobal.isNaN(value) && value !== value;
-        },
+        isNaN: envGlobal.isNaN,
         /**
          * @param {*} value
          *
@@ -173,7 +172,7 @@ JARS.internal('Types/Validators', function(getInternal) {
     function isIterable(value) {
         var length = value.length;
 
-        return length === 0 || (length > 0 && ((length - 1) in value));
+        return length === 0 || (length > 0 && length - 1 in value);
     }
 
     TypeLookup.each(function(type, typeDef) {
@@ -187,7 +186,7 @@ JARS.internal('Types/Validators', function(getInternal) {
     });
 
     function getGlobalValidator(typeDef, validatorName) {
-        return (envGlobal[typeDef] && envGlobal[typeDef][validatorName]) ? envGlobal[typeDef][validatorName] : null;
+        return envGlobal[typeDef] && envGlobal[typeDef][validatorName] ? envGlobal[typeDef][validatorName] : null;
     }
 
     return Validators;
