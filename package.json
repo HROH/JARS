@@ -1,21 +1,23 @@
 {
   "name": "jars",
   "version": "0.4.0",
-  "description": "",
+  "description": "An opinionated module loader that serves as a learning project",
   "author": "Holger Haas",
   "private": true,
   "license": "MIT",
   "devDependencies": {
     "eslint": "4.19.0",
-    "eslint-config-jars": "file:../eslint-config-jars",
+    "eslint-config-jars": "git+ssh://git@github.com/HROH/eslint-config-jars.git",
     "gulp": "3.9.1",
-    "jars-gulp": "file:../jars-gulp",
-    "jars-karma": "file:../jars-karma"
+    "jars-gulp": "git+ssh://git@github.com/HROH/jars-gulp.git",
+    "jars-karma": "git+ssh://git@github.com/HROH/jars-karma.git"
   },
   "scripts": {
     "dev": "gulp -- dev",
-    "test": "gulp -- test",
-    "watch": "gulp -- watch",
-    "version": "git add README.md src/jars.js"
+    "test": "npm run lint && gulp -- test",
+    "lint": "eslint -- **/*.js",
+    "report": "gulp -- report",
+    "docs": "gulp -- docs",
+    "min": "gulp -- min"
   }
 }
