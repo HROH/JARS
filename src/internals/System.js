@@ -8,12 +8,6 @@ JARS.module('System', [
 ]).$import('*!Registries/Internals').$export(function(InternalsRegistry) {
     'use strict';
 
-    var Validators = InternalsRegistry.get('Types/Validators'),
-        Lookup = InternalsRegistry.get('Types/Lookup'),
-        envGlobal = InternalsRegistry.get('Env').global,
-        merge = InternalsRegistry.get('Helpers/Object').merge,
-        System;
-
     /**
      * @module System
      *
@@ -37,7 +31,7 @@ JARS.module('System', [
      * @borrows JARS~internals.Types.Validators.isRegExp as isRegExp
      * @borrows JARS~internals.Types.Validators.isA as isA
      */
-    System = merge({
+    var System = InternalsRegistry.get('Helpers/Object').merge({
         /**
          * @namespace
          *
@@ -47,11 +41,11 @@ JARS.module('System', [
             /**
              * @type {Global}
              */
-            global: envGlobal
+            global: InternalsRegistry.get('Env').global
         },
 
-        getType: Lookup.get
-    }, Validators);
+        getType: InternalsRegistry.get('Types/Lookup').get
+    }, InternalsRegistry.get('Types/Validators'));
 
     return System;
 });
