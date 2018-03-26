@@ -50,7 +50,7 @@ JARS.internal('States/Subject', function(getInternal) {
         },
         /**
          * @param {JARS~internals.States.Info} stateInfo
-         * @param {function(canTransition: boolean, currentStateInfo: JARS~internals.States.Info, nextStateInfo: JARS~internals.States.Info)} callback
+         * @param {JARS~internals.States.Subject~TransitionCallback} callback
          *
          * @return {boolean}
          */
@@ -109,6 +109,14 @@ JARS.internal('States/Subject', function(getInternal) {
      * @method JARS~internals.States.Subject#isAborted
      *
      * @return {boolean}
+     */
+
+    /**
+     * @callback JARS~internals.States.Subject~TransitionCallback
+     *
+     * @param {boolean} canTransition
+     * @param {JARS~internals.States.Info} currentStateInfo
+     * @param {JARS~internals.States.Info} nextStateInfo
      */
 
     return Subject;
