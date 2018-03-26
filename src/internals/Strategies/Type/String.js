@@ -19,21 +19,9 @@ JARS.internal('Strategies/Type/String', function(getInternal) {
         var info = InterceptionResolver.getInfo(subjectName),
             result = resolutionStrategy(subject, info.name);
 
-        abortOnResolutionError(subject.stateUpdater, result.error, subjectName);
+        result.error && subject.abort(MSG_DEFAULT_RESOLUTION_ERROR + result.error, [subjectName]);
 
         return result.name ? [SubjectsRegistry.get(InterceptionResolver.makeInterception(result.name, info), requestor)] : [];
-    }
-
-    /**
-     * @memberof JARS~internals.Strategies.Type.String
-     * @inner
-     *
-     * @param {JARS~internals.States.Updater} stateUpdater
-     * @param {string} error
-     * @param {string} subjectName
-     */
-    function abortOnResolutionError(stateUpdater, error, subjectName) {
-        error && stateUpdater.setAborted(MSG_DEFAULT_RESOLUTION_ERROR + error, [subjectName]);
     }
 
     return String;

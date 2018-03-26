@@ -84,6 +84,13 @@ JARS.internal('Subjects/Subject', function(getInternal) {
             }
 
             this.state.onChange(handler);
+        },
+        /**
+         * @param {string} [message]
+         * @param {Object} [logInfo]
+         */
+        abort: function(message, logInfo) {
+            this.stateUpdater.setAborted(message, logInfo);
         }
     };
 

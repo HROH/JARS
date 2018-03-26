@@ -18,11 +18,9 @@ JARS.internal('Handlers/Subjects/Dependencies', function(getInternal) {
      */
     function Dependencies(subject, provide) {
         var circularDependencies = getCircularDependencies(subject.requestor),
-            dependencies = circularDependencies ? [] : subject.dependencies.getAll(),
-            stateUpdater = subject.stateUpdater,
-            completionHandler = circularDependencies ? new DependenciesAborted(stateUpdater, circularDependencies) : new DependenciesCompleted(subject.state, stateUpdater, subject.ref, provide);
+            completionHandler = circularDependencies ? new DependenciesAborted(subject, circularDependencies) : new DependenciesCompleted(subject, provide);
 
-        return new SubjectHandler(subject, dependencies, MSG_STRINGS, completionHandler);
+        return new SubjectHandler(subject, circularDependencies ? [] : subject.dependencies.getAll(), MSG_STRINGS, completionHandler);
     }
 
     /**

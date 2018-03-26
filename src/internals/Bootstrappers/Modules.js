@@ -33,7 +33,7 @@ JARS.internal('Bootstrappers/Modules', function(getInternal) {
                         });
                     }
                     else {
-                        pluginRequest.stateUpdater.setAborted(MSG_INTERNAL_NOT_FOUND, [internalName]);
+                        pluginRequest.abort(MSG_INTERNAL_NOT_FOUND, [internalName]);
                     }
                 }
             });

@@ -20,7 +20,7 @@ JARS.internal('Interceptors/Plugin', function(getInternal) {
         intercept: function(interception) {
             var plugIn = interception.parent.getMeta(META_PLUGIN);
 
-            isFunction(plugIn) ? plugIn(interception, getInternal) : interception.stateUpdater.setAborted(MSG_MISSING_PLUGIN_METHOD);
+            isFunction(plugIn) ? plugIn(interception, getInternal) : interception.abort(MSG_MISSING_PLUGIN_METHOD);
         },
         /**
          * @type {string}

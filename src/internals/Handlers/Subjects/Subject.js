@@ -40,7 +40,7 @@ JARS.internal('Handlers/Subjects/Subject', function(getInternal) {
          * @param {string} subjectName
          */
         onAborted: function(subjectName) {
-            this.requestor.stateUpdater.setAborted(MSG_ABORTED, [this._msgStrings[0], subjectName]);
+            this.requestor.abort(MSG_ABORTED, [this._msgStrings[0], subjectName]);
         },
         /**
          * @param {JARS~internals.Refs.Modules} refs

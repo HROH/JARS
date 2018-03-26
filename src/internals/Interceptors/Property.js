@@ -26,7 +26,7 @@ JARS.internal('Interceptors/Property', function(getInternal) {
                     value = this[property];
                 }
                 else {
-                    interception.stateUpdater.setAborted(MSG_MISSING_PROPERTY, [property]);
+                    interception.abort(MSG_MISSING_PROPERTY, [property]);
                 }
 
                 return value;
