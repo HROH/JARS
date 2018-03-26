@@ -1,12 +1,16 @@
 JARS.internal('Bootstrappers/Modules', function(getInternal) {
     'use strict';
 
+    var MSG_INTERNAL_ACCESSED = 'You are accessing the internal "${0}". They might be subject to change!',
+        MSG_INTERNAL_NOT_FOUND = 'could not find internal "${0}"!',
+        Modules;
+
     /**
      * @namespace
      *
      * @memberof JARS~internals.Bootstrappers
      */
-    var Modules = {
+    Modules = {
         /**
          * @method
          */
@@ -23,13 +27,13 @@ JARS.internal('Bootstrappers/Modules', function(getInternal) {
                         internal = getInternal(internalName);
 
                     if(internal) {
-                        pluginRequest.logger.warn('You are accessing the internal "${0}". They might be subject to change!', [internalName]);
+                        pluginRequest.logger.warn(MSG_INTERNAL_ACCESSED, [internalName]);
                         pluginRequest.$export(function() {
                             return internal;
                         });
                     }
                     else {
-                        pluginRequest.stateUpdater.setAborted('could not find internal "${0}"!', [internalName]);
+                        pluginRequest.stateUpdater.setAborted(MSG_INTERNAL_NOT_FOUND, [internalName]);
                     }
                 }
             });
