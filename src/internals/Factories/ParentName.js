@@ -1,13 +1,7 @@
 JARS.internal('Factories/ParentName', function(getInternal) {
     'use strict';
 
-    var parentFactories = {
-        module: getInternal('Resolvers/Parent'),
-
-        bundle: getInternal('Resolvers/Bundle').removeBundleSuffix,
-
-        interception: getInternal('Resolvers/Interception').getSubjectName
-    };
+    var SubjectResolvers = getInternal('Resolvers/Subjects');
 
     /**
      * @memberof JARS~internals.Factories
@@ -17,7 +11,7 @@ JARS.internal('Factories/ParentName', function(getInternal) {
      * @return {string}
      */
     function ParentName(injector) {
-        return parentFactories[injector.type](injector.subjectName);
+        return SubjectResolvers[injector.type].getParentName(injector.subjectName);
     }
 
     return ParentName;

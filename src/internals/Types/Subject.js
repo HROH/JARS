@@ -1,8 +1,8 @@
 JARS.internal('Types/Subject', function(getInternal) {
     'use strict';
 
-    var removeBundleSuffix = getInternal('Resolvers/Bundle').removeBundleSuffix,
-        getSubjectName = getInternal('Resolvers/Interception').getSubjectName,
+    var getBundleParentName = getInternal('Resolvers/Subjects/Bundle').getParentName,
+        getInterceptionParentName = getInternal('Resolvers/Subjects/Interception').getParentName,
         SUBJECT_TYPE_MODULE = 'module',
         SUBJECT_TYPE_BUNDLE = 'bundle',
         SUBJECT_TYPE_INTERCEPTION = 'interception',
@@ -28,7 +28,7 @@ JARS.internal('Types/Subject', function(getInternal) {
          * @return {boolean}
          */
         isBundle: function(subjectName) {
-            return removeBundleSuffix(subjectName) !== subjectName;
+            return !Subject.isInterception(subjectName) && getBundleParentName(subjectName) !== subjectName;
         },
         /**
          * @param {string} subjectName
@@ -36,7 +36,7 @@ JARS.internal('Types/Subject', function(getInternal) {
          * @return {boolean}
          */
         isInterception: function(subjectName) {
-            return getSubjectName(subjectName) !== subjectName;
+            return getInterceptionParentName(subjectName) !== subjectName;
         }
     };
 

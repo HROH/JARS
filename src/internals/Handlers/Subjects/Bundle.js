@@ -2,8 +2,7 @@ JARS.internal('Handlers/Subjects/Bundle', function(getInternal) {
     'use strict';
 
     var FileNameResolver = getInternal('Resolvers/FileName'),
-        isBundle = getInternal('Types/Subject').isBundle,
-        removeBundleSuffix = getInternal('Resolvers/Bundle').removeBundleSuffix,
+        getBundleParentName = getInternal('Resolvers/Subjects/Bundle').getParentName,
         each = getInternal('Helpers/Array').each;
 
     /**
@@ -24,9 +23,7 @@ JARS.internal('Handlers/Subjects/Bundle', function(getInternal) {
             };
 
             each(arguments, function(dep, index) {
-                var dependencyName = dependencies[index].name;
-
-                bundleExport[FileNameResolver(isBundle(dependencyName) ? removeBundleSuffix(dependencyName) : dependencyName)] = dep;
+                bundleExport[FileNameResolver(getBundleParentName(dependencies[index].name))] = dep;
             });
 
             return bundleExport;

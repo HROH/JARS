@@ -1,7 +1,8 @@
-JARS.internal('Resolvers/Interception', function(getInternal) {
+JARS.internal('Resolvers/Subjects/Interception', function(getInternal) {
     'use strict';
 
-    var eachInterceptor = getInternal('Registries/Interceptors').each,
+    var unwrapVersion = getInternal('Resolvers/Version').unwrapVersion,
+        eachInterceptor = getInternal('Registries/Interceptors').each,
         interceptionInfoCache = {},
         Interception;
 
@@ -13,25 +14,27 @@ JARS.internal('Resolvers/Interception', function(getInternal) {
     Interception = {
         /**
          * @param {string} subjectName
+         * @param {JARS~internals.Resolvers.Subjects~Info} info
          *
          * @return {string}
          */
-        getSubjectName: function(subjectName) {
+        getName: function(subjectName, info) {
+            return unwrapVersion(function(tmpSubjectName) {
+                return tmpSubjectName && info && info.type ? tmpSubjectName + info.type + info.data : tmpSubjectName;
+            })(subjectName);
+        },
+        /**
+         * @param {string} subjectName
+         *
+         * @return {string}
+         */
+        getParentName: unwrapVersion(function(subjectName) {
             return Interception.getInfo(subjectName).name;
-        },
-        /**
-         * @param {string} subjectName
-         * @param {JARS~internals.Resolvers.Interception~Info} info
-         *
-         * @return {string}
-         */
-        makeInterception: function(subjectName, info) {
-            return info.type ? subjectName + info.type + info.data : subjectName;
-        },
+        }),
         /**
          * @param {string} subjectName
          *
-         * @return {JARS~internals.Resolvers.Interception~Info}
+         * @return {JARS~internals.Resolvers.Subjects~Info}
          */
         getInfo: function(subjectName) {
             var interceptionInfo = interceptionInfoCache[subjectName],
@@ -60,19 +63,20 @@ JARS.internal('Resolvers/Interception', function(getInternal) {
             }
 
             return interceptionInfo;
+        },
+        /**
+         * @param {function(string): string} transformSubjectName
+         *
+         * @return {function(string): string}
+         */
+        unwrapInterception: function(transformSubjectName) {
+            return function(subjectName) {
+                var info = Interception.getInfo(subjectName);
+
+                return Interception.getName(transformSubjectName(info.name), info);
+            };
         }
     };
-
-    /**
-     * @typedef {Object} Info
-     *
-     * @memberof JARS~internals.Resolvers.Interception
-     * @inner
-     *
-     * @property {string} name
-     * @property {string} type
-     * @property {string} data
-     */
 
     return Interception;
 });

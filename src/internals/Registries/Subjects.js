@@ -2,9 +2,9 @@ JARS.internal('Registries/Subjects', function(getInternal) {
     'use strict';
 
     var Injector = getInternal('Helpers/Injector'),
-        BundleResolver = getInternal('Resolvers/Bundle'),
-        ParentResolver = getInternal('Resolvers/Parent'),
         AutoAborter = getInternal('Helpers/AutoAborter'),
+        getBundleName = getInternal('Resolvers/Subjects/Bundle').getName,
+        ROOT_MODULE = getInternal('Resolvers/Subjects/Module').ROOT,
         Subjects;
 
     /**
@@ -23,7 +23,7 @@ JARS.internal('Registries/Subjects', function(getInternal) {
             var module = Subjects.get(moduleName);
 
             AutoAborter.clear(module);
-            Subjects.get(BundleResolver.getBundleName(moduleName)).$import(bundleModules);
+            Subjects.get(getBundleName(moduleName)).$import(bundleModules);
 
             return module;
         },
@@ -40,13 +40,13 @@ JARS.internal('Registries/Subjects', function(getInternal) {
          * @return {JARS~internals.Subjects.Subject}
          */
         getRootModule: function() {
-            return Subjects.get(ParentResolver.ROOT);
+            return Subjects.get(ROOT_MODULE);
         },
         /**
          * @return {JARS~internals.Subjects.Subject}
          */
         getRootBundle: function() {
-            return Subjects.get(BundleResolver.ROOT);
+            return Subjects.get(getBundleName(ROOT_MODULE));
         },
         /**
          * @param {string} context

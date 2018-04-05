@@ -1,9 +1,9 @@
 JARS.internal('Factories/Options', function(getInternal) {
     'use strict';
 
-    var ParentResolver = getInternal('Resolvers/Parent'),
-        ConfigOptions = getInternal('Configs/Options'),
-        getBundleName = getInternal('Resolvers/Bundle').getBundleName,
+    var ConfigOptions = getInternal('Configs/Options'),
+        getModuleParentName = getInternal('Resolvers/Subjects/Module').getParentName,
+        getBundleName = getInternal('Resolvers/Subjects/Bundle').getName,
         optionFactories;
 
     /**
@@ -23,7 +23,7 @@ JARS.internal('Factories/Options', function(getInternal) {
         },
 
         bundle: function(injector) {
-            var grandParentName = ParentResolver(injector.injectLocal('parentName'));
+            var grandParentName = getModuleParentName(injector.injectLocal('parentName'));
 
             return grandParentName ? inheritOptions(injector, getBundleName(grandParentName)) : new ConfigOptions();
         },

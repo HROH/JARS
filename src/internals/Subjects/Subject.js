@@ -1,10 +1,10 @@
 JARS.internal('Subjects/Subject', function(getInternal) {
     'use strict';
 
-    var ParentResolver = getInternal('Resolvers/Parent'),
-        ParentLoadHandler = getInternal('Handlers/Subjects/Parent'),
+    var ParentLoadHandler = getInternal('Handlers/Subjects/Parent'),
         DependenciesLoadHandler = getInternal('Handlers/Subjects/Dependencies'),
-        Modules = getInternal('Handlers/Modules');
+        Modules = getInternal('Handlers/Modules'),
+        isRoot = getInternal('Resolvers/Subjects/Module').isRoot;
 
     /**
      * @callback Provide
@@ -31,7 +31,7 @@ JARS.internal('Subjects/Subject', function(getInternal) {
         var subject = this;
 
         subject.name = subjectName;
-        subject.isRoot = subjectName === ParentResolver.ROOT;
+        subject.isRoot = isRoot(subjectName);
         subject.parent = parent;
         subject.requestor = requestor || subject;
         subject.config = injector.injectLocal('config');

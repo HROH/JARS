@@ -20,4 +20,4 @@
  * @property {string} name
  * @property {string} error
  */
-JARS.internalGroup('Strategies/Resolution', ['Absolute', 'Bundle', 'Nested', 'Relative', 'Subject', 'Version']);
+JARS.internalGroup('Strategies/Resolution', ['Absolute', 'Bundle', 'Nested', 'Relative', 'Subject']);

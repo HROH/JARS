@@ -6,7 +6,6 @@ JARS.internal('Resolvers/PathList', function(getInternal) {
         importModules = getInternal('Handlers/Import').$import,
         each = getInternal('Helpers/Array').each,
         rootModule = getInternal('Registries/Subjects').getRootModule(),
-        excluded = rootModule.dependencies.resolve('System.*'),
         PathList;
 
     /**
@@ -24,11 +23,11 @@ JARS.internal('Resolvers/PathList', function(getInternal) {
          * @param {string} entryModuleName
          * @param {function(string[])} callback
          */
-        computeSortedPathList: function(entryModuleName, callback) {
+        resolve: function(entryModuleName, callback) {
             var entryModule = rootModule.dependencies.resolve(entryModuleName)[0];
 
-            importModules([entryModule.name], function computeSortedPathList() {
-                callback(ModulesTraverser(entryModule, PathListTraverser, markSubjectsSorted(excluded, {
+            importModules([entryModule.name], function() {
+                callback(ModulesTraverser(entryModule, PathListTraverser, markSubjectsSorted(rootModule.dependencies.resolve('System.*'), {
                     sorted: {},
 
                     paths: []

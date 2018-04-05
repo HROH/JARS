@@ -202,7 +202,7 @@
          *
          * @return {JARS}
          */
-        computeSortedPathList: delegate('Resolvers/PathList', 'computeSortedPathList', getJARS),
+        computeSortedPathList: delegate('Resolvers/PathList', 'resolve', getJARS),
         /**
          * @method
          *

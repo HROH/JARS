@@ -1,17 +1,17 @@
 JARS.internal('Factories/Info', function(getInternal) {
     'use strict';
 
-    var getInfo = getInternal('Resolvers/Interception').getInfo;
+    var SubjectResolvers = getInternal('Resolvers/Subjects');
 
     /**
      * @memberof JARS~internals.Factories
      *
      * @param {JARS~internals.Helpers.Injector} injector
      *
-     * @return {JARS~internals.Resolvers.Interception~Info}
+     * @return {JARS~internals.Resolvers.Subjects~Info}
      */
     function Info(injector) {
-        return getInfo(injector.subjectName);
+        return SubjectResolvers[injector.type].getInfo(injector.subjectName);
     }
 
     return Info;

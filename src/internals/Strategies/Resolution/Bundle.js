@@ -14,9 +14,9 @@ JARS.internal('Strategies/Resolution/Bundle', function(getInternal) {
      * @return {JARS~internals.Strategies.Resolution~Data}
      */
     function Bundle(subject, subjectName) {
-        return RelativeResolver(subjectName) ? {
+        return RelativeResolver.is(subjectName) ? {
             error: MSG_BUNDLE_RESOLUTION_ERROR
-        } : RelativeResolutionStrategy(subject, '.' + subjectName);
+        } : RelativeResolutionStrategy(subject, RelativeResolver.make(subjectName));
     }
 
     return Bundle;

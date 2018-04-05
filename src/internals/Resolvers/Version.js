@@ -17,7 +17,7 @@ JARS.internal('Resolvers/Version', function() {
          * @return {function(string): string}
          */
         unwrapVersion: function(transformSubjectName) {
-            return function unwrapVersion(subjectName) {
+            return function(subjectName) {
                 return appendVersion(transformSubjectName(Version.removeVersion(subjectName)), Version.getVersion(subjectName));
             };
         },

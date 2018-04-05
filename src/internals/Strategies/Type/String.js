@@ -2,7 +2,6 @@ JARS.internal('Strategies/Type/String', function(getInternal) {
     'use strict';
 
     var SubjectsRegistry = getInternal('Registries/Subjects'),
-        InterceptionResolver = getInternal('Resolvers/Interception'),
         MSG_DEFAULT_RESOLUTION_ERROR = 'could not resolve "${0}": ';
 
     /**
@@ -16,12 +15,11 @@ JARS.internal('Strategies/Type/String', function(getInternal) {
      * @return {JARS~internals.Subjects.Subject[]}
      */
     function String(subject, requestor, subjectName, resolutionStrategy) {
-        var info = InterceptionResolver.getInfo(subjectName),
-            result = resolutionStrategy(subject, info.name);
+        var result = resolutionStrategy(subject, subjectName);
 
         result.error && subject.abort(MSG_DEFAULT_RESOLUTION_ERROR + result.error, [subjectName]);
 
-        return result.name ? [SubjectsRegistry.get(InterceptionResolver.makeInterception(result.name, info), requestor)] : [];
+        return result.name ? [SubjectsRegistry.get(result.name, requestor)] : [];
     }
 
     return String;

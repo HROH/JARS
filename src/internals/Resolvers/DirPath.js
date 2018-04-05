@@ -1,9 +1,8 @@
 JARS.internal('Resolvers/DirPath', function(getInternal) {
     'use strict';
 
-    var FileNameResolver = getInternal('Resolvers/FileName'),
-        removeVersion = getInternal('Resolvers/Version').removeVersion,
-        ParentResolver = getInternal('Resolvers/Parent'),
+    var removeVersion = getInternal('Resolvers/Version').removeVersion,
+        ModuleResolver = getInternal('Resolvers/Subjects/Module'),
         RE_DOT = /\./g,
         RE_STARTS_WITH_UPPERCASE = /^[A-Z]/,
         SLASH = '/';
@@ -16,11 +15,9 @@ JARS.internal('Resolvers/DirPath', function(getInternal) {
      * @return {string}
      */
     function DirPath(subjectName) {
-        return removeVersion(RE_STARTS_WITH_UPPERCASE.test(FileNameResolver(subjectName)) ? getParentDir(subjectName) : subjectName).replace(RE_DOT, SLASH);
-    }
+        var info = ModuleResolver.getInfo(subjectName);
 
-    function getParentDir(subjectName) {
-        return ParentResolver(subjectName) === ParentResolver.ROOT ? '' : ParentResolver(subjectName);
+        return removeVersion(RE_STARTS_WITH_UPPERCASE.test(info.data) ? ModuleResolver.isRoot(info.name) ? '' : info.name : subjectName).replace(RE_DOT, SLASH);
     }
 
     return DirPath;

@@ -1,18 +1,32 @@
 JARS.internal('Resolvers/Relative', function() {
     'use strict';
 
-    var RE_LEADING_DOT = /^\./;
+    var DOT = '.',
+        Relative;
 
     /**
+     * @namespace
+     *
      * @memberof JARS~internals.Resolvers
-     *
-     * @param {string} subjectName
-     *
-     * @return {boolean}
      */
-    function Relative(subjectName) {
-        return RE_LEADING_DOT.test(subjectName);
-    }
+    Relative = {
+        /**
+         * @param {string} subjectName
+         *
+         * @return {boolean}
+         */
+        is: function(subjectName) {
+            return subjectName.indexOf(DOT) === 0;
+        },
+        /**
+         * @param {string} subjectName
+         *
+         * @return {string}
+         */
+        make: function(subjectName) {
+            return DOT + subjectName;
+        }
+    };
 
     return Relative;
 });

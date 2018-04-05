@@ -2,7 +2,7 @@ JARS.internal('Resolvers/FileName', function(getInternal) {
     'use strict';
 
     var removeVersion = getInternal('Resolvers/Version').removeVersion,
-        DOT = '.';
+        getInfo = getInternal('Resolvers/Subjects/Module').getInfo;
 
     /**
      * @memberof JARS~internals.Resolvers
@@ -12,9 +12,7 @@ JARS.internal('Resolvers/FileName', function(getInternal) {
      * @return {string}
      */
     function FileName(subjectName) {
-        subjectName = removeVersion(subjectName);
-
-        return subjectName.substr(subjectName.lastIndexOf(DOT) + 1);
+        return removeVersion(getInfo(subjectName).data);
     }
 
     return FileName;
