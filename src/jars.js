@@ -12,6 +12,10 @@
         },
         Env, SourceManager, JARS;
 
+    /**
+     * @namespace JARS~internals
+     */
+
     Env = (function envConfigSetup() {
         var scripts = envGlobal.document.getElementsByTagName('script'),
             script = scripts[scripts.length - 1],
@@ -127,7 +131,7 @@
          *
          * @return {JARS~ModuleWrapper}
          */
-        module: delegate('Registries/Subjects', 'registerModule', function returnModuleWrapper(moduleName) {
+        module: delegate('Registries/Subjects', 'registerModule', function(moduleName) {
             var dynamicInternalName = 'Registries/Subjects:' + moduleName,
                 ModuleWrapper;
 
@@ -190,7 +194,7 @@
         /**
          * @method
          *
-         * @param {(JARS~internals.Configs.Global~Option|JARS~internals.Configs.Global~Options)} optionOrConfigOrArray
+         * @param {(JARS~internals.Configs.Global~Option|JARS~internals.Configs.Global~Options)} optionOrConfig
          * @param {*} [valueOrArray]
          *
          * @return {JARS}

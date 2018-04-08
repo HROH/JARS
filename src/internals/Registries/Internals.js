@@ -5,10 +5,6 @@ JARS.init(function(commands) {
         Internals, Queue, Group;
 
     /**
-     * @namespace JARS~internals
-     */
-
-    /**
      * @namespace
      *
      * @memberof JARS~internals.Registries

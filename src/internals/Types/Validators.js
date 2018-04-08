@@ -49,6 +49,8 @@ JARS.internal('Types/Validators', function(getInternal) {
          */
         isFinite: envGlobal.isFinite,
         /**
+         * @method
+         *
          * @param {*} value
          *
          * @return {boolean}
