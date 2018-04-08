@@ -162,6 +162,8 @@
                  * @method
                  *
                  * @param {JARS~internals.Subjects.Subject~Provide} provide
+                 *
+                 * @return {JARS}
                  */
                 $export: delegate(dynamicInternalName, '$export')
             };
@@ -193,7 +195,7 @@
          *
          * @return {JARS}
          */
-        configure: delegate('Configs/Global', 'update', getJARS),
+        configure: delegate('Configs/Global', 'update'),
         /**
          * @method
          *
@@ -202,7 +204,7 @@
          *
          * @return {JARS}
          */
-        computeSortedPathList: delegate('Resolvers/PathList', 'resolve', getJARS),
+        computeSortedPathList: delegate('Resolvers/PathList', 'resolve'),
         /**
          * @method
          *
@@ -211,7 +213,7 @@
          *
          * @return {JARS}
          */
-        flush: delegate('Registries/Subjects', 'flush', getJARS),
+        flush: delegate('Registries/Subjects', 'flush'),
         /**
          * @return {JARS}
          */
@@ -243,17 +245,7 @@
         return function internalDelegator() {
             pushCommand([internalName, methodName, Array.prototype.slice.call(arguments)]);
 
-            return returnFn && returnFn.apply(null, arguments);
+            return returnFn ? returnFn.apply(null, arguments) : JARS;
         };
-    }
-
-    /**
-     * @memberof JARS
-     * @inner
-     *
-     * @return {JARS}
-     */
-    function getJARS() {
-        return JARS;
     }
 })(this);
