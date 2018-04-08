@@ -11,9 +11,11 @@ JARS.internal('Bootstrappers/Configs', function(getInternal) {
          * @method
          */
         bootstrap: function() {
+            var Env = getInternal('Env');
+
             getInternal('Configs/Global').update({
-                modules: {
-                    basePath: getInternal('Env').BASE_PATH,
+                modules: [{
+                    basePath: Env.BASE_PATH,
 
                     cache: true,
 
@@ -22,7 +24,11 @@ JARS.internal('Bootstrappers/Configs', function(getInternal) {
                     minify: false,
 
                     timeout: 5
-                },
+                }, {
+                    restrict: 'System.*',
+
+                    basePath: Env.INTERNALS_PATH
+                }],
 
                 interceptors: [
                     getInternal('Interceptors/Plugin'),

@@ -4,8 +4,7 @@
     var previousJARS = envGlobal.JARS,
         commands = [
             ['Bootstrappers/Modules', 'bootstrap'],
-            ['Bootstrappers/Configs', 'bootstrap'],
-            ['Bootstrappers/System', 'bootstrap']
+            ['Bootstrappers/Configs', 'bootstrap']
         ],
         pushCommand = function(command) {
             commands.push(command);
