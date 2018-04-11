@@ -11,7 +11,7 @@ JARS.internal('Factories/Logger', function(getInternal) {
      * @return {JARS~internals.Helpers.Logger}
      */
     function Logger(injector) {
-        return new SubjectLogger(injector.injectLocal('description') + injector.subjectName, injector.injectLocal('config'), injectLogger(injector, 'state'), injectLogger(injector, 'ref'));
+        return new SubjectLogger(injector.get('description') + injector.subjectName, injector.get('config'), injectLogger(injector, 'state'), injectLogger(injector, 'ref'));
     }
 
     /**

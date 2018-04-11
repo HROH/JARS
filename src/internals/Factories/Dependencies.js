@@ -12,7 +12,7 @@ JARS.internal('Factories/Dependencies', function(getInternal) {
      * @return {JARS~internals.Subjects.Dependencies}
      */
     function Dependencies(injector, requestor) {
-        return new SubjectDependencies(requestor, injector.injectLocal('state'), injector.injectLocal('strategy'));
+        return new SubjectDependencies(requestor, injector.get('state'), injector.get('strategy'));
     }
 
     return Dependencies;

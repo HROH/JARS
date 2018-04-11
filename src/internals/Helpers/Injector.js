@@ -29,7 +29,7 @@ JARS.internal('Helpers/Injector', function(getInternal) {
          *
          * @return {*}
          */
-        injectLocal: function(localKey, localArgs) {
+        get: function(localKey, localArgs) {
             return this._cache[localKey] || (this._cache[localKey] = Factories[localKey](this, localArgs));
         },
         /**
@@ -59,7 +59,7 @@ JARS.internal('Helpers/Injector', function(getInternal) {
      * @return {*}
      */
     Injector.inject = function(subjectName, requestorName, key, args) {
-        return subjectName ? getInjector(subjectName, requestorName).injectLocal(key, args) : null;
+        return subjectName ? getInjector(subjectName, requestorName).get(key, args) : null;
     };
 
     /**

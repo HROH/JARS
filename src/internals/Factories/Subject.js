@@ -25,7 +25,7 @@ JARS.internal('Factories/Subject', function(getInternal) {
      * @return {JARS~internals.Subjects.Subject}
      */
     function injectParent(injector) {
-        return injector.inject(injector.injectLocal('parentName'), 'subject');
+        return injector.inject(injector.get('parentName'), 'subject');
     }
 
     /**

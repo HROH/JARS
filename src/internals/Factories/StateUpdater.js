@@ -11,7 +11,7 @@ JARS.internal('Factories/StateUpdater', function(getInternal) {
      * @return {JARS~internals.States.Updater}
      */
     function StateUpdater(injector) {
-        return new Updater(injector.injectLocal('state'), injector.injectLocal('logger'));
+        return new Updater(injector.get('state'), injector.get('logger'));
     }
 
     return StateUpdater;

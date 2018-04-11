@@ -11,7 +11,7 @@ JARS.internal('Factories/Config', function(getInternal) {
      * @return {JARS~internals.Configs.Subject}
      */
     function Config(injector) {
-        return new SubjectConfig(injector.subjectName, injector.injectLocal('options'));
+        return new SubjectConfig(injector.subjectName, injector.get('options'));
     }
 
     return Config;

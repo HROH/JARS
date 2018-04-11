@@ -34,14 +34,14 @@ JARS.internal('Subjects/Subject', function(getInternal) {
         subject.isRoot = isRoot(subjectName);
         subject.parent = parent;
         subject.requestor = requestor || subject;
-        subject.config = injector.injectLocal('config');
-        subject.ref = injector.injectLocal('ref');
-        subject.logger = injector.injectLocal('logger');
-        subject.state = injector.injectLocal('state');
-        subject.stateUpdater = injector.injectLocal('stateUpdater');
-        subject.dependencies = injector.injectLocal('dependencies', subject.requestor);
-        subject.handler = injector.injectLocal('handler', subject);
-        subject.info = injector.injectLocal('info');
+        subject.config = injector.get('config');
+        subject.ref = injector.get('ref');
+        subject.logger = injector.get('logger');
+        subject.state = injector.get('state');
+        subject.stateUpdater = injector.get('stateUpdater');
+        subject.dependencies = injector.get('dependencies', subject.requestor);
+        subject.handler = injector.get('handler', subject);
+        subject.info = injector.get('info');
         subject._meta = {};
     }
 

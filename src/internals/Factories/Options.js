@@ -23,7 +23,7 @@ JARS.internal('Factories/Options', function(getInternal) {
         },
 
         bundle: function(injector) {
-            var grandParentName = getModuleParentName(injector.injectLocal('parentName'));
+            var grandParentName = getModuleParentName(injector.get('parentName'));
 
             return grandParentName ? inheritOptions(injector, getBundleName(grandParentName)) : new ConfigOptions();
         },
