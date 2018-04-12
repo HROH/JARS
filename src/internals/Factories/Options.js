@@ -1,10 +1,7 @@
 JARS.internal('Factories/Options', function(getInternal) {
     'use strict';
 
-    var ConfigOptions = getInternal('Configs/Options'),
-        getModuleParentName = getInternal('Resolvers/Subjects/Module').getParentName,
-        getBundleName = getInternal('Resolvers/Subjects/Bundle').getName,
-        optionFactories;
+    var ConfigOptions = getInternal('Configs/Options');
 
     /**
      * @memberof JARS~internals.Factories
@@ -14,36 +11,9 @@ JARS.internal('Factories/Options', function(getInternal) {
      * @return {JARS~internals.Configs.Options}
      */
     function Options(injector) {
-        return optionFactories[injector.type](injector);
-    }
+        var parentBundleName = injector.get('parentBundleName');
 
-    optionFactories = {
-        module: function(injector) {
-            return inheritOptions(injector, getBundleName(injector.subjectName));
-        },
-
-        bundle: function(injector) {
-            var grandParentName = getModuleParentName(injector.get('parentName'));
-
-            return grandParentName ? inheritOptions(injector, getBundleName(grandParentName)) : new ConfigOptions();
-        },
-
-        interception: function(injector) {
-            return inheritOptions(injector, injector.requestorName);
-        }
-    };
-
-    /**
-     * @memberof JARS~internals.Factories.Options
-     * @inner
-     *
-     * @param {JARS~internals.Helpers.Injector} injector
-     * @param {string} subjectName
-     *
-     * @return {JARS~internals.Configs.Options}
-     */
-    function inheritOptions(injector, subjectName) {
-        return ConfigOptions.childOf(injector.inject(subjectName, 'options'));
+        return parentBundleName ? ConfigOptions.childOf(injector.inject(parentBundleName, 'options')) : new ConfigOptions();
     }
 
     return Options;

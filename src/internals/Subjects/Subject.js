@@ -23,17 +23,15 @@ JARS.internal('Subjects/Subject', function(getInternal) {
      * @memberof JARS~internals.Subjects
      *
      * @param {string} subjectName
-     * @param {JARS~internals.Subjects.Subject} parent
-     * @param {(JARS~internals.Subjects.Subject|null)} requestor
      * @param {JARS~internals.Helpers.Injector} injector
      */
-    function Subject(subjectName, parent, requestor, injector) {
+    function Subject(subjectName, injector) {
         var subject = this;
 
         subject.name = subjectName;
         subject.isRoot = isRoot(subjectName);
-        subject.parent = parent;
-        subject.requestor = requestor || subject;
+        subject.parent = injector.get('parent');
+        subject.requestor = injector.get('requestor') || subject;
         subject.config = injector.get('config');
         subject.ref = injector.get('ref');
         subject.logger = injector.get('logger');
@@ -42,6 +40,7 @@ JARS.internal('Subjects/Subject', function(getInternal) {
         subject.dependencies = injector.get('dependencies', subject.requestor);
         subject.handler = injector.get('handler', subject);
         subject.info = injector.get('info');
+        subject._injector = injector;
         subject._meta = {};
     }
 
@@ -60,6 +59,12 @@ JARS.internal('Subjects/Subject', function(getInternal) {
          */
         getMeta: function(metaProp) {
             return this._meta[metaProp];
+        },
+        /**
+         * @return {JARS~internals.Subjects.Subject}
+         */
+        getParentBundle: function() {
+            return this._injector.get('parentBundle');
         },
         /**
          * @param {JARS~internals.Subjects~Declaration} dependencies
