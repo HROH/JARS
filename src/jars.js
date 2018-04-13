@@ -96,7 +96,7 @@
      */
     JARS = {
         /**
-         * @param {function()} bootstrapInternalsRegistry
+         * @param {function(JARS~internals.Registries.Internals~Command[]): JARS~internals.Registries.Internals} bootstrapInternalsRegistry
          */
         init: function(bootstrapInternalsRegistry) {
             var InternalsRegistry = bootstrapInternalsRegistry(commands);
@@ -240,9 +240,9 @@
     /**
      * @param {string} internalName
      * @param {string} methodName
-     * @param {function()} returnFn
+     * @param {function(...*)} returnFn
      *
-     * @return {function()}
+     * @return {function(...*)}
      */
     function delegate(internalName, methodName, returnFn) {
         return function internalDelegator() {

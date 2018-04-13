@@ -15,7 +15,7 @@ JARS.internal('Handlers/Subjects/Subject', function(getInternal) {
      * @param {JARS~internals.Subjects.Subject} requestor
      * @param {JARS~internals.Subjects.Subject[]} subjects
      * @param {string[]} msgStrings
-     * @param {JARS~internals.Handlers~Completion} completionHandler
+     * @param {JARS~internals.Handlers.Subjects~Completion} completionHandler
      */
     function Subject(requestor, subjects, msgStrings, completionHandler) {
         var handler = this;

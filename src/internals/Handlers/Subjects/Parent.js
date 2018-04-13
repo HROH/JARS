@@ -8,7 +8,7 @@ JARS.internal('Handlers/Subjects/Parent', function(getInternal) {
      * @memberof JARS~internals.Handlers.Subjects
      *
      * @param {JARS~internals.Subjects.Subject} subject
-     * @param {JARS~internals.Handlers~Completion} completionHandler
+     * @param {JARS~internals.Handlers.Subjects~Completion} completionHandler
      *
      * @return {JARS~internals.Handlers.Subjects.Subject}
      */

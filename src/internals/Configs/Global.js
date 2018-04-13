@@ -72,7 +72,7 @@ JARS.internal('Configs/Global', function(getInternal) {
      *
      * @property {(JARS~internals.Configs.Hooks~Debugging|boolean)} debugging
      * @property {string} environment
-     * @property {Object<string, JARS~internals.Configs.Global~Options>} environments
+     * @property {JARS~internals.Configs.Hooks~Environments} environments
      * @property {boolean} globalAccess
      * @property {JARS~internals.Interceptors~Interceptor} interceptors
      * @property {string} main

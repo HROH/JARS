@@ -7,7 +7,7 @@ JARS.internal('Configs/Transforms/Config', function(getInternal) {
      * @memberof JARS~internals.Configs.Transforms
      *
      * @param {Object} publicConfig
-     * @param {string} subject
+     * @param {Object} oldPublicConfig
      *
      * @return {JARS~internals.Configs.Public}
      */

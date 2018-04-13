@@ -8,9 +8,9 @@ JARS.internal('Handlers/Import', function(getInternal) {
      * @memberof JARS~internals.Handlers
      *
      * @param {JARS~internals.Subjects~Declaration} moduleNames
-     * @param {function(...*)} onCompleted
-     * @param {function()} onAborted
-     * @param {function()} onLoaded
+     * @param {function(...*)} [onCompleted]
+     * @param {function(string)} [onAborted]
+     * @param {function(string)} [onLoaded]
      *
      * @return {JARS~internals.Handlers.Subjects.Subject}
      */
@@ -32,9 +32,9 @@ JARS.internal('Handlers/Import', function(getInternal) {
 
     /**
      * @param {JARS~internals.Subjects~Declaration} moduleNames
-     * @param {function(...*)} onCompleted
-     * @param {function()} onAborted
-     * @param {function()} onLoaded
+     * @param {function(...*)} [onCompleted]
+     * @param {function(string)} [onAborted]
+     * @param {function(string)} [onLoaded]
      */
     Import.$import = function(moduleNames, onCompleted, onAborted, onLoaded) {
         request(Import(moduleNames, onCompleted, onAborted, onLoaded));

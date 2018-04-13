@@ -34,7 +34,7 @@ JARS.module('System.LogLevels').$import(['*!Registries/Internals', '.::isNumber'
             }
         },
         /**
-         * @param {function()} callback
+         * @param {function(string, number)} callback
          */
         each: function(callback) {
             each(definedLevels, callback);

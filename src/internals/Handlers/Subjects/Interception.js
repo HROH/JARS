@@ -7,6 +7,8 @@ JARS.internal('Handlers/Subjects/Interception', function(getInternal) {
     /**
      * @memberof JARS~internals.Handlers.Subjects
      *
+     * @implements {JARS~internals.Handlers.Subjects~Completion}
+     *
      * @param {JARS~internals.Subjects.Subject} subject
      */
     function Interception(subject) {

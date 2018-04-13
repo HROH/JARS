@@ -8,6 +8,8 @@ JARS.internal('Handlers/Subjects/Module', function(getInternal) {
     /**
      * @memberof JARS~internals.Handlers.Subjects
      *
+     * @implements {JARS~internals.Handlers.Subjects~Completion}
+     *
      * @param {JARS~internals.Subjects.Subject} subject
      */
     function Module(subject) {

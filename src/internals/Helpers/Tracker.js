@@ -16,7 +16,7 @@ JARS.internal('Helpers/Tracker', function() {
             root = subject.name;
         },
         /**
-         * @param {string} [subject]
+         * @param {string} [subjectName]
          */
         setCurrent: function(subjectName) {
             current = subjectName || root;

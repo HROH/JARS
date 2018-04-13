@@ -9,7 +9,7 @@ JARS.internal('Factories/Handler', function(getInternal) {
      * @param {JARS~internals.Helpers.Injector} injector
      * @param {JARS~internals.Subjects.Subject} subject
      *
-     * @return {JARS~internals.Handlers~Completion}
+     * @return {JARS~internals.Handlers.Subjects~Completion}
      */
     function Handler(injector, subject) {
         return new Handlers[injector.type](subject);

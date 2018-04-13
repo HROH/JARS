@@ -6,7 +6,7 @@ JARS.internal('Factories/ParentBundle', function() {
      *
      * @param {JARS~internals.Helpers.Injector} injector
      *
-     * @return {JARS~internals.Subjects.Subject}
+     * @return {(JARS~internals.Subjects.Subject|null)}
      */
     function ParentBundle(injector) {
         var parentBundleName = injector.get('parentBundleName');

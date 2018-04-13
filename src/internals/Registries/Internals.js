@@ -122,7 +122,7 @@ JARS.init(function(commands) {
         },
         /**
          * @param {string[]} groupList
-         * @param {function()} callback
+         * @param {function(string)} callback
          */
         each: function(groupList, callback) {
             var index = 0;

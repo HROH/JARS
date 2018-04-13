@@ -8,7 +8,7 @@ JARS.internal('Subjects/Dependencies', function(getInternal) {
      *
      * @memberof JARS~internals.Subjects
      *
-     * @param {JARS~internals.Subjects~Subject} requestor
+     * @param {JARS~internals.Subjects.Subject} requestor
      * @param {JARS~internals.States.Subject} state
      * @param {JARS~internals.Strategies.Resolution~Strategy} strategy
      */

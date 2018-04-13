@@ -61,7 +61,7 @@ JARS.internal('Subjects/Subject', function(getInternal) {
             return this._meta[metaProp];
         },
         /**
-         * @return {JARS~internals.Subjects.Subject}
+         * @return {(JARS~internals.Subjects.Subject|null)}
          */
         getParentBundle: function() {
             return this._injector.get('parentBundle');

@@ -20,7 +20,7 @@ JARS.internal('Bootstrappers/Modules', function(getInternal) {
             getInternal('Helpers/Tracker').setRoot(rootModule);
             rootModule.setMeta({
                 /**
-                 * @param {JARS~internals.Subjects.Interception} pluginRequest
+                 * @param {JARS~internals.Subjects.Subject} pluginRequest
                  */
                 plugIn: function(pluginRequest) {
                     var internalName = pluginRequest.info.data,

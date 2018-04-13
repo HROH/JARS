@@ -23,10 +23,10 @@ JARS.internal('Configs/Subject', function(getInternal) {
     Subject.prototype = {
         constructor: Subject,
         /**
-         * @param {Object} newOptions
+         * @param {JARS~internals.Configs.Hooks~Modules} options
          */
-        update: function(newOptions) {
-            Options.transformAndUpdate(this._options, newOptions, this._subjectName);
+        update: function(options) {
+            Options.transformAndUpdate(this._options, options, this._subjectName);
         },
         /**
          * @param {string} option

@@ -30,7 +30,7 @@ JARS.internal('Helpers/Recoverer', function(getInternal) {
      *
      * @param {JARS~internals.Subjects.Subject} subject
      *
-     * @return {Object}
+     * @return {JARS~internals.Configs.Hooks~Modules}
      */
     function getNextConfig(subject) {
         var subjectForConfig = getSubjectForConfig(subject),
@@ -48,7 +48,7 @@ JARS.internal('Helpers/Recoverer', function(getInternal) {
      * @memberof JARS~internals.Helpers.Recoverer
      * @inner
      *
-     * @param {JARS~internals.Subjects.subject} subject
+     * @param {JARS~internals.Subjects.Subject} subject
      *
      * @return {JARS~internals.Subjects.Subject}
      */

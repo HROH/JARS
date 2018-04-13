@@ -72,6 +72,9 @@ JARS.internal('Helpers/Injector', function(getInternal) {
     };
 
     /**
+     * @memberof JARS~internals.Helpers.Injector
+     * @inner
+     *
      * @param {string} subjectName
      * @param {string} requestorName
      *
@@ -83,6 +86,15 @@ JARS.internal('Helpers/Injector', function(getInternal) {
         return injectors[injectorKey] || (injectors[injectorKey] = new Injector(subjectName, requestorName));
     }
 
+    /**
+     * @memberof JARS~internals.Helpers.Injector
+     * @inner
+     *
+     * @param {string} subjectName
+     * @param {string} requestorName
+     *
+     * @return {string}
+     */
     function getRequestorName(subjectName, requestorName) {
         return SubjectTypes.isInterception(subjectName) ? requestorName : subjectName;
     }

@@ -11,6 +11,8 @@ JARS.internal('Configs/Hooks/Debugging', function(getInternal) {
      *
      * @param {JARS~internals.Configs.Global} globalConfig
      * @param {(JARS~internals.Configs.Hooks~Debugging|boolean)} debugConfig
+     *
+     * @return {JARS~internals.Configs.Hooks~Debugging}
      */
     function Debugging(globalConfig, debugConfig) {
         debugConfig = merge({
@@ -24,6 +26,8 @@ JARS.internal('Configs/Hooks/Debugging', function(getInternal) {
 
             debug: debugConfig.debug
         });
+
+        return debugConfig;
     }
 
     /**
@@ -33,6 +37,7 @@ JARS.internal('Configs/Hooks/Debugging', function(getInternal) {
      * @inner
      *
      * @property {boolean} debug
+     * @property {string} [mode]
      */
 
     return Debugging;
