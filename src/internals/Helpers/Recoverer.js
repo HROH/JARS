@@ -1,75 +1,59 @@
 JARS.internal('Helpers/Recoverer', function(getInternal) {
     'use strict';
 
-    var merge = getInternal('Helpers/Object').merge,
-        nextConfigs = {},
+    var ObjectHelper = getInternal('Helpers/Object'),
+        nextSubjects = {},
         MSG_RECOVERING = 'failed to load and tries to recover...';
 
     /**
      * @memberof JARS~internals.Helpers
      *
-     * @param {JARS~internals.Subjects.Subject} module
+     * @param {JARS~internals.Subjects.Subject} subject
      *
      * @return {boolean}
      */
-    function Recoverer(module) {
-        var updated = updateNextRecover(module.name, module.config);
+    function Recoverer(subject) {
+        var nextConfig = getNextConfig(subject);
 
-        if (updated) {
-            module.logger.warn(MSG_RECOVERING);
-            module.handler(module);
+        if (nextConfig) {
+            subject.logger.warn(MSG_RECOVERING);
+            subject.config.update(ObjectHelper.merge({}, nextConfig));
+            subject.handler.onCompleted();
         }
 
-        return updated;
+        return !!nextConfig;
     }
 
     /**
      * @memberof JARS~internals.Helpers.Recoverer
      * @inner
      *
-     * @param {string} moduleName
-     * @param {JARS~internals.Configs.Subject} config
+     * @param {JARS~internals.Subjects.Subject} subject
      *
-     * @return {boolean}
+     * @return {Object}
      */
-    function updateNextRecover(moduleName, config) {
-        var currentConfig = getCurrentConfig(moduleName, config),
-            nextRecover;
+    function getNextConfig(subject) {
+        var subjectForConfig = getSubjectForConfig(subject),
+            nextConfig = subject.config.getOwn('recover');
 
-        if(currentConfig) {
-            setNextConfig(moduleName, currentConfig);
-            nextRecover = currentConfig.get('recover');
-
-            nextRecover && config.update(merge({}, nextRecover, {
-                restrict: moduleName
-            }));
+        if(subjectForConfig && !nextConfig) {
+            nextConfig = subjectForConfig.config.get('recover');
+            nextSubjects[subject.name] = subjectForConfig.getParentBundle();
         }
 
-        return !!nextRecover;
+        return nextConfig;
     }
 
     /**
      * @memberof JARS~internals.Helpers.Recoverer
      * @inner
      *
-     * @param {string} moduleName
-     * @param {JARS~internals.Configs.Subject} fallbackConfig
+     * @param {JARS~internals.Subjects.subject} subject
      *
-     * @return {(JARS~internals.Configs.Subject|boolean)}
+     * @return {JARS~internals.Subjects.Subject}
      */
-    function getCurrentConfig(moduleName, fallbackConfig) {
-        return nextConfigs[moduleName] === false ? false : nextConfigs[moduleName] || (nextConfigs[moduleName] = fallbackConfig);
-    }
-
-    /**
-     * @memberof JARS~internals.Helpers.Recoverer
-     * @inner
-     *
-     * @param {string} moduleName
-     * @param {JARS~internals.Configs.Subject} currentConfig
-     */
-    function setNextConfig(moduleName, currentConfig) {
-        nextConfigs[moduleName] = currentConfig.parentConfig || false;
+    function getSubjectForConfig(subject) {
+        return ObjectHelper.hasOwnProp(nextSubjects, subject.name) ? nextSubjects[subject.name] : subject;
     }
 
     return Recoverer;

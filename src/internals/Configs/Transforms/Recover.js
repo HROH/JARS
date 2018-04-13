@@ -7,21 +7,14 @@ JARS.internal('Configs/Transforms/Recover', function(getInternal) {
      * @memberof JARS~internals.Configs.Transforms
      *
      * @param {JARS~internals.Configs.Hooks~Modules} recoverConfig
-     * @param {JARS~internals.Configs.Hooks~Modules} oldRecoverConfig
-     * @param {string} subjectName
      *
      * @return {JARS~internals.Configs.Hooks~Modules}
      */
-    function Recover(recoverConfig, oldRecoverConfig, subjectName) {
+    function Recover(recoverConfig) {
         /*
          * create a copy of the recover-config
          * because it should update for every module independently
-         */
-        var recover = merge({}, recoverConfig);
-
-        recover.restrict = subjectName;
-
-        /*
+         *
          * if no next recover-config is given set it explicitly
          * this is important because the recoverflow is as follows:
          * - if the module has a recover-config, use it to update its config
@@ -31,9 +24,9 @@ JARS.internal('Configs/Transforms/Recover', function(getInternal) {
          * So if the module has a recover-config that doesn't get replaced
          * it may repeatedly try to recover with this config
          */
-        recover.recover || (recover.recover = null);
-
-        return recover;
+        return merge({
+            recover: null
+        }, recoverConfig);
     }
 
     return Recover;

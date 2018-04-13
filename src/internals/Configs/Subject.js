@@ -1,7 +1,8 @@
 JARS.internal('Configs/Subject', function(getInternal) {
     'use strict';
 
-    var Options = getInternal('Configs/Options');
+    var Options = getInternal('Configs/Options'),
+        hasOwnProp = getInternal('Helpers/Object').hasOwnProp;
 
     /**
      * @class
@@ -34,6 +35,14 @@ JARS.internal('Configs/Subject', function(getInternal) {
          */
         get: function(option) {
             return option in this._options ? this._options[option] : this._defaultOptions[option];
+        },
+        /**
+         * @param {string} option
+         *
+         * @return {*}
+         */
+        getOwn: function(option) {
+            return hasOwnProp(this._options, option) ? this._options[option] : null;
         }
     };
 
