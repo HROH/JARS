@@ -2,9 +2,10 @@ JARS.internal('Handlers/Subjects/DependenciesCompleted', function() {
     'use strict';
 
     /**
-     * @memberof JARS~internals.Handlers.Subjects
-     *
+     * @class
      * @implements {JARS~internals.Handlers.Subjects~Completion}
+     *
+     * @memberof JARS~internals.Handlers.Subjects
      *
      * @param {JARS~internals.Subjects.subject} subject
      * @param {JARS~internals.Subjects.Subject~Provide} provide

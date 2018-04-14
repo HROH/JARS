@@ -15,7 +15,7 @@ JARS.internal('Traverser/PathList', function(getInternal) {
          * @param {JARS~internals.Subjects.Subject} subject
          * @param {JARS~internals.Subjects.Subject} entryModule
          * @param {number} depth
-         * @param {*} trackList
+         * @param {JARS~internals.Traverser.PathList~TrackList} trackList
          *
          * @return {boolean}
          */
@@ -26,7 +26,7 @@ JARS.internal('Traverser/PathList', function(getInternal) {
          * @param {JARS~internals.Subjects.Subject} subject
          * @param {JARS~internals.Subjects.Subject} entryModule
          * @param {number} depth
-         * @param {Object} trackList
+         * @param {JARS~internals.Traverser.PathList~TrackList} trackList
          *
          * @return {JARS~internals.Traverser.Modules~Result}
          */
@@ -46,13 +46,23 @@ JARS.internal('Traverser/PathList', function(getInternal) {
 
     /**
      * @param {JARS~internals.Subjects.Subject} subject
-     * @param {Object} trackList
+     * @param {JARS~internals.Traverser.PathList~TrackList} trackList
      *
      * @return {boolean}
      */
     function isSorted(subject, trackList) {
         return trackList.sorted[subject.name];
     }
+
+    /**
+     * @typedef {Object} TrackList
+     *
+     * @memberof JARS~internals.Traverser.PathList
+     * @inner
+     *
+     * @property {Object<string, boolean>} sorted
+     * @property {string[]} paths
+     */
 
     return PathList;
 });

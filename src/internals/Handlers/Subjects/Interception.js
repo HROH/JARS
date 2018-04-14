@@ -5,9 +5,10 @@ JARS.internal('Handlers/Subjects/Interception', function(getInternal) {
         MSG_MODULE_INTERCEPTED = 'handling request of "${0}"';
 
     /**
-     * @memberof JARS~internals.Handlers.Subjects
-     *
+     * @class
      * @implements {JARS~internals.Handlers.Subjects~Completion}
+     *
+     * @memberof JARS~internals.Handlers.Subjects
      *
      * @param {JARS~internals.Subjects.Subject} subject
      */

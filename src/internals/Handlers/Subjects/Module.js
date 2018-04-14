@@ -6,9 +6,10 @@ JARS.internal('Handlers/Subjects/Module', function(getInternal) {
         loadSource = getInternal('SourceManager').load;
 
     /**
-     * @memberof JARS~internals.Handlers.Subjects
-     *
+     * @class
      * @implements {JARS~internals.Handlers.Subjects~Completion}
+     *
+     * @memberof JARS~internals.Handlers.Subjects
      *
      * @param {JARS~internals.Subjects.Subject} subject
      */

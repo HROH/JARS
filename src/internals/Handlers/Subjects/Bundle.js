@@ -6,9 +6,10 @@ JARS.internal('Handlers/Subjects/Bundle', function(getInternal) {
         each = getInternal('Helpers/Array').each;
 
     /**
-     * @memberof JARS~internals.Handlers.Subjects
-     *
+     * @class
      * @implements {JARS~internals.Handlers.Subjects~Completion}
+     *
+     * @memberof JARS~internals.Handlers.Subjects
      *
      * @param {JARS~internals.Subjects.Subject} subject
      */

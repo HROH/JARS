@@ -15,7 +15,10 @@
  */
 
 /**
- * @typedef {Object} JARS~internals.Strategies.Resolution~Data
+ * @typedef {Object} Data
+ *
+ * @memberof JARS~internals.Strategies.Resolution
+ * @inner
  *
  * @property {string} name
  * @property {string} error

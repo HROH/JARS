@@ -5,9 +5,10 @@ JARS.internal('Handlers/Subjects/DependenciesAborted', function() {
         MSG_ABORTED_CIRCULAR_DEPENDENCIES = 'found circular dependencies "${0}"';
 
     /**
-     * @memberof JARS~internals.Handlers.Subjects
-     *
+     * @class
      * @implements {JARS~internals.Handlers.Subjects~Completion}
+     *
+     * @memberof JARS~internals.Handlers.Subjects
      *
      * @param {JARS~internals.Subjects.subject} subject
      * @param {string[]} circularDependencies

@@ -8,10 +8,9 @@ JARS.internal('Interceptors/Plugin', function(getInternal) {
 
     /**
      * @namespace
+     * @implements  {JARS~internals.Interceptors~Interceptor}
      *
      * @memberof JARS~internals.Interceptors
-     *
-     * @implements  {JARS~internals.Interceptors~Interceptor}
      */
     Plugin = {
         /**

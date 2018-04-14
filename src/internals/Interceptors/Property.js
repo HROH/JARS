@@ -8,10 +8,9 @@ JARS.internal('Interceptors/Property', function(getInternal) {
 
     /**
      * @namespace
+     * @implements {JARS~internals.Interceptors~Interceptor}
      *
      * @memberof JARS~internals.Interceptors
-     *
-     * @implements {JARS~internals.Interceptors~Interceptor}
      */
     Property = {
         /**

@@ -21,7 +21,7 @@ JARS.internal('Traverser/Circular', function() {
          * @param {JARS~internals.Subjects.Subject} subject
          * @param {JARS~internals.Subjects.Subject} entryModule
          * @param {number} depth
-         * @param {*} circularList
+         * @param {string[]} [circularList]
          *
          * @return {JARS~internals.Traverser.Modules~Result}
          */

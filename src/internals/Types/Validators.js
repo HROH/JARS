@@ -187,6 +187,15 @@ JARS.internal('Types/Validators', function(getInternal) {
         });
     });
 
+    /**
+     * @memberof JARS~internals.Types.Validators
+     * @inner
+     *
+     * @param {string} typeDef
+     * @param {string} validatorName
+     *
+     * @return {(function(*): boolean|null)}
+     */
     function getGlobalValidator(typeDef, validatorName) {
         return envGlobal[typeDef] && envGlobal[typeDef][validatorName] ? envGlobal[typeDef][validatorName] : null;
     }
