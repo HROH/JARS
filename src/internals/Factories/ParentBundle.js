@@ -9,9 +9,7 @@ JARS.internal('Factories/ParentBundle', function() {
      * @return {(JARS~internals.Subjects.Subject|null)}
      */
     function ParentBundle(injector) {
-        var parentBundleName = injector.get('parentBundleName');
-
-        return parentBundleName ? injector.inject(parentBundleName, 'subject') : null;
+        return injector.inject(injector.get('parentBundleName'), 'subject');
     }
 
     return ParentBundle;
