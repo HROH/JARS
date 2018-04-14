@@ -1,4 +1,4 @@
-JARS.internal('Handlers/Subjects/Module', function(getInternal) {
+JARS.internal('Handlers/Completion/Module', function(getInternal) {
     'use strict';
 
     var AutoAborter = getInternal('Helpers/AutoAborter'),
@@ -7,9 +7,9 @@ JARS.internal('Handlers/Subjects/Module', function(getInternal) {
 
     /**
      * @class
-     * @implements {JARS~internals.Handlers.Subjects~Completion}
+     * @implements {JARS~internals.Handlers.Completion~Subject}
      *
-     * @memberof JARS~internals.Handlers.Subjects
+     * @memberof JARS~internals.Handlers.Completion
      *
      * @param {JARS~internals.Subjects.Subject} subject
      */

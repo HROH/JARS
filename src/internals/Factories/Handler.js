@@ -1,7 +1,7 @@
 JARS.internal('Factories/Handler', function(getInternal) {
     'use strict';
 
-    var Handlers = getInternal('Handlers/Subjects');
+    var CompletionHandlers = getInternal('Handlers/Completion');
 
     /**
      * @memberof JARS~internals.Factories
@@ -9,10 +9,10 @@ JARS.internal('Factories/Handler', function(getInternal) {
      * @param {JARS~internals.Helpers.Injector} injector
      * @param {JARS~internals.Subjects.Subject} subject
      *
-     * @return {JARS~internals.Handlers.Subjects~Completion}
+     * @return {JARS~internals.Handlers.Completion~Subject}
      */
     function Handler(injector, subject) {
-        return new Handlers[injector.type](subject);
+        return new CompletionHandlers[injector.type](subject);
     }
 
     return Handler;

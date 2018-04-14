@@ -1,7 +1,9 @@
 JARS.internal('Subjects/Dependencies', function(getInternal) {
     'use strict';
 
-    var AnyResolutionStrategy = getInternal('Strategies/Type/Any');
+    var AnyResolutionStrategy = getInternal('Strategies/Type/Any'),
+        CircularTraverser = getInternal('Traverser/Circular'),
+        ModulesTraverser = getInternal('Traverser/Modules');
 
     /**
      * @class
@@ -17,6 +19,7 @@ JARS.internal('Subjects/Dependencies', function(getInternal) {
         this._state = state;
         this._strategy = strategy;
         this._modules = [];
+        this._circular = false;
     }
 
     Dependencies.prototype = {
@@ -26,6 +29,20 @@ JARS.internal('Subjects/Dependencies', function(getInternal) {
          */
         getAll: function() {
             return this._modules;
+        },
+        /**
+         * @return {(string[]|boolean)}
+         */
+        getCircular: function() {
+            var entryModule = this._requestor;
+
+            return this._circular || (this._circular = !entryModule.isRoot && entryModule.config.get('checkCircularDeps') && ModulesTraverser(entryModule, CircularTraverser));
+        },
+        /**
+         * @return {JARS~internals.Subjects.Subject[]}
+         */
+        getNotCircular: function() {
+            return this.getCircular() ? [] : this.getAll();
         },
         /**
          * @param {JARS~internals.Subjects~Declaration} modules

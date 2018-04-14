@@ -1,4 +1,4 @@
-JARS.internal('Handlers/Subjects/Interception', function(getInternal) {
+JARS.internal('Handlers/Completion/Interception', function(getInternal) {
     'use strict';
 
     var getInterceptor = getInternal('Registries/Interceptors').get,
@@ -6,9 +6,9 @@ JARS.internal('Handlers/Subjects/Interception', function(getInternal) {
 
     /**
      * @class
-     * @implements {JARS~internals.Handlers.Subjects~Completion}
+     * @implements {JARS~internals.Handlers.Completion~Subject}
      *
-     * @memberof JARS~internals.Handlers.Subjects
+     * @memberof JARS~internals.Handlers.Completion
      *
      * @param {JARS~internals.Subjects.Subject} subject
      */
