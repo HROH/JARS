@@ -38,7 +38,7 @@ JARS.internal('Helpers/Recoverer', function(getInternal) {
 
         if(subjectForConfig && !nextConfig) {
             nextConfig = subjectForConfig.config.get('recover');
-            nextSubjects[subject.name] = subjectForConfig.getParentBundle();
+            nextSubjects[subject.name] = getNextSubjectForConfig(subjectForConfig);
         }
 
         return nextConfig;
@@ -54,6 +54,20 @@ JARS.internal('Helpers/Recoverer', function(getInternal) {
      */
     function getSubjectForConfig(subject) {
         return ObjectHelper.hasOwnProp(nextSubjects, subject.name) ? nextSubjects[subject.name] : subject;
+    }
+
+    /**
+     * @memberof JARS~internals.Helpers.Recoverer
+     * @inner
+     *
+     * @param {JARS~internals.Subjects.Subject} subject
+     *
+     * @return {JARS~internals.Subjects.Subject}
+     */
+    function getNextSubjectForConfig(subject) {
+        var nextSubject = subject.getParentBundle();
+
+        return nextSubject && nextSubject.config.get('recover') === subject.config.get('recover') ? getNextSubjectForConfig(nextSubject) : nextSubject;
     }
 
     return Recoverer;
