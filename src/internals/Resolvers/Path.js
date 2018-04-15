@@ -2,9 +2,9 @@ JARS.internal('Resolvers/Path', function(getInternal) {
     'use strict';
 
     var ExtensionTransform = getInternal('Configs/Transforms/Extension'),
+        Options = getInternal('Configs/Options'),
         each = getInternal('Helpers/Array').each,
-        pathOptions = ['basePath', 'versionPath', 'dirPath', 'fileName', 'minify', 'extension', 'cache'],
-        OPTION_EXTENSION = 'extension';
+        PATH_OPTIONS = [Options.BASE_PATH, Options.VERSION_PATH, Options.DIR_PATH, Options.FILE_NAME, Options.MINIFY, Options.EXTENSION, Options.CACHE];
 
     /**
      * @memberof JARS~internals.Resolvers
@@ -17,8 +17,8 @@ JARS.internal('Resolvers/Path', function(getInternal) {
     function Path(subject, extension) {
         var path = '';
 
-        each(pathOptions, function(option) {
-            path += option === OPTION_EXTENSION && extension ? ExtensionTransform(extension) : subject.config.get(option);
+        each(PATH_OPTIONS, function(option) {
+            path += option === Options.EXTENSION && extension ? ExtensionTransform(extension) : subject.config.get(option);
         });
 
         return path;

@@ -3,6 +3,7 @@ JARS.internal('Helpers/AutoAborter', function(getInternal) {
 
     var Recoverer = getInternal('Helpers/Recoverer'),
         global = getInternal('Env').global,
+        TIMEOUT = getInternal('Configs/Options').TIMEOUT,
         timeoutIDs = {},
         MILLISECONDS_PER_SECOND = 1000,
         MSG_MODULE_ABORTED = 'timeout after ${sec} second(s) with given path "${path}"',
@@ -19,7 +20,7 @@ JARS.internal('Helpers/AutoAborter', function(getInternal) {
          * @param {string} path
          */
         setup: function(module, path) {
-            var timeout = module.config.get('timeout');
+            var timeout = module.config.get(TIMEOUT);
 
             timeoutIDs[module.name] = global.setTimeout(function abortModule() {
                 Recoverer(module) || module.abort(MSG_MODULE_ABORTED, {

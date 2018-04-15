@@ -2,6 +2,7 @@ JARS.internal('Helpers/Recoverer', function(getInternal) {
     'use strict';
 
     var ObjectHelper = getInternal('Helpers/Object'),
+        RECOVER = getInternal('Configs/Options').RECOVER,
         nextSubjects = {},
         MSG_RECOVERING = 'failed to load and tries to recover...';
 
@@ -34,10 +35,10 @@ JARS.internal('Helpers/Recoverer', function(getInternal) {
      */
     function getNextConfig(subject) {
         var subjectForConfig = getSubjectForConfig(subject),
-            nextConfig = subject.config.getOwn('recover');
+            nextConfig = subject.config.getOwn(RECOVER);
 
         if(subjectForConfig && !nextConfig) {
-            nextConfig = subjectForConfig.config.get('recover');
+            nextConfig = subjectForConfig.config.get(RECOVER);
             nextSubjects[subject.name] = getNextSubjectForConfig(subjectForConfig);
         }
 
@@ -67,7 +68,7 @@ JARS.internal('Helpers/Recoverer', function(getInternal) {
     function getNextSubjectForConfig(subject) {
         var nextSubject = subject.getParentBundle();
 
-        return nextSubject && nextSubject.config.get('recover') === subject.config.get('recover') ? getNextSubjectForConfig(nextSubject) : nextSubject;
+        return nextSubject && nextSubject.config.get(RECOVER) === subject.config.get(RECOVER) ? getNextSubjectForConfig(nextSubject) : nextSubject;
     }
 
     return Recoverer;

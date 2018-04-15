@@ -1,7 +1,8 @@
 JARS.internal('Refs/Subject', function(getInternal) {
     'use strict';
 
-    var Tracker = getInternal('Helpers/Tracker');
+    var Tracker = getInternal('Helpers/Tracker'),
+        CONTEXT = getInternal('Configs/Options').CONTEXT;
 
     /**
      * @class
@@ -15,15 +16,15 @@ JARS.internal('Refs/Subject', function(getInternal) {
     function Subject(subjectName, parentRef, config) {
         this._subjectName = subjectName;
         this._parent = parentRef;
-        this._contexts = {};
         this._config = config;
+        this._contexts = {};
     }
 
     Subject.prototype = {
         constructor: Subject,
         /**
          * @param {JARS~internals.Refs.Modules} refs
-         * @param {JARS~internals.Subjects.Subject~Provide} provide
+         * @param {JARS~internals.Subjects.Subject~Provide} [provide]
          */
         init: function(refs, provide) {
             this._refs = refs;
@@ -35,7 +36,7 @@ JARS.internal('Refs/Subject', function(getInternal) {
          * @return {*}
          */
         get: function(context) {
-            context = context || this._config.get('context');
+            context = context || this._config.get(CONTEXT);
 
             return this._contexts[context] || this._create(context);
         },
@@ -47,6 +48,8 @@ JARS.internal('Refs/Subject', function(getInternal) {
             this._refs && this._refs.flush(context);
         },
         /**
+         * @private
+         *
          * @param {string} context
          *
          * @return {*}

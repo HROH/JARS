@@ -2,11 +2,13 @@
  * @module Modules
  */
 JARS.module('System.Modules').meta({
-    plugIn: function(pluginRequest) {
+    plugIn: function(pluginRequest, getInternal) {
         'use strict';
 
+        var CONFIG = getInternal('Configs/Options').CONFIG;
+
         pluginRequest.$export(function() {
-            return pluginRequest.requestor.config.get('config');
+            return pluginRequest.requestor.config.get(CONFIG);
         });
     }
 }).$import('*!Registries/Internals').$export(function(InternalsRegistry) {

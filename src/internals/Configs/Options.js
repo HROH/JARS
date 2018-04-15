@@ -5,9 +5,6 @@ JARS.internal('Configs/Options', function(getInternal) {
         OptionsResolver = getInternal('Resolvers/Options'),
         Transforms = getInternal('Configs/Transforms'),
         ObjectHelper = getInternal('Helpers/Object'),
-        create = ObjectHelper.create,
-        hasOwnProp = ObjectHelper.hasOwnProp,
-        each = ObjectHelper.each,
         isBundle = getInternal('Types/Subject').isBundle,
         isNull = getInternal('Types/Validators').isNull;
 
@@ -26,7 +23,7 @@ JARS.internal('Configs/Options', function(getInternal) {
      * @return {JARS~internals.Configs.Options}
      */
     Options.childOf = function(parentOptions) {
-        var childOptions = create(Options, parentOptions);
+        var childOptions = ObjectHelper.create(Options, parentOptions);
 
         childOptions.config = PublicConfig.childOf(parentOptions.config);
 
@@ -52,12 +49,40 @@ JARS.internal('Configs/Options', function(getInternal) {
      * @param {string} subjectName
      */
     Options.transformAndUpdate = function(options, newOptions, subjectName) {
-        each(newOptions, function updateConfig(value, option) {
-            if (hasOwnProp(Transforms, option)) {
+        ObjectHelper.each(newOptions, function updateConfig(value, option) {
+            if (ObjectHelper.hasOwnProp(Transforms, option)) {
                 updateOption(options, option, transformOption(option, value, options[option], subjectName));
             }
         });
     };
+
+    ObjectHelper.merge(Options, {
+        BASE_PATH: 'basePath',
+
+        CACHE: 'cache',
+
+        CHECK_CIRCULAR_DEPS: 'checkCircularDeps',
+
+        CONFIG: 'config',
+
+        CONTEXT: 'context',
+
+        DEBUG: 'debug',
+
+        DIR_PATH: 'dirPath',
+
+        EXTENSION: 'extension',
+
+        FILE_NAME: 'fileName',
+
+        MINIFY: 'minify',
+
+        RECOVER: 'recover',
+
+        TIMEOUT: 'timeout',
+
+        VERSION_PATH: 'versionPath'
+    });
 
     /**
      * @memberof JARS~internals.Configs.Options
