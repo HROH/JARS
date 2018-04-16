@@ -15,7 +15,7 @@ JARS.internal('Traverser/Circular', function() {
          * @return {boolean}
          */
         onEnter: function(subject, entryModule, depth) {
-            return !equalsEntryModule(subject, entryModule, depth) && !(subject.state.isLoading() || subject.state.isLoaded());
+            return !(equalsEntryModule(subject, entryModule, depth) || subject.state.isLoading() || subject.state.isLoaded() || subject.state.isAborted());
         },
         /**
          * @param {JARS~internals.Subjects.Subject} subject
