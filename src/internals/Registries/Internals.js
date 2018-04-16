@@ -142,7 +142,7 @@ JARS.init(function(commands) {
     Queue = {
         counter: 0,
 
-        loading: [],
+        loading: {},
         /**
          * @param {string[]} internalNames
          * @param {string} groupName
@@ -158,7 +158,7 @@ JARS.init(function(commands) {
         add: function(internalName) {
             if(!internals[internalName]) {
                 Internals.load(internalName);
-                Queue.loading.push(internalName);
+                Queue.loading[internalName] = true;
                 Queue.counter++;
             }
         },
@@ -168,7 +168,7 @@ JARS.init(function(commands) {
          * @return {boolean}
          */
         mark: function(internalName) {
-            return Queue.loading.indexOf(internalName) !== -1 && --Queue.counter === 0;
+            return Queue.loading[internalName] && --Queue.counter === 0;
         }
     };
 
