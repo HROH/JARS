@@ -9,83 +9,11 @@
         pushCommand = function(command) {
             commands.push(command);
         },
-        Env, SourceManager, JARS;
+        currentPlatform, JARS;
 
     /**
      * @namespace JARS~internals
      */
-
-    Env = (function envConfigSetup() {
-        var scripts = envGlobal.document.getElementsByTagName('script'),
-            script = scripts[scripts.length - 1],
-            Env;
-
-        /**
-         * @namespace
-         *
-         * @memberof JARS~internals
-         */
-        Env = {
-            /**
-             * @type {Global}
-             */
-            global: envGlobal,
-            /**
-             * @type {string}
-             */
-            MAIN_MODULE: getData('main'),
-            /**
-             * @type {string}
-             */
-            BASE_PATH: getData('base') || './',
-            /**
-             * @type {string}
-             */
-            INTERNALS_PATH: getData('internals') || script.src.substring(0, script.src.lastIndexOf('/')) + '/internals/'
-        };
-
-        /**
-         * @memberof JARS~internals.Env
-         * @inner
-         *
-         * @param {string} key
-         *
-         * @return {string}
-         */
-        function getData(key) {
-            return script.getAttribute('data-' + key);
-        }
-
-        return Env;
-    })();
-
-    SourceManager = (function sourceManagerSetup() {
-        var doc = envGlobal.document,
-            head = doc.getElementsByTagName('head')[0],
-            SourceManager;
-
-        /**
-         * @namespace
-         *
-         * @memberof JARS~internals
-         */
-        SourceManager = {
-            /**
-             * @param {string} path
-             */
-            load: function(path) {
-                var script = doc.createElement('script');
-
-                head.appendChild(script);
-
-                script.type = 'text/javascript';
-                script.src = path;
-                script.async = true;
-            }
-        };
-
-        return SourceManager;
-    })();
 
     /**
      * @namespace
@@ -96,17 +24,27 @@
      */
     JARS = {
         /**
+         * @param {Object} platform
+         */
+        platform: function(platform) {
+            if(!currentPlatform) {
+                currentPlatform = platform;
+                JARS.main(platform.Env.MAIN_MODULE);
+                platform.SourceManager.load(platform.Env.INTERNALS_PATH + 'Registries/Internals.js');
+            }
+        },
+        /**
          * @param {function(JARS~internals.Registries.Internals~Command[]): JARS~internals.Registries.Internals} bootstrapInternalsRegistry
          */
         init: function(bootstrapInternalsRegistry) {
             var InternalsRegistry = bootstrapInternalsRegistry(commands);
 
             InternalsRegistry.register('Env', function() {
-                return Env;
+                return currentPlatform.Env;
             });
 
             InternalsRegistry.register('SourceManager', function() {
-                return SourceManager;
+                return currentPlatform.SourceManager;
             });
 
             JARS.internal = InternalsRegistry.register;
@@ -234,9 +172,6 @@
 
     envGlobal.JARS = JARS;
 
-    JARS.main(Env.MAIN_MODULE);
-    SourceManager.load(Env.INTERNALS_PATH + 'Registries/Internals.js');
-
     /**
      * @param {string} internalName
      * @param {string} methodName
@@ -251,4 +186,4 @@
             return returnFn ? returnFn.apply(null, arguments) : JARS;
         };
     }
-})(this);
+})(typeof window === 'undefined' ? global : window);
