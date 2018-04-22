@@ -1,1 +1,1 @@
-module.exports = require('jars-gulp')(require('gulp'), 'JARS');
+module.exports = require('jars-gulp')(require('gulp'), 'JARS', 'Holger Haas');

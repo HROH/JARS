@@ -5,7 +5,7 @@ JARS.internal('Resolvers/PathList', function(getInternal) {
         ModulesTraverser = getInternal('Traverser/Modules'),
         importModules = getInternal('Handlers/Import').$import,
         each = getInternal('Helpers/Array').each,
-        rootModule = getInternal('Registries/Subjects').getRootModule(),
+        rootModuleDeps = getInternal('Registries/Subjects').getRootModule().dependencies,
         PathList;
 
     /**
@@ -24,10 +24,8 @@ JARS.internal('Resolvers/PathList', function(getInternal) {
          * @param {function(string[])} callback
          */
         resolve: function(entryModuleName, callback) {
-            var entryModule = rootModule.dependencies.resolve(entryModuleName)[0];
-
-            importModules([entryModule.name], function() {
-                callback(ModulesTraverser(entryModule, PathListTraverser, markSubjectsSorted(rootModule.dependencies.resolve('System.*'), {
+            importModules(entryModuleName, function() {
+                callback(ModulesTraverser(rootModuleDeps.resolve(entryModuleName)[0], PathListTraverser, markSubjectsSorted(rootModuleDeps.resolve('System.*'), {
                     sorted: {},
 
                     paths: []
@@ -41,16 +39,13 @@ JARS.internal('Resolvers/PathList', function(getInternal) {
      * @inner
      *
      * @param {JARS~internals.Subjects.Subject[]} subjects
-     * @param {Object} trackList
+     * @param {JARS~internals.Traverser.PathList~TrackList} trackList
      */
     function markSubjectsSorted(subjects, trackList) {
         each(subjects, function markSubjectSorted(excludedSubject) {
             trackList.sorted[excludedSubject.name] = true;
-
-            if(!excludedSubject.isRoot) {
-                trackList.sorted[excludedSubject.parent.name] = true;
-                trackList = markSubjectsSorted(excludedSubject.dependencies.getAll(), trackList);
-            }
+            trackList.sorted[excludedSubject.parent.name] = true;
+            trackList = markSubjectsSorted(excludedSubject.dependencies.getAll(), trackList);
         });
 
         return trackList;

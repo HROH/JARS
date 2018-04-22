@@ -90,7 +90,7 @@ JARS.module('System.LogLevels').$import(['*!Registries/Internals', '.::isNumber'
      * @inner
      *
      * @param {string} level
-     * @return {number} priority
+     * @return {number}
      */
     function setLevelPriority(level, priority) {
         LogLevels[level.toUpperCase()] = isNumber(priority) ? priority : LogLevels.ALL;

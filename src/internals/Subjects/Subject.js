@@ -3,7 +3,7 @@ JARS.internal('Subjects/Subject', function(getInternal) {
 
     var ParentLoadHandler = getInternal('Handlers/Subjects/Parent'),
         DependenciesLoadHandler = getInternal('Handlers/Subjects/Dependencies'),
-        Modules = getInternal('Handlers/Modules'),
+        request = getInternal('Handlers/Modules').request,
         isRoot = getInternal('Resolvers/Subjects/Module').isRoot;
 
     /**
@@ -77,7 +77,7 @@ JARS.internal('Subjects/Subject', function(getInternal) {
          */
         $export: function(provide) {
             if (this.stateUpdater.setRegistered()) {
-                Modules.request(DependenciesLoadHandler(this, provide));
+                request(DependenciesLoadHandler(this, provide));
             }
         },
         /**
@@ -85,7 +85,7 @@ JARS.internal('Subjects/Subject', function(getInternal) {
          */
         load: function(handler) {
             if (this.stateUpdater.setLoading()) {
-                Modules.request(ParentLoadHandler(this, this.handler));
+                request(ParentLoadHandler(this, this.handler));
             }
 
             this.state.onChange(handler);
