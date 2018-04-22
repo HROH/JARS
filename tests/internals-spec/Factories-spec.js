@@ -1,0 +1,19 @@
+JARS.moduleAuto('internals-spec.Factories-spec', [
+    'Config-spec',
+    'Dependencies-spec',
+    'Description-spec',
+    'Handler-spec',
+    'Info-spec',
+    'Logger-spec',
+    'Options-spec',
+    'Parent-spec',
+    'ParentBundle-spec',
+    'ParentBundleName-spec',
+    'ParentName-spec',
+    'Ref-spec',
+    'Requestor-spec',
+    'State-spec',
+    'StateUpdater-spec',
+    'Strategy-spec',
+    'Subject-spec'
+]);
