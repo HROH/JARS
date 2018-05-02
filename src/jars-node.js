@@ -17,6 +17,10 @@
             /**
              * @type {string}
              */
+            platform: 'node',
+            /**
+             * @type {string}
+             */
             MAIN_MODULE: envGlobal.process.env.MAIN_MODULE,
             /**
              * @type {string}

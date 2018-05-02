@@ -21,6 +21,10 @@
             /**
              * @type {string}
              */
+            platform: 'browser',
+            /**
+             * @type {string}
+             */
             MAIN_MODULE: getData('main'),
             /**
              * @type {string}
