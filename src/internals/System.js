@@ -11,6 +11,7 @@ JARS.module('System', [
     /**
      * @module System
      *
+     * @borrows JARS~internals.Env as env
      * @borrows JARS~internals.Types.Lookup.get as getType
      * @borrows JARS~internals.Types.Validators.isNil as isNil
      * @borrows JARS~internals.Types.Validators.isNull as isNull
@@ -32,17 +33,7 @@ JARS.module('System', [
      * @borrows JARS~internals.Types.Validators.isA as isA
      */
     var System = InternalsRegistry.get('Helpers/Object').merge({
-        /**
-         * @namespace
-         *
-         * @memberof module:System
-         */
-        env: {
-            /**
-             * @type {Global}
-             */
-            global: InternalsRegistry.get('Env').global
-        },
+        env: InternalsRegistry.get('Env'),
 
         getType: InternalsRegistry.get('Types/Lookup').get
     }, InternalsRegistry.get('Types/Validators'));
