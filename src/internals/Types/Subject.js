@@ -27,6 +27,14 @@ JARS.internal('Types/Subject', function(getInternal) {
          *
          * @return {boolean}
          */
+        isModule: function(subjectName) {
+            return Subject.get(subjectName) === SUBJECT_TYPE_MODULE;
+        },
+        /**
+         * @param {string} subjectName
+         *
+         * @return {boolean}
+         */
         isBundle: function(subjectName) {
             return !Subject.isInterception(subjectName) && getBundleParentName(subjectName) !== subjectName;
         },
