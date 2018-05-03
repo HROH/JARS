@@ -2,11 +2,8 @@ JARS.internal('States/Updater', function(getInternal) {
     'use strict';
 
     var StateInfo = getInternal('States/Info'),
-        merge = getInternal('Helpers/Object').merge,
-        MSG_ATTEMPT = 'attempted to mark as ${nextState} but is currently ${curState}',
-        MSG_DONE = 'is ${nextState}',
-        LOG_ATTEMPT = 'attempt',
-        LOG_DONE = 'done';
+        LogData = getInternal('States/LogData'),
+        merge = getInternal('Helpers/Object').merge;
 
     /**
      * @class
@@ -36,33 +33,18 @@ JARS.internal('States/Updater', function(getInternal) {
             var updater = this;
 
             return updater._state.set(stateInfo, function(canTransition, currentStateInfo, nextStateInfo) {
-                logInfo = merge(merge({
+                updater._logger[LogData.getMethod(nextStateInfo, canTransition)](LogData.getMessage(message, canTransition), merge({
                     curState: currentStateInfo.text,
 
                     nextState: nextStateInfo.text
-                }, nextStateInfo.methods), logInfo);
-
-                updater._logger[logInfo[canTransition ? LOG_DONE : LOG_ATTEMPT]](getMessage(canTransition, message), logInfo);
+                }, logInfo));
             });
         }
     };
 
-    /**
-     * @memberof JARS~internals.States.Updater
-     * @inner
-     *
-     * @param {boolean} canTransition
-     * @param {string} message
-     *
-     * @return {string}
-     */
-    function getMessage(canTransition, message) {
-        return (canTransition ? MSG_DONE : MSG_ATTEMPT) + (message ? ' - ' + message : '');
-    }
-
     StateInfo.each(function(stateInfo) {
-        Updater.prototype[stateInfo.set] = function(customMessage, logInfo) {
-            return this._update(stateInfo, customMessage, logInfo);
+        Updater.prototype[stateInfo.set] = function(message, logInfo) {
+            return this._update(stateInfo, message, logInfo);
         };
     });
 

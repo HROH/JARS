@@ -4,24 +4,7 @@ JARS.internal('States/Info', function(getInternal) {
     var each = getInternal('Helpers/Array').each,
         IS_PREFIX = 'is',
         SET_PREFIX = 'set',
-        LOG_METHODS = {},
         stateInfos = [];
-
-    LOG_METHODS.registered = LOG_METHODS.waiting = LOG_METHODS.intercepted = {
-        attempt: 'warn',
-
-        done: 'info'
-    };
-    LOG_METHODS.loaded = LOG_METHODS.loading = {
-        attempt: 'debug',
-
-        done: LOG_METHODS.waiting.done
-    };
-    LOG_METHODS.aborted = {
-        attempt: LOG_METHODS.waiting.attempt,
-
-        done: 'error'
-    };
 
     /**
      * @class
@@ -30,11 +13,9 @@ JARS.internal('States/Info', function(getInternal) {
      *
      * @param {string} stateText
      * @param {string} stateMethodText
-     * @param {Object} logMethods
      */
-    function Info(stateText, stateMethodText, logMethods) {
+    function Info(stateText, stateMethodText) {
         this.text = stateText;
-        this.methods = logMethods;
         this.is = IS_PREFIX + stateMethodText;
         this.set = SET_PREFIX + stateMethodText;
     }
@@ -72,7 +53,7 @@ JARS.internal('States/Info', function(getInternal) {
     };
 
     each(['waiting', 'loading', 'registered', 'intercepted', 'loaded', 'aborted'], function(stateText) {
-        stateInfos.push(new Info(stateText, stateText.charAt(0).toUpperCase() + stateText.substr(1), LOG_METHODS[stateText]));
+        stateInfos.push(new Info(stateText, stateText.charAt(0).toUpperCase() + stateText.substr(1)));
     });
 
     stateInfos[0].setNext([stateInfos[1], stateInfos[2], stateInfos[5]]);
