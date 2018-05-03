@@ -1,19 +1,20 @@
 JARS.internal('Traverser/Modules', function(getInternal) {
     'use strict';
 
-    var arrayEach = getInternal('Helpers/Array').each;
+    var Result = getInternal('Traverser/Result'),
+        arrayEach = getInternal('Helpers/Array').each;
 
     /**
      * @memberof JARS~internals.Traverser
      *
      * @param {JARS~internals.Subjects.Subject} entryModule
-     * @param {JARS~internals.Traverser.Modules~Handle} traverseHandle
+     * @param {JARS~internals.Traverser.Modules~Handle} handle
      * @param {*} initialValue
      *
      * @return {*}
      */
-    function Modules(entryModule, traverseHandle, initialValue) {
-        return traverseSubject(entryModule, entryModule, traverseHandle, 0, initialValue).value;
+    function Modules(entryModule, handle, initialValue) {
+        return traverseSubject(entryModule, entryModule, handle, 0, initialValue).value;
     }
 
     /**
@@ -22,18 +23,14 @@ JARS.internal('Traverser/Modules', function(getInternal) {
      *
      * @param {JARS~internals.Subjects.Subject} subject
      * @param {JARS~internals.Subjects.Subject} entryModule
-     * @param {JARS~internals.Traverser.Modules~Handle} traverseHandle
+     * @param {JARS~internals.Traverser.Modules~Handle} handle
      * @param {number} depth
      * @param {*} value
      *
-     * @return {JARS~internals.Traverser.Modules~Result}
+     * @return {JARS~internals.Traverser.Result}
      */
-    function traverseSubject(subject, entryModule, traverseHandle, depth, value) {
-        if(traverseHandle.onEnter(subject, entryModule, depth, value)) {
-            value = traverseRelated(subject, entryModule, traverseHandle, depth, value);
-        }
-
-        return traverseHandle.onLeave(subject, entryModule, depth, value);
+    function traverseSubject(subject, entryModule, handle, depth, value) {
+        return handle.onLeave(subject, entryModule, depth, handle.onEnter(subject, entryModule, depth, value) ? traverseRelated(subject, entryModule, handle, depth, value) : value);
     }
 
     /**
@@ -42,20 +39,16 @@ JARS.internal('Traverser/Modules', function(getInternal) {
      *
      * @param {JARS~internals.Subjects.Subject} subject
      * @param {JARS~internals.Subjects.Subject} entryModule
-     * @param {JARS~internals.Traverser.Modules~Handle} traverseHandle
+     * @param {JARS~internals.Traverser.Modules~Handle} handle
      * @param {number} depth
      * @param {*} value
      *
      * @return {*}
      */
-    function traverseRelated(subject, entryModule, traverseHandle, depth, value) {
-        var result = subject.isRoot || subject.parent.isRoot ? defaultResult(value) : traverseSubject(subject.parent, entryModule, traverseHandle, depth, value);
+    function traverseRelated(subject, entryModule, handle, depth, value) {
+        var result = subject.isRoot || subject.parent.isRoot ? new Result(value) : traverseSubject(subject.parent, entryModule, handle, depth, value);
 
-        if(!result.done) {
-            result = traverseDependencies(subject, entryModule, traverseHandle, depth, result.value);
-        }
-
-        return result.value;
+        return (result.done ? result : traverseDependencies(subject, entryModule, handle, depth, result.value)).value;
     }
 
     /**
@@ -64,38 +57,22 @@ JARS.internal('Traverser/Modules', function(getInternal) {
      *
      * @param {JARS~internals.Subjects.Subject} subject
      * @param {JARS~internals.Subjects.Subject} entryModule
-     * @param {JARS~internals.Traverser.Modules~Handle} traverseHandle
+     * @param {JARS~internals.Traverser.Modules~Handle} handle
      * @param {number} depth
      * @param {*} value
      *
-     * @return {JARS~internals.Traverser.Modules~Result}
+     * @return {JARS~internals.Traverser.Result}
      */
-    function traverseDependencies(subject, entryModule, traverseHandle, depth, value) {
+    function traverseDependencies(subject, entryModule, handle, depth, value) {
         var result;
 
         arrayEach(subject.dependencies.getAll(), function(nestedSubject) {
-            result = traverseSubject(nestedSubject, entryModule, traverseHandle, depth + 1, value);
+            result = traverseSubject(nestedSubject, entryModule, handle, depth + 1, value);
 
             return result.done;
         });
 
-        return result || defaultResult(value);
-    }
-
-    /**
-     * @memberof JARS~internals.Traverser.Modules
-     * @inner
-     *
-     * @param {*} value
-     *
-     * @return {JARS~internals.Traverser.Modules~Result}
-     */
-    function defaultResult(value) {
-        return {
-            value: value,
-
-            done: false
-        };
+        return result || new Result(value);
     }
 
     /**
@@ -106,16 +83,6 @@ JARS.internal('Traverser/Modules', function(getInternal) {
      *
      * @method onEnter
      * @method onLeave
-     */
-
-    /**
-     * @typedef {Object} Result
-     *
-     * @memberof JARS~internals.Traverser.Modules
-     * @inner
-     *
-     * @property {*} value
-     * @property {boolean} done
      */
 
     return Modules;

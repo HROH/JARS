@@ -1,4 +1,4 @@
 /**
  * @namespace JARS~internals.Traverser
  */
-JARS.internalGroup('Traverser', ['Circular', 'Modules', 'PathList']);
+JARS.internalGroup('Traverser', ['Circular', 'Modules', 'PathList', 'Result']);

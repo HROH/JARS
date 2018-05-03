@@ -3,8 +3,8 @@ JARS.internal('Resolvers/PathList', function(getInternal) {
 
     var PathListTraverser = getInternal('Traverser/PathList'),
         ModulesTraverser = getInternal('Traverser/Modules'),
+        PathListHelper = getInternal('Helpers/PathList'),
         importModules = getInternal('Handlers/Import').$import,
-        each = getInternal('Helpers/Array').each,
         rootModuleDeps = getInternal('Registries/Subjects').getRootModule().dependencies,
         PathList;
 
@@ -25,31 +25,10 @@ JARS.internal('Resolvers/PathList', function(getInternal) {
          */
         resolve: function(entryModuleName, callback) {
             importModules(entryModuleName, function() {
-                callback(ModulesTraverser(rootModuleDeps.resolve(entryModuleName)[0], PathListTraverser, markSubjectsSorted(rootModuleDeps.resolve('System.*'), {
-                    sorted: {},
-
-                    paths: []
-                })).paths);
+                callback(ModulesTraverser(rootModuleDeps.resolve(entryModuleName)[0], PathListTraverser, new PathListHelper(rootModuleDeps.resolve('System.*'))).paths);
             });
         }
     };
-
-    /**
-     * @memberof JARS~internals.Resolvers.PathList
-     * @inner
-     *
-     * @param {JARS~internals.Subjects.Subject[]} subjects
-     * @param {JARS~internals.Traverser.PathList~TrackList} trackList
-     */
-    function markSubjectsSorted(subjects, trackList) {
-        each(subjects, function markSubjectSorted(excludedSubject) {
-            trackList.sorted[excludedSubject.name] = true;
-            trackList.sorted[excludedSubject.parent.name] = true;
-            trackList = markSubjectsSorted(excludedSubject.dependencies.getAll(), trackList);
-        });
-
-        return trackList;
-    }
 
     return PathList;
 });

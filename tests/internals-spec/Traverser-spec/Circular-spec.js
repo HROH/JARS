@@ -2,7 +2,8 @@ JARS.module('internals-spec.Traverser-spec.Circular-spec').$import(['*!Registrie
     'use strict';
 
     var expect = chai.expect,
-        SubjectsRegistry = InternalsRegistry.get('Registries/Subjects');
+        SubjectsRegistry = InternalsRegistry.get('Registries/Subjects'),
+        Result = InternalsRegistry.get('Traverser/Result');
 
     describe('Traverser/Circular', function() {
         var CircularTraverser = InternalsRegistry.get('Traverser/Circular');
@@ -176,10 +177,7 @@ JARS.module('internals-spec.Traverser-spec.Circular-spec').$import(['*!Registrie
                     it('should prepend its name to the list for any depth and entry module', function() {
                         var entryModuleSame = subject,
                             entryModuleDifferent = SubjectsRegistry.get('test-circular-entry'),
-                            expected = {
-                                value: [subject.name].concat(list),
-                                done: true
-                            };
+                            expected = new Result([subject.name].concat(list), true);
 
                         expect(CircularTraverser.onLeave(subject, entryModuleSame, 0, list)).to.deep.equal(expected);
                         expect(CircularTraverser.onLeave(subject, entryModuleSame, 4, list)).to.deep.equal(expected);
@@ -195,17 +193,11 @@ JARS.module('internals-spec.Traverser-spec.Circular-spec').$import(['*!Registrie
                         var entryModuleSame = subject;
 
                         it('should create no list when the depth is 0', function() {
-                            expect(CircularTraverser.onLeave(subject, entryModuleSame, 0, list)).to.deep.equal({
-                                value: list,
-                                done: false
-                            });
+                            expect(CircularTraverser.onLeave(subject, entryModuleSame, 0, list)).to.deep.equal(new Result(list));
                         });
 
                         it('should create a list when the depth is bigger than 0', function() {
-                            expect(CircularTraverser.onLeave(subject, entryModuleSame, 4, list)).to.deep.equal({
-                                value: [subject.name],
-                                done: true
-                            });
+                            expect(CircularTraverser.onLeave(subject, entryModuleSame, 4, list)).to.deep.equal(new Result([subject.name], true));
                         });
                     });
 
@@ -213,10 +205,7 @@ JARS.module('internals-spec.Traverser-spec.Circular-spec').$import(['*!Registrie
                         var entryModuleDifferent = SubjectsRegistry.get('test-circular-entry');
 
                         it('should create no list for any depth', function() {
-                            var expected = {
-                                value: list,
-                                done: false
-                            };
+                            var expected = new Result(list);
 
                             expect(CircularTraverser.onLeave(subject, entryModuleDifferent, 0, list)).to.deep.equal(expected);
                             expect(CircularTraverser.onLeave(subject, entryModuleDifferent, 4, list)).to.deep.equal(expected);

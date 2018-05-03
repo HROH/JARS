@@ -1,12 +1,15 @@
-JARS.internal('Traverser/Circular', function() {
+JARS.internal('Traverser/Circular', function(getInternal) {
     'use strict';
+
+    var Result = getInternal('Traverser/Result'),
+        Circular;
 
     /**
      * @namespace
      *
      * @memberof JARS~internals.Traverser
      */
-    var Circular = {
+    Circular = {
         /**
          * @param {JARS~internals.Subjects.Subject} subject
          * @param {JARS~internals.Subjects.Subject} entryModule
@@ -23,18 +26,14 @@ JARS.internal('Traverser/Circular', function() {
          * @param {number} depth
          * @param {string[]} [circularList]
          *
-         * @return {JARS~internals.Traverser.Modules~Result}
+         * @return {JARS~internals.Traverser.Result}
          */
         onLeave: function(subject, entryModule, depth, circularList) {
             if(circularList || equalsEntryModule(subject, entryModule, depth)) {
                 circularList = circularList ? [subject.name].concat(circularList) : [subject.name];
             }
 
-            return {
-                value: circularList,
-
-                done: !!circularList
-            };
+            return new Result(circularList, !!circularList);
         }
     };
 
