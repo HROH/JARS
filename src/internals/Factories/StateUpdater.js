@@ -1,14 +1,14 @@
 JARS.internal('Factories/StateUpdater', function(getInternal) {
     'use strict';
 
-    var Updater = getInternal('States/Updater');
+    var Updater = getInternal('State/Updater');
 
     /**
      * @memberof JARS~internals.Factories
      *
      * @param {JARS~internals.Helpers.Injector} injector
      *
-     * @return {JARS~internals.States.Updater}
+     * @return {JARS~internals.State.Updater}
      */
     function StateUpdater(injector) {
         return new Updater(injector.get('state'), injector.get('logger'));

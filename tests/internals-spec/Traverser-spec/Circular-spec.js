@@ -3,7 +3,8 @@ JARS.module('internals-spec.Traverser-spec.Circular-spec').$import(['*!Registrie
 
     var expect = chai.expect,
         SubjectsRegistry = InternalsRegistry.get('Registries/Subjects'),
-        Result = InternalsRegistry.get('Traverser/Result');
+        Result = InternalsRegistry.get('Traverser/Result'),
+        States = InternalsRegistry.get('State/States');
 
     describe('Traverser/Circular', function() {
         var CircularTraverser = InternalsRegistry.get('Traverser/Circular');
@@ -14,11 +15,11 @@ JARS.module('internals-spec.Traverser-spec.Circular-spec').$import(['*!Registrie
 
                 describe('when it is waiting', function() {
                     beforeEach(function() {
-                        sinon.stub(subject.state, 'isWaiting').returns(true);
+                        sinon.stub(subject.state, 'is').returns(false).withArgs(States.WAITING).returns(true);
                     });
 
                     afterEach(function() {
-                        subject.state.isWaiting.restore();
+                        subject.state.is.restore();
                     });
 
                     describe('and equals the entry module', function() {
@@ -45,11 +46,11 @@ JARS.module('internals-spec.Traverser-spec.Circular-spec').$import(['*!Registrie
 
                 describe('when it is loading', function() {
                     beforeEach(function() {
-                        sinon.stub(subject.state, 'isLoading').returns(true);
+                        sinon.stub(subject.state, 'is').returns(false).withArgs(States.LOADING).returns(true);
                     });
 
                     afterEach(function() {
-                        subject.state.isLoading.restore();
+                        subject.state.is.restore();
                     });
 
                     it('should return `false` for any depth and entry module', function() {
@@ -65,11 +66,11 @@ JARS.module('internals-spec.Traverser-spec.Circular-spec').$import(['*!Registrie
 
                 describe('when it is registered', function() {
                     beforeEach(function() {
-                        sinon.stub(subject.state, 'isRegistered').returns(true);
+                        sinon.stub(subject.state, 'is').returns(false).withArgs(States.REGISTERED).returns(true);
                     });
 
                     afterEach(function() {
-                        subject.state.isRegistered.restore();
+                        subject.state.is.restore();
                     });
 
                     describe('and equals the entry module', function() {
@@ -96,11 +97,11 @@ JARS.module('internals-spec.Traverser-spec.Circular-spec').$import(['*!Registrie
 
                 describe('when it is intercepted', function() {
                     beforeEach(function() {
-                        sinon.stub(subject.state, 'isIntercepted').returns(true);
+                        sinon.stub(subject.state, 'is').returns(false).withArgs(States.INTERCEPTED).returns(true);
                     });
 
                     afterEach(function() {
-                        subject.state.isIntercepted.restore();
+                        subject.state.is.restore();
                     });
 
                     describe('and equals the entry module', function() {
@@ -127,11 +128,11 @@ JARS.module('internals-spec.Traverser-spec.Circular-spec').$import(['*!Registrie
 
                 describe('when it is loaded', function() {
                     beforeEach(function() {
-                        sinon.stub(subject.state, 'isLoaded').returns(true);
+                        sinon.stub(subject.state, 'is').returns(false).withArgs(States.LOADED).returns(true);
                     });
 
                     afterEach(function() {
-                        subject.state.isLoaded.restore();
+                        subject.state.is.restore();
                     });
 
                     it('should return `false` for any depth and entry module', function() {
@@ -147,11 +148,11 @@ JARS.module('internals-spec.Traverser-spec.Circular-spec').$import(['*!Registrie
 
                 describe('when it is aborted', function() {
                     beforeEach(function() {
-                        sinon.stub(subject.state, 'isAborted').returns(true);
+                        sinon.stub(subject.state, 'is').returns(false).withArgs(States.ABORTED).returns(true);
                     });
 
                     afterEach(function() {
-                        subject.state.isAborted.restore();
+                        subject.state.is.restore();
                     });
 
                     it('should return `false` for any depth and entry module', function() {

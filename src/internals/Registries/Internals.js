@@ -89,7 +89,7 @@ JARS.init(function(commands) {
                 'Refs',
                 'Registries',
                 'Resolvers',
-                'States',
+                'State',
                 'Strategies',
                 'Subjects',
                 'Traverser',

@@ -1,7 +1,8 @@
-JARS.internal('Handlers/Completion/Dependencies', function() {
+JARS.internal('Handlers/Completion/Dependencies', function(getInternal) {
     'use strict';
 
-    var CIRCULAR_SEPARATOR = '" -> "',
+    var LOADED = getInternal('State/States').LOADED,
+        CIRCULAR_SEPARATOR = '" -> "',
         MSG_ABORTED_CIRCULAR_DEPENDENCIES = 'found circular dependencies "${0}"';
 
     /**
@@ -28,9 +29,9 @@ JARS.internal('Handlers/Completion/Dependencies', function() {
         if(circularDeps) {
             subject.abort(MSG_ABORTED_CIRCULAR_DEPENDENCIES, [circularDeps.join(CIRCULAR_SEPARATOR)]);
         }
-        else if(!subject.state.isLoaded()) {
+        else if(!subject.state.is(LOADED)) {
             subject.ref.init(refs, this._provide);
-            subject.stateUpdater.setLoaded();
+            subject.stateUpdater.update(LOADED);
         }
     };
 

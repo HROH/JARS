@@ -9,7 +9,7 @@ JARS.moduleAuto('internals-spec', [
     'Refs-spec.*',
     'Registries-spec.*',
     'Resolvers-spec.*',
-    'States-spec.*',
+    'State-spec.*',
     'Strategies-spec.*',
     'Subjects-spec.*',
     'Traverser-spec.*',

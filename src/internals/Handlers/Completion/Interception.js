@@ -2,6 +2,7 @@ JARS.internal('Handlers/Completion/Interception', function(getInternal) {
     'use strict';
 
     var getInterceptor = getInternal('Registries/Interceptors').get,
+        INTERCEPTED = getInternal('State/States').INTERCEPTED,
         MSG_MODULE_INTERCEPTED = 'handling request of "${0}"';
 
     /**
@@ -19,7 +20,7 @@ JARS.internal('Handlers/Completion/Interception', function(getInternal) {
     Interception.prototype.onCompleted = function() {
         var subject = this._subject;
 
-        subject.requestor.stateUpdater.setIntercepted(MSG_MODULE_INTERCEPTED, [subject.name]);
+        subject.requestor.stateUpdater.update(INTERCEPTED, MSG_MODULE_INTERCEPTED, [subject.name]);
         getInterceptor(subject.info.type).intercept(subject);
     };
 

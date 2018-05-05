@@ -2,6 +2,7 @@ JARS.internal('Traverser/Circular', function(getInternal) {
     'use strict';
 
     var Result = getInternal('Traverser/Result'),
+        States = getInternal('State/States'),
         Circular;
 
     /**
@@ -18,7 +19,7 @@ JARS.internal('Traverser/Circular', function(getInternal) {
          * @return {boolean}
          */
         onEnter: function(subject, entryModule, depth) {
-            return !(equalsEntryModule(subject, entryModule, depth) || subject.state.isLoading() || subject.state.isLoaded() || subject.state.isAborted());
+            return !(equalsEntryModule(subject, entryModule, depth) || subject.state.is(States.LOADING) || subject.state.is(States.LOADED) || subject.state.is(States.ABORTED));
         },
         /**
          * @param {JARS~internals.Subjects.Subject} subject

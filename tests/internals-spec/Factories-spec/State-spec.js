@@ -3,20 +3,20 @@ JARS.module('internals-spec.Factories-spec.State-spec').$import('*!Registries/In
 
     var expect = chai.expect,
         Injector = InternalsRegistry.get('Helpers/Injector'),
-        State = InternalsRegistry.get('States/Subject');
+        State = InternalsRegistry.get('State/Subject');
 
     describe('Factories/State', function() {
         var StateFactory = InternalsRegistry.get('Factories/State');
 
-        it('should return an instance of `States/Subject` when given a module injector', function() {
+        it('should return an instance of `State/Subject` when given a module injector', function() {
             expect(StateFactory(new Injector('test', 'test-requestor'))).to.be.an.instanceof(State);
         });
 
-        it('should return an instance of `States/Subject` when given a bundle injector', function() {
+        it('should return an instance of `State/Subject` when given a bundle injector', function() {
             expect(StateFactory(new Injector('test.*', 'test-requestor'))).to.be.an.instanceof(State);
         });
 
-        it('should return an instance of `States/Subject` when given an interception injector', function() {
+        it('should return an instance of `State/Subject` when given an interception injector', function() {
             expect(StateFactory(new Injector('test!', 'test-requestor'))).to.be.an.instanceof(State);
         });
     });

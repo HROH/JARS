@@ -2,6 +2,7 @@ JARS.internal('Traverser/PathList', function(getInternal) {
     'use strict';
 
     var Result = getInternal('Traverser/Result'),
+        LOADED = getInternal('State/States').LOADED,
         PathList;
 
     /**
@@ -19,7 +20,7 @@ JARS.internal('Traverser/PathList', function(getInternal) {
          * @return {boolean}
          */
         onEnter: function(subject, entryModule, depth, pathList) {
-            return !pathList.isSorted(subject) && subject.state.isLoaded();
+            return !pathList.isSorted(subject) && subject.state.is(LOADED);
         },
         /**
          * @param {JARS~internals.Subjects.Subject} subject

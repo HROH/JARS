@@ -1,7 +1,8 @@
 JARS.internal('Helpers/Logger', function(getInternal) {
     'use strict';
 
-    var DEBUG = getInternal('Configs/Options').DEBUG;
+    var DEBUG = getInternal('Configs/Options').DEBUG,
+        LOADED = getInternal('State/States').LOADED;
 
     /**
      * @class
@@ -10,7 +11,7 @@ JARS.internal('Helpers/Logger', function(getInternal) {
      *
      * @param {string} description
      * @param {JARS~internals.Configs.Subject} config
-     * @param {JARS~internals.States.Subject} loggerState
+     * @param {JARS~internals.State.Subject} loggerState
      * @param {JARS~internals.Refs.Subject} loggerRef
      */
     function Subject(description, config, loggerState, loggerRef) {
@@ -26,7 +27,7 @@ JARS.internal('Helpers/Logger', function(getInternal) {
      * @param {Object} [values]
      */
     Subject.prototype.write = function(level, message, values) {
-        this._config.get(DEBUG) && this._loggerState.isLoaded() && this._loggerRef.get()[level + 'WithContext'](this._context, message, values);
+        this._config.get(DEBUG) && this._loggerState.is(LOADED) && this._loggerRef.get()[level + 'WithContext'](this._context, message, values);
     };
 
     getInternal('Helpers/Array').each(['debug', 'error', 'info', 'warn'], function(level) {
