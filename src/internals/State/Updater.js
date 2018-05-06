@@ -17,24 +17,19 @@ JARS.internal('State/Updater', function(getInternal) {
         this._logger = logger;
     }
 
-    Updater.prototype = {
-        constructor: Updater,
-        /**
-         * @private
-         *
-         * @param {string} state
-         * @param {string} [message]
-         * @param {Object} [logInfo]
-         *
-         * @return {boolean}
-         */
-        update: function(state, message, logInfo) {
-            var updater = this;
+    /**
+     * @param {string} state
+     * @param {string} [message]
+     * @param {Object} [logInfo]
+     *
+     * @return {boolean}
+     */
+    Updater.prototype.update = function(state, message, logInfo) {
+        var updater = this;
 
-            return updater._state.set(state, function(canTransition, currentState, nextState) {
-                updater._logger[LogData.getMethod(canTransition, nextState)](LogData.getMessage(canTransition, message), merge(LogData.getInfo(currentState, nextState), logInfo));
-            });
-        }
+        return updater._state.set(state, function(canTransition, currentState, nextState) {
+            updater._logger[LogData.getMethod(canTransition, nextState)](LogData.getMessage(canTransition, message), merge(LogData.getInfo(currentState, nextState), logInfo));
+        });
     };
 
     return Updater;

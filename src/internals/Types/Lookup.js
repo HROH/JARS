@@ -31,7 +31,7 @@ JARS.internal('Types/Lookup', function(getInternal) {
             return type === NUMBER ? getNumberType(value) : type;
         },
         /**
-         * @param {function(string, string)} callback
+         * @param {JARS~internals.Helpers.Object~Callback} callback
          */
         each: function(callback) {
             each(typeDefs, callback);

@@ -9,7 +9,7 @@ JARS.internal('Helpers/Array', function() {
     var Array = {
         /**
          * @param {Array<*>} array
-         * @param {function(*, number): boolean} callback
+         * @param {JARS~internals.Helpers.Array~Callback} callback
          */
         each: function(array, callback) {
             var index = 0,
@@ -22,6 +22,15 @@ JARS.internal('Helpers/Array', function() {
             }
         }
     };
+
+    /**
+     * @callback JARS~internals.Helpers.Array~Callback
+     *
+     * @param {*} value
+     * @param {number} [index]
+     *
+     * @return {boolean}
+     */
 
     return Array;
 });

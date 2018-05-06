@@ -39,7 +39,7 @@ JARS.internal('Helpers/Object', function() {
         },
         /**
          * @param {Object} object
-         * @param {function(*, string): boolean} callback
+         * @param {JARS~internals.Helpers.Object~Callback} callback
          */
         each: function(object, callback) {
             var property;
@@ -66,6 +66,15 @@ JARS.internal('Helpers/Object', function() {
             return dest;
         }
     };
+
+    /**
+     * @callback JARS~internals.Helpers.Object~Callback
+     *
+     * @param {*} value
+     * @param {string} [key]
+     *
+     * @return {boolean}
+     */
 
     return Object;
 });

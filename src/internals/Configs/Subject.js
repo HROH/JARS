@@ -13,11 +13,9 @@ JARS.internal('Configs/Subject', function(getInternal) {
      * @param {JARS~internals.Configs.Options} options
      */
     function Subject(subjectName, options) {
-        var config = this;
-
-        config._subjectName = subjectName;
-        config._options = options;
-        config._defaultOptions = Options.getDefault(subjectName);
+        this._subjectName = subjectName;
+        this._options = options;
+        this._defaultOptions = Options.getDefault(subjectName);
     }
 
     Subject.prototype = {

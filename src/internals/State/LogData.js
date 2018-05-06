@@ -22,6 +22,12 @@ JARS.internal('State/LogData', function(getInternal) {
      * @memberof JARS~internals.State
      */
     LogData = {
+        /**
+         * @param {string} currentState
+         * @param {string} nextState
+         *
+         * @return {Object}
+         */
         getInfo: function(currentState, nextState) {
             return {
                 s0: currentState,

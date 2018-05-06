@@ -2,7 +2,7 @@ JARS.internal('State/States', function(getInternal) {
     'use strict';
 
     var each = getInternal('Helpers/Array').each,
-        states = ['waiting', 'loading', 'registered', 'intercepted', 'loaded', 'aborted'],
+        STATES = ['waiting', 'loading', 'registered', 'intercepted', 'loaded', 'aborted'],
         nextStates = {},
         States;
 
@@ -13,10 +13,10 @@ JARS.internal('State/States', function(getInternal) {
      */
     States = {
         /**
-         * @param {function(string)} callback
+         * @param {JARS~internals.Helpers.Array~Callback} callback
          */
         each: function(callback) {
-            each(states, callback);
+            each(STATES, callback);
         },
         /**
          * @param {string} currentState
@@ -34,6 +34,13 @@ JARS.internal('State/States', function(getInternal) {
         nextStates[state] = {};
     });
 
+    /**
+     * @memberof JARS~internals.State.States
+     * @inner
+     *
+     * @param {string} state
+     * @param {string[]} next
+     */
     function setNext(state, next) {
         each(next, function(nextState) {
             nextStates[state][nextState] = true;
@@ -42,8 +49,8 @@ JARS.internal('State/States', function(getInternal) {
 
     setNext(States.WAITING, [States.LOADING, States.REGISTERED, States.ABORTED]);
     setNext(States.LOADING, [States.REGISTERED, States.ABORTED]);
-    setNext(States.REGISTERED, states.slice(3));
-    setNext(States.INTERCEPTED, states.slice(3));
+    setNext(States.REGISTERED, STATES.slice(3));
+    setNext(States.INTERCEPTED, STATES.slice(3));
     setNext(States.LOADED, [States.WAITING]);
     setNext(States.ABORTED, [States.WAITING]);
 

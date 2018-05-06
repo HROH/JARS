@@ -22,7 +22,7 @@ JARS.internal('Registries/Interceptors', function(getInternal) {
             }
         },
         /**
-         * @param {function(JARS~internals.Interceptors~Interceptor, string)} callback
+         * @param {JARS~internals.Helpers.Object~Callback} callback
          */
         each: function(callback) {
             each(interceptors, callback);
