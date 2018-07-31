@@ -2,7 +2,8 @@ JARS.internal('Configs/Hooks/Debugging', function(getInternal) {
     'use strict';
 
     var isObject = getInternal('Types/Validators').isObject,
-        merge = getInternal('Helpers/Object').merge;
+        merge = getInternal('Helpers/Object').merge,
+        LOG_ALL = getInternal('Logger/Levels').ALL;
 
     /**
      * @method
@@ -16,15 +17,13 @@ JARS.internal('Configs/Hooks/Debugging', function(getInternal) {
      */
     function Debugging(globalConfig, debugConfig) {
         debugConfig = merge({
-            mode: 'console'
+            level: LOG_ALL
         }, isObject(debugConfig) ? debugConfig : {
             debug: debugConfig
         });
 
         globalConfig.update('modules', {
-            config: debugConfig,
-
-            debug: debugConfig.debug
+            config: debugConfig
         });
 
         return debugConfig;
@@ -37,7 +36,7 @@ JARS.internal('Configs/Hooks/Debugging', function(getInternal) {
      * @inner
      *
      * @property {boolean} debug
-     * @property {string} [mode]
+     * @property {string} [level]
      */
 
     return Debugging;

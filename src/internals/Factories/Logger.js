@@ -1,7 +1,10 @@
 JARS.internal('Factories/Logger', function(getInternal) {
     'use strict';
 
-    var SubjectLogger = getInternal('Helpers/Logger');
+    var SubjectLogger = getInternal('Logger/Logger'),
+        Transports = getInternal('Logger/Transports'),
+        Console = getInternal('Logger/Console'),
+        CONFIG = getInternal('Configs/Options').CONFIG;
 
     /**
      * @memberof JARS~internals.Factories
@@ -11,20 +14,9 @@ JARS.internal('Factories/Logger', function(getInternal) {
      * @return {JARS~internals.Helpers.Logger}
      */
     function Logger(injector) {
-        return new SubjectLogger(injector.get('description') + injector.subjectName, injector.get('config'), injectLogger(injector, 'state'), injectLogger(injector, 'ref'));
-    }
+        var config = injector.get('config').get(CONFIG);
 
-    /**
-     * @memberof JARS~internals.Factories.Logger
-     * @inner
-     *
-     * @param {JARS~internals.Helpers.injector} injector
-     * @param {string} key
-     *
-     * @return {*}
-     */
-    function injectLogger(injector, key) {
-        return injector.inject('System.Logger', key);
+        return new SubjectLogger(injector.get('description') + injector.subjectName, new Transports([new Console(config)]), config);
     }
 
     return Logger;

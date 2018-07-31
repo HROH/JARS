@@ -2,6 +2,7 @@ JARS.internal('State/LogData', function(getInternal) {
     'use strict';
 
     var States = getInternal('State/States'),
+        Levels = getInternal('Logger/Levels'),
         LOG_ATTEMPT = 0,
         LOG_DONE = 1,
         LOG_METHODS = [{
@@ -12,8 +13,8 @@ JARS.internal('State/LogData', function(getInternal) {
         LogData;
 
     States.each(function(state) {
-        LOG_METHODS[LOG_ATTEMPT][state] = state === States.LOADING || state === States.LOADED ? 'debug' : 'warn';
-        LOG_METHODS[LOG_DONE][state] = state === States.ABORTED ? 'error' : 'info';
+        LOG_METHODS[LOG_ATTEMPT][state] = Levels.getLevel(state === States.LOADING || state === States.LOADED ? Levels.DEBUG : Levels.WARN);
+        LOG_METHODS[LOG_DONE][state] = Levels.getLevel(state === States.ABORTED ? Levels.ERROR : Levels.INFO);
     });
 
     /**

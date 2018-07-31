@@ -86,6 +86,7 @@ JARS.init(function(commands) {
                 'Handlers',
                 'Helpers',
                 'Interceptors',
+                'Logger',
                 'Refs',
                 'Registries',
                 'Resolvers',

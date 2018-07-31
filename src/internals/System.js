@@ -1,7 +1,6 @@
 JARS.module('System', [
     'Formatter',
     'Logger',
-    'LogContext',
     'LogLevels',
     'Modules',
     'Transports.*'

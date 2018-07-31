@@ -1,7 +1,12 @@
 JARS.internal('Configs/Hooks/Main', function(getInternal) {
     'use strict';
 
-    var MAIN_CONTEXT = 'Main:',
+    var Transports = getInternal('Logger/Transports'),
+        Console = getInternal('Logger/Console'),
+        Logger = getInternal('Logger/Logger'),
+        LOG_ALL = getInternal('Logger/Levels').ALL,
+        globalTransports = new Transports([new Console()]),
+        MAIN_CONTEXT = 'Main:',
         SUCCESS_MESSAGE = 'successfully loaded',
         ERROR_MESSAGE = 'aborted';
 
@@ -16,26 +21,25 @@ JARS.internal('Configs/Hooks/Main', function(getInternal) {
      * @return {string}
      */
     function Main(globalConfig, mainModule) {
-        var $import = getInternal('Handlers/Import').$import;
+        var $import = getInternal('Handlers/Import').$import,
+            mainLogger = new Logger(MAIN_CONTEXT + mainModule, globalTransports, {
+                debug: true,
 
-        $import('System.*', function(System) {
-            var mainLogger = new System.Logger(MAIN_CONTEXT + mainModule, {
-                debug: true
+                level: LOG_ALL
             });
 
-            globalConfig.update('modules', {
-                restrict: mainModule,
+        globalConfig.update('modules', {
+            restrict: mainModule,
 
-                basePath: getInternal('Env').BASE_PATH,
+            basePath: getInternal('Env').BASE_PATH,
 
-                dirPath: ''
-            });
+            dirPath: ''
+        });
 
-            $import(mainModule, function mainModuleLoaded() {
-                mainLogger.info(SUCCESS_MESSAGE);
-            }, function mainModuleAborted() {
-                mainLogger.error(ERROR_MESSAGE);
-            });
+        $import(mainModule, function mainModuleLoaded() {
+            mainLogger.info(SUCCESS_MESSAGE);
+        }, function mainModuleAborted() {
+            mainLogger.error(ERROR_MESSAGE);
         });
 
         return mainModule;
