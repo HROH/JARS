@@ -27,7 +27,7 @@ JARS.internal('Bootstrappers/Modules', function(getInternal) {
                         internal = getInternal(internalName);
 
                     if(internal) {
-                        pluginRequest.logger.warn(MSG_INTERNAL_ACCESSED, [internalName]);
+                        pluginRequest.requestor.logger.warn(MSG_INTERNAL_ACCESSED, [internalName]);
                         pluginRequest.$export(function() {
                             return internal;
                         });
