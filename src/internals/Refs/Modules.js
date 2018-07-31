@@ -22,25 +22,25 @@ JARS.internal('Refs/Modules', function(getInternal) {
             this._refs[index] = ref;
         },
         /**
-         * @param {string} [context]
+         * @param {string} [scope]
          *
          * @return {Array<*>}
          */
-        get: function(context) {
+        get: function(scope) {
             var refs = [];
 
             each(this._refs, function(ref) {
-                refs.push(ref.get(context));
+                refs.push(ref.get(scope));
             });
 
             return refs;
         },
         /**
-         * @param {string} context
+         * @param {string} scope
          */
-        flush: function(context) {
+        flush: function(scope) {
             each(this._refs, function(ref) {
-                ref.flush(context);
+                ref.flush(scope);
             });
         }
     };

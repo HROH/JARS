@@ -43,10 +43,10 @@ JARS.internal('Helpers/Injector', function(getInternal) {
             return Injector.inject(localSubjectName, this.requestorName, localKey, localArgs);
         },
         /**
-         * @param {string} context
+         * @param {string} scope
          */
-        flush: function(context) {
-            this._cache.ref && this._cache.ref.flush(context);
+        flush: function(scope) {
+            this._cache.ref && this._cache.ref.flush(scope);
         }
     };
 
@@ -63,11 +63,11 @@ JARS.internal('Helpers/Injector', function(getInternal) {
     };
 
     /**
-     * @param {string} context
+     * @param {string} scope
      */
-    Injector.flush = function(context) {
+    Injector.flush = function(scope) {
         each(injectors, function(injector) {
-            injector.flush(context);
+            injector.flush(scope);
         });
     };
 

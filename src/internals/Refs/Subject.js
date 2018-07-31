@@ -2,7 +2,7 @@ JARS.internal('Refs/Subject', function(getInternal) {
     'use strict';
 
     var Tracker = getInternal('Helpers/Tracker'),
-        CONTEXT = getInternal('Configs/Options').CONTEXT;
+        SCOPE = getInternal('Configs/Options').SCOPE;
 
     /**
      * @class
@@ -17,7 +17,7 @@ JARS.internal('Refs/Subject', function(getInternal) {
         this._subjectName = subjectName;
         this._parent = parentRef;
         this._config = config;
-        this._contexts = {};
+        this._scopes = {};
     }
 
     Subject.prototype = {
@@ -31,44 +31,44 @@ JARS.internal('Refs/Subject', function(getInternal) {
             this._provide = provide || provideObject;
         },
         /**
-         * @param {string} [context]
+         * @param {string} [scope]
          *
          * @return {*}
          */
-        get: function(context) {
-            context = context || this._config.get(CONTEXT);
+        get: function(scope) {
+            scope = scope || this._config.get(SCOPE);
 
-            return this._contexts[context] || this._create(context);
+            return this._scopes[scope] || this._create(scope);
         },
         /**
-         * @param {string} context
+         * @param {string} scope
          */
-        flush: function(context) {
-            this._contexts[context] = null;
-            this._refs && this._refs.flush(context);
+        flush: function(scope) {
+            this._scopes[scope] = null;
+            this._refs && this._refs.flush(scope);
         },
         /**
          * @private
          *
-         * @param {string} context
+         * @param {string} scope
          *
          * @return {*}
          */
-        _create: function(context) {
+        _create: function(scope) {
             var ref = this,
-                contexts = ref._contexts,
+                scopes = ref._scopes,
                 parentContent, contents;
 
             if(ref._parent) {
-                parentContent = ref._parent.get(context);
-                contents = ref._refs.get(context);
+                parentContent = ref._parent.get(scope);
+                contents = ref._refs.get(scope);
 
                 Tracker.setCurrent(ref._subjectName);
 
                 try {
-                    contexts[context] = ref._provide.apply(parentContent, contents) || {};
+                    scopes[scope] = ref._provide.apply(parentContent, contents) || {};
                 } catch (error) {
-                    contexts[context] = {};
+                    scopes[scope] = {};
                     //TODO handle error
 
                     throw error;
@@ -78,10 +78,10 @@ JARS.internal('Refs/Subject', function(getInternal) {
                 }
             }
             else {
-                contexts[context] = {};
+                scopes[scope] = {};
             }
 
-            return contexts[context];
+            return scopes[scope];
         }
     };
 

@@ -6,7 +6,6 @@ JARS.internalGroup('Configs/Transforms', [
     'Cache',
     'CheckCircularDeps',
     'Config',
-    'Context',
     'Debug',
     'DirPath',
     'Extension',
@@ -14,6 +13,7 @@ JARS.internalGroup('Configs/Transforms', [
     'Minify',
     'Path',
     'Recover',
+    'Scope',
     'Timeout',
     'VersionPath'
 ]);

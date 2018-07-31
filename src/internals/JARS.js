@@ -149,8 +149,8 @@
         /**
          * @method
          *
-         * @param {string} context
-         * @param {string} switchToContext
+         * @param {string} scope
+         * @param {string} switchToScope
          *
          * @return {JARS}
          */

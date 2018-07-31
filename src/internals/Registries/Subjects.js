@@ -49,14 +49,14 @@ JARS.internal('Registries/Subjects', function(getInternal) {
             return Subjects.get(getBundleName(ROOT_MODULE));
         },
         /**
-         * @param {string} context
-         * @param {string} switchToContext
+         * @param {string} scope
+         * @param {string} switchToScope
          */
-        flush: function(context, switchToContext) {
-            Injector.flush(context);
+        flush: function(scope, switchToScope) {
+            Injector.flush(scope);
 
-            switchToContext && Subjects.getRootModule().config.update({
-                context: switchToContext
+            switchToScope && Subjects.getRootModule().config.update({
+                scope: switchToScope
             });
         }
     };

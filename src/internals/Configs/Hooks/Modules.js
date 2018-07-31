@@ -31,7 +31,7 @@ JARS.internal('Configs/Hooks/Modules', function(getInternal) {
      * @property {boolean} cache
      * @property {boolean} checkCircularDeps
      * @property {JARS~internals.Configs.Public} config
-     * @property {string} context
+     * @property {string} scope
      * @property {boolean} debug
      * @property {string} dirPath
      * @property {string} extension

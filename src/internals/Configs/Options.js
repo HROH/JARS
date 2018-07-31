@@ -65,8 +65,6 @@ JARS.internal('Configs/Options', function(getInternal) {
 
         CONFIG: 'config',
 
-        CONTEXT: 'context',
-
         DEBUG: 'debug',
 
         DIR_PATH: 'dirPath',
@@ -78,6 +76,8 @@ JARS.internal('Configs/Options', function(getInternal) {
         MINIFY: 'minify',
 
         RECOVER: 'recover',
+
+        SCOPE: 'scope',
 
         TIMEOUT: 'timeout',
 

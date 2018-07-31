@@ -19,7 +19,7 @@ JARS.internal('Bootstrappers/Configs', function(getInternal) {
 
                     cache: true,
 
-                    context: 'default',
+                    scope: 'default',
 
                     minify: false,
 

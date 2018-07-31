@@ -3,7 +3,6 @@ JARS.moduleAuto('internals-spec.Configs-spec.Transforms-spec', [
     'Cache-spec',
     'CheckCircularDeps-spec',
     'Config-spec',
-    'Context-spec',
     'Debug-spec',
     'DirPath-spec',
     'Extension-spec',
@@ -11,6 +10,7 @@ JARS.moduleAuto('internals-spec.Configs-spec.Transforms-spec', [
     'Minify-spec',
     'Path-spec',
     'Recover-spec',
+    'Scope-spec',
     'Timeout-spec',
     'VersionPath-spec'
 ]);
