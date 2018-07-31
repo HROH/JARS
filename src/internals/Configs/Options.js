@@ -65,8 +65,6 @@ JARS.internal('Configs/Options', function(getInternal) {
 
         CONFIG: 'config',
 
-        DEBUG: 'debug',
-
         DIR_PATH: 'dirPath',
 
         EXTENSION: 'extension',
