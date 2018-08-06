@@ -29,12 +29,12 @@ JARS.internal('State/Subject', function(getInternal) {
          * @private
          */
         _syncQueue: function() {
-            var state = this,
-                isLoaded = state.is(States.LOADED);
+            var queue = this._queue,
+                isLoaded = this.is(States.LOADED);
 
-            if(isLoaded || state.is(States.ABORTED)) {
-                while(state._queue.length) {
-                    state._queue.shift()[isLoaded ? 'onLoaded' : 'onAborted'](state._subjectName);
+            if(isLoaded || this.is(States.ABORTED)) {
+                while(queue.length) {
+                    queue.shift()[isLoaded ? 'onLoaded' : 'onAborted'](this._subjectName);
                 }
             }
         },
@@ -53,14 +53,14 @@ JARS.internal('State/Subject', function(getInternal) {
          * @return {boolean}
          */
         set: function(nextState, callback) {
-            var state = this,
-                canTransition = States.hasNext(state._current, nextState);
+            var currentState = this._current,
+                canTransition = States.hasNext(currentState, nextState);
 
-            callback(canTransition, state._current, nextState);
+            callback(canTransition, currentState, nextState);
 
             if(canTransition) {
-                state._current = nextState;
-                state._syncQueue();
+                this._current = nextState;
+                this._syncQueue();
             }
 
             return canTransition;
