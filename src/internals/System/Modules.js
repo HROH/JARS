@@ -33,26 +33,28 @@ JARS.module('System.Modules').meta({
      */
     Modules = {
         /**
-         * @param {JARS~internals.Subjects~Declaration} moduleNames
+         * @param {JARS~internals.Subjects~Declaration} subjectNames
+         * @param {string} [scope]
          *
          * @return {Array<*>}
          */
-        useAll: function(moduleNames) {
+        useAll: function(subjectNames, scope) {
             var refs = [];
 
-            each(SubjectsRegistry.getRootModule().dependencies.resolve(moduleNames), function(subject) {
-                refs.push(subject.ref.get());
+            each(SubjectsRegistry.getRootModule().dependencies.resolve(subjectNames), function(subject) {
+                refs.push(subject.ref.get(scope));
             });
 
             return refs;
         },
         /**
-         * @param {string} moduleName
+         * @param {string} subjectName
+         * @param {string} [scope]
          *
          * @return {*}
          */
-        use: function(moduleName) {
-            return Modules.useAll(moduleName)[0];
+        use: function(subjectName, scope) {
+            return Modules.useAll(subjectName, scope)[0];
         },
 
         $import: $import,
