@@ -59,16 +59,17 @@ JARS.module('System.Modules').meta({
 
         $import: $import,
         /**
-         * @return {{moduleName: string, path: string}}
+         * @return {{name: string, path: string, logger: JARS~internals.Logger.Logger}}
          */
-        getCurrentModuleData: function() {
-            //TODO
-            var module = SubjectsRegistry.get(getCurrent());
+        getCurrentData: function() {
+            var subject = SubjectsRegistry.get(getCurrent());
 
             return {
-                moduleName: module.name,
+                name: subject.name,
 
-                path: PathResolver(module)
+                path: PathResolver(subject),
+
+                logger: subject.logger
             };
         }
     };
