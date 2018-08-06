@@ -3,7 +3,7 @@ JARS.internal('Handlers/Completion/Bundle', function(getInternal) {
 
     var FileNameResolver = getInternal('Resolvers/FileName'),
         getBundleParentName = getInternal('Resolvers/Subjects/Bundle').getParentName,
-        each = getInternal('Helpers/Array').each;
+        reduce = getInternal('Helpers/Array').reduce;
 
     /**
      * @class
@@ -21,15 +21,13 @@ JARS.internal('Handlers/Completion/Bundle', function(getInternal) {
         var dependencies = this._subject.dependencies.getAll();
 
         this._subject.$export(function() {
-            var bundleExport = {
-                default: this
-            };
-
-            each(arguments, function(dep, index) {
+            return reduce(arguments, function(bundleExport, dep, index) {
                 bundleExport[FileNameResolver(getBundleParentName(dependencies[index].name))] = dep;
-            });
 
-            return bundleExport;
+                return bundleExport;
+            }, {
+                default: this
+            });
         });
     };
 

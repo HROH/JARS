@@ -19,7 +19,7 @@ JARS.module('System.Modules').meta({
         getCurrent = getInternal('Helpers/Tracker').getCurrent,
         $import = getInternal('Handlers/Import').$import,
         PathResolver = getInternal('Resolvers/Path'),
-        each = getInternal('Helpers/Array').each,
+        reduce = getInternal('Helpers/Array').reduce,
         Modules;
 
     /**
@@ -39,13 +39,11 @@ JARS.module('System.Modules').meta({
          * @return {Array<*>}
          */
         useAll: function(subjectNames, scope) {
-            var refs = [];
-
-            each(SubjectsRegistry.getRootModule().dependencies.resolve(subjectNames), function(subject) {
+            return reduce(SubjectsRegistry.getRootModule().dependencies.resolve(subjectNames), function(refs, subject) {
                 refs.push(subject.ref.get(scope));
-            });
 
-            return refs;
+                return refs;
+            }, []);
         },
         /**
          * @param {string} subjectName

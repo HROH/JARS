@@ -20,6 +20,16 @@ JARS.internal('Helpers/Array', function() {
                     break;
                 }
             }
+        },
+
+        reduce: function(array, callback, initialValue) {
+            var result = initialValue;
+
+            Array.each(array, function(value, index) {
+                result = callback(result, value, index);
+            });
+
+            return result;
         }
     };
 

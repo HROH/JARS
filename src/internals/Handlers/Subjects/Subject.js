@@ -1,7 +1,7 @@
 JARS.internal('Handlers/Subjects/Subject', function(getInternal) {
     'use strict';
 
-    var each = getInternal('Helpers/Array').each,
+    var reduce = getInternal('Helpers/Array').reduce,
         MSG_REQUESTED = '${0} "${1}" requested',
         MSG_LOADED = '${0} "${1}" loaded',
         MSG_ABORTED = 'missing ${0} "${1}"',
@@ -59,13 +59,11 @@ JARS.internal('Handlers/Subjects/Subject', function(getInternal) {
      * @return {string[]}
      */
     function join(subjects) {
-        var subjectNames = [];
-
-        each(subjects, function(subject) {
+        return reduce(subjects, function(subjectNames, subject) {
             subjectNames.push(subject.name);
-        });
 
-        return subjectNames.join(SEPARATOR);
+            return subjectNames;
+        }, []).join(SEPARATOR);
     }
 
     return Subject;

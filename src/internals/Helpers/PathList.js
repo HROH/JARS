@@ -3,7 +3,7 @@ JARS.internal('Helpers/PathList', function(getInternal) {
 
     var PathResolver = getInternal('Resolvers/Path'),
         isModule = getInternal('Types/Subject').isModule,
-        each = getInternal('Helpers/Array').each;
+        reduce = getInternal('Helpers/Array').reduce;
 
     /**
      * @class
@@ -46,13 +46,9 @@ JARS.internal('Helpers/PathList', function(getInternal) {
          * @return {JARS~internals.Helpers.PathList}
          */
         _sortAll: function(subjects) {
-            var pathList = this;
-
-            each(subjects, function(excludedSubject) {
-                pathList.sort(excludedSubject, true).sort(excludedSubject.parent, true)._sortAll(excludedSubject.dependencies.getAll());
-            });
-
-            return pathList;
+            return reduce(subjects, function(pathList, excludedSubject) {
+                return pathList.sort(excludedSubject, true).sort(excludedSubject.parent, true)._sortAll(excludedSubject.dependencies.getAll());
+            }, this);
         }
     };
 
