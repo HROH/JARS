@@ -36,17 +36,15 @@ JARS.internal('Configs/Options', function(getInternal) {
      * @return {JARS~internals.Configs.Options}
      */
     Options.getDefault = function(subjectName) {
-        var defaultOptions = new Options();
-
-        isBundle(subjectName) || Options.transformAndUpdate(defaultOptions, OptionsResolver(subjectName), subjectName);
-
-        return defaultOptions;
+        return isBundle(subjectName) ? new Options() : Options.transformAndUpdate(new Options(), OptionsResolver(subjectName), subjectName);
     };
 
     /**
      * @param {JARS~internals.Configs.Options} options
      * @param {Object} newOptions
      * @param {string} subjectName
+     *
+     * @return {JARS~internals.Configs.Options}
      */
     Options.transformAndUpdate = function(options, newOptions, subjectName) {
         ObjectHelper.each(newOptions, function updateConfig(value, option) {
@@ -54,6 +52,8 @@ JARS.internal('Configs/Options', function(getInternal) {
                 updateOption(options, option, transformOption(option, value, options[option], subjectName));
             }
         });
+
+        return options;
     };
 
     ObjectHelper.merge(Options, {
