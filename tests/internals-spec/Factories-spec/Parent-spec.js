@@ -2,8 +2,7 @@ JARS.module('internals-spec.Factories-spec.Parent-spec').$import('*!Registries/I
     'use strict';
 
     var expect = chai.expect,
-        Injector = InternalsRegistry.get('Helpers/Injector'),
-        SubjectsRegistry = InternalsRegistry.get('Registries/Subjects'),
+        Injector = InternalsRegistry.get('Registries/Injector'),
         Subject = InternalsRegistry.get('Subjects/Subject');
 
     describe('Factories/Parent', function() {
@@ -22,7 +21,7 @@ JARS.module('internals-spec.Factories-spec.Parent-spec').$import('*!Registries/I
         });
 
         it('should return `null` when given the root module injector', function() {
-            expect(ParentFactory(new Injector(SubjectsRegistry.getRootModule().name, 'test-requestor'))).to.equal(null);
+            expect(ParentFactory(new Injector(Injector.getRootModule().name, 'test-requestor'))).to.equal(null);
         });
     });
 });

@@ -2,8 +2,7 @@ JARS.module('internals-spec.Factories-spec.ParentBundleName-spec').$import('*!Re
     'use strict';
 
     var expect = chai.expect,
-        Injector = InternalsRegistry.get('Helpers/Injector'),
-        SubjectsRegistry = InternalsRegistry.get('Registries/Subjects');
+        Injector = InternalsRegistry.get('Registries/Injector');
 
     describe('Factories/ParentBundleName', function() {
         var ParentBundleNameFactory = InternalsRegistry.get('Factories/ParentBundleName');
@@ -13,7 +12,7 @@ JARS.module('internals-spec.Factories-spec.ParentBundleName-spec').$import('*!Re
         });
 
         it('should return the bundle when given a bundle injector', function() {
-            expect(ParentBundleNameFactory(new Injector('test.*', 'test-requestor'))).to.equal(SubjectsRegistry.getRootBundle().name);
+            expect(ParentBundleNameFactory(new Injector('test.*', 'test-requestor'))).to.equal(Injector.getRootBundle().name);
         });
 
         it('should return the bundle when given an interception injector', function() {
@@ -21,7 +20,7 @@ JARS.module('internals-spec.Factories-spec.ParentBundleName-spec').$import('*!Re
         });
 
         it('should return an empty string when given the root bundle injector', function() {
-            expect(ParentBundleNameFactory(new Injector(SubjectsRegistry.getRootBundle().name, 'test-requestor'))).to.equal('');
+            expect(ParentBundleNameFactory(new Injector(Injector.getRootBundle().name, 'test-requestor'))).to.equal('');
         });
     });
 });

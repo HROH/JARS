@@ -1,4 +1,4 @@
 /**
  * @namespace JARS~internals.Registries
  */
-JARS.internalGroup('Registries', ['Interceptors', 'Internals', 'Subjects']);
+JARS.internalGroup('Registries', ['Injector', 'Interceptors', 'Internals']);

@@ -2,7 +2,7 @@ JARS.internal('Handlers/Import', function(getInternal) {
     'use strict';
 
     var request = getInternal('Handlers/Modules').request,
-        rootModule = getInternal('Registries/Subjects').getRootModule();
+        rootModule = getInternal('Registries/Injector').getRootModule();
 
     /**
      * @memberof JARS~internals.Handlers

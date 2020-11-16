@@ -6,7 +6,7 @@ JARS.internal('Factories/Info', function(getInternal) {
     /**
      * @memberof JARS~internals.Factories
      *
-     * @param {JARS~internals.Helpers.Injector} injector
+     * @param {JARS~internals.Registries.Injector} injector
      *
      * @return {JARS~internals.Resolvers.Subjects~Info}
      */

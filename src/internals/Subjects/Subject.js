@@ -24,7 +24,7 @@ JARS.internal('Subjects/Subject', function(getInternal) {
      * @memberof JARS~internals.Subjects
      *
      * @param {string} subjectName
-     * @param {JARS~internals.Helpers.Injector} injector
+     * @param {JARS~internals.Registries.Injector} injector
      */
     function Subject(subjectName, injector) {
         var subject = this;

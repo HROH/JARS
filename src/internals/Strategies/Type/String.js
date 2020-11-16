@@ -1,7 +1,7 @@
 JARS.internal('Strategies/Type/String', function(getInternal) {
     'use strict';
 
-    var SubjectsRegistry = getInternal('Registries/Subjects'),
+    var Injector = getInternal('Registries/Injector'),
         MSG_DEFAULT_RESOLUTION_ERROR = 'could not resolve "${0}": ';
 
     /**
@@ -19,7 +19,7 @@ JARS.internal('Strategies/Type/String', function(getInternal) {
 
         result.error && subject.abort(MSG_DEFAULT_RESOLUTION_ERROR + result.error, [subjectName]);
 
-        return result.name ? [SubjectsRegistry.get(result.name, requestor)] : [];
+        return result.name ? [Injector.getSubject(result.name, requestor)] : [];
     }
 
     return String;

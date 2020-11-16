@@ -6,12 +6,12 @@ JARS.internal('Factories/Ref', function(getInternal) {
     /**
      * @memberof JARS~internals.Factories
      *
-     * @param {JARS~internals.Helpers.Injector} injector
+     * @param {JARS~internals.Registries.Injector} injector
      *
      * @return {JARS~internals.Refs.Subject}
      */
     function Ref(injector) {
-        return new SubjectRef(injector.subjectName, injector.inject(injector.get('parentName'), 'ref'), injector.get('config'));
+        return new SubjectRef(injector.subjectName, injector.getGlobal(injector.get('parentName'), 'ref'), injector.get('config'));
     }
 
     return Ref;

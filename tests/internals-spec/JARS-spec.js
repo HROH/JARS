@@ -3,7 +3,7 @@ JARS.module('internals-spec.JARS-spec').$import('*!Registries/Internals').$expor
 
     var expect = chai.expect,
         GlobalConfig = InternalsRegistry.get('Configs/Global'),
-        SubjectsRegistry = InternalsRegistry.get('Registries/Subjects'),
+        Injector = InternalsRegistry.get('Registries/Injector'),
         PathListResolver = InternalsRegistry.get('Resolvers/PathList');
 
     describe('JARS', function() {
@@ -22,16 +22,16 @@ JARS.module('internals-spec.JARS-spec').$import('*!Registries/Internals').$expor
         });
 
         describe('.flush()', function() {
-            it('should delegate to Registries/Subjects.flush()', function() {
+            it('should delegate to Registries/Injector.flush()', function() {
                 var context = 'test-flush';
 
-                sinon.stub(SubjectsRegistry, 'flush');
+                sinon.stub(Injector, 'flush');
 
                 JARS.flush(context);
 
-                expect(SubjectsRegistry.flush).to.have.been.calledWith(context);
+                expect(Injector.flush).to.have.been.calledWith(context);
 
-                SubjectsRegistry.flush.restore();
+                Injector.flush.restore();
             });
         });
 
@@ -52,16 +52,16 @@ JARS.module('internals-spec.JARS-spec').$import('*!Registries/Internals').$expor
         });
 
         describe('.module()', function() {
-            it('should delegate to Registries/Subjects.registerModule()', function() {
+            it('should delegate to Registries/Injector.registerModule()', function() {
                 var moduleName = 'test-register';
 
-                sinon.stub(SubjectsRegistry, 'registerModule');
+                sinon.stub(Injector, 'registerModule');
 
                 JARS.module(moduleName);
 
-                expect(SubjectsRegistry.registerModule).to.have.been.calledWith(moduleName);
+                expect(Injector.registerModule).to.have.been.calledWith(moduleName);
 
-                SubjectsRegistry.registerModule.restore();
+                Injector.registerModule.restore();
             });
 
             it('should return a module API when given a modulename', function() {

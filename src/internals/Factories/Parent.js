@@ -4,12 +4,12 @@ JARS.internal('Factories/Parent', function() {
     /**
      * @memberof JARS~internals.Factories
      *
-     * @param {JARS~internals.Helpers.Injector} injector
+     * @param {JARS~internals.Registries.Injector} injector
      *
      * @return {JARS~internals.Subjects.Subject}
      */
     function Parent(injector) {
-        return injector.inject(injector.get('parentName'), 'subject');
+        return injector.getGlobal(injector.get('parentName'), 'subject');
     }
 
     return Parent;

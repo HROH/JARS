@@ -4,12 +4,12 @@ JARS.internal('Factories/ParentBundle', function() {
     /**
      * @memberof JARS~internals.Factories
      *
-     * @param {JARS~internals.Helpers.Injector} injector
+     * @param {JARS~internals.Registries.Injector} injector
      *
      * @return {(JARS~internals.Subjects.Subject|null)}
      */
     function ParentBundle(injector) {
-        return injector.inject(injector.get('parentBundleName'), 'subject');
+        return injector.getGlobal(injector.get('parentBundleName'), 'subject');
     }
 
     return ParentBundle;

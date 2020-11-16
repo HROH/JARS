@@ -5,7 +5,7 @@ JARS.internal('Resolvers/PathList', function(getInternal) {
         ModulesTraverser = getInternal('Traverser/Modules'),
         PathListHelper = getInternal('Helpers/PathList'),
         importModules = getInternal('Handlers/Import').$import,
-        rootModuleDeps = getInternal('Registries/Subjects').getRootModule().dependencies,
+        rootModuleDeps = getInternal('Registries/Injector').getRootModule().dependencies,
         PathList;
 
     /**

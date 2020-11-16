@@ -2,7 +2,7 @@ JARS.module('internals-spec.Factories-spec.Strategy-spec').$import('*!Registries
     'use strict';
 
     var expect = chai.expect,
-        Injector = InternalsRegistry.get('Helpers/Injector'),
+        Injector = InternalsRegistry.get('Registries/Injector'),
         SubjectResolutionStrategy = InternalsRegistry.get('Strategies/Resolution/Subject'),
         BundleResolutionStrategy = InternalsRegistry.get('Strategies/Resolution/Bundle');
 

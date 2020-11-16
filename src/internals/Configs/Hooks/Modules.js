@@ -1,7 +1,7 @@
 JARS.internal('Configs/Hooks/Modules', function(getInternal) {
     'use strict';
 
-    var SubjectsRegistry = getInternal('Registries/Subjects'),
+    var Injector = getInternal('Registries/Injector'),
         each = getInternal('Helpers/Array').each;
 
     /**
@@ -12,12 +12,12 @@ JARS.internal('Configs/Hooks/Modules', function(getInternal) {
      */
     function Modules(globalConfig, config) {
         if(config.restrict) {
-            each(SubjectsRegistry.getRootModule().dependencies.resolve(config.restrict), function updateConfig(subject) {
+            each(Injector.getRootModule().dependencies.resolve(config.restrict), function updateConfig(subject) {
                 subject.config.update(config);
             });
         }
         else {
-            SubjectsRegistry.getRootBundle().config.update(config);
+            Injector.getRootBundle().config.update(config);
         }
     }
 

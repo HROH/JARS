@@ -1,7 +1,10 @@
-JARS.internal('Helpers/Injector', function(getInternal) {
+JARS.internal('Registries/Injector', function(getInternal) {
     'use strict';
 
     var SubjectTypes = getInternal('Types/Subject'),
+        AutoAborter = getInternal('Helpers/AutoAborter'),
+        getBundleName = getInternal('Resolvers/Subjects/Bundle').getName,
+        ROOT_MODULE = getInternal('Resolvers/Subjects/Module').ROOT,
         each = getInternal('Helpers/Object').each,
         Factories = getInternal('Factories'),
         injectors = {};
@@ -9,7 +12,7 @@ JARS.internal('Helpers/Injector', function(getInternal) {
     /**
      * @class
      *
-     * @memberof JARS~internals.Helpers
+     * @memberof JARS~internals.Registries
      *
      * @param {string} subjectName
      * @param {string} requestorName
@@ -39,8 +42,8 @@ JARS.internal('Helpers/Injector', function(getInternal) {
          *
          * @return {*}
          */
-        inject: function(localSubjectName, localKey, localArgs) {
-            return Injector.inject(localSubjectName, this.requestorName, localKey, localArgs);
+        getGlobal: function(localSubjectName, localKey, localArgs) {
+            return Injector.get(localSubjectName, this.requestorName, localKey, localArgs);
         },
         /**
          * @param {string} scope
@@ -58,27 +61,71 @@ JARS.internal('Helpers/Injector', function(getInternal) {
      *
      * @return {*}
      */
-    Injector.inject = function(subjectName, requestorName, key, args) {
+    Injector.get = function(subjectName, requestorName, key, args) {
         return subjectName ? getInjector(subjectName, requestorName).get(key, args) : null;
     };
 
     /**
-     * @param {string} scope
+     * @param {string} moduleName
+     * @param {JARS~internals.Subjects~Declaration} bundleModules
+     *
+     * @return {JARS~internals.Subjects.Subject}
      */
-    Injector.flush = function(scope) {
+    Injector.registerModule = function(moduleName, bundleModules) {
+        var module = Injector.getSubject(moduleName);
+
+        AutoAborter.clear(module);
+        Injector.getSubject(getBundleName(moduleName)).$import(bundleModules);
+
+        return module;
+    };
+
+    /**
+     * @param {string} subjectName
+     * @param {JARS~internals.Subjects.Subject} [requestor]
+     *
+     * @return {JARS~internals.Subjects.Subject}
+     */
+    Injector.getSubject = function(subjectName, requestor) {
+        return Injector.get(subjectName, requestor && requestor.name, 'subject');
+    };
+
+    /**
+     * @return {JARS~internals.Subjects.Subject}
+     */
+    Injector.getRootModule = function() {
+        return Injector.getSubject(ROOT_MODULE);
+    };
+
+    /**
+     * @return {JARS~internals.Subjects.Subject}
+     */
+    Injector.getRootBundle = function() {
+        return Injector.getSubject(getBundleName(ROOT_MODULE));
+    };
+
+    /**
+     * @param {string} scope
+     * @param {string} switchToScope
+     */
+    Injector.flush = function(scope, switchToScope) {
         each(injectors, function(injector) {
             injector.flush(scope);
+        });
+
+        switchToScope && Injector.getRootModule().config.update({
+            scope: switchToScope
         });
     };
 
     /**
-     * @memberof JARS~internals.Helpers.Injector
+     * @memberof JARS~internals.Registries.Injector
      * @inner
      *
      * @param {string} subjectName
      * @param {string} requestorName
      *
-     * @return {JARS~internals.Helpers.Injector}
+     * @return {JARS~internals.Registries.Injector}
      */
     function getInjector(subjectName, requestorName) {
         var injectorKey = subjectName + ':' + getRequestorName(subjectName, requestorName);
@@ -87,7 +134,7 @@ JARS.internal('Helpers/Injector', function(getInternal) {
     }
 
     /**
-     * @memberof JARS~internals.Helpers.Injector
+     * @memberof JARS~internals.Registries.Injector
      * @inner
      *
      * @param {string} subjectName

@@ -4,12 +4,12 @@ JARS.internal('Factories/Requestor', function() {
     /**
      * @memberof JARS~internals.Factories
      *
-     * @param {JARS~internals.Helpers.Injector} injector
+     * @param {JARS~internals.Registries.Injector} injector
      *
      * @return {(JARS~internals.Subjects.Subject|null)}
      */
     function Requestor(injector) {
-        return injector.subjectName !== injector.requestorName ? injector.inject(injector.requestorName, 'subject') : null;
+        return injector.subjectName !== injector.requestorName ? injector.getGlobal(injector.requestorName, 'subject') : null;
     }
 
     return Requestor;

@@ -2,7 +2,7 @@ JARS.module('internals-spec.Factories-spec.Description-spec').$import(['*!Regist
     'use strict';
 
     var expect = chai.expect,
-        Injector = InternalsRegistry.get('Helpers/Injector');
+        Injector = InternalsRegistry.get('Registries/Injector');
 
     describe('Factories/Description()', function() {
         var DescriptionFactory = InternalsRegistry.get('Factories/Description');

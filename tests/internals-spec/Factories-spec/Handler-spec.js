@@ -2,7 +2,7 @@ JARS.module('internals-spec.Factories-spec.Handler-spec').$import('*!Registries/
     'use strict';
 
     var expect = chai.expect,
-        Injector = InternalsRegistry.get('Helpers/Injector'),
+        Injector = InternalsRegistry.get('Registries/Injector'),
         ModuleCompletionHandler = InternalsRegistry.get('Handlers/Completion/Module'),
         BundleCompletionHandler = InternalsRegistry.get('Handlers/Completion/Bundle'),
         InterceptionCompletionHandler = InternalsRegistry.get('Handlers/Completion/Interception');

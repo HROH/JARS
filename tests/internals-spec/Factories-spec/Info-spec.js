@@ -2,7 +2,7 @@ JARS.module('internals-spec.Factories-spec.Info-spec').$import('*!Registries/Int
     'use strict';
 
     var expect = chai.expect,
-        Injector = InternalsRegistry.get('Helpers/Injector'),
+        Injector = InternalsRegistry.get('Registries/Injector'),
         getModuleInfo = InternalsRegistry.get('Resolvers/Subjects/Module').getInfo,
         getBundleInfo = InternalsRegistry.get('Resolvers/Subjects/Bundle').getInfo,
         getInterceptionInfo = InternalsRegistry.get('Resolvers/Subjects/Interception').getInfo;

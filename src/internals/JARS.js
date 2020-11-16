@@ -68,12 +68,12 @@
          *
          * @return {JARS~ModuleWrapper}
          */
-        module: delegate('Registries/Subjects', 'registerModule', function(moduleName) {
-            var dynamicInternalName = 'Registries/Subjects:' + moduleName,
+        module: delegate('Registries/Injector', 'registerModule', function(moduleName) {
+            var dynamicInternalName = 'Registries/Injector:' + moduleName,
                 ModuleWrapper;
 
             delegate('Registries/Internals', 'register')(dynamicInternalName, function(getInternal) {
-                return getInternal('Registries/Subjects').get(moduleName);
+                return getInternal('Registries/Injector').getSubject(moduleName);
             });
 
             /**
@@ -154,7 +154,7 @@
          *
          * @return {JARS}
          */
-        flush: delegate('Registries/Subjects', 'flush'),
+        flush: delegate('Registries/Injector', 'flush'),
         /**
          * @return {JARS}
          */

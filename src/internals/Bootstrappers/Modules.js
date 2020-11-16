@@ -15,7 +15,7 @@ JARS.internal('Bootstrappers/Modules', function(getInternal) {
          * @method
          */
         bootstrap: function() {
-            var rootModule = getInternal('Registries/Subjects').getRootModule();
+            var rootModule = getInternal('Registries/Injector').getRootModule();
 
             getInternal('Helpers/Tracker').setRoot(rootModule);
             rootModule.setMeta({

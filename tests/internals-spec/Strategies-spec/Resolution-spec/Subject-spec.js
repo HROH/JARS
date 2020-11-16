@@ -2,13 +2,13 @@ JARS.module('internals-spec.Strategies-spec.Resolution-spec.Subject-spec').$impo
     'use strict';
 
     var expect = chai.expect,
-        SubjectsRegistry = InternalsRegistry.get('Registries/Subjects');
+        Injector = InternalsRegistry.get('Registries/Injector');
 
     describe('Strategies/Resolution/Subject()', function() {
         var SubjectResolutionStrategy = InternalsRegistry.get('Strategies/Resolution/Subject');
 
         describe('given the root module', function() {
-            var testModule = SubjectsRegistry.getRootModule();
+            var testModule = Injector.getRootModule();
 
             it('should resolve an absolute dependency module', function() {
                 expect(SubjectResolutionStrategy(testModule, 'dependency')).to.deep.equal({
@@ -36,7 +36,7 @@ JARS.module('internals-spec.Strategies-spec.Resolution-spec.Subject-spec').$impo
         });
 
         describe('given a not versioned module', function() {
-            var testModule = SubjectsRegistry.get('test.child');
+            var testModule = Injector.getSubject('test.child');
 
             it('should resolve an absolute dependency module', function() {
                 expect(SubjectResolutionStrategy(testModule, 'dependency')).to.deep.equal({
@@ -76,7 +76,7 @@ JARS.module('internals-spec.Strategies-spec.Resolution-spec.Subject-spec').$impo
         });
 
         describe('given a versioned module', function() {
-            var testModule = SubjectsRegistry.get('test.child@1.0.0');
+            var testModule = Injector.getSubject('test.child@1.0.0');
 
             it('should resolve an absolute dependency module', function() {
                 expect(SubjectResolutionStrategy(testModule, 'dependency')).to.deep.equal({

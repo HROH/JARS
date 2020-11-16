@@ -2,7 +2,7 @@ JARS.module('internals-spec.Traverser-spec.Circular-spec').$import(['*!Registrie
     'use strict';
 
     var expect = chai.expect,
-        SubjectsRegistry = InternalsRegistry.get('Registries/Subjects'),
+        Injector = InternalsRegistry.get('Registries/Injector'),
         Result = InternalsRegistry.get('Traverser/Result'),
         States = InternalsRegistry.get('State/States');
 
@@ -11,7 +11,7 @@ JARS.module('internals-spec.Traverser-spec.Circular-spec').$import(['*!Registrie
 
         describe('.onEnter()', function() {
             describe('given a subject', function() {
-                var subject = SubjectsRegistry.get('test-circular');
+                var subject = Injector.getSubject('test-circular');
 
                 describe('when it is waiting', function() {
                     beforeEach(function() {
@@ -35,7 +35,7 @@ JARS.module('internals-spec.Traverser-spec.Circular-spec').$import(['*!Registrie
                     });
 
                     describe('and does not equal the entry module', function() {
-                        var entryModuleDifferent = SubjectsRegistry.get('test-circular-entry');
+                        var entryModuleDifferent = Injector.getSubject('test-circular-entry');
 
                         it('should return `true` for any depth', function() {
                             expect(CircularTraverser.onEnter(subject, entryModuleDifferent, 0)).to.be.true;
@@ -55,7 +55,7 @@ JARS.module('internals-spec.Traverser-spec.Circular-spec').$import(['*!Registrie
 
                     it('should return `false` for any depth and entry module', function() {
                         var entryModuleSame = subject,
-                            entryModuleDifferent = SubjectsRegistry.get('test-circular-entry');
+                            entryModuleDifferent = Injector.getSubject('test-circular-entry');
 
                         expect(CircularTraverser.onEnter(subject, entryModuleSame, 0)).to.be.false;
                         expect(CircularTraverser.onEnter(subject, entryModuleSame, 4)).to.be.false;
@@ -86,7 +86,7 @@ JARS.module('internals-spec.Traverser-spec.Circular-spec').$import(['*!Registrie
                     });
 
                     describe('and does not equal the entry module', function() {
-                        var entryModuleDifferent = SubjectsRegistry.get('test-circular-entry');
+                        var entryModuleDifferent = Injector.getSubject('test-circular-entry');
 
                         it('should return `true` for any depth', function() {
                             expect(CircularTraverser.onEnter(subject, entryModuleDifferent, 0)).to.be.true;
@@ -117,7 +117,7 @@ JARS.module('internals-spec.Traverser-spec.Circular-spec').$import(['*!Registrie
                     });
 
                     describe('and does not equal the entry module', function() {
-                        var entryModuleDifferent = SubjectsRegistry.get('test-circular-entry');
+                        var entryModuleDifferent = Injector.getSubject('test-circular-entry');
 
                         it('should return `true` for any depth', function() {
                             expect(CircularTraverser.onEnter(subject, entryModuleDifferent, 0)).to.be.true;
@@ -137,7 +137,7 @@ JARS.module('internals-spec.Traverser-spec.Circular-spec').$import(['*!Registrie
 
                     it('should return `false` for any depth and entry module', function() {
                         var entryModuleSame = subject,
-                            entryModuleDifferent = SubjectsRegistry.get('test-circular-entry');
+                            entryModuleDifferent = Injector.getSubject('test-circular-entry');
 
                         expect(CircularTraverser.onEnter(subject, entryModuleSame, 0)).to.be.false;
                         expect(CircularTraverser.onEnter(subject, entryModuleSame, 4)).to.be.false;
@@ -157,7 +157,7 @@ JARS.module('internals-spec.Traverser-spec.Circular-spec').$import(['*!Registrie
 
                     it('should return `false` for any depth and entry module', function() {
                         var entryModuleSame = subject,
-                            entryModuleDifferent = SubjectsRegistry.get('test-circular-entry');
+                            entryModuleDifferent = Injector.getSubject('test-circular-entry');
 
                         expect(CircularTraverser.onEnter(subject, entryModuleSame, 0)).to.be.false;
                         expect(CircularTraverser.onEnter(subject, entryModuleSame, 4)).to.be.false;
@@ -170,14 +170,14 @@ JARS.module('internals-spec.Traverser-spec.Circular-spec').$import(['*!Registrie
 
         describe('.onLeave()', function() {
             describe('given a subject', function() {
-                var subject = SubjectsRegistry.get('test-circular');
+                var subject = Injector.getSubject('test-circular');
 
                 describe('and given a starting list', function() {
                     var list = ['test'];
 
                     it('should prepend its name to the list for any depth and entry module', function() {
                         var entryModuleSame = subject,
-                            entryModuleDifferent = SubjectsRegistry.get('test-circular-entry'),
+                            entryModuleDifferent = Injector.getSubject('test-circular-entry'),
                             expected = new Result([subject.name].concat(list), true);
 
                         expect(CircularTraverser.onLeave(subject, entryModuleSame, 0, list)).to.deep.equal(expected);
@@ -203,7 +203,7 @@ JARS.module('internals-spec.Traverser-spec.Circular-spec').$import(['*!Registrie
                     });
 
                     describe('when it does not equal the entry module', function() {
-                        var entryModuleDifferent = SubjectsRegistry.get('test-circular-entry');
+                        var entryModuleDifferent = Injector.getSubject('test-circular-entry');
 
                         it('should create no list for any depth', function() {
                             var expected = new Result(list);

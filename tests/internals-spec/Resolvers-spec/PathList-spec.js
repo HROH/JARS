@@ -2,7 +2,7 @@ JARS.module('internals-spec.Resolvers-spec.PathList-spec').$import(['*!Registrie
     'use strict';
 
     var expect = chai.expect,
-        SubjectsRegistry = InternalsRegistry.get('Registries/Subjects'),
+        Injector = InternalsRegistry.get('Registries/Injector'),
         PathResolver = InternalsRegistry.get('Resolvers/Path');
 
     describe('Resolvers/PathList', function() {
@@ -10,10 +10,10 @@ JARS.module('internals-spec.Resolvers-spec.PathList-spec').$import(['*!Registrie
 
         describe('.resolve()', function() {
             it('should compute a sorted list of dependency paths', function(done) {
-                var bundle = SubjectsRegistry.get('pathlist.*'),
-                    moduleA = SubjectsRegistry.get('pathlist.A'),
-                    moduleB = SubjectsRegistry.get('pathlist.B'),
-                    moduleC = SubjectsRegistry.get('pathlist.C');
+                var bundle = Injector.getSubject('pathlist.*'),
+                    moduleA = Injector.getSubject('pathlist.A'),
+                    moduleB = Injector.getSubject('pathlist.B'),
+                    moduleC = Injector.getSubject('pathlist.C');
 
                 bundle.$import(['A', 'B', 'C']);
                 bundle.parent.$export();
@@ -25,7 +25,7 @@ JARS.module('internals-spec.Resolvers-spec.PathList-spec').$import(['*!Registrie
 
                 PathListResolver.resolve('pathlist.*', function(list) {
                     expect(list).to.deep.equal([
-                        PathResolver(SubjectsRegistry.get('pathlist')),
+                        PathResolver(Injector.getSubject('pathlist')),
                         PathResolver(moduleA),
                         PathResolver(moduleC),
                         PathResolver(moduleB)

@@ -2,14 +2,13 @@ JARS.module('internals-spec.Factories-spec.ParentName-spec').$import('*!Registri
     'use strict';
 
     var expect = chai.expect,
-        Injector = InternalsRegistry.get('Helpers/Injector'),
-        SubjectsRegistry = InternalsRegistry.get('Registries/Subjects');
+        Injector = InternalsRegistry.get('Registries/Injector');
 
     describe('Factories/ParentName', function() {
         var ParentNameFactory = InternalsRegistry.get('Factories/ParentName');
 
         it('should return the parent module name when given a module injector', function() {
-            expect(ParentNameFactory(new Injector('test', 'test-requestor'))).to.equal(SubjectsRegistry.getRootModule().name);
+            expect(ParentNameFactory(new Injector('test', 'test-requestor'))).to.equal(Injector.getRootModule().name);
         });
 
         it('should return the module name when given a bundle injector', function() {

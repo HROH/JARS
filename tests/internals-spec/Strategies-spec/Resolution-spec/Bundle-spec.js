@@ -2,13 +2,13 @@ JARS.module('internals-spec.Strategies-spec.Resolution-spec.Bundle-spec').$impor
     'use strict';
 
     var expect = chai.expect,
-        SubjectsRegistry = InternalsRegistry.get('Registries/Subjects');
+        Injector = InternalsRegistry.get('Registries/Injector');
 
     describe('Strategies/Resolution/Bundle()', function() {
         var BundleResolutionStrategy = InternalsRegistry.get('Strategies/Resolution/Bundle');
 
         describe('given a bundle', function() {
-            var testBundle = SubjectsRegistry.get('test.*');
+            var testBundle = Injector.getSubject('test.*');
 
             it('should resolve a bundle dependency module', function() {
                 expect(BundleResolutionStrategy(testBundle, 'a')).to.deep.equal({
@@ -30,7 +30,7 @@ JARS.module('internals-spec.Strategies-spec.Resolution-spec.Bundle-spec').$impor
         });
 
         describe('given a versioned bundle', function() {
-            var testBundle = SubjectsRegistry.get('test.*@1.0.0');
+            var testBundle = Injector.getSubject('test.*@1.0.0');
 
             it('should resolve a bundle dependency module', function() {
                 expect(BundleResolutionStrategy(testBundle, 'a')).to.deep.equal({
