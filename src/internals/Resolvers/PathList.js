@@ -4,7 +4,7 @@ JARS.internal('Resolvers/PathList', function(getInternal) {
     var PathListTraverser = getInternal('Traverser/PathList'),
         ModulesTraverser = getInternal('Traverser/Modules'),
         PathListHelper = getInternal('Helpers/PathList'),
-        importModules = getInternal('Handlers/Import').$import,
+        ImportHandler = getInternal('Handlers/Import'),
         rootModuleDeps = getInternal('Registries/Injector').getRootModule().dependencies,
         PathList;
 
@@ -24,7 +24,7 @@ JARS.internal('Resolvers/PathList', function(getInternal) {
          * @param {function(string[])} callback
          */
         resolve: function(entryModuleName, callback) {
-            importModules(entryModuleName, function() {
+            ImportHandler(entryModuleName, function() {
                 callback(ModulesTraverser(rootModuleDeps.resolve(entryModuleName)[0], PathListTraverser, new PathListHelper(rootModuleDeps.resolve('System.*'))).paths);
             });
         }

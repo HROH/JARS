@@ -21,7 +21,7 @@ JARS.internal('Configs/Hooks/Main', function(getInternal) {
      * @return {string}
      */
     function Main(globalConfig, mainModule) {
-        var $import = getInternal('Handlers/Import').$import,
+        var ImportHandler = getInternal('Handlers/Import'),
             mainLogger = new Logger(MAIN_CONTEXT + mainModule, globalTransports, {
                 debug: true,
 
@@ -36,7 +36,7 @@ JARS.internal('Configs/Hooks/Main', function(getInternal) {
             dirPath: ''
         });
 
-        $import(mainModule, function mainModuleLoaded() {
+        ImportHandler(mainModule, function mainModuleLoaded() {
             mainLogger.info(SUCCESS_MESSAGE);
         }, function mainModuleAborted() {
             mainLogger.error(ERROR_MESSAGE);

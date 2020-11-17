@@ -15,7 +15,7 @@ JARS.internal('Handlers/Import', function(getInternal) {
      * @return {JARS~internals.Handlers.Subjects.Subject}
      */
     function Import(moduleNames, onCompleted, onAborted, onLoaded) {
-        return {
+        return request({
             requestor: rootModule,
 
             subjects: rootModule.dependencies.resolve(moduleNames),
@@ -27,18 +27,8 @@ JARS.internal('Handlers/Import', function(getInternal) {
             onCompleted: onCompleted ? function(refs) {
                 onCompleted.apply(null, refs.get());
             } : noop
-        };
+        });
     }
-
-    /**
-     * @param {JARS~internals.Subjects~Declaration} moduleNames
-     * @param {function(...*)} [onCompleted]
-     * @param {function(string)} [onAborted]
-     * @param {function(string)} [onLoaded]
-     */
-    Import.$import = function(moduleNames, onCompleted, onAborted, onLoaded) {
-        request(Import(moduleNames, onCompleted, onAborted, onLoaded));
-    };
 
     /**
      * @memberof JARS~internals.Handlers.Import
