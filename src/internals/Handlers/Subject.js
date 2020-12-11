@@ -1,4 +1,4 @@
-JARS.internal('Handlers/Subjects/Subject', function(getInternal) {
+JARS.internal('Handlers/Subject', function(getInternal) {
     'use strict';
 
     var reduce = getInternal('Helpers/Array').reduce,
@@ -10,7 +10,7 @@ JARS.internal('Handlers/Subjects/Subject', function(getInternal) {
     /**
      * @class
      *
-     * @memberof JARS~internals.Handlers.Subjects
+     * @memberof JARS~internals.Handlers
      *
      * @param {JARS~internals.Subjects.Subject} requestor
      * @param {JARS~internals.Subjects.Subject[]} subjects
@@ -51,7 +51,7 @@ JARS.internal('Handlers/Subjects/Subject', function(getInternal) {
     };
 
     /**
-     * @memberof JARS~internals.Handlers.Subjects.Subject
+     * @memberof JARS~internals.Handlers.Subject
      * @inner
      *
      * @param {JARS~internals.Subjects.Subject[]} subjects
