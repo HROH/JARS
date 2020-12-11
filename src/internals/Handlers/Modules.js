@@ -1,7 +1,7 @@
 JARS.internal('Handlers/Modules', function(getInternal) {
     'use strict';
 
-    var ModulesRef = getInternal('Refs/Modules'),
+    var SubjectsRef = getInternal('Refs/Subjects'),
         each = getInternal('Helpers/Array').each;
 
     /**
@@ -18,7 +18,7 @@ JARS.internal('Handlers/Modules', function(getInternal) {
         handler._nextHandler = requestHandler;
         handler._subjects = requestHandler.subjects;
         handler._total = handler._subjects.length;
-        handler._ref = new ModulesRef();
+        handler._ref = new SubjectsRef();
         handler._loaded = 0;
 
         handler.onCompleted();

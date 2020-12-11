@@ -1,4 +1,4 @@
-JARS.internal('Refs/Modules', function(getInternal) {
+JARS.internal('Refs/Subjects', function(getInternal) {
     'use strict';
 
     var each = getInternal('Helpers/Array').each;
@@ -8,12 +8,12 @@ JARS.internal('Refs/Modules', function(getInternal) {
      *
      * @memberof JARS~internals.Refs
      */
-    function Modules() {
+    function Subjects() {
         this._refs = [];
     }
 
-    Modules.prototype = {
-        constructor: Modules,
+    Subjects.prototype = {
+        constructor: Subjects,
         /**
          * @param {number} index
          * @param {JARS~internals.Refs.Subject} ref
@@ -45,5 +45,5 @@ JARS.internal('Refs/Modules', function(getInternal) {
         }
     };
 
-    return Modules;
+    return Subjects;
 });
