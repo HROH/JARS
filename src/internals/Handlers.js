@@ -1,4 +1,4 @@
 /**
  * @namespace JARS~internals.Handlers
  */
-JARS.internalGroup('Handlers', ['Completion', 'Import', 'Modules', 'Subjects']);
+JARS.internalGroup('Handlers', ['Anonymous', 'Completion', 'Modules', 'Subjects']);

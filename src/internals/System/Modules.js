@@ -17,7 +17,8 @@ JARS.module('System.Modules').meta({
     var getInternal = InternalsRegistry.get,
         Injector = getInternal('Registries/Injector'),
         getCurrent = getInternal('Helpers/Tracker').getCurrent,
-        ImportHandler = getInternal('Handlers/Import'),
+        AnonymousHandler = getInternal('Handlers/Anonymous'),
+        request = getInternal('Handlers/Modules').request,
         PathResolver = getInternal('Resolvers/Path'),
         reduce = getInternal('Helpers/Array').reduce,
         Modules;
@@ -28,8 +29,6 @@ JARS.module('System.Modules').meta({
      * @memberof module:System
      *
      * @alias module:Modules
-     *
-     * @borrows JARS~internals.Handlers.Import.$import as $import
      */
     Modules = {
         /**
@@ -54,8 +53,19 @@ JARS.module('System.Modules').meta({
         use: function(subjectName, scope) {
             return Modules.useAll(subjectName, scope)[0];
         },
-
-        $import: ImportHandler,
+        /**
+         * @memberof JARS~internals.Handlers
+         *
+         * @param {JARS~internals.Subjects~Declaration} moduleNames
+         * @param {function(...*)} [onCompleted]
+         * @param {function(string)} [onAborted]
+         * @param {function(string)} [onLoaded]
+         *
+         * @return {JARS~internals.Handlers.Subject}
+         */
+        $import: function(moduleNames, onCompleted, onAborted, onLoaded) {
+            request(AnonymousHandler(moduleNames, onCompleted, onAborted, onLoaded));
+        },
         /**
          * @return {{name: string, path: string, logger: JARS~internals.Logger.Logger}}
          */
