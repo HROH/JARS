@@ -9,19 +9,19 @@ JARS.internal('Handlers/Modules', function(getInternal) {
      *
      * @memberof JARS~internals.Handlers
      *
-     * @param {JARS~internals.Handlers.Subjects.Subject} requestHandler
+     * @param {JARS~internals.Handlers.Subject} subjectHandler
      */
-    function Modules(requestHandler) {
+    function Modules(subjectHandler) {
         var handler = this;
 
-        handler.requestor = requestHandler.requestor;
-        handler._nextHandler = requestHandler;
-        handler._subjects = requestHandler.subjects;
+        handler.requestor = subjectHandler.requestor;
+        handler._subjectHandler = subjectHandler;
+        handler._subjects = subjectHandler.subjects;
         handler._total = handler._subjects.length;
         handler._ref = new SubjectsRef();
         handler._loaded = 0;
 
-        handler.onCompleted();
+        handler._checkCompleted();
     }
 
     Modules.prototype = {
@@ -29,20 +29,14 @@ JARS.internal('Handlers/Modules', function(getInternal) {
          * @method
          */
         request: function() {
-            var handler = this;
+            var handler = this,
+                ref = handler._ref;
 
             each(handler._subjects, function(subject, index) {
-                handler.requestSubject(subject, index);
-            });
-        },
-        /**
-         * @param {JARS~internals.Subjects.Subject} subject
-         * @param {number} index
-         */
-        requestSubject: function(subject, index) {
-            this._ref.add(index, subject.ref);
+                ref.add(index, subject.ref);
 
-            subject.load(this);
+                subject.load(handler);
+            });
         },
         /**
          * @param {string} subjectName
@@ -50,28 +44,28 @@ JARS.internal('Handlers/Modules', function(getInternal) {
         onLoaded: function(subjectName) {
             var handler = this;
 
-            handler._nextHandler.onLoaded(subjectName, getPercentage(handler._loaded++, handler._total));
-            handler.onCompleted();
+            handler._subjectHandler.onLoaded(subjectName, getPercentage(handler._loaded++, handler._total));
+            handler._checkCompleted();
         },
         /**
          * @param {string} subjectName
          */
         onAborted: function(subjectName) {
-            this._nextHandler.onAborted(subjectName);
+            this._subjectHandler.onAborted(subjectName);
         },
         /**
          * @method
          */
-        onCompleted: function() {
-            this._loaded === this._total && this._nextHandler.onCompleted(this._ref);
+        _checkCompleted: function() {
+            this._loaded === this._total && this._subjectHandler.onCompleted(this._ref);
         }
     };
 
     /**
-     * @param {JARS~internals.Handlers.Subjects.Subject} requestHandler
+     * @param {JARS~internals.Handlers.Subject} subjectHandler
      */
-    Modules.request = function(requestHandler) {
-        new Modules(requestHandler).request();
+    Modules.request = function(subjectHandler) {
+        new Modules(subjectHandler).request();
     };
 
     /**
