@@ -20,7 +20,7 @@ JARS.internal('Handlers/Completion/Dependencies', function(getInternal) {
     }
 
     /**
-     * @param {JARS~internals.Refs.Modules} refs
+     * @param {JARS~internals.Refs.Subjects} refs
      */
     Dependencies.prototype.onCompleted = function(refs) {
         var subject = this._subject,

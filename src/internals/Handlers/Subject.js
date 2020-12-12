@@ -43,7 +43,7 @@ JARS.internal('Handlers/Subject', function(getInternal) {
             this.requestor.abort(MSG_ABORTED, [this._msgStrings[0], subjectName]);
         },
         /**
-         * @param {JARS~internals.Refs.Modules} refs
+         * @param {JARS~internals.Refs.Subjects} refs
          */
         onCompleted: function(refs) {
             this._completionHandler.onCompleted(refs);

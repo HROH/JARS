@@ -23,7 +23,7 @@ JARS.internal('Refs/Subject', function(getInternal) {
     Subject.prototype = {
         constructor: Subject,
         /**
-         * @param {JARS~internals.Refs.Modules} refs
+         * @param {JARS~internals.Refs.Subjects} refs
          * @param {JARS~internals.Subjects.Subject~Provide} [provide]
          */
         init: function(refs, provide) {

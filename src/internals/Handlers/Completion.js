@@ -9,6 +9,6 @@
 /**
  * @method JARS~internals.Handlers.Completion~Subject#onCompleted
  *
- * @param {JARS~internals.Refs.Modules} refs
+ * @param {JARS~internals.Refs.Subjects} refs
  */
 JARS.internalGroup('Handlers/Completion', ['Bundle', 'Dependencies', 'Interception', 'Module']);
