@@ -18,7 +18,7 @@ JARS.module('System.Modules').meta({
         Injector = getInternal('Registries/Injector'),
         getCurrent = getInternal('Helpers/Tracker').getCurrent,
         AnonymousHandler = getInternal('Handlers/Anonymous'),
-        request = getInternal('Handlers/Modules').request,
+        request = getInternal('Handlers/Subjects').request,
         PathResolver = getInternal('Resolvers/Path'),
         reduce = getInternal('Helpers/Array').reduce,
         Modules;

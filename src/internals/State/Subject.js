@@ -19,7 +19,7 @@ JARS.internal('State/Subject', function(getInternal) {
     Subject.prototype = {
         constructor: Subject,
         /**
-         * @param {JARS~internals.Handlers.Modules} changeHandler
+         * @param {JARS~internals.Handlers.Subjects} changeHandler
          */
         onChange: function(changeHandler) {
             this._queue.push(changeHandler);

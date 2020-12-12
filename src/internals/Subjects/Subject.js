@@ -2,7 +2,7 @@ JARS.internal('Subjects/Subject', function(getInternal) {
     'use strict';
 
     var States = getInternal('State/States'),
-        request = getInternal('Handlers/Modules').request,
+        request = getInternal('Handlers/Subjects').request,
         isRoot = getInternal('Resolvers/Subjects/Module').isRoot;
 
     /**
@@ -79,7 +79,7 @@ JARS.internal('Subjects/Subject', function(getInternal) {
             }
         },
         /**
-         * @param {JARS~internals.Handlers.Modules} handler
+         * @param {JARS~internals.Handlers.Subjects} handler
          */
         load: function(handler) {
             if (this.stateUpdater.update(States.LOADING)) {

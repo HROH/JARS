@@ -1,4 +1,4 @@
-JARS.internal('Handlers/Modules', function(getInternal) {
+JARS.internal('Handlers/Subjects', function(getInternal) {
     'use strict';
 
     var SubjectsRef = getInternal('Refs/Subjects'),
@@ -11,7 +11,7 @@ JARS.internal('Handlers/Modules', function(getInternal) {
      *
      * @param {JARS~internals.Handlers.Subject} subjectHandler
      */
-    function Modules(subjectHandler) {
+    function Subjects(subjectHandler) {
         var handler = this;
 
         handler.requestor = subjectHandler.requestor;
@@ -24,7 +24,7 @@ JARS.internal('Handlers/Modules', function(getInternal) {
         handler._checkCompleted();
     }
 
-    Modules.prototype = {
+    Subjects.prototype = {
         /**
          * @method
          */
@@ -64,8 +64,8 @@ JARS.internal('Handlers/Modules', function(getInternal) {
     /**
      * @param {JARS~internals.Handlers.Subject} subjectHandler
      */
-    Modules.request = function(subjectHandler) {
-        new Modules(subjectHandler).request();
+    Subjects.request = function(subjectHandler) {
+        new Subjects(subjectHandler).request();
     };
 
     /**
@@ -81,5 +81,5 @@ JARS.internal('Handlers/Modules', function(getInternal) {
         return Number((count / total).toFixed(2));
     }
 
-    return Modules;
+    return Subjects;
 });

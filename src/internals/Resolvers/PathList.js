@@ -5,7 +5,7 @@ JARS.internal('Resolvers/PathList', function(getInternal) {
         ModulesTraverser = getInternal('Traverser/Modules'),
         PathListHelper = getInternal('Helpers/PathList'),
         AnonymousHandler = getInternal('Handlers/Anonymous'),
-        request = getInternal('Handlers/Modules').request,
+        request = getInternal('Handlers/Subjects').request,
         rootModuleDeps = getInternal('Registries/Injector').getRootModule().dependencies,
         PathList;
 
