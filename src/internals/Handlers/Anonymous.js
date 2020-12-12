@@ -1,7 +1,8 @@
 JARS.internal('Handlers/Anonymous', function(getInternal) {
     'use strict';
 
-    var rootModule = getInternal('Registries/Injector').getRootModule();
+    var rootModule = getInternal('Registries/Injector').getRootModule(),
+        SubjectHandler = getInternal('Handlers/Subject');
 
     /**
      * @memberof JARS~internals.Handlers
@@ -11,20 +12,23 @@ JARS.internal('Handlers/Anonymous', function(getInternal) {
      * @param {function(string)} [onAborted]
      * @param {function(string)} [onLoaded]
      *
-     * @return {JARS~internals.Handlers.Subjects.Subject}
+     * @return {JARS~internals.Handlers.Subject}
      */
     function Anonymous(moduleNames, onCompleted, onAborted, onLoaded) {
-        this.requestor = rootModule;
-        this.subjects = rootModule.dependencies.resolve(moduleNames);
-        this.onLoaded = onLoaded || noop;
-        this.onAborted = onAborted || noop;
-        this.onCompleted = onCompleted ? function(refs) {
-            onCompleted.apply(null, refs.get());
-        } : noop;
+        var handler = new SubjectHandler(rootModule, rootModule.dependencies.resolve(moduleNames), ['anonymous dependency', 'anonymous dependencies'], {
+            onCompleted: onCompleted ? function(refs) {
+                onCompleted.apply(null, refs.get());
+            } : noop
+        });
+
+        onLoaded && (handler.onLoaded = onLoaded);
+        onAborted && (handler.onAborted = onAborted);
+
+        return handler;
     }
 
     /**
-     * @memberof JARS~internals.Handlers.Import
+     * @memberof JARS~internals.Handlers.Anonymous
      * @inner
      */
     function noop() {}
