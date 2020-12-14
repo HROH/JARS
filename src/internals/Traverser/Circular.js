@@ -19,7 +19,7 @@ JARS.internal('Traverser/Circular', function(getInternal) {
          * @return {boolean}
          */
         onEnter: function(subject, entryModule, depth) {
-            return !(equalsEntryModule(subject, entryModule, depth) || subject.state.is(States.LOADING) || subject.state.is(States.LOADED) || subject.state.is(States.ABORTED));
+            return (subject.state.is(States.REGISTERED) || subject.state.is(States.INTERCEPTED)) && !equalsEntryModule(subject, entryModule, depth);
         },
         /**
          * @param {JARS~internals.Subjects.Subject} subject
