@@ -5,7 +5,6 @@ JARS.internal('Resolvers/PathList', function(getInternal) {
         ModulesTraverser = getInternal('Traverser/Modules'),
         PathListHelper = getInternal('Helpers/PathList'),
         AnonymousHandler = getInternal('Handlers/Anonymous'),
-        request = getInternal('Handlers/Subjects').request,
         rootModuleDeps = getInternal('Registries/Injector').getRootModule().dependencies,
         PathList;
 
@@ -25,9 +24,9 @@ JARS.internal('Resolvers/PathList', function(getInternal) {
          * @param {function(string[])} callback
          */
         resolve: function(entryModuleName, callback) {
-            request(AnonymousHandler(entryModuleName, function() {
+            AnonymousHandler(entryModuleName, function() {
                 callback(ModulesTraverser(rootModuleDeps.resolve(entryModuleName)[0], PathListTraverser, new PathListHelper(rootModuleDeps.resolve('System.*'))).paths);
-            }));
+            });
         }
     };
 

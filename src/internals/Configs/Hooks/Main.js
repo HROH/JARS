@@ -21,8 +21,7 @@ JARS.internal('Configs/Hooks/Main', function(getInternal) {
      * @return {string}
      */
     function Main(globalConfig, mainModule) {
-        var request = getInternal('Handlers/Modules').request,
-            AnonymousHandler = getInternal('Handlers/Anonymous'),
+        var AnonymousHandler = getInternal('Handlers/Anonymous'),
             mainLogger = new Logger(MAIN_CONTEXT + mainModule, globalTransports, {
                 debug: true,
 
@@ -37,11 +36,11 @@ JARS.internal('Configs/Hooks/Main', function(getInternal) {
             dirPath: ''
         });
 
-        request(AnonymousHandler(mainModule, function mainModuleLoaded() {
+        AnonymousHandler(mainModule, function mainModuleCompleted() {
             mainLogger.info(SUCCESS_MESSAGE);
         }, function mainModuleAborted() {
             mainLogger.error(ERROR_MESSAGE);
-        }));
+        });
 
         return mainModule;
     }

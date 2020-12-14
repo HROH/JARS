@@ -2,7 +2,6 @@ JARS.internal('Subjects/Subject', function(getInternal) {
     'use strict';
 
     var States = getInternal('State/States'),
-        request = getInternal('Handlers/Subjects').request,
         isRoot = getInternal('Resolvers/Subjects/Module').isRoot;
 
     /**
@@ -75,7 +74,7 @@ JARS.internal('Subjects/Subject', function(getInternal) {
          */
         $export: function(provide) {
             if (this.stateUpdater.update(States.REGISTERED)) {
-                request(this._injector.get('dependenciesHandler', [this, provide]));
+                this._injector.get('dependenciesHandler', [this, provide]).request(this._injector.get('dependencies').getNotCircular());
             }
         },
         /**
@@ -83,7 +82,7 @@ JARS.internal('Subjects/Subject', function(getInternal) {
          */
         load: function(handler) {
             if (this.stateUpdater.update(States.LOADING)) {
-                request(this._injector.get('parentHandler', this));
+                this._injector.get('parentHandler', this).request([this._injector.get('parent')]);
             }
 
             this.state.onChange(handler);

@@ -18,7 +18,6 @@ JARS.module('System.Modules').meta({
         Injector = getInternal('Registries/Injector'),
         getCurrent = getInternal('Helpers/Tracker').getCurrent,
         AnonymousHandler = getInternal('Handlers/Anonymous'),
-        request = getInternal('Handlers/Subjects').request,
         PathResolver = getInternal('Resolvers/Path'),
         reduce = getInternal('Helpers/Array').reduce,
         Modules;
@@ -29,6 +28,8 @@ JARS.module('System.Modules').meta({
      * @memberof module:System
      *
      * @alias module:Modules
+     *
+     * @borrows JARS~internals.Handlers.Anonymous as $import
      */
     Modules = {
         /**
@@ -53,19 +54,8 @@ JARS.module('System.Modules').meta({
         use: function(subjectName, scope) {
             return Modules.useAll(subjectName, scope)[0];
         },
-        /**
-         * @memberof JARS~internals.Handlers
-         *
-         * @param {JARS~internals.Subjects~Declaration} moduleNames
-         * @param {function(...*)} [onCompleted]
-         * @param {function(string)} [onAborted]
-         * @param {function(string)} [onLoaded]
-         *
-         * @return {JARS~internals.Handlers.Subject}
-         */
-        $import: function(moduleNames, onCompleted, onAborted, onLoaded) {
-            request(AnonymousHandler(moduleNames, onCompleted, onAborted, onLoaded));
-        },
+
+        $import: AnonymousHandler,
         /**
          * @return {{name: string, path: string, logger: JARS~internals.Logger.Logger}}
          */

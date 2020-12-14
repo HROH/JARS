@@ -2,36 +2,30 @@ JARS.internal('Handlers/Anonymous', function(getInternal) {
     'use strict';
 
     var rootModule = getInternal('Registries/Injector').getRootModule(),
-        SubjectHandler = getInternal('Handlers/Subject');
+        SubjectsHandler = getInternal('Handlers/Subjects'),
+        MSG_STRINGS = ['anonymous dependency', 'anonymous dependencies'];
 
     /**
      * @memberof JARS~internals.Handlers
      *
      * @param {JARS~internals.Subjects~Declaration} moduleNames
-     * @param {function(...*)} [onCompleted]
-     * @param {function(string)} [onAborted]
-     * @param {function(string)} [onLoaded]
-     *
-     * @return {JARS~internals.Handlers.Subject}
+     * @param {function(...*): void} [onCompleted]
+     * @param {function(string): void} [onAborted]
+     * @param {function(string): void} [onLoaded]
      */
     function Anonymous(moduleNames, onCompleted, onAborted, onLoaded) {
-        var handler = new SubjectHandler(rootModule, rootModule.dependencies.resolve(moduleNames), ['anonymous dependency', 'anonymous dependencies'], {
-            onCompleted: onCompleted ? function(refs) {
-                onCompleted.apply(null, refs.get());
-            } : noop
+        var handler = new SubjectsHandler(rootModule, MSG_STRINGS, {
+            onCompleted: function(refs) {
+                onCompleted && onCompleted.apply(null, refs.get());
+            },
+
+            onSubjectLoaded: onLoaded,
+
+            onSubjectAborted: onAborted
         });
 
-        onLoaded && (handler.onLoaded = onLoaded);
-        onAborted && (handler.onAborted = onAborted);
-
-        return handler;
+        handler.request(rootModule.dependencies.resolve(moduleNames));
     }
-
-    /**
-     * @memberof JARS~internals.Handlers.Anonymous
-     * @inner
-     */
-    function noop() {}
 
     return Anonymous;
 });

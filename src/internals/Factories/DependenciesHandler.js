@@ -1,7 +1,7 @@
 JARS.internal('Factories/DependenciesHandler', function(getInternal) {
     'use strict';
 
-    var SubjectHandler = getInternal('Handlers/Subject'),
+    var SubjectsHandler = getInternal('Handlers/Subjects'),
         DependenciesCompletionHandler = getInternal('Handlers/Completion/Dependencies'),
         MSG_STRINGS = ['dependency', 'dependencies'];
 
@@ -16,7 +16,7 @@ JARS.internal('Factories/DependenciesHandler', function(getInternal) {
     function DependenciesHandler(injector, args) {
         var subject = args[0];
 
-        return new SubjectHandler(subject, injector.get('dependencies').getNotCircular(), MSG_STRINGS, new DependenciesCompletionHandler(subject, args[1]));
+        return new SubjectsHandler(subject, MSG_STRINGS, new DependenciesCompletionHandler(subject, args[1]));
     }
 
     return DependenciesHandler;

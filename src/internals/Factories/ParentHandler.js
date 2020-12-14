@@ -1,7 +1,7 @@
 JARS.internal('Factories/ParentHandler', function(getInternal) {
     'use strict';
 
-    var SubjectHandler = getInternal('Handlers/Subject'),
+    var SubjectsHandler = getInternal('Handlers/Subjects'),
         MSG_STRINGS = ['parent'];
 
     /**
@@ -13,7 +13,7 @@ JARS.internal('Factories/ParentHandler', function(getInternal) {
      * @return {JARS~internals.Handlers.Subject}
      */
     function ParentHandler(injector, subject) {
-        return new SubjectHandler(subject, [injector.get('parent')], MSG_STRINGS, injector.get('handler', subject));
+        return new SubjectsHandler(subject, MSG_STRINGS, injector.get('handler', subject));
     }
 
     return ParentHandler;
