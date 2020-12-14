@@ -38,19 +38,19 @@ JARS.internal('Resolvers/Subjects/Interception', function(getInternal) {
          */
         getInfo: function(subjectName) {
             var interceptionInfo = interceptionInfoCache[subjectName],
-                moduleParts;
+                subjectParts;
 
             if (!interceptionInfo) {
                 eachInterceptor(function findInterceptor(interceptor, interceptorType) {
                     if (subjectName.indexOf(interceptorType) > -1) {
-                        moduleParts = subjectName.split(interceptorType);
+                        subjectParts = subjectName.split(interceptorType);
 
                         interceptionInfo = {
-                            name: moduleParts.shift(),
+                            name: subjectParts.shift(),
 
                             type: interceptorType,
 
-                            data: moduleParts.join(interceptorType)
+                            data: subjectParts.join(interceptorType)
                         };
                     }
 

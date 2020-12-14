@@ -82,7 +82,7 @@ JARS.internal('Handlers/Subjects', function(getInternal) {
     };
 
     /**
-     * @memberof JARS~internals.Handlers.Modules
+     * @memberof JARS~internals.Handlers.Subjects
      * @inner
      *
      * @param {number} count

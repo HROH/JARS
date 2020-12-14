@@ -3,7 +3,7 @@ JARS.internal('Subjects/Dependencies', function(getInternal) {
 
     var AnyResolutionStrategy = getInternal('Strategies/Type/Any'),
         CircularTraverser = getInternal('Traverser/Circular'),
-        ModulesTraverser = getInternal('Traverser/Modules'),
+        SubjectsTraverser = getInternal('Traverser/Subjects'),
         States = getInternal('State/States'),
         CHECK_CIRCULAR_DEPS = getInternal('Configs/Options').CHECK_CIRCULAR_DEPS;
 
@@ -20,7 +20,7 @@ JARS.internal('Subjects/Dependencies', function(getInternal) {
         this._requestor = requestor;
         this._state = state;
         this._strategy = strategy;
-        this._modules = [];
+        this._subjects = [];
         this._circular = false;
     }
 
@@ -30,15 +30,15 @@ JARS.internal('Subjects/Dependencies', function(getInternal) {
          * @return {JARS~internals.Subjects.Subject[]}
          */
         getAll: function() {
-            return this._modules;
+            return this._subjects;
         },
         /**
          * @return {(string[]|boolean)}
          */
         getCircular: function() {
-            var entryModule = this._requestor;
+            var entrySubject = this._requestor;
 
-            return this._circular || (this._circular = !entryModule.isRoot && entryModule.config.get(CHECK_CIRCULAR_DEPS) && ModulesTraverser(entryModule, CircularTraverser));
+            return this._circular || (this._circular = !entrySubject.isRoot && entrySubject.config.get(CHECK_CIRCULAR_DEPS) && SubjectsTraverser(entrySubject, CircularTraverser));
         },
         /**
          * @return {JARS~internals.Subjects.Subject[]}
@@ -47,11 +47,11 @@ JARS.internal('Subjects/Dependencies', function(getInternal) {
             return this.getCircular() ? [] : this.getAll();
         },
         /**
-         * @param {JARS~internals.Subjects~Declaration} modules
+         * @param {JARS~internals.Subjects~Declaration} subjects
          */
-        add: function(modules) {
+        add: function(subjects) {
             if(this._state.is(States.WAITING) || this._state.is(States.LOADING)) {
-                this._modules = this._modules.concat(this.resolve(modules));
+                this._subjects = this._subjects.concat(this.resolve(subjects));
             }
         },
         /**
@@ -60,17 +60,17 @@ JARS.internal('Subjects/Dependencies', function(getInternal) {
          * @return {(JARS~internals.Subjects.Subject|null)}
          */
         find: function(subjectName) {
-            var index = this._modules.indexOf(this.resolve([subjectName])[0]);
+            var index = this._subjects.indexOf(this.resolve([subjectName])[0]);
 
-            return index > -1 ? this._modules[index] : null;
+            return index > -1 ? this._subjects[index] : null;
         },
         /**
-         * @param {JARS~internals.Subjects~Declaration} modules
+         * @param {JARS~internals.Subjects~Declaration} subjects
          *
          * @return {JARS~internals.Subjects.Subject[]}
          */
-        resolve: function(modules) {
-            return AnyResolutionStrategy(this._requestor, this._requestor, modules, this._strategy);
+        resolve: function(subjects) {
+            return AnyResolutionStrategy(this._requestor, this._requestor, subjects, this._strategy);
         }
     };
 

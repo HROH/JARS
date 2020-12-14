@@ -23,13 +23,13 @@ JARS.module('internals-spec.Traverser-spec.Circular-spec').$import(['*!Registrie
                     });
 
                     it('should bail for any depth', function() {
-                        var entryModuleSame = subject,
-                            entryModuleDifferent = Injector.getSubject('test-circular-entry');
+                        var entrySubjectSame = subject,
+                            entrySubjectDifferent = Injector.getSubject('test-circular-entry');
 
-                        expect(CircularTraverser.onEnter(subject, entryModuleSame, 0)).to.be.false;
-                        expect(CircularTraverser.onEnter(subject, entryModuleSame, 4)).to.be.false;
-                        expect(CircularTraverser.onEnter(subject, entryModuleDifferent, 0)).to.be.false;
-                        expect(CircularTraverser.onEnter(subject, entryModuleDifferent, 4)).to.be.false;
+                        expect(CircularTraverser.onEnter(subject, entrySubjectSame, 0)).to.be.false;
+                        expect(CircularTraverser.onEnter(subject, entrySubjectSame, 4)).to.be.false;
+                        expect(CircularTraverser.onEnter(subject, entrySubjectDifferent, 0)).to.be.false;
+                        expect(CircularTraverser.onEnter(subject, entrySubjectDifferent, 4)).to.be.false;
                     });
                 });
 
@@ -43,13 +43,13 @@ JARS.module('internals-spec.Traverser-spec.Circular-spec').$import(['*!Registrie
                     });
 
                     it('should bail for any depth', function() {
-                        var entryModuleSame = subject,
-                            entryModuleDifferent = Injector.getSubject('test-circular-entry');
+                        var entrySubjectSame = subject,
+                            entrySubjectDifferent = Injector.getSubject('test-circular-entry');
 
-                        expect(CircularTraverser.onEnter(subject, entryModuleSame, 0)).to.be.false;
-                        expect(CircularTraverser.onEnter(subject, entryModuleSame, 4)).to.be.false;
-                        expect(CircularTraverser.onEnter(subject, entryModuleDifferent, 0)).to.be.false;
-                        expect(CircularTraverser.onEnter(subject, entryModuleDifferent, 4)).to.be.false;
+                        expect(CircularTraverser.onEnter(subject, entrySubjectSame, 0)).to.be.false;
+                        expect(CircularTraverser.onEnter(subject, entrySubjectSame, 4)).to.be.false;
+                        expect(CircularTraverser.onEnter(subject, entrySubjectDifferent, 0)).to.be.false;
+                        expect(CircularTraverser.onEnter(subject, entrySubjectDifferent, 4)).to.be.false;
                     });
                 });
 
@@ -63,23 +63,23 @@ JARS.module('internals-spec.Traverser-spec.Circular-spec').$import(['*!Registrie
                     });
 
                     describe('and equals the entry module', function() {
-                        var entryModuleSame = subject;
+                        var entrySubjectSame = subject;
 
                         it('should not bail when the depth is 0', function() {
-                            expect(CircularTraverser.onEnter(subject, entryModuleSame, 0)).to.be.true;
+                            expect(CircularTraverser.onEnter(subject, entrySubjectSame, 0)).to.be.true;
                         });
 
                         it('should bail when the depth is bigger than 0', function() {
-                            expect(CircularTraverser.onEnter(subject, entryModuleSame, 4)).to.be.false;
+                            expect(CircularTraverser.onEnter(subject, entrySubjectSame, 4)).to.be.false;
                         });
                     });
 
                     describe('and does not equal the entry module', function() {
-                        var entryModuleDifferent = Injector.getSubject('test-circular-entry');
+                        var entrySubjectDifferent = Injector.getSubject('test-circular-entry');
 
                         it('should not bail for any depth', function() {
-                            expect(CircularTraverser.onEnter(subject, entryModuleDifferent, 0)).to.be.true;
-                            expect(CircularTraverser.onEnter(subject, entryModuleDifferent, 4)).to.be.true;
+                            expect(CircularTraverser.onEnter(subject, entrySubjectDifferent, 0)).to.be.true;
+                            expect(CircularTraverser.onEnter(subject, entrySubjectDifferent, 4)).to.be.true;
                         });
                     });
                 });
@@ -94,23 +94,23 @@ JARS.module('internals-spec.Traverser-spec.Circular-spec').$import(['*!Registrie
                     });
 
                     describe('and equals the entry module', function() {
-                        var entryModuleSame = subject;
+                        var entrySubjectSame = subject;
 
                         it('should not bail when the depth is 0', function() {
-                            expect(CircularTraverser.onEnter(subject, entryModuleSame, 0)).to.be.true;
+                            expect(CircularTraverser.onEnter(subject, entrySubjectSame, 0)).to.be.true;
                         });
 
                         it('should bail when the depth is bigger than 0', function() {
-                            expect(CircularTraverser.onEnter(subject, entryModuleSame, 4)).to.be.false;
+                            expect(CircularTraverser.onEnter(subject, entrySubjectSame, 4)).to.be.false;
                         });
                     });
 
                     describe('and does not equal the entry module', function() {
-                        var entryModuleDifferent = Injector.getSubject('test-circular-entry');
+                        var entrySubjectDifferent = Injector.getSubject('test-circular-entry');
 
                         it('should not bail for any depth', function() {
-                            expect(CircularTraverser.onEnter(subject, entryModuleDifferent, 0)).to.be.true;
-                            expect(CircularTraverser.onEnter(subject, entryModuleDifferent, 4)).to.be.true;
+                            expect(CircularTraverser.onEnter(subject, entrySubjectDifferent, 0)).to.be.true;
+                            expect(CircularTraverser.onEnter(subject, entrySubjectDifferent, 4)).to.be.true;
                         });
                     });
                 });
@@ -125,13 +125,13 @@ JARS.module('internals-spec.Traverser-spec.Circular-spec').$import(['*!Registrie
                     });
 
                     it('should bail for any depth and entry module', function() {
-                        var entryModuleSame = subject,
-                            entryModuleDifferent = Injector.getSubject('test-circular-entry');
+                        var entrySubjectSame = subject,
+                            entrySubjectDifferent = Injector.getSubject('test-circular-entry');
 
-                        expect(CircularTraverser.onEnter(subject, entryModuleSame, 0)).to.be.false;
-                        expect(CircularTraverser.onEnter(subject, entryModuleSame, 4)).to.be.false;
-                        expect(CircularTraverser.onEnter(subject, entryModuleDifferent, 0)).to.be.false;
-                        expect(CircularTraverser.onEnter(subject, entryModuleDifferent, 4)).to.be.false;
+                        expect(CircularTraverser.onEnter(subject, entrySubjectSame, 0)).to.be.false;
+                        expect(CircularTraverser.onEnter(subject, entrySubjectSame, 4)).to.be.false;
+                        expect(CircularTraverser.onEnter(subject, entrySubjectDifferent, 0)).to.be.false;
+                        expect(CircularTraverser.onEnter(subject, entrySubjectDifferent, 4)).to.be.false;
                     });
                 });
 
@@ -145,13 +145,13 @@ JARS.module('internals-spec.Traverser-spec.Circular-spec').$import(['*!Registrie
                     });
 
                     it('should bail for any depth and entry module', function() {
-                        var entryModuleSame = subject,
-                            entryModuleDifferent = Injector.getSubject('test-circular-entry');
+                        var entrySubjectSame = subject,
+                            entrySubjectDifferent = Injector.getSubject('test-circular-entry');
 
-                        expect(CircularTraverser.onEnter(subject, entryModuleSame, 0)).to.be.false;
-                        expect(CircularTraverser.onEnter(subject, entryModuleSame, 4)).to.be.false;
-                        expect(CircularTraverser.onEnter(subject, entryModuleDifferent, 0)).to.be.false;
-                        expect(CircularTraverser.onEnter(subject, entryModuleDifferent, 4)).to.be.false;
+                        expect(CircularTraverser.onEnter(subject, entrySubjectSame, 0)).to.be.false;
+                        expect(CircularTraverser.onEnter(subject, entrySubjectSame, 4)).to.be.false;
+                        expect(CircularTraverser.onEnter(subject, entrySubjectDifferent, 0)).to.be.false;
+                        expect(CircularTraverser.onEnter(subject, entrySubjectDifferent, 4)).to.be.false;
                     });
                 });
             });
@@ -165,14 +165,14 @@ JARS.module('internals-spec.Traverser-spec.Circular-spec').$import(['*!Registrie
                     var list = ['test'];
 
                     it('should prepend the name of the subject to the list for any depth and entry module', function() {
-                        var entryModuleSame = subject,
-                            entryModuleDifferent = Injector.getSubject('test-circular-entry'),
+                        var entrySubjectSame = subject,
+                            entrySubjectDifferent = Injector.getSubject('test-circular-entry'),
                             expected = new Result([subject.name].concat(list), true);
 
-                        expect(CircularTraverser.onLeave(subject, entryModuleSame, 0, list)).to.deep.equal(expected);
-                        expect(CircularTraverser.onLeave(subject, entryModuleSame, 4, list)).to.deep.equal(expected);
-                        expect(CircularTraverser.onLeave(subject, entryModuleDifferent, 0, list)).to.deep.equal(expected);
-                        expect(CircularTraverser.onLeave(subject, entryModuleDifferent, 4, list)).to.deep.equal(expected);
+                        expect(CircularTraverser.onLeave(subject, entrySubjectSame, 0, list)).to.deep.equal(expected);
+                        expect(CircularTraverser.onLeave(subject, entrySubjectSame, 4, list)).to.deep.equal(expected);
+                        expect(CircularTraverser.onLeave(subject, entrySubjectDifferent, 0, list)).to.deep.equal(expected);
+                        expect(CircularTraverser.onLeave(subject, entrySubjectDifferent, 4, list)).to.deep.equal(expected);
                     });
                 });
 
@@ -180,25 +180,25 @@ JARS.module('internals-spec.Traverser-spec.Circular-spec').$import(['*!Registrie
                     var list = null;
 
                     describe('when it equals the entry module', function() {
-                        var entryModuleSame = subject;
+                        var entrySubjectSame = subject;
 
                         it('should create no list when the depth is 0', function() {
-                            expect(CircularTraverser.onLeave(subject, entryModuleSame, 0, list)).to.deep.equal(new Result(list));
+                            expect(CircularTraverser.onLeave(subject, entrySubjectSame, 0, list)).to.deep.equal(new Result(list));
                         });
 
                         it('should create a list containing the subject when the depth is bigger than 0', function() {
-                            expect(CircularTraverser.onLeave(subject, entryModuleSame, 4, list)).to.deep.equal(new Result([subject.name], true));
+                            expect(CircularTraverser.onLeave(subject, entrySubjectSame, 4, list)).to.deep.equal(new Result([subject.name], true));
                         });
                     });
 
                     describe('when it does not equal the entry module', function() {
-                        var entryModuleDifferent = Injector.getSubject('test-circular-entry');
+                        var entrySubjectDifferent = Injector.getSubject('test-circular-entry');
 
                         it('should create no list for any depth', function() {
                             var expected = new Result(list);
 
-                            expect(CircularTraverser.onLeave(subject, entryModuleDifferent, 0, list)).to.deep.equal(expected);
-                            expect(CircularTraverser.onLeave(subject, entryModuleDifferent, 4, list)).to.deep.equal(expected);
+                            expect(CircularTraverser.onLeave(subject, entrySubjectDifferent, 0, list)).to.deep.equal(expected);
+                            expect(CircularTraverser.onLeave(subject, entrySubjectDifferent, 4, list)).to.deep.equal(expected);
                         });
                     });
                 });
