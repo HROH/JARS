@@ -74,7 +74,7 @@ JARS.internal('Subjects/Subject', function(getInternal) {
          */
         $export: function(provide) {
             if (this.stateUpdater.update(States.REGISTERED)) {
-                this._injector.get('dependenciesHandler', [this, provide]).request(this._injector.get('dependencies').getNotCircular());
+                this._injector.get('dependenciesHandler', [this, provide]).request(this.dependencies.getNotCircular());
             }
         },
         /**
@@ -82,7 +82,7 @@ JARS.internal('Subjects/Subject', function(getInternal) {
          */
         load: function(handler) {
             if (this.stateUpdater.update(States.LOADING)) {
-                this._injector.get('parentHandler', this).request([this._injector.get('parent')]);
+                this._injector.get('parentHandler', this).request([this.parent]);
             }
 
             this.state.onChange(handler);
