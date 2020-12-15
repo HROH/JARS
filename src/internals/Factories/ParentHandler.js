@@ -13,7 +13,7 @@ JARS.internal('Factories/ParentHandler', function(getInternal) {
      * @return {JARS~internals.Handlers.Subject}
      */
     function ParentHandler(injector, subject) {
-        return new SubjectsHandler(subject, MSG_STRINGS, injector.get('handler', subject));
+        return new SubjectsHandler(subject, MSG_STRINGS, injector.get('completionHandler', subject));
     }
 
     return ParentHandler;

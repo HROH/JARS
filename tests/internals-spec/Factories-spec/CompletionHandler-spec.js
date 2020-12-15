@@ -1,4 +1,4 @@
-JARS.module('internals-spec.Factories-spec.Handler-spec').$import('*!Registries/Internals').$export(function(InternalsRegistry) {
+JARS.module('internals-spec.Factories-spec.CompletionHandler-spec').$import('*!Registries/Internals').$export(function(InternalsRegistry) {
     'use strict';
 
     var expect = chai.expect,
@@ -8,18 +8,18 @@ JARS.module('internals-spec.Factories-spec.Handler-spec').$import('*!Registries/
         InterceptionCompletionHandler = InternalsRegistry.get('Handlers/Completion/Interception');
 
     describe('Factories/Handler', function() {
-        var HandlerFactory = InternalsRegistry.get('Factories/Handler');
+        var CompletionHandlerFactory = InternalsRegistry.get('Factories/CompletionHandler');
 
         it('should return an instance of `Handlers/Completion/Module` when given a module', function() {
-            expect(HandlerFactory(new Injector('test', 'test-requestor'))).to.be.an.instanceof(ModuleCompletionHandler);
+            expect(CompletionHandlerFactory(new Injector('test', 'test-requestor'))).to.be.an.instanceof(ModuleCompletionHandler);
         });
 
         it('should return an instance of `Handlers/Completion/Bundle` when given a bundle', function() {
-            expect(HandlerFactory(new Injector('test.*', 'test-requestor'))).to.be.an.instanceof(BundleCompletionHandler);
+            expect(CompletionHandlerFactory(new Injector('test.*', 'test-requestor'))).to.be.an.instanceof(BundleCompletionHandler);
         });
 
         it('should return an instance of `Handlers/Completion/Interception` when given an interception', function() {
-            expect(HandlerFactory(new Injector('test!', 'test-requestor'))).to.be.an.instanceof(InterceptionCompletionHandler);
+            expect(CompletionHandlerFactory(new Injector('test!', 'test-requestor'))).to.be.an.instanceof(InterceptionCompletionHandler);
         });
     });
 });

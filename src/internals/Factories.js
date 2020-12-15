@@ -2,11 +2,11 @@
  * @namespace JARS~internals.Factories
  */
 JARS.internalGroup('Factories', [
+    'CompletionHandler',
     'Config',
     'Dependencies',
     'DependenciesHandler',
     'Description',
-    'Handler',
     'Info',
     'Logger',
     'Options',

@@ -1,8 +1,8 @@
 JARS.moduleAuto('internals-spec.Factories-spec', [
+    'CompletionHandler-spec',
     'Config-spec',
     'Dependencies-spec',
     'Description-spec',
-    'Handler-spec',
     'Info-spec',
     'Logger-spec',
     'Options-spec',

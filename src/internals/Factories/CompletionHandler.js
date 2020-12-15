@@ -1,4 +1,4 @@
-JARS.internal('Factories/Handler', function(getInternal) {
+JARS.internal('Factories/CompletionHandler', function(getInternal) {
     'use strict';
 
     var CompletionHandlers = getInternal('Handlers/Completion');
@@ -11,9 +11,9 @@ JARS.internal('Factories/Handler', function(getInternal) {
      *
      * @return {JARS~internals.Handlers.Completion~Subject}
      */
-    function Handler(injector, subject) {
+    function CompletionHandler(injector, subject) {
         return new CompletionHandlers[injector.type](subject);
     }
 
-    return Handler;
+    return CompletionHandler;
 });
