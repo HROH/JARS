@@ -75,13 +75,6 @@ JARS.internal('Handlers/Subjects', function(getInternal) {
     };
 
     /**
-     * @param {JARS~internals.Handlers.Subject} subjectHandler
-     */
-    Subjects.request = function(subjectHandler) {
-        new Subjects(subjectHandler).request();
-    };
-
-    /**
      * @memberof JARS~internals.Handlers.Subjects
      * @inner
      *
