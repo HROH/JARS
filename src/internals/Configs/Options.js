@@ -6,7 +6,7 @@ JARS.internal('Configs/Options', function(getInternal) {
         Transforms = getInternal('Configs/Transforms'),
         ObjectHelper = getInternal('Helpers/Object'),
         isBundle = getInternal('Types/Subject').isBundle,
-        isNull = getInternal('Types/Validators').isNull;
+        Validators = getInternal('Types/Validators');
 
     /**
      * @class
@@ -49,7 +49,12 @@ JARS.internal('Configs/Options', function(getInternal) {
     Options.transformAndUpdate = function(options, newOptions, subjectName) {
         ObjectHelper.each(newOptions, function updateConfig(value, option) {
             if (ObjectHelper.hasOwnProp(Transforms, option)) {
-                updateOption(options, option, transformOption(option, value, options[option], subjectName));
+                if (Validators.isFunction(value)) {
+                    options[option + 'Transform'] = value;
+                }
+                else {
+                    updateOption(options, option, Transforms[option](value, options[option], subjectName));
+                }
             }
         });
 
@@ -86,27 +91,12 @@ JARS.internal('Configs/Options', function(getInternal) {
      * @memberof JARS~internals.Configs.Options
      * @inner
      *
-     * @param {string} option
-     * @param {*} value
-     * @param {*} oldValue
-     * @param {string} subjectName
-     *
-     * @return {*}
-     */
-    function transformOption(option, value, oldValue, subjectName) {
-        return Transforms[option](value, oldValue, subjectName);
-    }
-
-    /**
-     * @memberof JARS~internals.Configs.Options
-     * @inner
-     *
      * @param {JARS~internals.Configs.Options} options
      * @param {string} option
      * @param {*} value
      */
     function updateOption(options, option, value) {
-        if (isNull(value)) {
+        if (Validators.isNull(value)) {
             delete options[option];
         }
         else {
