@@ -5,9 +5,15 @@
 
     JARS.configure({
         modules: {
-            basePath: 'base/tests',
+            restrict: 'tests.*',
 
-            timeout: 1
+            basePath: 'base',
+
+            timeout: 1,
+
+            fileName: function(fileName) {
+                return fileName + '-spec';
+            }
         },
 
         debugging: {
@@ -17,9 +23,9 @@
         }
     });
 
-    JARS.module('tests').$import(['internals-spec.*']).$export(function() {
+    JARS.module('test-start').$import(['tests.*']).$export(function() {
         karma.start();
     });
 
-    JARS.main('tests');
+    JARS.main('test-start');
 })(window.__karma__);
