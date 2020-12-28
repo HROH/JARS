@@ -7,12 +7,11 @@ JARS.internal('Factories/CompletionHandler', function(getInternal) {
      * @memberof JARS~internals.Factories
      *
      * @param {JARS~internals.Registries.Injector} injector
-     * @param {JARS~internals.Subjects.Subject} subject
      *
      * @return {JARS~internals.Handlers.Completion~Subject}
      */
-    function CompletionHandler(injector, subject) {
-        return new CompletionHandlers[injector.type](subject);
+    function CompletionHandler(injector) {
+        return new CompletionHandlers[injector.type](injector.get('subject'));
     }
 
     return CompletionHandler;

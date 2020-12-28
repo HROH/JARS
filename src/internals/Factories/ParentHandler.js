@@ -8,12 +8,11 @@ JARS.internal('Factories/ParentHandler', function(getInternal) {
      * @memberof JARS~internals.Factories
      *
      * @param {JARS~internals.Registries.Injector} injector
-     * @param {JARS~internals.Subjects.Subject} subject
      *
      * @return {JARS~internals.Handlers.Subject}
      */
-    function ParentHandler(injector, subject) {
-        return new SubjectsHandler(subject, MSG_STRINGS, injector.get('completionHandler', subject));
+    function ParentHandler(injector) {
+        return new SubjectsHandler(injector.get('subject'), MSG_STRINGS, injector.get('completionHandler'));
     }
 
     return ParentHandler;
