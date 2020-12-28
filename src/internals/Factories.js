@@ -16,7 +16,6 @@ JARS.internalGroup('Factories', [
     'ParentHandler',
     'ParentName',
     'Ref',
-    'Requestor',
     'Strategy',
     'State',
     'StateUpdater',

@@ -11,7 +11,6 @@ JARS.moduleAuto('tests.internals.Factories', [
     'ParentBundleName',
     'ParentName',
     'Ref',
-    'Requestor',
     'State',
     'StateUpdater',
     'Strategy',

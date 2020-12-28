@@ -15,12 +15,12 @@ JARS.internal('Registries/Injector', function(getInternal) {
      * @memberof JARS~internals.Registries
      *
      * @param {string} subjectName
-     * @param {string} requestorName
+     * @param {JARS~internals.Subjects.Subject} [requestor]
      */
-    function Injector(subjectName, requestorName) {
+    function Injector(subjectName, requestor) {
         this.subjectName = subjectName;
         this.type = SubjectTypes.get(subjectName);
-        this.requestorName = getRequestorName(subjectName, requestorName);
+        this.requestor = requestor;
         this._cache = {};
     }
 
@@ -43,7 +43,7 @@ JARS.internal('Registries/Injector', function(getInternal) {
          * @return {*}
          */
         getGlobal: function(localSubjectName, localKey, localArgs) {
-            return Injector.get(localSubjectName, this.requestorName, localKey, localArgs);
+            return localSubjectName ? Injector.forSubject(localSubjectName, this.requestor).get(localKey, localArgs) : null;
         },
         /**
          * @param {string} scope
@@ -54,15 +54,19 @@ JARS.internal('Registries/Injector', function(getInternal) {
     };
 
     /**
-     * @param {string} subjectName
-     * @param {string} requestorName
-     * @param {string} key
-     * @param {*} args
+     * @memberof JARS~internals.Registries.Injector
+     * @inner
      *
-     * @return {*}
+     * @param {string} subjectName
+     * @param {JARS~internals.Subjects.Subject} [requestor]
+     *
+     * @return {JARS~internals.Registries.Injector}
      */
-    Injector.get = function(subjectName, requestorName, key, args) {
-        return subjectName ? getInjector(subjectName, requestorName).get(key, args) : null;
+    Injector.forSubject = function(subjectName, requestor) {
+        var isInterception = SubjectTypes.isInterception(subjectName),
+            injectorKey = subjectName + ':' + (isInterception ? requestor.name : subjectName);
+
+        return injectors[injectorKey] || (injectors[injectorKey] = new Injector(subjectName, isInterception ? requestor : null));
     };
 
     /**
@@ -87,7 +91,7 @@ JARS.internal('Registries/Injector', function(getInternal) {
      * @return {JARS~internals.Subjects.Subject}
      */
     Injector.getSubject = function(subjectName, requestor) {
-        return Injector.get(subjectName, requestor && requestor.name, 'subject');
+        return Injector.forSubject(subjectName, requestor).get('subject');
     };
 
     /**
@@ -117,34 +121,6 @@ JARS.internal('Registries/Injector', function(getInternal) {
             scope: switchToScope
         });
     };
-
-    /**
-     * @memberof JARS~internals.Registries.Injector
-     * @inner
-     *
-     * @param {string} subjectName
-     * @param {string} requestorName
-     *
-     * @return {JARS~internals.Registries.Injector}
-     */
-    function getInjector(subjectName, requestorName) {
-        var injectorKey = subjectName + ':' + getRequestorName(subjectName, requestorName);
-
-        return injectors[injectorKey] || (injectors[injectorKey] = new Injector(subjectName, requestorName));
-    }
-
-    /**
-     * @memberof JARS~internals.Registries.Injector
-     * @inner
-     *
-     * @param {string} subjectName
-     * @param {string} requestorName
-     *
-     * @return {string}
-     */
-    function getRequestorName(subjectName, requestorName) {
-        return SubjectTypes.isInterception(subjectName) ? requestorName : subjectName;
-    }
 
     return Injector;
 });

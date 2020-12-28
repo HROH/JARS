@@ -29,13 +29,13 @@ JARS.internal('Subjects/Subject', function(getInternal) {
         subject.name = subjectName;
         subject.isRoot = isRoot(subjectName);
         subject.parent = injector.get('parent');
-        subject.requestor = injector.get('requestor') || subject;
+        subject.requestor = injector.requestor;
         subject.config = injector.get('config');
         subject.ref = injector.get('ref');
         subject.logger = injector.get('logger');
         subject.state = injector.get('state');
         subject.stateUpdater = injector.get('stateUpdater');
-        subject.dependencies = injector.get('dependencies', subject.requestor);
+        subject.dependencies = injector.get('dependencies', subject.requestor || subject);
         subject.info = injector.get('info');
         subject._injector = injector;
         subject._meta = {};
