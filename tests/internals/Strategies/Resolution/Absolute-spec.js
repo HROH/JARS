@@ -2,13 +2,13 @@ JARS.module('tests.internals.Strategies.Resolution.Absolute').$import(['*!Regist
     'use strict';
 
     var expect = chai.expect,
-        Injector = InternalsRegistry.get('Registries/Injector');
+        SubjectsRegistry = InternalsRegistry.get('Registries/Subjects');
 
     describe('Strategies/Resolution/Absolute()', function() {
         var AbsoluteResolutionStrategy = InternalsRegistry.get('Strategies/Resolution/Absolute');
 
         describe('given a base module', function() {
-            var testModule = Injector.getSubject('test');
+            var testModule = SubjectsRegistry.getSubject('test');
 
             it('should resolve a modulename absolute', function() {
                 expect(AbsoluteResolutionStrategy(testModule, 'Module')).to.deep.equal({

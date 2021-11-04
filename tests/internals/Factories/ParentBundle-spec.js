@@ -2,28 +2,30 @@ JARS.module('tests.internals.Factories.ParentBundle').$import('*!Registries/Inte
     'use strict';
 
     var expect = chai.expect,
-        Injector = InternalsRegistry.get('Registries/Injector');
+        SubjectsRegistry = InternalsRegistry.get('Registries/Subjects'),
+        Injector = InternalsRegistry.get('Registries/Injector'),
+        FactoryHelper = this;
 
     describe('Factories/ParentBundle', function() {
         var ParentBundleFactory = InternalsRegistry.get('Factories/ParentBundle');
 
         it('should return the parent bundle for a module', function() {
-            expect(ParentBundleFactory(new Injector('test', 'test-requestor'))).to.equal(Injector.getSubject('test.*'));
-            expect(ParentBundleFactory(new Injector(Injector.getRootModule().name, 'test-requestor'))).to.equal(Injector.getRootBundle());
+            expect(ParentBundleFactory(FactoryHelper.createModuleInjector())).to.equal(SubjectsRegistry.getSubject('test.*'));
+            expect(ParentBundleFactory(FactoryHelper.createRootModuleInjector())).to.equal(SubjectsRegistry.getRootBundle());
         });
 
         it('should return the parent bundle for a bundle', function() {
-            expect(ParentBundleFactory(new Injector('test.deep.*', 'test-requestor'))).to.equal(Injector.getSubject('test.*'));
-            expect(ParentBundleFactory(new Injector('test.*', 'test-requestor'))).to.equal(Injector.getRootBundle());
+            expect(ParentBundleFactory(new Injector(SubjectsRegistry, 'test.deep.*', 'test-requestor'))).to.equal(SubjectsRegistry.getSubject('test.*'));
+            expect(ParentBundleFactory(FactoryHelper.createBundleInjector())).to.equal(SubjectsRegistry.getRootBundle());
         });
 
         it('should return the parent bundle for an interception', function() {
-            expect(ParentBundleFactory(new Injector('test!', 'test-requestor'))).to.equal(Injector.getSubject('test.*'));
-            expect(ParentBundleFactory(new Injector('test.*!', 'test-requestor'))).to.equal(Injector.getSubject('test.*'));
+            expect(ParentBundleFactory(FactoryHelper.createInterceptionInjector())).to.equal(SubjectsRegistry.getSubject('test.*'));
+            expect(ParentBundleFactory(new Injector(SubjectsRegistry, 'test.*!', 'test-requestor'))).to.equal(SubjectsRegistry.getSubject('test.*'));
         });
 
         it('should return `null` for the root bundle', function() {
-            expect(ParentBundleFactory(new Injector(Injector.getRootBundle().name, 'test-requestor'))).to.equal(null);
+            expect(ParentBundleFactory(FactoryHelper.createRootBundleInjector())).to.equal(null);
         });
     });
 });

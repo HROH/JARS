@@ -2,7 +2,7 @@ JARS.module('tests.internals.Traverser.Circular').$import(['*!Registries/Interna
     'use strict';
 
     var expect = chai.expect,
-        Injector = InternalsRegistry.get('Registries/Injector'),
+        SubjectsRegistry = InternalsRegistry.get('Registries/Subjects'),
         Result = InternalsRegistry.get('Traverser/Result'),
         States = InternalsRegistry.get('State/States');
 
@@ -11,7 +11,7 @@ JARS.module('tests.internals.Traverser.Circular').$import(['*!Registries/Interna
 
         describe('.onEnter()', function() {
             describe('given a subject', function() {
-                var subject = Injector.getSubject('test-circular');
+                var subject = SubjectsRegistry.getSubject('test-circular');
 
                 describe('when it is waiting', function() {
                     beforeEach(function() {
@@ -24,7 +24,7 @@ JARS.module('tests.internals.Traverser.Circular').$import(['*!Registries/Interna
 
                     it('should bail for any depth', function() {
                         var entrySubjectSame = subject,
-                            entrySubjectDifferent = Injector.getSubject('test-circular-entry');
+                            entrySubjectDifferent = SubjectsRegistry.getSubject('test-circular-entry');
 
                         expect(CircularTraverser.onEnter(subject, entrySubjectSame, 0)).to.be.false;
                         expect(CircularTraverser.onEnter(subject, entrySubjectSame, 4)).to.be.false;
@@ -44,7 +44,7 @@ JARS.module('tests.internals.Traverser.Circular').$import(['*!Registries/Interna
 
                     it('should bail for any depth', function() {
                         var entrySubjectSame = subject,
-                            entrySubjectDifferent = Injector.getSubject('test-circular-entry');
+                            entrySubjectDifferent = SubjectsRegistry.getSubject('test-circular-entry');
 
                         expect(CircularTraverser.onEnter(subject, entrySubjectSame, 0)).to.be.false;
                         expect(CircularTraverser.onEnter(subject, entrySubjectSame, 4)).to.be.false;
@@ -75,7 +75,7 @@ JARS.module('tests.internals.Traverser.Circular').$import(['*!Registries/Interna
                     });
 
                     describe('and does not equal the entry module', function() {
-                        var entrySubjectDifferent = Injector.getSubject('test-circular-entry');
+                        var entrySubjectDifferent = SubjectsRegistry.getSubject('test-circular-entry');
 
                         it('should not bail for any depth', function() {
                             expect(CircularTraverser.onEnter(subject, entrySubjectDifferent, 0)).to.be.true;
@@ -106,7 +106,7 @@ JARS.module('tests.internals.Traverser.Circular').$import(['*!Registries/Interna
                     });
 
                     describe('and does not equal the entry module', function() {
-                        var entrySubjectDifferent = Injector.getSubject('test-circular-entry');
+                        var entrySubjectDifferent = SubjectsRegistry.getSubject('test-circular-entry');
 
                         it('should not bail for any depth', function() {
                             expect(CircularTraverser.onEnter(subject, entrySubjectDifferent, 0)).to.be.true;
@@ -126,7 +126,7 @@ JARS.module('tests.internals.Traverser.Circular').$import(['*!Registries/Interna
 
                     it('should bail for any depth and entry module', function() {
                         var entrySubjectSame = subject,
-                            entrySubjectDifferent = Injector.getSubject('test-circular-entry');
+                            entrySubjectDifferent = SubjectsRegistry.getSubject('test-circular-entry');
 
                         expect(CircularTraverser.onEnter(subject, entrySubjectSame, 0)).to.be.false;
                         expect(CircularTraverser.onEnter(subject, entrySubjectSame, 4)).to.be.false;
@@ -146,7 +146,7 @@ JARS.module('tests.internals.Traverser.Circular').$import(['*!Registries/Interna
 
                     it('should bail for any depth and entry module', function() {
                         var entrySubjectSame = subject,
-                            entrySubjectDifferent = Injector.getSubject('test-circular-entry');
+                            entrySubjectDifferent = SubjectsRegistry.getSubject('test-circular-entry');
 
                         expect(CircularTraverser.onEnter(subject, entrySubjectSame, 0)).to.be.false;
                         expect(CircularTraverser.onEnter(subject, entrySubjectSame, 4)).to.be.false;
@@ -159,14 +159,14 @@ JARS.module('tests.internals.Traverser.Circular').$import(['*!Registries/Interna
 
         describe('.onLeave()', function() {
             describe('given a subject', function() {
-                var subject = Injector.getSubject('test-circular');
+                var subject = SubjectsRegistry.getSubject('test-circular');
 
                 describe('and given a starting list', function() {
                     var list = ['test'];
 
                     it('should prepend the name of the subject to the list for any depth and entry module', function() {
                         var entrySubjectSame = subject,
-                            entrySubjectDifferent = Injector.getSubject('test-circular-entry'),
+                            entrySubjectDifferent = SubjectsRegistry.getSubject('test-circular-entry'),
                             expected = new Result([subject.name].concat(list), true);
 
                         expect(CircularTraverser.onLeave(subject, entrySubjectSame, 0, list)).to.deep.equal(expected);
@@ -192,7 +192,7 @@ JARS.module('tests.internals.Traverser.Circular').$import(['*!Registries/Interna
                     });
 
                     describe('when it does not equal the entry module', function() {
-                        var entrySubjectDifferent = Injector.getSubject('test-circular-entry');
+                        var entrySubjectDifferent = SubjectsRegistry.getSubject('test-circular-entry');
 
                         it('should create no list for any depth', function() {
                             var expected = new Result(list);

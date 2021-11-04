@@ -2,22 +2,22 @@ JARS.module('tests.internals.Factories.Dependencies').$import('*!Registries/Inte
     'use strict';
 
     var expect = chai.expect,
-        Injector = InternalsRegistry.get('Registries/Injector'),
-        Dependencies = InternalsRegistry.get('Subjects/Dependencies');
+        Dependencies = InternalsRegistry.get('Subjects/Dependencies'),
+        FactoryHelper = this;
 
     describe('Factories/Dependencies', function() {
         var DependenciesFactory = InternalsRegistry.get('Factories/Dependencies');
 
         it('should return an instance of `Subjects/Dependencies` when given a module injector', function() {
-            expect(DependenciesFactory(new Injector('test', 'test-requestor'))).to.be.an.instanceof(Dependencies);
+            expect(DependenciesFactory(FactoryHelper.createModuleInjector())).to.be.an.instanceof(Dependencies);
         });
 
         it('should return an instance of `Subjects/Dependencies` when given a bundle injector', function() {
-            expect(DependenciesFactory(new Injector('test.*', 'test-requestor'))).to.be.an.instanceof(Dependencies);
+            expect(DependenciesFactory(FactoryHelper.createBundleInjector())).to.be.an.instanceof(Dependencies);
         });
 
         it('should return an instance of `Subjects/Dependencies` when given an interception injector', function() {
-            expect(DependenciesFactory(new Injector('test!', 'test-requestor'))).to.be.an.instanceof(Dependencies);
+            expect(DependenciesFactory(FactoryHelper.createInterceptionInjector())).to.be.an.instanceof(Dependencies);
         });
     });
 });

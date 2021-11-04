@@ -9,6 +9,8 @@
         pushCommand = function(command) {
             commands.push(command);
         },
+        INTERNALS_REGISTRY = 'Registries/Internals',
+        SUBJECTS_REGISTRY = 'Registries/Subjects',
         currentPlatform, JARS;
 
     /**
@@ -30,7 +32,7 @@
             if(!currentPlatform) {
                 currentPlatform = platform;
                 JARS.main(platform.Env.MAIN_MODULE);
-                platform.SourceManager.load(platform.Env.INTERNALS_PATH + 'Registries/Internals.js');
+                platform.SourceManager.load(platform.Env.INTERNALS_PATH + INTERNALS_REGISTRY + '.js');
             }
         },
         /**
@@ -68,12 +70,12 @@
          *
          * @return {JARS~ModuleWrapper}
          */
-        module: delegate('Registries/Injector', 'registerModule', function(moduleName) {
-            var dynamicInternalName = 'Registries/Injector:' + moduleName,
+        module: delegate(SUBJECTS_REGISTRY, 'registerModule', function(moduleName) {
+            var dynamicInternalName = SUBJECTS_REGISTRY + ':' + moduleName,
                 ModuleWrapper;
 
-            delegate('Registries/Internals', 'register')(dynamicInternalName, function(getInternal) {
-                return getInternal('Registries/Injector').getSubject(moduleName);
+            delegate(INTERNALS_REGISTRY, 'register')(dynamicInternalName, function(getInternal) {
+                return getInternal(SUBJECTS_REGISTRY).getSubject(moduleName);
             });
 
             /**
@@ -154,7 +156,7 @@
          *
          * @return {JARS}
          */
-        flush: delegate('Registries/Injector', 'flush'),
+        flush: delegate(SUBJECTS_REGISTRY, 'flush'),
         /**
          * @return {JARS}
          */

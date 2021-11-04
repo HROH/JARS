@@ -1,7 +1,7 @@
 JARS.internal('Handlers/Anonymous', function(getInternal) {
     'use strict';
 
-    var rootModule = getInternal('Registries/Injector').getRootModule(),
+    var rootModule = getInternal('Registries/Subjects').getRootModule(),
         SubjectsHandler = getInternal('Handlers/Subjects'),
         MSG_STRINGS = ['anonymous dependency', 'anonymous dependencies'];
 

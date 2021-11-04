@@ -15,7 +15,7 @@ JARS.module('System.Modules').meta({
     'use strict';
 
     var getInternal = InternalsRegistry.get,
-        Injector = getInternal('Registries/Injector'),
+        SubjectsRegistry = getInternal('Registries/Subjects'),
         getCurrent = getInternal('Helpers/Tracker').getCurrent,
         AnonymousHandler = getInternal('Handlers/Anonymous'),
         PathResolver = getInternal('Resolvers/Path'),
@@ -39,7 +39,7 @@ JARS.module('System.Modules').meta({
          * @return {Array<*>}
          */
         useAll: function(subjectNames, scope) {
-            return reduce(Injector.getRootModule().dependencies.resolve(subjectNames), function(refs, subject) {
+            return reduce(SubjectsRegistry.getRootModule().dependencies.resolve(subjectNames), function(refs, subject) {
                 refs.push(subject.ref.get(scope));
 
                 return refs;
@@ -60,7 +60,7 @@ JARS.module('System.Modules').meta({
          * @return {{name: string, path: string, logger: JARS~internals.Logger.Logger}}
          */
         getCurrentData: function() {
-            var subject = Injector.getSubject(getCurrent());
+            var subject = SubjectsRegistry.getSubject(getCurrent());
 
             return {
                 name: subject.name,

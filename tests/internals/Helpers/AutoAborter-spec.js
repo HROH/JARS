@@ -2,8 +2,8 @@ JARS.module('tests.internals.Helpers.AutoAborter').$import(['*!Registries/Intern
     'use strict';
 
     var expect = chai.expect,
-        PathResolver = InternalsRegistry.get('Resolvers/Path'),
-        Injector = InternalsRegistry.get('Registries/Injector');
+        SubjectsRegistry = InternalsRegistry.get('Registries/Subjects'),
+        PathResolver = InternalsRegistry.get('Resolvers/Path');
 
     describe('Helpers/AutoAborter', function() {
         var AutoAborter = InternalsRegistry.get('Helpers/AutoAborter');
@@ -44,7 +44,7 @@ JARS.module('tests.internals.Helpers.AutoAborter').$import(['*!Registries/Intern
     });
 
     function createMockModuleWithTimeout(moduleName) {
-        var mockModule = Injector.getSubject(moduleName);
+        var mockModule = SubjectsRegistry.getSubject(moduleName);
 
         mockModule.config.update({
             timeout: 1

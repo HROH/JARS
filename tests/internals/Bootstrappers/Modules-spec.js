@@ -5,20 +5,20 @@ JARS.module('tests.internals.Bootstrappers.Modules').$import('*!Registries/Inter
 
     describe('Bootstrappers/Modules', function() {
         var ModulesBootstrapper = InternalsRegistry.get('Bootstrappers/Modules'),
-            Injector = InternalsRegistry.get('Registries/Injector'),
+            SubjectsRegistry = InternalsRegistry.get('Registries/Subjects'),
             Tracker = InternalsRegistry.get('Helpers/Tracker');
 
         describe('.bootstrap()', function() {
-            var testRoot = Injector.getSubject('testRoot');
+            var testRoot = SubjectsRegistry.getSubject('testRoot');
 
             beforeEach(function() {
-                sinon.stub(Injector, 'getRootModule').returns(testRoot);
+                sinon.stub(SubjectsRegistry, 'getRootModule').returns(testRoot);
                 sinon.stub(testRoot, 'setMeta');
                 sinon.stub(Tracker, 'setRoot');
             });
 
             afterEach(function() {
-                Injector.getRootModule.restore();
+                SubjectsRegistry.getRootModule.restore();
                 testRoot.setMeta.restore();
                 Tracker.setRoot.restore();
             });
@@ -26,7 +26,7 @@ JARS.module('tests.internals.Bootstrappers.Modules').$import('*!Registries/Inter
             it('should get the root module', function() {
                 ModulesBootstrapper.bootstrap();
 
-                expect(Injector.getRootModule).to.have.been.called;
+                expect(SubjectsRegistry.getRootModule).to.have.been.called;
             });
 
             it('should pass the root module to the tracker', function() {

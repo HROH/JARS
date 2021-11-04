@@ -3,7 +3,7 @@ JARS.module('tests.internals.JARS').$import('*!Registries/Internals').$export(fu
 
     var expect = chai.expect,
         GlobalConfig = InternalsRegistry.get('Configs/Global'),
-        Injector = InternalsRegistry.get('Registries/Injector'),
+        SubjectsRegistry = InternalsRegistry.get('Registries/Subjects'),
         PathListResolver = InternalsRegistry.get('Resolvers/PathList');
 
     describe('JARS', function() {
@@ -22,16 +22,16 @@ JARS.module('tests.internals.JARS').$import('*!Registries/Internals').$export(fu
         });
 
         describe('.flush()', function() {
-            it('should delegate to Registries/Injector.flush()', function() {
+            it('should delegate to Registries/Subjects.flush()', function() {
                 var context = 'test-flush';
 
-                sinon.stub(Injector, 'flush');
+                sinon.stub(SubjectsRegistry, 'flush');
 
                 JARS.flush(context);
 
-                expect(Injector.flush).to.have.been.calledWith(context);
+                expect(SubjectsRegistry.flush).to.have.been.calledWith(context);
 
-                Injector.flush.restore();
+                SubjectsRegistry.flush.restore();
             });
         });
 
@@ -52,16 +52,16 @@ JARS.module('tests.internals.JARS').$import('*!Registries/Internals').$export(fu
         });
 
         describe('.module()', function() {
-            it('should delegate to Registries/Injector.registerModule()', function() {
+            it('should delegate to Registries/Subjects.registerModule()', function() {
                 var moduleName = 'test-register';
 
-                sinon.stub(Injector, 'registerModule');
+                sinon.stub(SubjectsRegistry, 'registerModule');
 
                 JARS.module(moduleName);
 
-                expect(Injector.registerModule).to.have.been.calledWith(moduleName);
+                expect(SubjectsRegistry.registerModule).to.have.been.calledWith(moduleName);
 
-                Injector.registerModule.restore();
+                SubjectsRegistry.registerModule.restore();
             });
 
             it('should return a module API when given a modulename', function() {
