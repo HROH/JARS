@@ -32,6 +32,14 @@ JARS.internal('Resolvers/Subjects/Module', function(getInternal) {
         },
         /**
          * @param {string} subjectName
+         *
+         * @return {boolean}
+         */
+        isAnonymousName: function(subjectName) {
+            return subjectName.indexOf(ANONYMOUS_NAME) === 0;
+        },
+        /**
+         * @param {string} subjectName
          * @param {string} childSubjectName
          *
          * @return {string}

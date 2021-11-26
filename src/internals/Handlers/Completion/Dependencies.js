@@ -1,7 +1,8 @@
 JARS.internal('Handlers/Completion/Dependencies', function(getInternal) {
     'use strict';
 
-    var LOADED = getInternal('State/States').LOADED,
+    var isAnonymousName = getInternal('Resolvers/Subjects/Module').isAnonymousName,
+        LOADED = getInternal('State/States').LOADED,
         CIRCULAR_SEPARATOR = '" -> "',
         MSG_ABORTED_CIRCULAR_DEPENDENCIES = 'found circular dependencies "${0}"';
 
@@ -39,8 +40,7 @@ JARS.internal('Handlers/Completion/Dependencies', function(getInternal) {
                 subject.ref.init(refs, this._provide);
                 subject.stateUpdater.update(LOADED);
 
-                // TODO
-                if(subject.name.indexOf('anonymous_') === 0) {
+                if(isAnonymousName(subject.name)) {
                     subject.ref.get();
                 }
             }
