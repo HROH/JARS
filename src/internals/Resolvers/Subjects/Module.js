@@ -3,6 +3,8 @@ JARS.internal('Resolvers/Subjects/Module', function(getInternal) {
 
     var unwrapVersion = getInternal('Resolvers/Version').unwrapVersion,
         unwrapInterception = getInternal('Resolvers/Subjects/Interception').unwrapInterception,
+        anonymousCounter = 0,
+        ANONYMOUS_NAME = 'anonymous_',
         DOT = '.',
         EMPTY_STRING = '',
         Module;
@@ -21,6 +23,12 @@ JARS.internal('Resolvers/Subjects/Module', function(getInternal) {
          */
         isRoot: function(subjectName) {
             return subjectName === Module.ROOT;
+        },
+        /**
+         * @returns {string}
+         */
+        getAnonymousName: function() {
+            return ANONYMOUS_NAME + anonymousCounter++;
         },
         /**
          * @param {string} subjectName

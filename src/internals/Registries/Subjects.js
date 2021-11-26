@@ -5,7 +5,7 @@ JARS.internal('Registries/Subjects', function(getInternal) {
         Injector = getInternal('Registries/Injector'),
         AutoAborter = getInternal('Helpers/AutoAborter'),
         getBundleName = getInternal('Resolvers/Subjects/Bundle').getName,
-        ROOT_MODULE = getInternal('Resolvers/Subjects/Module').ROOT,
+        ModuleResolver = getInternal('Resolvers/Subjects/Module'),
         each = getInternal('Helpers/Object').each,
         injectors = {},
         Subjects;
@@ -55,13 +55,19 @@ JARS.internal('Registries/Subjects', function(getInternal) {
          * @return {JARS~internals.Subjects.Subject}
          */
         getRootModule: function() {
-            return Subjects.getSubject(ROOT_MODULE);
+            return Subjects.getSubject(ModuleResolver.ROOT);
         },
         /**
          * @return {JARS~internals.Subjects.Subject}
          */
         getRootBundle: function() {
-            return Subjects.getSubject(getBundleName(ROOT_MODULE));
+            return Subjects.getSubject(getBundleName(ModuleResolver.ROOT));
+        },
+        /*
+         * @return {JARS~internals.Subjects.Subject}
+         */
+        getAnonymousModule: function() {
+            return Subjects.getSubject(ModuleResolver.getAnonymousName());
         },
         /**
          * @param {string} scope

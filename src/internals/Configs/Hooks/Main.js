@@ -7,6 +7,7 @@ JARS.internal('Configs/Hooks/Main', function(getInternal) {
         LOG_ALL = getInternal('Logger/Levels').ALL,
         globalTransports = new Transports([new Console()]),
         MAIN_CONTEXT = 'Main:',
+        REQUEST_MESSAGE = 'requested',
         SUCCESS_MESSAGE = 'successfully loaded',
         ERROR_MESSAGE = 'aborted';
 
@@ -16,33 +17,39 @@ JARS.internal('Configs/Hooks/Main', function(getInternal) {
      * @memberof JARS~internals.Configs.Hooks
      *
      * @param {JARS~internals.Configs.Global} globalConfig
-     * @param {string} mainModule
+     * @param {string} mainModuleName
      *
      * @return {string}
      */
-    function Main(globalConfig, mainModule) {
-        var AnonymousHandler = getInternal('Handlers/Anonymous'),
-            mainLogger = new Logger(MAIN_CONTEXT + mainModule, globalTransports, {
+    function Main(globalConfig, mainModuleName) {
+        var SubjectsRegistry = getInternal('Registries/Subjects'),
+            anonymousModule = SubjectsRegistry.getAnonymousModule(),
+            mainLogger = new Logger(MAIN_CONTEXT + mainModuleName, globalTransports, {
                 debug: true,
 
                 level: LOG_ALL
             });
 
         globalConfig.update('modules', {
-            restrict: mainModule,
+            restrict: mainModuleName,
 
             basePath: getInternal('Env').BASE_PATH,
 
             dirPath: ''
         });
 
-        AnonymousHandler(mainModule, function mainModuleCompleted() {
-            mainLogger.info(SUCCESS_MESSAGE);
-        }, function mainModuleAborted() {
+        mainLogger.debug(REQUEST_MESSAGE);
+
+        anonymousModule.$import(mainModuleName);
+        anonymousModule.$export(function() {
+            mainLogger.debug(SUCCESS_MESSAGE);
+        }, function(subjectName, percentage) {
+            mainLogger.debug(subjectName, percentage);
+        }, function() {
             mainLogger.error(ERROR_MESSAGE);
         });
 
-        return mainModule;
+        return mainModuleName;
     }
 
     return Main;

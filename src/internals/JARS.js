@@ -104,7 +104,9 @@
                 /**
                  * @method
                  *
-                 * @param {JARS~internals.Subjects.Subject~Provide} provide
+                 * @param {JARS~internals.Handlers.Completion.Dependencies~Provide} [provide]
+                 * @param {JARS~internals.Handlers.Completion.Dependencies~Progress} [progress]
+                 * @param {JARS~internals.Handlers.Completion.Dependencies~Error} [error]
                  *
                  * @return {JARS}
                  */

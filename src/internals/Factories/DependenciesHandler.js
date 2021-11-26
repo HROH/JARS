@@ -9,14 +9,16 @@ JARS.internal('Factories/DependenciesHandler', function(getInternal) {
      * @memberof JARS~internals.Factories
      *
      * @param {JARS~internals.Registries.Injector} injector
-     * @param {JARS~internals.Subjects.Subject~Provide} provide
+     * @param {JARS~internals.Handlers.Completion.Dependencies~Provide} [provide]
+     * @param {JARS~internals.Handlers.Completion.Dependencies~Progress} [progress]
+     * @param {JARS~internals.Handlers.Completion.Dependencies~Error} [error]
      *
      * @return {JARS~internals.Handlers.Subject}
      */
-    function DependenciesHandler(injector, provide) {
+    function DependenciesHandler(injector, callbacks) {
         var subject = injector.get('subject');
 
-        return new SubjectsHandler(subject, MSG_STRINGS, new DependenciesCompletionHandler(subject, provide));
+        return new SubjectsHandler(subject, MSG_STRINGS, new DependenciesCompletionHandler(subject, callbacks.provide, callbacks.progress, callbacks.error));
     }
 
     return DependenciesHandler;

@@ -2,18 +2,8 @@ JARS.internal('Subjects/Subject', function(getInternal) {
     'use strict';
 
     var States = getInternal('State/States'),
-        isRoot = getInternal('Resolvers/Subjects/Module').isRoot;
-
-    /**
-     * @callback Provide
-     *
-     * @memberof JARS~internals.Subjects.Subject
-     * @inner
-     *
-     * @param {...*} dependencyRefs
-     *
-     * @return {*}
-     */
+        isRoot = getInternal('Resolvers/Subjects/Module').isRoot,
+        merge = getInternal('Helpers/Object').merge;
 
     /**
      * @class
@@ -44,10 +34,10 @@ JARS.internal('Subjects/Subject', function(getInternal) {
     Subject.prototype = {
         constructor: Subject,
         /**
-         * @param {Object} meta
+         * @param {{plugIn: [function]}} meta
          */
         setMeta: function(meta) {
-            this._meta = meta;
+            merge(this._meta, meta);
         },
         /**
          * @param {string} metaProp
@@ -70,11 +60,19 @@ JARS.internal('Subjects/Subject', function(getInternal) {
             this.dependencies.add(dependencies);
         },
         /**
-         * @param {JARS~internals.Subjects.Subject~Provide} provide
+         * @param {JARS~internals.Handlers.Completion.Dependencies~Provide} provide
+         * @param {JARS~internals.Handlers.Completion.Dependencies~Progress} progress
+         * @param {JARS~internals.Handlers.Completion.Dependencies~Error} error
          */
-        $export: function(provide) {
+        $export: function(provide, progress, error) {
             if (this.stateUpdater.update(States.REGISTERED)) {
-                this._injector.get('dependenciesHandler', provide).request(this.dependencies.getNotCircular());
+                this._injector.get('dependenciesHandler', {
+                    provide: provide,
+
+                    progress: progress,
+
+                    error: error
+                }).request(this.dependencies.getNotCircular());
             }
         },
         /**

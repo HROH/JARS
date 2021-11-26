@@ -17,7 +17,6 @@ JARS.module('System.Modules').meta({
     var getInternal = InternalsRegistry.get,
         SubjectsRegistry = getInternal('Registries/Subjects'),
         getCurrent = getInternal('Helpers/Tracker').getCurrent,
-        AnonymousHandler = getInternal('Handlers/Anonymous'),
         PathResolver = getInternal('Resolvers/Path'),
         reduce = getInternal('Helpers/Array').reduce,
         Modules;
@@ -55,7 +54,12 @@ JARS.module('System.Modules').meta({
             return Modules.useAll(subjectName, scope)[0];
         },
 
-        $import: AnonymousHandler,
+        $import: function(subjectNames, provide, progress, error) {
+            var anonymousModule = SubjectsRegistry.getAnonymousModule();
+
+            anonymousModule.$import(subjectNames);
+            anonymousModule.$export(provide, progress, error);
+        },
         /**
          * @return {{name: string, path: string, logger: JARS~internals.Logger.Logger}}
          */

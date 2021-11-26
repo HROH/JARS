@@ -24,7 +24,7 @@ JARS.internal('Refs/Subject', function(getInternal) {
         constructor: Subject,
         /**
          * @param {JARS~internals.Refs.Subjects} refs
-         * @param {JARS~internals.Subjects.Subject~Provide} [provide]
+         * @param {JARS~internals.Handlers.Completion.Dependencies~Provide} [provide]
          */
         init: function(refs, provide) {
             this._refs = refs;
