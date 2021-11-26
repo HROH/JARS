@@ -2,7 +2,6 @@ JARS.internal('Subjects/Subject', function(getInternal) {
     'use strict';
 
     var States = getInternal('State/States'),
-        isRoot = getInternal('Resolvers/Subjects/Module').isRoot,
         merge = getInternal('Helpers/Object').merge;
 
     /**
@@ -17,7 +16,6 @@ JARS.internal('Subjects/Subject', function(getInternal) {
         var subject = this;
 
         subject.name = subjectName;
-        subject.isRoot = isRoot(subjectName);
         subject.parent = injector.get('parent');
         subject.requestor = injector.requestor;
         subject.config = injector.get('config');

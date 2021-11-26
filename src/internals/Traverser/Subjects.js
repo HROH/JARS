@@ -1,7 +1,8 @@
 JARS.internal('Traverser/Subjects', function(getInternal) {
     'use strict';
 
-    var Result = getInternal('Traverser/Result'),
+    var isRoot = getInternal('Resolvers/Subjects/Module').isRoot,
+        Result = getInternal('Traverser/Result'),
         arrayEach = getInternal('Helpers/Array').each;
 
     /**
@@ -46,7 +47,7 @@ JARS.internal('Traverser/Subjects', function(getInternal) {
      * @return {*}
      */
     function traverseRelated(subject, entrySubject, handle, depth, value) {
-        var result = subject.isRoot || subject.parent.isRoot ? new Result(value) : traverseSubject(subject.parent, entrySubject, handle, depth, value);
+        var result = isRoot(subject.name) || isRoot(subject.parent.name) ? new Result(value) : traverseSubject(subject.parent, entrySubject, handle, depth, value);
 
         return (result.done ? result : traverseDependencies(subject, entrySubject, handle, depth, result.value)).value;
     }

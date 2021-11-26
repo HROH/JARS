@@ -1,7 +1,8 @@
 JARS.internal('Strategies/Resolution/Nested', function(getInternal) {
     'use strict';
 
-    var AbsoluteResolutionStrategy = getInternal('Strategies/Resolution/Absolute'),
+    var isRoot = getInternal('Resolvers/Subjects/Module').isRoot,
+        AbsoluteResolutionStrategy = getInternal('Strategies/Resolution/Absolute'),
         DOT = '.',
         MSG_NESTED_RESOLUTION_ERROR = 'a nested module must contain "." only as a special symbol';
 
@@ -14,7 +15,7 @@ JARS.internal('Strategies/Resolution/Nested', function(getInternal) {
      * @return {JARS~internals.Strategies.Resolution~Data}
      */
     function Nested(subject, subjectName) {
-        return subjectName !== DOT ? AbsoluteResolutionStrategy(subject, subjectName) : subject.isRoot ? {
+        return subjectName !== DOT ? AbsoluteResolutionStrategy(subject, subjectName) : isRoot(subject.name) ? {
             error: MSG_NESTED_RESOLUTION_ERROR
         } : {
             name: subject.name
