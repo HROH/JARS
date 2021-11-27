@@ -18,8 +18,17 @@ JARS.internal('Resolvers/Version', function() {
          */
         unwrapVersion: function(transformSubjectName) {
             return function(subjectName) {
-                return appendVersion(transformSubjectName(Version.removeVersion(subjectName)), Version.getVersion(subjectName));
+                return Version.appendVersion(transformSubjectName(Version.removeVersion(subjectName)), Version.getVersion(subjectName));
             };
+        },
+        /**
+         * @param {string} subjectName
+         * @param {string} version
+         *
+         * @return {string}
+         */
+        appendVersion: function(subjectName, version) {
+            return subjectName && version ? [subjectName, version].join(VERSION_DELIMITER) : subjectName;
         },
         /**
          * @param {string} subjectName
@@ -38,19 +47,6 @@ JARS.internal('Resolvers/Version', function() {
             return subjectName.split(VERSION_DELIMITER)[1] || EMPTY_STRING;
         }
     };
-
-    /**
-     * @memberof JARS~internals.Resolvers.Version
-     * @inner
-     *
-     * @param {string} subjectName
-     * @param {string} version
-     *
-     * @return {string}
-     */
-    function appendVersion(subjectName, version) {
-        return subjectName && version ? [subjectName, version].join(VERSION_DELIMITER) : subjectName;
-    }
 
     return Version;
 });
