@@ -20,20 +20,20 @@ JARS.internal('Bootstrappers/Modules', function(getInternal) {
             getInternal('Helpers/Tracker').setRoot(rootModule);
             rootModule.setMeta({
                 /**
-                 * @param {JARS~internals.Subjects.Subject} pluginRequest
+                 * @param {JARS~internals.Subjects.Subject} interception
                  */
-                plugIn: function(pluginRequest) {
-                    var internalName = pluginRequest.info.data,
+                plugIn: function(interception) {
+                    var internalName = interception.info.data,
                         internal = getInternal(internalName);
 
                     if(internal) {
-                        pluginRequest.requestor.logger.warn(MSG_INTERNAL_ACCESSED, [internalName]);
-                        pluginRequest.$export(function() {
+                        interception.requestor.logger.warn(MSG_INTERNAL_ACCESSED, [internalName]);
+                        interception.$export(function() {
                             return internal;
                         });
                     }
                     else {
-                        pluginRequest.abort(MSG_INTERNAL_NOT_FOUND, [internalName]);
+                        interception.abort(MSG_INTERNAL_NOT_FOUND, [internalName]);
                     }
                 }
             });
