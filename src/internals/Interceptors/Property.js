@@ -3,7 +3,7 @@ JARS.internal('Interceptors/Property', function(getInternal) {
 
     // TODO allow search for nested properties
     var hasOwnProp = getInternal('Helpers/Object').hasOwnProp,
-        MSG_MISSING_PROPERTY = 'the module has no property "${0}"',
+        MSG_MISSING_PROPERTY = 'the module "${0}" has no property "${1}"',
         Property;
 
     /**
@@ -25,7 +25,7 @@ JARS.internal('Interceptors/Property', function(getInternal) {
                     value = this[property];
                 }
                 else {
-                    interception.abort(MSG_MISSING_PROPERTY, [property]);
+                    interception.abort(MSG_MISSING_PROPERTY, [interception.parent.name, property]);
                 }
 
                 return value;

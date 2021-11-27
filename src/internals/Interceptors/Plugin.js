@@ -3,7 +3,7 @@ JARS.internal('Interceptors/Plugin', function(getInternal) {
 
     var isFunction = getInternal('Types/Validators').isFunction,
         META_PLUGIN = 'plugIn',
-        MSG_MISSING_PLUGIN_METHOD = 'could not call method "plugIn" on this module',
+        MSG_MISSING_PLUGIN_METHOD = 'could not call method "plugIn" on module "${0}"',
         Plugin;
 
     /**
@@ -19,7 +19,7 @@ JARS.internal('Interceptors/Plugin', function(getInternal) {
         intercept: function(interception) {
             var plugIn = interception.parent.getMeta(META_PLUGIN);
 
-            isFunction(plugIn) ? plugIn(interception, getInternal) : interception.abort(MSG_MISSING_PLUGIN_METHOD);
+            isFunction(plugIn) ? plugIn(interception, getInternal) : interception.abort(MSG_MISSING_PLUGIN_METHOD, [interception.parent.name]);
         },
         /**
          * @type {string}
