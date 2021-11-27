@@ -1,9 +1,7 @@
 JARS.internal('Handlers/Completion/Module', function(getInternal) {
     'use strict';
 
-    var AutoAborter = getInternal('Helpers/AutoAborter'),
-        PathResolver = getInternal('Resolvers/Path'),
-        loadSource = getInternal('SourceManager').load;
+    var AutoAborter = getInternal('Helpers/AutoAborter');
 
     /**
      * @class
@@ -18,10 +16,7 @@ JARS.internal('Handlers/Completion/Module', function(getInternal) {
     }
 
     Module.prototype.onCompleted = function() {
-        var path = PathResolver(this._subject);
-
-        AutoAborter.setup(this._subject, path);
-        loadSource(path);
+        AutoAborter.setup(this._subject);
     };
 
     return Module;

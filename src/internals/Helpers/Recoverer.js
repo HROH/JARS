@@ -1,39 +1,18 @@
 JARS.internal('Helpers/Recoverer', function(getInternal) {
     'use strict';
 
-    var ObjectHelper = getInternal('Helpers/Object'),
+    var hasOwnProp = getInternal('Helpers/Object').hasOwnProp,
         RECOVER = getInternal('Configs/Options').RECOVER,
-        nextSubjects = {},
-        MSG_RECOVERING = 'failed to load and tries to recover...';
+        nextSubjects = {};
 
     /**
      * @memberof JARS~internals.Helpers
      *
      * @param {JARS~internals.Subjects.Subject} subject
      *
-     * @return {boolean}
-     */
-    function Recoverer(subject) {
-        var nextConfig = getNextConfig(subject);
-
-        if (nextConfig) {
-            subject.logger.warn(MSG_RECOVERING);
-            subject.config.update(ObjectHelper.merge({}, nextConfig));
-            subject.handler.onCompleted();
-        }
-
-        return !!nextConfig;
-    }
-
-    /**
-     * @memberof JARS~internals.Helpers.Recoverer
-     * @inner
-     *
-     * @param {JARS~internals.Subjects.Subject} subject
-     *
      * @return {JARS~internals.Configs.Hooks~Modules}
      */
-    function getNextConfig(subject) {
+    function Recoverer(subject) {
         var subjectForConfig = getSubjectForConfig(subject),
             nextConfig = subject.config.getOwn(RECOVER);
 
@@ -54,7 +33,7 @@ JARS.internal('Helpers/Recoverer', function(getInternal) {
      * @return {JARS~internals.Subjects.Subject}
      */
     function getSubjectForConfig(subject) {
-        return ObjectHelper.hasOwnProp(nextSubjects, subject.name) ? nextSubjects[subject.name] : subject;
+        return hasOwnProp(nextSubjects, subject.name) ? nextSubjects[subject.name] : subject;
     }
 
     /**
