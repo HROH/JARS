@@ -52,8 +52,11 @@ JARS.internal('Configs/Options', function(getInternal) {
                 if (Validators.isFunction(value)) {
                     options[option + 'Transform'] = value;
                 }
+                else if (Validators.isNull(value)) {
+                    delete options[option];
+                }
                 else {
-                    updateOption(options, option, Transforms[option](value, options[option], subjectName));
+                    options[option] = Transforms[option](value, options[option], subjectName);
                 }
             }
         });
@@ -86,23 +89,6 @@ JARS.internal('Configs/Options', function(getInternal) {
 
         VERSION_PATH: 'versionPath'
     });
-
-    /**
-     * @memberof JARS~internals.Configs.Options
-     * @inner
-     *
-     * @param {JARS~internals.Configs.Options} options
-     * @param {string} option
-     * @param {*} value
-     */
-    function updateOption(options, option, value) {
-        if (Validators.isNull(value)) {
-            delete options[option];
-        }
-        else {
-            options[option] = value;
-        }
-    }
 
     return Options;
 });
