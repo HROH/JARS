@@ -4,6 +4,7 @@ JARS.internal('Subjects/Dependencies', function(getInternal) {
     var AnyResolutionStrategy = getInternal('Strategies/Type/Any'),
         CircularTraverser = getInternal('Traverser/Circular'),
         SubjectsTraverser = getInternal('Traverser/Subjects'),
+        isRoot = getInternal('Resolvers/Subjects/Module').isRoot,
         States = getInternal('State/States'),
         CHECK_CIRCULAR_DEPS = getInternal('Configs/Options').CHECK_CIRCULAR_DEPS;
 
@@ -38,7 +39,7 @@ JARS.internal('Subjects/Dependencies', function(getInternal) {
         getCircular: function() {
             var entrySubject = this._requestor;
 
-            return this._circular || (this._circular = !entrySubject.isRoot && entrySubject.config.get(CHECK_CIRCULAR_DEPS) && SubjectsTraverser(entrySubject, CircularTraverser));
+            return this._circular || (this._circular = !isRoot(entrySubject.name) && entrySubject.config.get(CHECK_CIRCULAR_DEPS) && SubjectsTraverser(entrySubject, CircularTraverser));
         },
         /**
          * @return {JARS~internals.Subjects.Subject[]}
